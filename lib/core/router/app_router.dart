@@ -2,6 +2,8 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import '../../features/auth/presentation/views/login_screen.dart';
 import '../../features/auth/presentation/views/signup_screen.dart';
+import '../../features/restaurants/presentation/views/customer_home_screen.dart';
+import '../../features/restaurants/presentation/views/restaurant_detail_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -35,13 +37,13 @@ class AppRouter {
           GoRoute(
             path: 'restaurants',
             name: 'customer-restaurants',
-            builder: (context, state) => const RestaurantListScreen(),
+            builder: (context, state) => const CustomerHomeScreen(),
           ),
           GoRoute(
             path: 'restaurant/:id',
             name: 'customer-restaurant-detail',
             builder: (context, state) {
-              final restaurantId = state.pathParameters['id']!;
+              final restaurantId = state.pathParameters['id'] ?? '';
               return RestaurantDetailScreen(restaurantId: restaurantId);
             },
           ),
@@ -59,7 +61,7 @@ class AppRouter {
             path: 'order/:id',
             name: 'customer-order-detail',
             builder: (context, state) {
-              final orderId = state.pathParameters['id']!;
+              final orderId = state.pathParameters['id'] ?? '';
               return OrderDetailScreen(orderId: orderId);
             },
           ),
@@ -96,7 +98,7 @@ class AppRouter {
             path: 'product/edit/:id',
             name: 'restaurant-edit-product',
             builder: (context, state) {
-              final productId = state.pathParameters['id']!;
+              final productId = state.pathParameters['id'] ?? '';
               return EditProductScreen(productId: productId);
             },
           ),
@@ -123,7 +125,7 @@ class AppRouter {
             path: 'order/:id',
             name: 'driver-order-detail',
             builder: (context, state) {
-              final orderId = state.pathParameters['id']!;
+              final orderId = state.pathParameters['id'] ?? '';
               return DriverOrderDetailScreen(orderId: orderId);
             },
           ),
@@ -149,35 +151,7 @@ class SplashScreen extends StatelessWidget {
   }
 }
 
-class CustomerHomeScreen extends StatelessWidget {
-  const CustomerHomeScreen({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: Text('Customer Home Screen')));
-  }
-}
-
-class RestaurantListScreen extends StatelessWidget {
-  const RestaurantListScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: Text('Restaurant List Screen')));
-  }
-}
-
-class RestaurantDetailScreen extends StatelessWidget {
-  final String restaurantId;
-  const RestaurantDetailScreen({super.key, required this.restaurantId});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(child: Text('Restaurant Detail Screen - ID: $restaurantId')),
-    );
-  }
-}
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
