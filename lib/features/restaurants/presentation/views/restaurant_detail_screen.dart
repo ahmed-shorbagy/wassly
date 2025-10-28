@@ -2,45 +2,73 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/extensions.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../../../../shared/widgets/error_widget.dart';
 import '../cubits/restaurant_cubit.dart';
+import '../../../orders/presentation/cubits/cart_cubit.dart';
 import '../../domain/entities/product_entity.dart';
 import '../../domain/entities/restaurant_entity.dart';
 
-class RestaurantDetailScreen extends StatelessWidget {
+class RestaurantDetailScreen extends StatefulWidget {
   final String restaurantId;
 
-  const RestaurantDetailScreen({
-    super.key,
-    required this.restaurantId,
-  });
+  const RestaurantDetailScreen({super.key, required this.restaurantId});
+
+  @override
+  State<RestaurantDetailScreen> createState() => _RestaurantDetailScreenState();
+}
+
+class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
+  RestaurantEntity? _restaurant;
+  List<ProductEntity> _products = [];
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => context
-          .read<RestaurantCubit>()
-        ..getRestaurantById(restaurantId)
-        ..getRestaurantProducts(restaurantId),
+      create: (context) => context.read<RestaurantCubit>()
+        ..getRestaurantById(widget.restaurantId)
+        ..getRestaurantProducts(widget.restaurantId),
       child: Scaffold(
-        body: BlocBuilder<RestaurantCubit, RestaurantState>(
+        body: BlocConsumer<RestaurantCubit, RestaurantState>(
+          listener: (context, state) {
+            if (state is RestaurantLoaded) {
+              setState(() {
+                _restaurant = state.restaurant;
+              });
+            } else if (state is ProductsLoaded) {
+              setState(() {
+                _products = state.products;
+              });
+            }
+          },
           builder: (context, state) {
-            if (state is RestaurantLoading) {
+            // Check loading state
+            if (state is RestaurantLoading && _restaurant == null) {
               return const LoadingWidget();
-            } else if (state is RestaurantError) {
+            }
+
+            // Check error state
+            if (state is RestaurantError && _restaurant == null) {
               return ErrorDisplayWidget(
                 message: state.message,
                 onRetry: () {
-                  context.read<RestaurantCubit>().getRestaurantById(restaurantId);
-                  context.read<RestaurantCubit>().getRestaurantProducts(restaurantId);
+                  context.read<RestaurantCubit>().getRestaurantById(
+                    widget.restaurantId,
+                  );
+                  context.read<RestaurantCubit>().getRestaurantProducts(
+                    widget.restaurantId,
+                  );
                 },
               );
-            } else if (state is RestaurantLoaded) {
-              final restaurant = state.restaurant;
-              return _buildRestaurantDetail(context, restaurant, []);
             }
-            return const SizedBox.shrink();
+
+            // Build UI if we have restaurant data
+            if (_restaurant != null) {
+              return _buildRestaurantDetail(context, _restaurant!, _products);
+            }
+
+            return const LoadingWidget();
           },
         ),
       ),
@@ -59,15 +87,14 @@ class RestaurantDetailScreen extends StatelessWidget {
           expandedHeight: 250,
           pinned: true,
           flexibleSpace: FlexibleSpaceBar(
-            background: (restaurant.imageUrl != null && restaurant.imageUrl!.isNotEmpty)
+            background:
+                (restaurant.imageUrl != null && restaurant.imageUrl!.isNotEmpty)
                 ? CachedNetworkImage(
                     imageUrl: restaurant.imageUrl!,
                     fit: BoxFit.cover,
                     placeholder: (context, url) => Container(
                       color: AppColors.border,
-                      child: const Center(
-                        child: CircularProgressIndicator(),
-                      ),
+                      child: const Center(child: CircularProgressIndicator()),
                     ),
                     errorWidget: (context, url, error) => Container(
                       color: AppColors.border,
@@ -92,8 +119,8 @@ class RestaurantDetailScreen extends StatelessWidget {
                 Text(
                   restaurant.name,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 8),
 
@@ -145,9 +172,9 @@ class RestaurantDetailScreen extends StatelessWidget {
                 // Menu Section
                 Text(
                   'Menu',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -167,13 +194,10 @@ class RestaurantDetailScreen extends StatelessWidget {
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final product = products[index];
-                  return _buildProductCard(context, product);
-                },
-                childCount: products.length,
-              ),
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final product = products[index];
+                return _buildProductCard(context, product);
+              }, childCount: products.length),
             ),
           ),
       ],
@@ -184,9 +208,7 @@ class RestaurantDetailScreen extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -195,7 +217,7 @@ class RestaurantDetailScreen extends StatelessWidget {
             borderRadius: const BorderRadius.horizontal(
               left: Radius.circular(12),
             ),
-            child: product.imageUrl != null
+            child: product.imageUrl != null && product.imageUrl!.isNotEmpty
                 ? CachedNetworkImage(
                     imageUrl: product.imageUrl!,
                     width: 100,
@@ -205,9 +227,7 @@ class RestaurantDetailScreen extends StatelessWidget {
                       width: 100,
                       height: 100,
                       color: AppColors.border,
-                      child: const Center(
-                        child: CircularProgressIndicator(),
-                      ),
+                      child: const Center(child: CircularProgressIndicator()),
                     ),
                     errorWidget: (context, url, error) => Container(
                       width: 100,
@@ -244,9 +264,9 @@ class RestaurantDetailScreen extends StatelessWidget {
                   const SizedBox(height: 4),
 
                   // Description
-                  if (product.description != null)
+                  if (product.description.isNotEmpty)
                     Text(
-                      product.description!,
+                      product.description,
                       style: TextStyle(
                         fontSize: 12,
                         color: AppColors.textSecondary,
@@ -261,7 +281,7 @@ class RestaurantDetailScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '${product.price.toStringAsFixed(2)} EGP',
+                        '\$${product.price.toStringAsFixed(2)}',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -269,15 +289,14 @@ class RestaurantDetailScreen extends StatelessWidget {
                         ),
                       ),
                       ElevatedButton(
-                        onPressed: () {
-                          // TODO: Add to cart
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Added ${product.name} to cart'),
-                              backgroundColor: AppColors.success,
-                            ),
-                          );
-                        },
+                        onPressed: product.isAvailable
+                            ? () {
+                                context.read<CartCubit>().addItem(product);
+                                context.showSuccessSnackBar(
+                                  'Added ${product.name} to cart',
+                                );
+                              }
+                            : null,
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 16,

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/utils/extensions.dart';
+import '../../../../core/utils/logger.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../cubits/auth_cubit.dart';
 
@@ -31,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Form(
             key: _formKey,
@@ -39,9 +40,26 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Logo and Title
-                const Icon(Icons.restaurant, size: 80, color: Colors.orange),
-                const SizedBox(height: 24),
+                // Logo
+                Center(
+                  child: Container(
+                    width: 150,
+                    height: 90,
+                    margin: const EdgeInsets.only(bottom: 32),
+                    child: Image.asset(
+                      'assets/images/logo.jpeg',
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(
+                          Icons.restaurant,
+                          size: 80,
+                          color: Colors.orange,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                // Title
                 Text(
                   AppStrings.login,
                   style: Theme.of(context).textTheme.displaySmall,
@@ -95,16 +113,29 @@ class _LoginScreenState extends State<LoginScreen> {
                 BlocConsumer<AuthCubit, AuthState>(
                   listener: (context, state) {
                     if (state is AuthAuthenticated) {
+                      AppLogger.logNavigation(
+                        'User authenticated, navigating to home',
+                      );
                       // Navigate based on user type
-                      if (state.user.userType == 'customer') {
+                      final userType = state.user.userType;
+                      AppLogger.logInfo(
+                        'User type: $userType, navigating to appropriate home',
+                      );
+                      if (userType == 'customer') {
                         context.go('/customer');
-                      } else if (state.user.userType == 'restaurant') {
+                      } else if (userType == 'restaurant') {
                         context.go('/restaurant');
-                      } else if (state.user.userType == 'driver') {
+                      } else if (userType == 'driver') {
                         context.go('/driver');
+                      } else {
+                        context.go('/customer'); // Default fallback
                       }
                     } else if (state is AuthError) {
+                      AppLogger.logError(
+                        'Login error displayed to user: ${state.message}',
+                      );
                       context.showErrorSnackBar(state.message);
+                      // Don't navigate on error - let user retry or signup
                     }
                   },
                   builder: (context, state) {
@@ -141,11 +172,14 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _login() {
+    AppLogger.logInfo('Login button pressed');
     if (_formKey.currentState!.validate()) {
-      context.read<AuthCubit>().login(
-        _emailController.text.trim(),
-        _passwordController.text,
-      );
+      final email = _emailController.text.trim();
+      final password = _passwordController.text;
+      AppLogger.logAuth('Form validated, attempting login with email: $email');
+      context.read<AuthCubit>().login(email, password);
+    } else {
+      AppLogger.logWarning('Login form validation failed');
     }
   }
 }

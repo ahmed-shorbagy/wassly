@@ -49,9 +49,26 @@ class _SignupScreenState extends State<SignupScreen> {
               children: [
                 const SizedBox(height: 40),
 
-                // Logo and Title
-                const Icon(Icons.restaurant, size: 80, color: Colors.orange),
-                const SizedBox(height: 24),
+                // Logo
+                Center(
+                  child: Container(
+                    width: 150,
+                    height: 90,
+                    margin: const EdgeInsets.only(bottom: 24),
+                    child: Image.asset(
+                      'assets/images/logo.jpeg',
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(
+                          Icons.restaurant,
+                          size: 80,
+                          color: Colors.orange,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                // Title
                 Text(
                   AppStrings.signup,
                   style: Theme.of(context).textTheme.displaySmall,

@@ -7,6 +7,7 @@ import '../../../../core/constants/app_strings.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../../../../shared/widgets/error_widget.dart';
 import '../cubits/restaurant_cubit.dart';
+import '../../../orders/presentation/cubits/cart_cubit.dart';
 import '../../domain/entities/restaurant_entity.dart';
 
 class CustomerHomeScreen extends StatelessWidget {
@@ -16,7 +17,8 @@ class CustomerHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: BlocProvider(
-        create: (context) => context.read<RestaurantCubit>()..getAllRestaurants(),
+        create: (context) =>
+            context.read<RestaurantCubit>()..getAllRestaurants(),
         child: BlocBuilder<RestaurantCubit, RestaurantState>(
           builder: (context, state) {
             if (state is RestaurantLoading) {
@@ -24,7 +26,8 @@ class CustomerHomeScreen extends StatelessWidget {
             } else if (state is RestaurantError) {
               return ErrorDisplayWidget(
                 message: state.message,
-                onRetry: () => context.read<RestaurantCubit>().getAllRestaurants(),
+                onRetry: () =>
+                    context.read<RestaurantCubit>().getAllRestaurants(),
               );
             } else if (state is RestaurantsLoaded) {
               return _buildRestaurantsList(context, state.restaurants);
@@ -36,7 +39,10 @@ class CustomerHomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRestaurantsList(BuildContext context, List<RestaurantEntity> restaurants) {
+  Widget _buildRestaurantsList(
+    BuildContext context,
+    List<RestaurantEntity> restaurants,
+  ) {
     return CustomScrollView(
       slivers: [
         // App Bar
@@ -44,6 +50,47 @@ class CustomerHomeScreen extends StatelessWidget {
           expandedHeight: 200,
           floating: false,
           pinned: true,
+          actions: [
+            // Cart Button with Badge
+            BlocBuilder<CartCubit, CartState>(
+              builder: (context, state) {
+                final itemCount = state is CartLoaded ? state.itemCount : 0;
+                return Stack(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.shopping_cart),
+                      onPressed: () => context.push('/customer/cart'),
+                    ),
+                    if (itemCount > 0)
+                      Positioned(
+                        right: 8,
+                        top: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: AppColors.error,
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          child: Text(
+                            '$itemCount',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
+          ],
           flexibleSpace: FlexibleSpaceBar(
             title: const Text(
               AppStrings.restaurants,
@@ -57,10 +104,7 @@ class CustomerHomeScreen extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [
-                    AppColors.primary,
-                    AppColors.primaryLight,
-                  ],
+                  colors: [AppColors.primary, AppColors.primaryLight],
                 ),
               ),
             ),
@@ -86,25 +130,23 @@ class CustomerHomeScreen extends StatelessWidget {
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
               ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final restaurant = restaurants[index];
-                  return _buildRestaurantCard(context, restaurant);
-                },
-                childCount: restaurants.length,
-              ),
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final restaurant = restaurants[index];
+                return _buildRestaurantCard(context, restaurant);
+              }, childCount: restaurants.length),
             ),
           ),
       ],
     );
   }
 
-  Widget _buildRestaurantCard(BuildContext context, RestaurantEntity restaurant) {
+  Widget _buildRestaurantCard(
+    BuildContext context,
+    RestaurantEntity restaurant,
+  ) {
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: () {
           context.push('/customer/restaurant/${restaurant.id}');
@@ -116,7 +158,9 @@ class CustomerHomeScreen extends StatelessWidget {
             // Restaurant Image
             Expanded(
               child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(16),
+                ),
                 child: restaurant.imageUrl != null
                     ? CachedNetworkImage(
                         imageUrl: restaurant.imageUrl!,

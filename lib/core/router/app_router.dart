@@ -1,9 +1,13 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import '../../features/auth/presentation/views/splash_screen.dart';
 import '../../features/auth/presentation/views/login_screen.dart';
 import '../../features/auth/presentation/views/signup_screen.dart';
 import '../../features/restaurants/presentation/views/customer_home_screen.dart';
 import '../../features/restaurants/presentation/views/restaurant_detail_screen.dart';
+import '../../features/restaurants/presentation/views/restaurant_home_screen.dart';
+import '../../features/restaurants/presentation/views/driver_home_screen.dart';
+import '../../features/orders/presentation/views/cart_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -77,7 +81,7 @@ class AppRouter {
       GoRoute(
         path: '/restaurant',
         name: 'restaurant',
-        builder: (context, state) => const RestaurantDashboardScreen(),
+        builder: (context, state) => const RestaurantHomeScreen(),
         routes: [
           GoRoute(
             path: 'orders',
@@ -114,7 +118,7 @@ class AppRouter {
       GoRoute(
         path: '/driver',
         name: 'driver',
-        builder: (context, state) => const DriverDashboardScreen(),
+        builder: (context, state) => const DriverHomeScreen(),
         routes: [
           GoRoute(
             path: 'orders',
@@ -142,25 +146,6 @@ class AppRouter {
 }
 
 // Placeholder screens - these will be implemented in the respective feature modules
-class SplashScreen extends StatelessWidget {
-  const SplashScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: Text('Splash Screen')));
-  }
-}
-
-
-
-class CartScreen extends StatelessWidget {
-  const CartScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: Text('Cart Screen')));
-  }
-}
 
 class OrderListScreen extends StatelessWidget {
   const OrderListScreen({super.key});
@@ -189,17 +174,6 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(body: Center(child: Text('Profile Screen')));
-  }
-}
-
-class RestaurantDashboardScreen extends StatelessWidget {
-  const RestaurantDashboardScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text('Restaurant Dashboard Screen')),
-    );
   }
 }
 
@@ -252,15 +226,6 @@ class RestaurantSettingsScreen extends StatelessWidget {
     return const Scaffold(
       body: Center(child: Text('Restaurant Settings Screen')),
     );
-  }
-}
-
-class DriverDashboardScreen extends StatelessWidget {
-  const DriverDashboardScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: Text('Driver Dashboard Screen')));
   }
 }
 

@@ -14,6 +14,7 @@ import '../../features/restaurants/domain/usecases/get_all_restaurants_usecase.d
 import '../../features/restaurants/domain/usecases/get_restaurant_by_id_usecase.dart';
 import '../../features/restaurants/domain/usecases/get_restaurant_products_usecase.dart';
 import '../../features/restaurants/presentation/cubits/restaurant_cubit.dart';
+import '../../features/orders/presentation/cubits/cart_cubit.dart';
 import '../network/network_info.dart';
 
 class InjectionContainer {
@@ -58,11 +59,18 @@ class InjectionContainer {
       ),
       BlocProvider<RestaurantCubit>(
         create: (_) => RestaurantCubit(
-          getAllRestaurantsUseCase: GetAllRestaurantsUseCase(_restaurantRepository),
-          getRestaurantByIdUseCase: GetRestaurantByIdUseCase(_restaurantRepository),
-          getRestaurantProductsUseCase: GetRestaurantProductsUseCase(_restaurantRepository),
+          getAllRestaurantsUseCase: GetAllRestaurantsUseCase(
+            _restaurantRepository,
+          ),
+          getRestaurantByIdUseCase: GetRestaurantByIdUseCase(
+            _restaurantRepository,
+          ),
+          getRestaurantProductsUseCase: GetRestaurantProductsUseCase(
+            _restaurantRepository,
+          ),
         ),
       ),
+      BlocProvider<CartCubit>(create: (_) => CartCubit()),
     ];
   }
 }

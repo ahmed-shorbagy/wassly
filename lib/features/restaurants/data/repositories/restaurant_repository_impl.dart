@@ -4,6 +4,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/network/network_info.dart';
+import '../../../../core/utils/logger.dart';
 import '../../domain/entities/restaurant_entity.dart';
 import '../../domain/entities/product_entity.dart';
 import '../../domain/repositories/restaurant_repository.dart';
@@ -23,22 +24,39 @@ class RestaurantRepositoryImpl implements RestaurantRepository {
   Future<Either<Failure, List<RestaurantEntity>>> getAllRestaurants() async {
     if (await networkInfo.isConnected) {
       try {
+        // Get all restaurants, not just open ones
         final snapshot = await firestore
             .collection(AppConstants.restaurantsCollection)
-            .where('isOpen', isEqualTo: true)
             .get();
 
-        final restaurants = snapshot.docs
-            .map(
-              (doc) => RestaurantModel.fromJson({'id': doc.id, ...doc.data()}),
-            )
-            .toList();
+        AppLogger.logInfo(
+          'Found ${snapshot.docs.length} restaurants in Firestore',
+        );
 
+        final restaurants = snapshot.docs.map((doc) {
+          try {
+            final data = doc.data();
+            AppLogger.logInfo(
+              'Processing restaurant: ${data['name']} (ID: ${doc.id})',
+            );
+            return RestaurantModel.fromJson({'id': doc.id, ...data});
+          } catch (e) {
+            AppLogger.logError('Error parsing restaurant ${doc.id}', error: e);
+            rethrow;
+          }
+        }).toList();
+
+        AppLogger.logSuccess(
+          'Successfully loaded ${restaurants.length} restaurants',
+        );
         return Right(restaurants);
       } on ServerException catch (e) {
         return Left(ServerFailure(e.message));
       } catch (e) {
-        return Left(ServerFailure('Failed to load restaurants'));
+        AppLogger.logError('Failed to load restaurants', error: e);
+        return Left(
+          ServerFailure('Failed to load restaurants: ${e.toString()}'),
+        );
       }
     } else {
       return const Left(NetworkFailure('No internet connection'));

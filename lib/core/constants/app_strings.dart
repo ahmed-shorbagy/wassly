@@ -94,6 +94,11 @@ class AppStrings {
   static const String deliveryFee = 'Delivery Fee';
   static const String tax = 'Tax';
   static const String grandTotal = 'Grand Total';
+  static const String cartEmpty = 'Your cart is empty';
+  static const String browseRestaurants = 'Browse Restaurants';
+  static const String proceedToCheckout = 'Proceed to Checkout';
+  static const String remove = 'Remove';
+  static const String total = 'Total';
 
   // Profile
   static const String personalInfo = 'Personal Information';

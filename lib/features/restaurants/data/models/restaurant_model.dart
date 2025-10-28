@@ -15,6 +15,20 @@ class RestaurantModel extends RestaurantEntity {
   });
 
   factory RestaurantModel.fromJson(Map<String, dynamic> json) {
+    // Handle location - can be GeoPoint or Map
+    Map<String, dynamic> locationData = {};
+    if (json['location'] != null) {
+      if (json['location'] is GeoPoint) {
+        final geoPoint = json['location'] as GeoPoint;
+        locationData = {
+          'latitude': geoPoint.latitude,
+          'longitude': geoPoint.longitude,
+        };
+      } else if (json['location'] is Map) {
+        locationData = Map<String, dynamic>.from(json['location'] as Map);
+      }
+    }
+
     return RestaurantModel(
       id: json['id'] ?? '',
       ownerId: json['ownerId'] ?? '',
@@ -22,9 +36,11 @@ class RestaurantModel extends RestaurantEntity {
       description: json['description'] ?? '',
       imageUrl: json['imageUrl'],
       address: json['address'] ?? '',
-      location: json['location'] ?? {},
+      location: locationData,
       isOpen: json['isOpen'] ?? true,
-      createdAt: (json['createdAt'] as Timestamp).toDate(),
+      createdAt: json['createdAt'] != null
+          ? (json['createdAt'] as Timestamp).toDate()
+          : DateTime.now(),
     );
   }
 

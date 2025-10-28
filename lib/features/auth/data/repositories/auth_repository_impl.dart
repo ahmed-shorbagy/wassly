@@ -5,6 +5,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/network/network_info.dart';
+import '../../../../core/utils/logger.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../models/user_model.dart';
@@ -48,14 +49,27 @@ class AuthRepositoryImpl implements AuthRepository {
             return const Left(AuthFailure('User data not found'));
           }
         } else {
+          AppLogger.logError('Login failed: user credential is null');
           return const Left(AuthFailure('Login failed'));
         }
       } on FirebaseAuthException catch (e) {
-        return Left(AuthFailure(_mapFirebaseAuthException(e)));
+        AppLogger.logError(
+          'Firebase Auth Exception during login',
+          error: 'Code: ${e.code}, Message: ${e.message}',
+        );
+        final errorMessage = _mapFirebaseAuthException(e);
+        AppLogger.logAuth('Mapped error message: $errorMessage');
+        return Left(AuthFailure(errorMessage));
       } on ServerException catch (e) {
+        AppLogger.logError('Server Exception during login', error: e.message);
         return Left(ServerFailure(e.message));
-      } catch (e) {
-        return Left(ServerFailure('Unknown error occurred'));
+      } catch (e, stackTrace) {
+        AppLogger.logError(
+          'Unknown error during login',
+          error: e,
+          stackTrace: stackTrace,
+        );
+        return Left(ServerFailure('Unknown error occurred: ${e.toString()}'));
       }
     } else {
       return const Left(NetworkFailure('No internet connection'));
@@ -93,14 +107,27 @@ class AuthRepositoryImpl implements AuthRepository {
 
           return Right(userModel);
         } else {
+          AppLogger.logError('Signup failed: user credential is null');
           return const Left(AuthFailure('Signup failed'));
         }
       } on FirebaseAuthException catch (e) {
-        return Left(AuthFailure(_mapFirebaseAuthException(e)));
+        AppLogger.logError(
+          'Firebase Auth Exception during signup',
+          error: 'Code: ${e.code}, Message: ${e.message}',
+        );
+        final errorMessage = _mapFirebaseAuthException(e);
+        AppLogger.logAuth('Mapped error message: $errorMessage');
+        return Left(AuthFailure(errorMessage));
       } on ServerException catch (e) {
+        AppLogger.logError('Server Exception during signup', error: e.message);
         return Left(ServerFailure(e.message));
-      } catch (e) {
-        return Left(ServerFailure('Unknown error occurred'));
+      } catch (e, stackTrace) {
+        AppLogger.logError(
+          'Unknown error during signup',
+          error: e,
+          stackTrace: stackTrace,
+        );
+        return Left(ServerFailure('Unknown error occurred: ${e.toString()}'));
       }
     } else {
       return const Left(NetworkFailure('No internet connection'));
@@ -110,34 +137,51 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, void>> logout() async {
     try {
+      AppLogger.logAuth('Attempting logout');
       await firebaseAuth.signOut();
+      AppLogger.logSuccess('Logout successful');
       return const Right(null);
-    } catch (e) {
-      return const Left(AuthFailure('Logout failed'));
+    } catch (e, stackTrace) {
+      AppLogger.logError('Logout failed', error: e, stackTrace: stackTrace);
+      return Left(AuthFailure('Logout failed: ${e.toString()}'));
     }
   }
 
   @override
   Future<Either<Failure, UserEntity?>> getCurrentUser() async {
     try {
+      AppLogger.logAuth('Getting current user');
       final user = firebaseAuth.currentUser;
       if (user != null) {
+        AppLogger.logInfo('Firebase user found: ${user.email}');
         final userDoc = await firestore
             .collection(AppConstants.usersCollection)
             .doc(user.uid)
             .get();
 
         if (userDoc.exists) {
+          AppLogger.logSuccess('User document found in Firestore');
           final userModel = UserModel.fromJson({
             'id': user.uid,
             ...userDoc.data()!,
           });
           return Right(userModel);
+        } else {
+          AppLogger.logWarning(
+            'User document not found in Firestore for UID: ${user.uid}',
+          );
         }
+      } else {
+        AppLogger.logInfo('No current Firebase user');
       }
       return const Right(null);
-    } catch (e) {
-      return Left(ServerFailure('Failed to get current user'));
+    } catch (e, stackTrace) {
+      AppLogger.logError(
+        'Failed to get current user',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return Left(ServerFailure('Failed to get current user: ${e.toString()}'));
     }
   }
 
@@ -162,15 +206,19 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   String _mapFirebaseAuthException(FirebaseAuthException e) {
+    AppLogger.logAuth('Mapping Firebase error code: ${e.code}');
+
     switch (e.code) {
       case 'user-not-found':
         return 'No user found with this email address.';
       case 'wrong-password':
         return 'Wrong password provided.';
+      case 'invalid-credential':
+        return 'Invalid email or password. Please check your credentials.';
       case 'email-already-in-use':
         return 'An account already exists with this email address.';
       case 'weak-password':
-        return 'Password is too weak.';
+        return 'Password is too weak. Please use a stronger password.';
       case 'invalid-email':
         return 'Invalid email address.';
       case 'user-disabled':
@@ -179,8 +227,11 @@ class AuthRepositoryImpl implements AuthRepository {
         return 'Too many requests. Please try again later.';
       case 'operation-not-allowed':
         return 'This operation is not allowed.';
+      case 'network-request-failed':
+        return 'Network error. Please check your internet connection.';
       default:
-        return 'An error occurred during authentication.';
+        AppLogger.logWarning('Unmapped Firebase error code: ${e.code}');
+        return 'An error occurred: ${e.message ?? 'Unknown error'}';
     }
   }
 }
