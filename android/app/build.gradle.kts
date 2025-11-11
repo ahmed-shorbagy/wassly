@@ -23,14 +23,37 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        // Default application ID (will be overridden by flavors)
         applicationId = "com.wassly.app"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+    }
+
+    // Define product flavors for Customer, Partner, and Admin apps
+    flavorDimensions += "app"
+    productFlavors {
+        create("customer") {
+            dimension = "app"
+            applicationId = "com.wassly.customer"
+            resValue("string", "app_name", "Wassly")
+            manifestPlaceholders["appIcon"] = "@mipmap/ic_launcher_customer"
+        }
+        
+        create("partner") {
+            dimension = "app"
+            applicationId = "com.wassly.partner"
+            resValue("string", "app_name", "Wassly Partner")
+            manifestPlaceholders["appIcon"] = "@mipmap/ic_launcher_partner"
+        }
+        
+        create("admin") {
+            dimension = "app"
+            applicationId = "com.wassly.admin"
+            resValue("string", "app_name", "Wassly Admin")
+            manifestPlaceholders["appIcon"] = "@mipmap/ic_launcher_admin"
+        }
     }
 
     buildTypes {

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "54852093651",
+    "project_id": "way-c20c7",
+    "storage_bucket": "way-c20c7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:54852093651:android:cc28b4e02163a2aa493626",
+        "android_client_info": {
+          "package_name": "com.wassly.partner"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAsPP9TgJVWdlBCRdj54FWCwUoBriF-iyk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

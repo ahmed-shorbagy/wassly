@@ -1,0 +1,212 @@
+import 'dart:async';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:equatable/equatable.dart';
+import '../../../../core/utils/logger.dart';
+import '../../domain/entities/order_entity.dart';
+import '../../domain/usecases/create_order_usecase.dart';
+import '../../domain/usecases/get_customer_orders_usecase.dart';
+import '../../domain/usecases/get_active_orders_usecase.dart';
+import '../../domain/usecases/get_order_by_id_usecase.dart';
+import '../../domain/usecases/cancel_order_usecase.dart';
+import '../../domain/repositories/order_repository.dart';
+
+part 'order_state.dart';
+
+class OrderCubit extends Cubit<OrderState> {
+  final CreateOrderUseCase createOrderUseCase;
+  final GetCustomerOrdersUseCase getCustomerOrdersUseCase;
+  final GetActiveOrdersUseCase getActiveOrdersUseCase;
+  final GetOrderByIdUseCase getOrderByIdUseCase;
+  final CancelOrderUseCase cancelOrderUseCase;
+  final OrderRepository repository;
+
+  StreamSubscription? _orderSubscription;
+  StreamSubscription? _ordersListSubscription;
+
+  OrderCubit({
+    required this.createOrderUseCase,
+    required this.getCustomerOrdersUseCase,
+    required this.getActiveOrdersUseCase,
+    required this.getOrderByIdUseCase,
+    required this.cancelOrderUseCase,
+    required this.repository,
+  }) : super(OrderInitial());
+
+  @override
+  Future<void> close() {
+    _orderSubscription?.cancel();
+    _ordersListSubscription?.cancel();
+    return super.close();
+  }
+
+  /// Create a new order
+  Future<void> createOrder(OrderEntity order) async {
+    try {
+      emit(OrderCreating());
+      AppLogger.logInfo('Creating order for customer: ${order.customerId}');
+
+      final result = await createOrderUseCase(order);
+
+      result.fold(
+        (failure) {
+          AppLogger.logError('Failed to create order', error: failure.message);
+          emit(OrderError(failure.message));
+        },
+        (createdOrder) {
+          AppLogger.logSuccess('Order created: ${createdOrder.id}');
+          emit(OrderCreated(createdOrder));
+        },
+      );
+    } catch (e) {
+      AppLogger.logError('Error creating order', error: e);
+      emit(const OrderError('Failed to create order'));
+    }
+  }
+
+  /// Get all orders for a customer
+  Future<void> getCustomerOrders(String customerId) async {
+    try {
+      emit(OrderLoading());
+      AppLogger.logInfo('Fetching orders for customer: $customerId');
+
+      final result = await getCustomerOrdersUseCase(customerId);
+
+      result.fold(
+        (failure) {
+          AppLogger.logError('Failed to fetch orders', error: failure.message);
+          emit(OrderError(failure.message));
+        },
+        (orders) {
+          AppLogger.logSuccess('Fetched ${orders.length} orders');
+          emit(OrdersLoaded(orders));
+        },
+      );
+    } catch (e) {
+      AppLogger.logError('Error fetching orders', error: e);
+      emit(const OrderError('Failed to fetch orders'));
+    }
+  }
+
+  /// Get active orders for a customer
+  Future<void> getActiveOrders(String customerId) async {
+    try {
+      emit(OrderLoading());
+      AppLogger.logInfo('Fetching active orders for customer: $customerId');
+
+      final result = await getActiveOrdersUseCase(customerId);
+
+      result.fold(
+        (failure) {
+          AppLogger.logError(
+            'Failed to fetch active orders',
+            error: failure.message,
+          );
+          emit(OrderError(failure.message));
+        },
+        (orders) {
+          AppLogger.logSuccess('Fetched ${orders.length} active orders');
+          emit(OrdersLoaded(orders));
+        },
+      );
+    } catch (e) {
+      AppLogger.logError('Error fetching active orders', error: e);
+      emit(const OrderError('Failed to fetch active orders'));
+    }
+  }
+
+  /// Get order by ID
+  Future<void> getOrderById(String orderId) async {
+    try {
+      emit(OrderLoading());
+      AppLogger.logInfo('Fetching order: $orderId');
+
+      final result = await getOrderByIdUseCase(orderId);
+
+      result.fold(
+        (failure) {
+          AppLogger.logError('Failed to fetch order', error: failure.message);
+          emit(OrderError(failure.message));
+        },
+        (order) {
+          AppLogger.logSuccess('Order fetched: $orderId');
+          emit(OrderLoaded(order));
+        },
+      );
+    } catch (e) {
+      AppLogger.logError('Error fetching order', error: e);
+      emit(const OrderError('Failed to fetch order'));
+    }
+  }
+
+  /// Cancel an order
+  Future<void> cancelOrder(String orderId) async {
+    try {
+      emit(OrderCancelling());
+      AppLogger.logInfo('Cancelling order: $orderId');
+
+      final result = await cancelOrderUseCase(orderId);
+
+      result.fold(
+        (failure) {
+          AppLogger.logError('Failed to cancel order', error: failure.message);
+          emit(OrderError(failure.message));
+        },
+        (_) {
+          AppLogger.logSuccess('Order cancelled: $orderId');
+          emit(OrderCancelled());
+        },
+      );
+    } catch (e) {
+      AppLogger.logError('Error cancelling order', error: e);
+      emit(const OrderError('Failed to cancel order'));
+    }
+  }
+
+  /// Listen to order updates in real-time
+  void listenToOrder(String orderId) {
+    try {
+      AppLogger.logInfo('Setting up real-time listener for order: $orderId');
+
+      _orderSubscription?.cancel();
+      _orderSubscription = repository.listenToOrder(orderId).listen(
+        (order) {
+          AppLogger.logInfo('Order updated: ${order.id} - ${order.statusText}');
+          emit(OrderLoaded(order));
+        },
+        onError: (error) {
+          AppLogger.logError('Error in order stream', error: error);
+          emit(const OrderError('Failed to get order updates'));
+        },
+      );
+    } catch (e) {
+      AppLogger.logError('Error setting up order listener', error: e);
+      emit(const OrderError('Failed to listen to order updates'));
+    }
+  }
+
+  /// Listen to customer orders in real-time
+  void listenToCustomerOrders(String customerId) {
+    try {
+      AppLogger.logInfo(
+        'Setting up real-time listener for customer orders: $customerId',
+      );
+
+      _ordersListSubscription?.cancel();
+      _ordersListSubscription =
+          repository.listenToCustomerOrders(customerId).listen(
+        (orders) {
+          AppLogger.logInfo('Customer orders updated: ${orders.length} orders');
+          emit(OrdersLoaded(orders));
+        },
+        onError: (error) {
+          AppLogger.logError('Error in orders stream', error: error);
+          emit(const OrderError('Failed to get orders updates'));
+        },
+      );
+    } catch (e) {
+      AppLogger.logError('Error setting up orders listener', error: e);
+      emit(const OrderError('Failed to listen to orders updates'));
+    }
+  }
+}
+

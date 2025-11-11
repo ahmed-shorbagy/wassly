@@ -6,6 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/extensions.dart';
 import '../../../../shared/widgets/loading_widget.dart';
+import '../../../restaurants/presentation/cubits/restaurant_cubit.dart';
 import '../cubits/cart_cubit.dart';
 
 class CartScreen extends StatelessWidget {
@@ -120,9 +121,24 @@ class CartScreen extends StatelessWidget {
     );
   }
 
-  void _proceedToCheckout(BuildContext context) {
-    // TODO: Navigate to checkout screen
-    context.showSuccessSnackBar('Proceed to checkout - Coming soon!');
+  Future<void> _proceedToCheckout(BuildContext context) async {
+    // Get the restaurant from the first cart item
+    final cartState = context.read<CartCubit>().state;
+    if (cartState is CartLoaded && cartState.items.isNotEmpty) {
+      final restaurantId = cartState.items.first.product.restaurantId;
+      
+      // Fetch restaurant data
+      await context.read<RestaurantCubit>().getRestaurantById(restaurantId);
+      
+      // Get the restaurant from cubit state
+      final restaurantState = context.read<RestaurantCubit>().state;
+      if (restaurantState is RestaurantLoaded) {
+        // Navigate to checkout with restaurant data
+        context.push('/customer/checkout', extra: restaurantState.restaurant);
+      } else {
+        context.showErrorSnackBar('Failed to load restaurant details');
+      }
+    }
   }
 }
 

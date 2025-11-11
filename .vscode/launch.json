@@ -1,0 +1,105 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "🟠 Customer App (Debug)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main_customer.dart",
+      "args": [
+        "--flavor",
+        "customer"
+      ],
+      "flutterMode": "debug"
+    },
+    {
+      "name": "🟠 Customer App (Release)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main_customer.dart",
+      "args": [
+        "--flavor",
+        "customer"
+      ],
+      "flutterMode": "release"
+    },
+    {
+      "name": "🟢 Partner App (Debug)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main_partner.dart",
+      "args": [
+        "--flavor",
+        "partner"
+      ],
+      "flutterMode": "debug"
+    },
+    {
+      "name": "🟢 Partner App (Release)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main_partner.dart",
+      "args": [
+        "--flavor",
+        "partner"
+      ],
+      "flutterMode": "release"
+    },
+    {
+      "name": "🟣 Admin App (Debug)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main_admin.dart",
+      "args": [
+        "--flavor",
+        "admin"
+      ],
+      "flutterMode": "debug"
+    },
+    {
+      "name": "🟣 Admin App (Release)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main_admin.dart",
+      "args": [
+        "--flavor",
+        "admin"
+      ],
+      "flutterMode": "release"
+    },
+    {
+      "name": "🟠 Customer App (Profile)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main_customer.dart",
+      "args": [
+        "--flavor",
+        "customer"
+      ],
+      "flutterMode": "profile"
+    },
+    {
+      "name": "🟢 Partner App (Profile)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main_partner.dart",
+      "args": [
+        "--flavor",
+        "partner"
+      ],
+      "flutterMode": "profile"
+    },
+    {
+      "name": "🟣 Admin App (Profile)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main_admin.dart",
+      "args": [
+        "--flavor",
+        "admin"
+      ],
+      "flutterMode": "profile"
+    }
+  ]
+}
+

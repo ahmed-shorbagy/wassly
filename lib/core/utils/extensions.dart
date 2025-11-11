@@ -44,6 +44,10 @@ extension BuildContextExtensions on BuildContext {
   void showSuccessSnackBar(String message) {
     showSnackBar(message, backgroundColor: Colors.green);
   }
+
+  void showInfoSnackBar(String message) {
+    showSnackBar(message, backgroundColor: Colors.blue);
+  }
 }
 
 extension DateTimeExtensions on DateTime {

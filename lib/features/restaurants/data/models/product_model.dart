@@ -56,6 +56,13 @@ class ProductModel extends ProductEntity {
     };
   }
 
+  Map<String, dynamic> toFirestore() => toJson();
+
+  factory ProductModel.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return ProductModel.fromJson({...data, 'id': doc.id});
+  }
+
   ProductModel copyWith({
     String? id,
     String? restaurantId,

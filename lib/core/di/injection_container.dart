@@ -15,6 +15,20 @@ import '../../features/restaurants/domain/usecases/get_restaurant_by_id_usecase.
 import '../../features/restaurants/domain/usecases/get_restaurant_products_usecase.dart';
 import '../../features/restaurants/presentation/cubits/restaurant_cubit.dart';
 import '../../features/orders/presentation/cubits/cart_cubit.dart';
+import '../../features/orders/data/repositories/order_repository_impl.dart';
+import '../../features/orders/domain/repositories/order_repository.dart';
+import '../../features/orders/domain/usecases/create_order_usecase.dart';
+import '../../features/orders/domain/usecases/get_customer_orders_usecase.dart';
+import '../../features/orders/domain/usecases/get_active_orders_usecase.dart';
+import '../../features/orders/domain/usecases/get_order_by_id_usecase.dart';
+import '../../features/orders/domain/usecases/cancel_order_usecase.dart';
+import '../../features/orders/presentation/cubits/order_cubit.dart';
+import '../../features/partner/presentation/cubits/product_management_cubit.dart';
+import '../../features/partner/presentation/cubits/restaurant_onboarding_cubit.dart';
+import '../../features/admin/presentation/cubits/admin_cubit.dart';
+import '../../features/restaurants/domain/repositories/restaurant_owner_repository.dart';
+import '../../features/restaurants/data/repositories/restaurant_owner_repository_impl.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import '../network/network_info.dart';
 
 class InjectionContainer {
@@ -24,14 +38,18 @@ class InjectionContainer {
 
   late final FirebaseAuth _firebaseAuth;
   late final FirebaseFirestore _firestore;
+  late final FirebaseStorage _firebaseStorage;
   late final NetworkInfo _networkInfo;
   late final AuthRepository _authRepository;
   late final RestaurantRepository _restaurantRepository;
+  late final OrderRepository _orderRepository;
+  late final RestaurantOwnerRepository _restaurantOwnerRepository;
 
   Future<void> init() async {
     // External dependencies
     _firebaseAuth = FirebaseAuth.instance;
     _firestore = FirebaseFirestore.instance;
+    _firebaseStorage = FirebaseStorage.instance;
     _networkInfo = NetworkInfoImpl();
 
     // Repository
@@ -44,6 +62,15 @@ class InjectionContainer {
     _restaurantRepository = RestaurantRepositoryImpl(
       firestore: _firestore,
       networkInfo: _networkInfo,
+    );
+
+    _orderRepository = OrderRepositoryImpl(
+      firestore: _firestore,
+    );
+
+    _restaurantOwnerRepository = RestaurantOwnerRepositoryImpl(
+      firestore: _firestore,
+      storage: _firebaseStorage,
     );
   }
 
@@ -71,6 +98,31 @@ class InjectionContainer {
         ),
       ),
       BlocProvider<CartCubit>(create: (_) => CartCubit()),
+      BlocProvider<OrderCubit>(
+        create: (_) => OrderCubit(
+          createOrderUseCase: CreateOrderUseCase(_orderRepository),
+          getCustomerOrdersUseCase: GetCustomerOrdersUseCase(_orderRepository),
+          getActiveOrdersUseCase: GetActiveOrdersUseCase(_orderRepository),
+          getOrderByIdUseCase: GetOrderByIdUseCase(_orderRepository),
+          cancelOrderUseCase: CancelOrderUseCase(_orderRepository),
+          repository: _orderRepository,
+        ),
+      ),
+      BlocProvider<ProductManagementCubit>(
+        create: (_) => ProductManagementCubit(
+          repository: _restaurantOwnerRepository,
+        ),
+      ),
+      BlocProvider<RestaurantOnboardingCubit>(
+        create: (_) => RestaurantOnboardingCubit(
+          repository: _restaurantOwnerRepository,
+        ),
+      ),
+      BlocProvider<AdminCubit>(
+        create: (_) => AdminCubit(
+          repository: _restaurantOwnerRepository,
+        ),
+      ),
     ];
   }
 }

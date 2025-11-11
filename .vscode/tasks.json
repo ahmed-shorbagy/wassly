@@ -1,0 +1,76 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "🧹 Flutter Clean",
+      "type": "shell",
+      "command": "flutter clean && flutter pub get",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "🔨 Build Customer APK (Debug)",
+      "type": "shell",
+      "command": "flutter build apk --flavor customer --target lib/main_customer.dart --debug",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "🔨 Build Customer APK (Release)",
+      "type": "shell",
+      "command": "flutter build apk --flavor customer --target lib/main_customer.dart --release",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "🔨 Build Partner APK (Debug)",
+      "type": "shell",
+      "command": "flutter build apk --flavor partner --target lib/main_partner.dart --debug",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "🔨 Build Partner APK (Release)",
+      "type": "shell",
+      "command": "flutter build apk --flavor partner --target lib/main_partner.dart --release",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "🔨 Build Admin APK (Debug)",
+      "type": "shell",
+      "command": "flutter build apk --flavor admin --target lib/main_admin.dart --debug",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "🔨 Build Admin APK (Release)",
+      "type": "shell",
+      "command": "flutter build apk --flavor admin --target lib/main_admin.dart --release",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "📦 Build All Apps (Release)",
+      "type": "shell",
+      "command": "flutter build apk --flavor customer --target lib/main_customer.dart --release && flutter build apk --flavor partner --target lib/main_partner.dart --release && flutter build apk --flavor admin --target lib/main_admin.dart --release",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "📊 Flutter Analyze",
+      "type": "shell",
+      "command": "flutter analyze",
+      "problemMatcher": [],
+      "group": "test"
+    },
+    {
+      "label": "🧪 Flutter Test",
+      "type": "shell",
+      "command": "flutter test",
+      "problemMatcher": [],
+      "group": "test"
+    }
+  ]
+}
+
