@@ -6,6 +6,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/logger.dart';
+import '../../../../core/network/supabase_service.dart';
+import '../../../../core/constants/supabase_constants.dart';
 import '../../domain/entities/restaurant_entity.dart';
 import '../../domain/entities/product_entity.dart';
 import '../../domain/repositories/restaurant_owner_repository.dart';
@@ -16,12 +18,15 @@ class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
   final FirebaseFirestore firestore;
   final FirebaseStorage storage;
   final ImagePicker imagePicker;
+  final SupabaseService supabaseService;
 
   RestaurantOwnerRepositoryImpl({
     required this.firestore,
     required this.storage,
     ImagePicker? imagePicker,
-  }) : imagePicker = imagePicker ?? ImagePicker();
+    SupabaseService? supabaseService,
+  })  : imagePicker = imagePicker ?? ImagePicker(),
+        supabaseService = supabaseService ?? SupabaseService();
 
   @override
   Future<Either<Failure, String>> uploadImage(
@@ -29,22 +34,50 @@ class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
     String fileName,
   ) async {
     try {
-      AppLogger.logInfo('Uploading image: $fileName');
+      AppLogger.logInfo('Uploading image to Supabase: $fileName');
 
       final file = File(path);
-      final ref = storage.ref().child('restaurants/$fileName');
       
-      await ref.putFile(file);
-      final url = await ref.getDownloadURL();
+      // Upload to Supabase Storage
+      final result = await supabaseService.uploadImage(
+        file: file,
+        bucketName: SupabaseConstants.restaurantImagesBucket,
+        folder: SupabaseConstants.restaurantLogosFolder,
+        fileName: fileName,
+      );
 
-      AppLogger.logSuccess('Image uploaded: $url');
-      return Right(url);
-    } on FirebaseException catch (e) {
-      AppLogger.logError('Firebase error uploading image', error: e);
-      return Left(ServerFailure('Failed to upload image: ${e.message}'));
+      return result.fold(
+        (failure) => Left(failure),
+        (url) {
+          AppLogger.logSuccess('Image uploaded to Supabase: $url');
+          return Right(url);
+        },
+      );
     } catch (e) {
       AppLogger.logError('Error uploading image', error: e);
-      return Left(ServerFailure('Failed to upload image'));
+      return Left(ServerFailure('Failed to upload image: $e'));
+    }
+  }
+  
+  @override
+  Future<Either<Failure, String>> uploadImageFile(
+    File file,
+    String bucketName,
+    String folder,
+  ) async {
+    try {
+      AppLogger.logInfo('Uploading image file to Supabase bucket: $bucketName');
+
+      final result = await supabaseService.uploadImage(
+        file: file,
+        bucketName: bucketName,
+        folder: folder,
+      );
+
+      return result;
+    } catch (e) {
+      AppLogger.logError('Error uploading image file', error: e);
+      return Left(ServerFailure('Failed to upload image: $e'));
     }
   }
 
@@ -88,17 +121,28 @@ class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
     try {
       AppLogger.logInfo('Creating restaurant: $name');
 
-      // Upload image first
-      final fileName = '${DateTime.now().millisecondsSinceEpoch}_$name.jpg';
-      final imageUploadResult = await uploadImage(imageFile.path, fileName);
+      // Upload image to Supabase first
+      AppLogger.logInfo('Uploading restaurant image to Supabase...');
+      final imageUploadResult = await uploadImageFile(
+        imageFile,
+        SupabaseConstants.restaurantImagesBucket,
+        SupabaseConstants.restaurantLogosFolder,
+      );
 
       String? imageUrl;
       imageUploadResult.fold(
-        (failure) => throw Exception('Failed to upload image'),
-        (url) => imageUrl = url,
+        (failure) {
+          AppLogger.logError('Failed to upload image', error: failure.message);
+          throw Exception('Failed to upload image: ${failure.message}');
+        },
+        (url) {
+          AppLogger.logSuccess('Image uploaded successfully');
+          imageUrl = url;
+        },
       );
 
-      // Create restaurant document
+      // Create restaurant document in Firestore
+      AppLogger.logInfo('Creating restaurant document in Firestore...');
       final restaurantData = {
         'name': name,
         'description': description,
@@ -119,7 +163,7 @@ class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
 
       final docRef = await firestore.collection('restaurants').add(restaurantData);
 
-      AppLogger.logSuccess('Restaurant created: ${docRef.id}');
+      AppLogger.logSuccess('Restaurant created with ID: ${docRef.id}');
       return Right(docRef.id);
     } on FirebaseException catch (e) {
       AppLogger.logError('Firebase error creating restaurant', error: e);

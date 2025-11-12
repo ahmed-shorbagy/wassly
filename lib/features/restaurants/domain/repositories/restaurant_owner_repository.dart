@@ -7,8 +7,11 @@ import '../entities/restaurant_entity.dart';
 import '../entities/product_entity.dart';
 
 abstract class RestaurantOwnerRepository {
-  /// Upload an image to Firebase Storage
+  /// Upload an image to Supabase Storage
   Future<Either<Failure, String>> uploadImage(String path, String fileName);
+  
+  /// Upload an image file directly to Supabase
+  Future<Either<Failure, String>> uploadImageFile(File file, String bucketName, String folder);
 
   /// Pick an image from gallery or camera
   Future<Either<Failure, XFile?>> pickImage(ImageSource source);

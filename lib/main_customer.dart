@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'config/flavor_config.dart';
 import 'firebase_options.dart';
 import 'core/router/customer_router.dart';
 import 'core/theme/app_theme.dart';
+import 'core/constants/supabase_constants.dart';
 import 'core/di/injection_container.dart';
 import 'core/utils/logger.dart';
 
@@ -22,6 +24,14 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
     AppLogger.logSuccess('Firebase initialized');
+
+    // Initialize Supabase
+    AppLogger.logInfo('Initializing Supabase...');
+    await Supabase.initialize(
+      url: SupabaseConstants.projectUrl,
+      anonKey: SupabaseConstants.anonKey,
+    );
+    AppLogger.logSuccess('Supabase initialized');
 
     // Initialize dependency injection
     AppLogger.logInfo('Initializing dependency injection...');

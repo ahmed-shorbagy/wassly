@@ -30,6 +30,8 @@ import '../../features/restaurants/domain/repositories/restaurant_owner_reposito
 import '../../features/restaurants/data/repositories/restaurant_owner_repository_impl.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import '../network/network_info.dart';
+import '../network/supabase_service.dart';
+import '../utils/image_upload_helper.dart';
 
 class InjectionContainer {
   static final InjectionContainer _instance = InjectionContainer._internal();
@@ -40,6 +42,8 @@ class InjectionContainer {
   late final FirebaseFirestore _firestore;
   late final FirebaseStorage _firebaseStorage;
   late final NetworkInfo _networkInfo;
+  late final SupabaseService _supabaseService;
+  late final ImageUploadHelper _imageUploadHelper;
   late final AuthRepository _authRepository;
   late final RestaurantRepository _restaurantRepository;
   late final OrderRepository _orderRepository;
@@ -51,6 +55,10 @@ class InjectionContainer {
     _firestore = FirebaseFirestore.instance;
     _firebaseStorage = FirebaseStorage.instance;
     _networkInfo = NetworkInfoImpl();
+    
+    // Supabase services
+    _supabaseService = SupabaseService();
+    _imageUploadHelper = ImageUploadHelper(supabaseService: _supabaseService);
 
     // Repository
     _authRepository = AuthRepositoryImpl(
@@ -71,8 +79,13 @@ class InjectionContainer {
     _restaurantOwnerRepository = RestaurantOwnerRepositoryImpl(
       firestore: _firestore,
       storage: _firebaseStorage,
+      supabaseService: _supabaseService,
     );
   }
+  
+  // Getters for accessing services from other parts of the app
+  SupabaseService get supabaseService => _supabaseService;
+  ImageUploadHelper get imageUploadHelper => _imageUploadHelper;
 
   List<BlocProvider> getBlocProviders() {
     return [
