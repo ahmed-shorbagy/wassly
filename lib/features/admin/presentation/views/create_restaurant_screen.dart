@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/extensions.dart';
 import '../../../../shared/widgets/loading_widget.dart';
@@ -23,6 +24,7 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
   final _addressController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
+  final _commercialRegistrationController = TextEditingController();
   final _deliveryFeeController = TextEditingController(text: '0.0');
   final _minOrderAmountController = TextEditingController(text: '0.0');
   final _estimatedDeliveryController = TextEditingController(text: '30');
@@ -30,24 +32,28 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
   File? _selectedImage;
   LatLng? _selectedLocation;
   final List<String> _selectedCategories = [];
-  final List<String> _availableCategories = [
-    'Fast Food',
-    'Italian',
-    'Chinese',
-    'Indian',
-    'Mexican',
-    'Japanese',
-    'Thai',
-    'Mediterranean',
-    'American',
-    'Vegetarian',
-    'Vegan',
-    'Desserts',
-    'Beverages',
-    'Healthy',
-    'BBQ',
-    'Seafood',
-  ];
+
+  List<String> _getAvailableCategories(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return [
+      l10n.fastFood,
+      l10n.italian,
+      l10n.chinese,
+      l10n.indian,
+      l10n.mexican,
+      l10n.japanese,
+      l10n.thai,
+      l10n.mediterranean,
+      l10n.american,
+      l10n.vegetarian,
+      l10n.vegan,
+      l10n.desserts,
+      l10n.beverages,
+      l10n.healthy,
+      l10n.bbq,
+      l10n.seafood,
+    ];
+  }
 
   @override
   void dispose() {
@@ -56,6 +62,7 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
     _addressController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
+    _commercialRegistrationController.dispose();
     _deliveryFeeController.dispose();
     _minOrderAmountController.dispose();
     _estimatedDeliveryController.dispose();
@@ -79,7 +86,8 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
       }
     } catch (e) {
       if (mounted) {
-        context.showErrorSnackBar('Failed to pick image: $e');
+        final l10n = AppLocalizations.of(context)!;
+        context.showErrorSnackBar(l10n.failedToPickImage(e.toString()));
       }
     }
   }
@@ -91,22 +99,26 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
       _selectedLocation = const LatLng(30.0444, 31.2357);
     });
     if (mounted) {
-      context.showInfoSnackBar('Location set to Cairo, Egypt');
+      final l10n = AppLocalizations.of(context)!;
+      context.showInfoSnackBar(l10n.locationSetToCairo);
     }
   }
 
   void _showCategoryPicker() {
+    final l10n = AppLocalizations.of(context)!;
+    final categories = _getAvailableCategories(context);
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Categories'),
+        title: Text(l10n.selectCategories),
         content: SizedBox(
           width: double.maxFinite,
           child: ListView.builder(
             shrinkWrap: true,
-            itemCount: _availableCategories.length,
+            itemCount: categories.length,
             itemBuilder: (context, index) {
-              final category = _availableCategories[index];
+              final category = categories[index];
               return CheckboxListTile(
                 title: Text(category),
                 value: _selectedCategories.contains(category),
@@ -128,7 +140,7 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Done'),
+            child: Text(l10n.done),
           ),
         ],
       ),
@@ -136,51 +148,56 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
   }
 
   void _submitForm() {
+    final l10n = AppLocalizations.of(context)!;
+
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
     if (_selectedImage == null) {
-      context.showErrorSnackBar('Please select a restaurant image');
+      context.showErrorSnackBar(l10n.pleaseSelectImage);
       return;
     }
 
     if (_selectedLocation == null) {
-      context.showErrorSnackBar('Please select a location');
+      context.showErrorSnackBar(l10n.pleaseSelectLocation);
       return;
     }
 
     if (_selectedCategories.isEmpty) {
-      context.showErrorSnackBar('Please select at least one category');
+      context.showErrorSnackBar(l10n.pleaseSelectAtLeastOneCategory);
       return;
     }
 
     context.read<AdminCubit>().createRestaurant(
-          name: _nameController.text.trim(),
-          description: _descriptionController.text.trim(),
-          address: _addressController.text.trim(),
-          phone: _phoneController.text.trim(),
-          email: _emailController.text.trim(),
-          categories: _selectedCategories,
-          location: _selectedLocation!,
-          imageFile: _selectedImage!,
-          deliveryFee: double.parse(_deliveryFeeController.text),
-          minOrderAmount: double.parse(_minOrderAmountController.text),
-          estimatedDeliveryTime: int.parse(_estimatedDeliveryController.text),
-        );
+      name: _nameController.text.trim(),
+      description: _descriptionController.text.trim(),
+      address: _addressController.text.trim(),
+      phone: _phoneController.text.trim(),
+      email: _emailController.text.trim(),
+      categories: _selectedCategories,
+      location: _selectedLocation!,
+      imageFile: _selectedImage!,
+      deliveryFee: double.parse(_deliveryFeeController.text),
+      minOrderAmount: double.parse(_minOrderAmountController.text),
+      estimatedDeliveryTime: int.parse(_estimatedDeliveryController.text),
+      commercialRegistration:
+          _commercialRegistrationController.text.trim().isNotEmpty
+          ? _commercialRegistrationController.text.trim()
+          : null,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Restaurant'),
-        backgroundColor: Colors.purple,
-      ),
+      appBar: AppBar(title: Text(l10n.createRestaurant)),
       body: BlocConsumer<AdminCubit, AdminState>(
         listener: (context, state) {
           if (state is RestaurantCreatedSuccess) {
-            context.showSuccessSnackBar('Restaurant created successfully!');
+            context.showSuccessSnackBar(l10n.restaurantCreatedSuccessfully);
             context.go('/admin/restaurants');
           } else if (state is AdminError) {
             context.showErrorSnackBar(state.message);
@@ -188,7 +205,7 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
         },
         builder: (context, state) {
           if (state is AdminLoading) {
-            return const LoadingWidget();
+            return LoadingWidget(message: l10n.creatingRestaurant);
           }
 
           return Form(
@@ -197,19 +214,19 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
               padding: const EdgeInsets.all(16),
               children: [
                 // Image Upload Section
-                _buildImageUploadSection(),
+                _buildImageUploadSection(l10n),
                 const SizedBox(height: 24),
 
                 // Basic Information
-                _buildSectionTitle('Basic Information'),
+                _buildSectionTitle(l10n.basicInformation),
                 const SizedBox(height: 12),
                 _buildTextField(
                   controller: _nameController,
-                  label: 'Restaurant Name',
+                  label: l10n.restaurantName,
                   icon: Icons.restaurant,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter restaurant name';
+                      return l10n.pleaseEnterRestaurantName;
                     }
                     return null;
                   },
@@ -217,12 +234,12 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                 const SizedBox(height: 16),
                 _buildTextField(
                   controller: _descriptionController,
-                  label: 'Description',
+                  label: l10n.description,
                   icon: Icons.description,
                   maxLines: 3,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter description';
+                      return l10n.pleaseEnterDescription;
                     }
                     return null;
                   },
@@ -230,19 +247,19 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                 const SizedBox(height: 24),
 
                 // Contact Information
-                _buildSectionTitle('Contact Information'),
+                _buildSectionTitle(l10n.contactInformation),
                 const SizedBox(height: 12),
                 _buildTextField(
                   controller: _phoneController,
-                  label: 'Phone Number',
+                  label: l10n.phoneNumber,
                   icon: Icons.phone,
                   keyboardType: TextInputType.phone,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter phone number';
+                      return l10n.pleaseEnterPhoneNumber;
                     }
                     if (!value.isValidPhone) {
-                      return 'Please enter a valid phone number';
+                      return l10n.pleaseEnterValidPhoneNumber;
                     }
                     return null;
                   },
@@ -250,63 +267,83 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                 const SizedBox(height: 16),
                 _buildTextField(
                   controller: _emailController,
-                  label: 'Email',
+                  label: l10n.email,
                   icon: Icons.email,
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter email';
+                      return l10n.pleaseEnterEmail;
                     }
                     if (!value.isValidEmail) {
-                      return 'Please enter a valid email';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 24),
-
-                // Location
-                _buildSectionTitle('Location'),
-                const SizedBox(height: 12),
-                _buildTextField(
-                  controller: _addressController,
-                  label: 'Address',
-                  icon: Icons.location_on,
-                  maxLines: 2,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter address';
+                      return l10n.pleaseEnterValidEmail;
                     }
                     return null;
                   },
                 ),
                 const SizedBox(height: 16),
-                _buildLocationPicker(),
+                _buildTextField(
+                  controller: _commercialRegistrationController,
+                  label: l10n.commercialRegistration,
+                  icon: Icons.business_center,
+                  keyboardType: TextInputType.text,
+                  validator: null, // Optional field
+                ),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    l10n.optional,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Location
+                _buildSectionTitle(l10n.location),
+                const SizedBox(height: 12),
+                _buildTextField(
+                  controller: _addressController,
+                  label: l10n.address,
+                  icon: Icons.location_on,
+                  maxLines: 2,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return l10n.pleaseEnterAddress;
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                _buildLocationPicker(l10n),
                 const SizedBox(height: 24),
 
                 // Categories
-                _buildSectionTitle('Categories'),
+                _buildSectionTitle(l10n.categories),
                 const SizedBox(height: 12),
-                _buildCategorySelector(),
+                _buildCategorySelector(l10n),
                 const SizedBox(height: 24),
 
                 // Delivery Settings
-                _buildSectionTitle('Delivery Settings'),
+                _buildSectionTitle(l10n.deliverySettings),
                 const SizedBox(height: 12),
                 Row(
                   children: [
                     Expanded(
                       child: _buildTextField(
                         controller: _deliveryFeeController,
-                        label: 'Delivery Fee (\$)',
+                        label: l10n.deliveryFee,
                         icon: Icons.delivery_dining,
                         keyboardType: TextInputType.number,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Required';
+                            return l10n.required;
                           }
                           if (double.tryParse(value) == null) {
-                            return 'Invalid number';
+                            return l10n.invalidNumber;
                           }
                           return null;
                         },
@@ -316,15 +353,15 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                     Expanded(
                       child: _buildTextField(
                         controller: _minOrderAmountController,
-                        label: 'Min Order (\$)',
+                        label: l10n.minOrder,
                         icon: Icons.shopping_cart,
                         keyboardType: TextInputType.number,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Required';
+                            return l10n.required;
                           }
                           if (double.tryParse(value) == null) {
-                            return 'Invalid number';
+                            return l10n.invalidNumber;
                           }
                           return null;
                         },
@@ -335,15 +372,15 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                 const SizedBox(height: 16),
                 _buildTextField(
                   controller: _estimatedDeliveryController,
-                  label: 'Estimated Delivery Time (minutes)',
+                  label: l10n.estimatedDeliveryTime,
                   icon: Icons.timer,
                   keyboardType: TextInputType.number,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter estimated delivery time';
+                      return l10n.required;
                     }
                     if (int.tryParse(value) == null) {
-                      return 'Invalid number';
+                      return l10n.invalidNumber;
                     }
                     return null;
                   },
@@ -353,16 +390,12 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                 // Submit Button
                 ElevatedButton(
                   onPressed: _submitForm,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.purple,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                  child: Text(
+                    l10n.createRestaurant,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
-                  ),
-                  child: const Text(
-                    'Create Restaurant',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -374,7 +407,7 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
     );
   }
 
-  Widget _buildImageUploadSection() {
+  Widget _buildImageUploadSection(AppLocalizations l10n) {
     return Container(
       height: 200,
       decoration: BoxDecoration(
@@ -415,10 +448,7 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                   child: ElevatedButton.icon(
                     onPressed: _pickImage,
                     icon: const Icon(Icons.edit),
-                    label: const Text('Change'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.purple,
-                    ),
+                    label: Text(l10n.change),
                   ),
                 ),
               ],
@@ -426,15 +456,19 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
           : InkWell(
               onTap: _pickImage,
               borderRadius: BorderRadius.circular(12),
-              child: const Center(
+              child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.add_photo_alternate, size: 60, color: Colors.grey),
-                    SizedBox(height: 12),
+                    const Icon(
+                      Icons.add_photo_alternate,
+                      size: 60,
+                      color: Colors.grey,
+                    ),
+                    const SizedBox(height: 12),
                     Text(
-                      'Tap to upload restaurant image',
-                      style: TextStyle(
+                      l10n.tapToUploadRestaurantImage,
+                      style: const TextStyle(
                         fontSize: 16,
                         color: Colors.grey,
                         fontWeight: FontWeight.w500,
@@ -453,7 +487,7 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
       style: const TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.bold,
-        color: Colors.purple,
+        color: AppColors.primary,
       ),
     );
   }
@@ -473,23 +507,21 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
       validator: validator,
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: Icon(icon, color: Colors.purple),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        prefixIcon: Icon(icon, color: AppColors.primary),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.grey.shade300),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.purple, width: 2),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
       ),
     );
   }
 
-  Widget _buildLocationPicker() {
+  Widget _buildLocationPicker(AppLocalizations l10n) {
     return InkWell(
       onTap: _pickLocation,
       child: Container(
@@ -500,16 +532,21 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
         ),
         child: Row(
           children: [
-            const Icon(Icons.map, color: Colors.purple),
+            const Icon(Icons.map, color: AppColors.primary),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 _selectedLocation != null
-                    ? 'Location: ${_selectedLocation!.latitude.toStringAsFixed(4)}, ${_selectedLocation!.longitude.toStringAsFixed(4)}'
-                    : 'Tap to select location on map',
+                    ? l10n.locationSet(
+                        _selectedLocation!.latitude.toStringAsFixed(4),
+                        _selectedLocation!.longitude.toStringAsFixed(4),
+                      )
+                    : l10n.tapToSelectLocationOnMap,
                 style: TextStyle(
                   fontSize: 14,
-                  color: _selectedLocation != null ? Colors.black : Colors.grey,
+                  color: _selectedLocation != null
+                      ? AppColors.textPrimary
+                      : AppColors.textSecondary,
                 ),
               ),
             ),
@@ -520,7 +557,7 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
     );
   }
 
-  Widget _buildCategorySelector() {
+  Widget _buildCategorySelector(AppLocalizations l10n) {
     return InkWell(
       onTap: _showCategoryPicker,
       child: Container(
@@ -532,15 +569,22 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
         child: _selectedCategories.isEmpty
             ? Row(
                 children: [
-                  const Icon(Icons.category, color: Colors.purple),
+                  const Icon(Icons.category, color: AppColors.primary),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Tap to select categories',
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                      l10n.tapToSelectCategories,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ),
-                  const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                  const Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: Colors.grey,
+                  ),
                 ],
               )
             : Column(
@@ -549,16 +593,16 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Selected Categories:',
-                        style: TextStyle(
+                      Text(
+                        l10n.selectedCategories,
+                        style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       TextButton(
                         onPressed: _showCategoryPicker,
-                        child: const Text('Edit'),
+                        child: Text(l10n.edit),
                       ),
                     ],
                   ),
@@ -570,7 +614,9 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                         .map(
                           (category) => Chip(
                             label: Text(category),
-                            backgroundColor: Colors.purple.withValues(alpha: 0.1),
+                            backgroundColor: AppColors.primary.withValues(
+                              alpha: 0.1,
+                            ),
                             deleteIcon: const Icon(Icons.close, size: 16),
                             onDeleted: () {
                               setState(() {
@@ -587,4 +633,3 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
     );
   }
 }
-

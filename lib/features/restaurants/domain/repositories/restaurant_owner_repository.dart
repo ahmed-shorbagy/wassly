@@ -29,6 +29,7 @@ abstract class RestaurantOwnerRepository {
     required double deliveryFee,
     required double minOrderAmount,
     required int estimatedDeliveryTime,
+    String? commercialRegistration, // Optional field
   });
 
   /// Update restaurant information

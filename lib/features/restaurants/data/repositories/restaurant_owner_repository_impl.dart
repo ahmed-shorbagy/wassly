@@ -117,6 +117,7 @@ class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
     required double deliveryFee,
     required double minOrderAmount,
     required int estimatedDeliveryTime,
+    String? commercialRegistration,
   }) async {
     try {
       AppLogger.logInfo('Creating restaurant: $name');
@@ -159,6 +160,8 @@ class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
         'rating': 0.0,
         'totalReviews': 0,
         'createdAt': FieldValue.serverTimestamp(),
+        if (commercialRegistration != null && commercialRegistration.isNotEmpty)
+          'commercialRegistration': commercialRegistration,
       };
 
       final docRef = await firestore.collection('restaurants').add(restaurantData);

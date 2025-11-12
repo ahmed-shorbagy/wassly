@@ -1,0 +1,72 @@
+{
+  "@@locale": "ar",
+  
+  "createRestaurant": "إنشاء مطعم",
+  "restaurantSetup": "إعداد المطعم",
+  
+  "basicInformation": "المعلومات الأساسية",
+  "restaurantName": "اسم المطعم",
+  "description": "الوصف",
+  "pleaseEnterRestaurantName": "الرجاء إدخال اسم المطعم",
+  "pleaseEnterDescription": "الرجاء إدخال الوصف",
+  
+  "contactInformation": "معلومات الاتصال",
+  "phoneNumber": "رقم الهاتف",
+  "email": "البريد الإلكتروني",
+  "commercialRegistration": "السجل التجاري",
+  "commercialRegistrationArabic": "السجل التجاري",
+  "optional": "اختياري",
+  "pleaseEnterPhoneNumber": "الرجاء إدخال رقم الهاتف",
+  "pleaseEnterValidPhoneNumber": "الرجاء إدخال رقم هاتف صحيح",
+  "pleaseEnterEmail": "الرجاء إدخال البريد الإلكتروني",
+  "pleaseEnterValidEmail": "الرجاء إدخال بريد إلكتروني صحيح",
+  
+  "location": "الموقع",
+  "address": "العنوان",
+  "pleaseEnterAddress": "الرجاء إدخال العنوان",
+  "tapToSelectLocationOnMap": "اضغط لاختيار الموقع على الخريطة",
+  "locationSet": "الموقع: {latitude}, {longitude}",
+  "locationSetToCairo": "تم تعيين الموقع إلى القاهرة، مصر",
+  
+  "categories": "الفئات",
+  "selectCategories": "اختر الفئات",
+  "tapToSelectCategories": "اضغط لاختيار الفئات",
+  "selectedCategories": "الفئات المختارة:",
+  "done": "تم",
+  "edit": "تعديل",
+  
+  "deliverySettings": "إعدادات التوصيل",
+  "deliveryFee": "رسوم التوصيل (ريال)",
+  "minOrder": "الحد الأدنى للطلب (ريال)",
+  "estimatedDeliveryTime": "وقت التوصيل المتوقع (دقيقة)",
+  "required": "مطلوب",
+  "invalidNumber": "رقم غير صحيح",
+  
+  "tapToUploadRestaurantImage": "اضغط لتحميل صورة المطعم",
+  "change": "تغيير",
+  "pleaseSelectImage": "الرجاء اختيار صورة المطعم",
+  "pleaseSelectLocation": "الرجاء اختيار الموقع",
+  "pleaseSelectAtLeastOneCategory": "الرجاء اختيار فئة واحدة على الأقل",
+  
+  "creatingRestaurant": "جاري إنشاء المطعم...",
+  "restaurantCreatedSuccessfully": "تم إنشاء المطعم بنجاح!",
+  "failedToPickImage": "فشل في اختيار الصورة: {error}",
+  
+  "fastFood": "وجبات سريعة",
+  "italian": "إيطالي",
+  "chinese": "صيني",
+  "indian": "هندي",
+  "mexican": "مكسيكي",
+  "japanese": "ياباني",
+  "thai": "تايلندي",
+  "mediterranean": "بحر متوسطي",
+  "american": "أمريكي",
+  "vegetarian": "نباتي",
+  "vegan": "نباتي صرف",
+  "desserts": "حلويات",
+  "beverages": "مشروبات",
+  "healthy": "صحي",
+  "bbq": "مشاوي",
+  "seafood": "مأكولات بحرية"
+}
+

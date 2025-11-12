@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'l10n/app_localizations.dart';
 import 'config/flavor_config.dart';
 import 'firebase_options.dart';
 import 'core/router/admin_router.dart';
@@ -70,6 +72,18 @@ class WasslyAdminApp extends StatelessWidget {
         theme: AdminTheme.lightTheme,
         routerConfig: AdminRouter.router,
         debugShowCheckedModeBanner: false,
+        // Set Arabic as the primary locale
+        locale: const Locale('ar', 'EG'),
+        supportedLocales: const [
+          Locale('ar', 'EG'), // Arabic (Egypt)
+          Locale('en', 'US'), // English (US)
+        ],
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
       ),
     );
   }

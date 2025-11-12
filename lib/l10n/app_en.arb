@@ -1,0 +1,89 @@
+{
+  "@@locale": "en",
+  
+  "createRestaurant": "Create Restaurant",
+  "restaurantSetup": "Restaurant Setup",
+  
+  "basicInformation": "Basic Information",
+  "restaurantName": "Restaurant Name",
+  "description": "Description",
+  "pleaseEnterRestaurantName": "Please enter restaurant name",
+  "pleaseEnterDescription": "Please enter description",
+  
+  "contactInformation": "Contact Information",
+  "phoneNumber": "Phone Number",
+  "email": "Email",
+  "commercialRegistration": "Commercial Registration",
+  "commercialRegistrationArabic": "السجل التجاري",
+  "optional": "Optional",
+  "pleaseEnterPhoneNumber": "Please enter phone number",
+  "pleaseEnterValidPhoneNumber": "Please enter a valid phone number",
+  "pleaseEnterEmail": "Please enter email",
+  "pleaseEnterValidEmail": "Please enter a valid email",
+  
+  "location": "Location",
+  "address": "Address",
+  "pleaseEnterAddress": "Please enter address",
+  "tapToSelectLocationOnMap": "Tap to select location on map",
+  "locationSet": "Location: {latitude}, {longitude}",
+  "@locationSet": {
+    "placeholders": {
+      "latitude": {
+        "type": "String"
+      },
+      "longitude": {
+        "type": "String"
+      }
+    }
+  },
+  "locationSetToCairo": "Location set to Cairo, Egypt",
+  
+  "categories": "Categories",
+  "selectCategories": "Select Categories",
+  "tapToSelectCategories": "Tap to select categories",
+  "selectedCategories": "Selected Categories:",
+  "done": "Done",
+  "edit": "Edit",
+  
+  "deliverySettings": "Delivery Settings",
+  "deliveryFee": "Delivery Fee ($)",
+  "minOrder": "Min Order ($)",
+  "estimatedDeliveryTime": "Estimated Delivery Time (minutes)",
+  "required": "Required",
+  "invalidNumber": "Invalid number",
+  
+  "tapToUploadRestaurantImage": "Tap to upload restaurant image",
+  "change": "Change",
+  "pleaseSelectImage": "Please select a restaurant image",
+  "pleaseSelectLocation": "Please select a location",
+  "pleaseSelectAtLeastOneCategory": "Please select at least one category",
+  
+  "creatingRestaurant": "Creating your restaurant...",
+  "restaurantCreatedSuccessfully": "Restaurant created successfully!",
+  "failedToPickImage": "Failed to pick image: {error}",
+  "@failedToPickImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "fastFood": "Fast Food",
+  "italian": "Italian",
+  "chinese": "Chinese",
+  "indian": "Indian",
+  "mexican": "Mexican",
+  "japanese": "Japanese",
+  "thai": "Thai",
+  "mediterranean": "Mediterranean",
+  "american": "American",
+  "vegetarian": "Vegetarian",
+  "vegan": "Vegan",
+  "desserts": "Desserts",
+  "beverages": "Beverages",
+  "healthy": "Healthy",
+  "bbq": "BBQ",
+  "seafood": "Seafood"
+}
+

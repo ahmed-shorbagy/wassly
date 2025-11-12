@@ -24,6 +24,7 @@ class AdminCubit extends Cubit<AdminState> {
     required double deliveryFee,
     required double minOrderAmount,
     required int estimatedDeliveryTime,
+    String? commercialRegistration,
   }) async {
     try {
       emit(AdminLoading());
@@ -41,6 +42,7 @@ class AdminCubit extends Cubit<AdminState> {
         deliveryFee: deliveryFee,
         minOrderAmount: minOrderAmount,
         estimatedDeliveryTime: estimatedDeliveryTime,
+        commercialRegistration: commercialRegistration,
       );
 
       result.fold(
