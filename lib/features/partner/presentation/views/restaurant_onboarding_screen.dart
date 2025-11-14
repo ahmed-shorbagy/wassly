@@ -25,9 +25,13 @@ class _RestaurantOnboardingScreenState
   final _addressController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
 
   XFile? _selectedImage;
   int _currentStep = 0;
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   final List<String> _selectedCategories = [];
   final List<String> _availableCategories = [
     'Fast Food',
@@ -55,6 +59,8 @@ class _RestaurantOnboardingScreenState
     _addressController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -88,14 +94,14 @@ class _RestaurantOnboardingScreenState
                   padding: const EdgeInsets.only(top: 24),
                   child: Row(
                     children: [
-                      if (_currentStep < 3)
+                      if (_currentStep < 4)
                         Expanded(
                           child: ElevatedButton(
                             onPressed: details.onStepContinue,
                             child: const Text('Continue'),
                           ),
                         ),
-                      if (_currentStep == 3)
+                      if (_currentStep == 4)
                         Expanded(
                           child: ElevatedButton(
                             onPressed: _submitForm,
@@ -152,6 +158,14 @@ class _RestaurantOnboardingScreenState
                   title: const Text('Contact & Location'),
                   content: _buildContactStep(),
                   isActive: _currentStep >= 3,
+                  state: _currentStep > 3
+                      ? StepState.complete
+                      : StepState.indexed,
+                ),
+                Step(
+                  title: const Text('Account Password'),
+                  content: _buildPasswordStep(),
+                  isActive: _currentStep >= 4,
                   state: StepState.indexed,
                 ),
               ],
@@ -551,6 +565,99 @@ class _RestaurantOnboardingScreenState
     );
   }
 
+  Widget _buildPasswordStep() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Create a password for your restaurant account',
+          style: TextStyle(fontSize: 16, color: Colors.grey),
+        ),
+        const SizedBox(height: 24),
+        TextFormField(
+          controller: _passwordController,
+          obscureText: _obscurePassword,
+          decoration: InputDecoration(
+            labelText: 'Password *',
+            hintText: 'Enter a secure password',
+            prefixIcon: const Icon(Icons.lock),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscurePassword ? Icons.visibility : Icons.visibility_off,
+              ),
+              onPressed: () {
+                setState(() {
+                  _obscurePassword = !_obscurePassword;
+                });
+              },
+            ),
+          ),
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return 'Password is required';
+            }
+            if (value.length < 6) {
+              return 'Password must be at least 6 characters';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 16),
+        TextFormField(
+          controller: _confirmPasswordController,
+          obscureText: _obscureConfirmPassword,
+          decoration: InputDecoration(
+            labelText: 'Confirm Password *',
+            hintText: 'Confirm your password',
+            prefixIcon: const Icon(Icons.lock_outline),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscureConfirmPassword
+                    ? Icons.visibility
+                    : Icons.visibility_off,
+              ),
+              onPressed: () {
+                setState(() {
+                  _obscureConfirmPassword = !_obscureConfirmPassword;
+                });
+              },
+            ),
+          ),
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return 'Please confirm your password';
+            }
+            if (value != _passwordController.text) {
+              return 'Passwords do not match';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 24),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.blue.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.info_outline, color: Colors.blue),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'This password will be used to log into your restaurant account. Make sure to keep it secure.',
+                  style: TextStyle(fontSize: 14, color: Colors.blue.shade700),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   Future<void> _pickImage() async {
     try {
       final ImagePicker picker = ImagePicker();
@@ -561,14 +668,16 @@ class _RestaurantOnboardingScreenState
         imageQuality: 85,
       );
 
-      if (image != null) {
+      if (image != null && mounted) {
         setState(() {
           _selectedImage = image;
         });
         context.showSuccessSnackBar('Image selected successfully');
       }
     } catch (e) {
-      context.showErrorSnackBar('Failed to pick image: $e');
+      if (mounted) {
+        context.showErrorSnackBar('Failed to pick image: $e');
+      }
     }
   }
 
@@ -595,6 +704,12 @@ class _RestaurantOnboardingScreenState
       setState(() {
         _currentStep = 3;
       });
+    } else if (_currentStep == 3) {
+      if (_formKey.currentState!.validate()) {
+        setState(() {
+          _currentStep = 4;
+        });
+      }
     }
   }
 
@@ -627,6 +742,23 @@ class _RestaurantOnboardingScreenState
       return;
     }
 
+    // Validate password match
+    if (_passwordController.text != _confirmPasswordController.text) {
+      context.showErrorSnackBar('Passwords do not match');
+      setState(() {
+        _currentStep = 4;
+      });
+      return;
+    }
+
+    if (_passwordController.text.length < 6) {
+      context.showErrorSnackBar('Password must be at least 6 characters');
+      setState(() {
+        _currentStep = 4;
+      });
+      return;
+    }
+
     // Get current user
     final authState = context.read<AuthCubit>().state;
     if (authState is! AuthAuthenticated) {
@@ -642,6 +774,7 @@ class _RestaurantOnboardingScreenState
       address: _addressController.text.trim(),
       phone: _phoneController.text.trim(),
       email: _emailController.text.trim(),
+      password: _passwordController.text.trim(),
       categories: _selectedCategories,
       imagePath: _selectedImage!.path,
     );

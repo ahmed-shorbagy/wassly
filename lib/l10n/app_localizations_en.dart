@@ -190,4 +190,280 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get seafood => 'Seafood';
+
+  @override
+  String get arabic => 'Arabic';
+
+  @override
+  String get egyptian => 'Egyptian';
+
+  @override
+  String get lebanese => 'Lebanese';
+
+  @override
+  String get syrian => 'Syrian';
+
+  @override
+  String get palestinian => 'Palestinian';
+
+  @override
+  String get jordanian => 'Jordanian';
+
+  @override
+  String get saudi => 'Saudi';
+
+  @override
+  String get emirati => 'Emirati';
+
+  @override
+  String get gulf => 'Gulf';
+
+  @override
+  String get moroccan => 'Moroccan';
+
+  @override
+  String get tunisian => 'Tunisian';
+
+  @override
+  String get algerian => 'Algerian';
+
+  @override
+  String get yemeni => 'Yemeni';
+
+  @override
+  String get iraqi => 'Iraqi';
+
+  @override
+  String get grilledMeat => 'Grilled Meat';
+
+  @override
+  String get kebabs => 'Kebabs';
+
+  @override
+  String get shawarma => 'Shawarma';
+
+  @override
+  String get falafel => 'Falafel';
+
+  @override
+  String get hummus => 'Hummus';
+
+  @override
+  String get mezze => 'Mezze';
+
+  @override
+  String get foul => 'Foul';
+
+  @override
+  String get taameya => 'Taameya';
+
+  @override
+  String get koshary => 'Koshary';
+
+  @override
+  String get mansaf => 'Mansaf';
+
+  @override
+  String get mansi => 'Mansi';
+
+  @override
+  String get mandi => 'Mandi';
+
+  @override
+  String get kabsa => 'Kabsa';
+
+  @override
+  String get majboos => 'Majboos';
+
+  @override
+  String get maqluba => 'Maqluba';
+
+  @override
+  String get musakhan => 'Musakhan';
+
+  @override
+  String get mansafJordanian => 'Mansaf Jordanian';
+
+  @override
+  String get waraqEnab => 'Waraq Enab';
+
+  @override
+  String get mahshi => 'Mahshi';
+
+  @override
+  String get kofta => 'Kofta';
+
+  @override
+  String get samosa => 'Samosa';
+
+  @override
+  String get knafeh => 'Knafeh';
+
+  @override
+  String get baklava => 'Baklava';
+
+  @override
+  String get biryani => 'Biryani';
+
+  @override
+  String get bakedGoods => 'Baked Goods';
+
+  @override
+  String get orientalSweets => 'Oriental Sweets';
+
+  @override
+  String get commercialRegistrationPhoto => 'Commercial Registration Photo';
+
+  @override
+  String get takePhoto => 'Take Photo';
+
+  @override
+  String get openCamera => 'Open Camera';
+
+  @override
+  String get pleaseTakeCommercialRegistrationPhoto =>
+      'Please take commercial registration photo';
+
+  @override
+  String get productManagement => 'Product Management';
+
+  @override
+  String get products => 'Products';
+
+  @override
+  String get addProduct => 'Add Product';
+
+  @override
+  String get editProduct => 'Edit Product';
+
+  @override
+  String get productName => 'Product Name';
+
+  @override
+  String get productDescription => 'Product Description';
+
+  @override
+  String get productPrice => 'Product Price';
+
+  @override
+  String get productCategory => 'Product Category';
+
+  @override
+  String get productImage => 'Product Image';
+
+  @override
+  String get productAvailable => 'Available';
+
+  @override
+  String get productUnavailable => 'Unavailable';
+
+  @override
+  String get pleaseEnterProductName => 'Please enter product name';
+
+  @override
+  String get pleaseEnterProductDescription =>
+      'Please enter product description';
+
+  @override
+  String get pleaseEnterProductPrice => 'Please enter product price';
+
+  @override
+  String get pleaseSelectProductCategory => 'Please select product category';
+
+  @override
+  String get pleaseSelectProductImage => 'Please select product image';
+
+  @override
+  String get productAddedSuccessfully => 'Product added successfully';
+
+  @override
+  String get productUpdatedSuccessfully => 'Product updated successfully';
+
+  @override
+  String get productDeletedSuccessfully => 'Product deleted successfully';
+
+  @override
+  String get creatingProduct => 'Creating product...';
+
+  @override
+  String get updatingProduct => 'Updating product...';
+
+  @override
+  String get deletingProduct => 'Deleting product...';
+
+  @override
+  String get areYouSureDeleteProduct =>
+      'Are you sure you want to delete this product?';
+
+  @override
+  String get noProductsYet => 'No products yet';
+
+  @override
+  String get startByAddingYourFirstProduct =>
+      'Start by adding your first product';
+
+  @override
+  String get selectRestaurantFirst => 'Please select a restaurant first';
+
+  @override
+  String get restaurantProducts => 'Restaurant Products';
+
+  @override
+  String get password => 'Password';
+
+  @override
+  String get confirmPassword => 'Confirm Password';
+
+  @override
+  String get pleaseEnterPassword => 'Please enter password';
+
+  @override
+  String get pleaseConfirmPassword => 'Please confirm password';
+
+  @override
+  String get passwordMustBeAtLeast6Characters =>
+      'Password must be at least 6 characters';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get updatePassword => 'Update Password';
+
+  @override
+  String get passwordUpdatedSuccessfully => 'Password updated successfully';
+
+  @override
+  String get newPassword => 'New Password';
+
+  @override
+  String get confirmNewPassword => 'Confirm New Password';
+
+  @override
+  String get currentPassword => 'Current Password';
+
+  @override
+  String get editRestaurant => 'Edit Restaurant';
+
+  @override
+  String get updateRestaurant => 'Update Restaurant';
+
+  @override
+  String get restaurantUpdatedSuccessfully => 'Restaurant updated successfully';
+
+  @override
+  String get updatingRestaurant => 'Updating restaurant...';
+
+  @override
+  String get restaurantNotFound => 'Restaurant not found';
+
+  @override
+  String get back => 'Back';
+
+  @override
+  String get loading => 'Loading...';
+
+  @override
+  String get leavePasswordEmptyToKeepCurrent =>
+      'Leave password empty to keep current password';
 }

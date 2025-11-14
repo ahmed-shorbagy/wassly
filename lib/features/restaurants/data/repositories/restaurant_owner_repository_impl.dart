@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:dartz/dartz.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -8,6 +9,7 @@ import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/network/supabase_service.dart';
 import '../../../../core/constants/supabase_constants.dart';
+import '../../../../core/constants/app_constants.dart';
 import '../../domain/entities/restaurant_entity.dart';
 import '../../domain/entities/product_entity.dart';
 import '../../domain/repositories/restaurant_owner_repository.dart';
@@ -17,16 +19,19 @@ import '../models/product_model.dart';
 class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
   final FirebaseFirestore firestore;
   final FirebaseStorage storage;
+  final FirebaseAuth firebaseAuth;
   final ImagePicker imagePicker;
   final SupabaseService supabaseService;
 
   RestaurantOwnerRepositoryImpl({
     required this.firestore,
     required this.storage,
+    FirebaseAuth? firebaseAuth,
     ImagePicker? imagePicker,
     SupabaseService? supabaseService,
-  })  : imagePicker = imagePicker ?? ImagePicker(),
-        supabaseService = supabaseService ?? SupabaseService();
+  }) : firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
+       imagePicker = imagePicker ?? ImagePicker(),
+       supabaseService = supabaseService ?? SupabaseService();
 
   @override
   Future<Either<Failure, String>> uploadImage(
@@ -37,7 +42,7 @@ class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
       AppLogger.logInfo('Uploading image to Supabase: $fileName');
 
       final file = File(path);
-      
+
       // Upload to Supabase Storage
       final result = await supabaseService.uploadImage(
         file: file,
@@ -46,19 +51,16 @@ class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
         fileName: fileName,
       );
 
-      return result.fold(
-        (failure) => Left(failure),
-        (url) {
-          AppLogger.logSuccess('Image uploaded to Supabase: $url');
-          return Right(url);
-        },
-      );
+      return result.fold((failure) => Left(failure), (url) {
+        AppLogger.logSuccess('Image uploaded to Supabase: $url');
+        return Right(url);
+      });
     } catch (e) {
       AppLogger.logError('Error uploading image', error: e);
       return Left(ServerFailure('Failed to upload image: $e'));
     }
   }
-  
+
   @override
   Future<Either<Failure, String>> uploadImageFile(
     File file,
@@ -111,18 +113,69 @@ class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
     required String address,
     required String phone,
     required String email,
+    required String password,
     required List<String> categories,
     required LatLng location,
     required File imageFile,
     required double deliveryFee,
     required double minOrderAmount,
     required int estimatedDeliveryTime,
-    String? commercialRegistration,
+    File? commercialRegistrationPhotoFile,
   }) async {
     try {
       AppLogger.logInfo('Creating restaurant: $name');
 
-      // Upload image to Supabase first
+      // Create Firebase Auth user account first
+      AppLogger.logInfo('Creating Firebase Auth user account...');
+      UserCredential? userCredential;
+      try {
+        userCredential = await firebaseAuth.createUserWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+        AppLogger.logSuccess(
+          'Firebase Auth user created: ${userCredential.user?.uid}',
+        );
+      } on FirebaseAuthException catch (e) {
+        AppLogger.logError('Failed to create Firebase Auth user', error: e);
+        return Left(
+          ServerFailure('Failed to create user account: ${e.message}'),
+        );
+      }
+
+      if (userCredential.user == null) {
+        AppLogger.logError('User credential is null after creation');
+        return const Left(ServerFailure('Failed to create user account'));
+      }
+
+      final userId = userCredential.user!.uid;
+
+      // Create user document in users collection
+      AppLogger.logInfo('Creating user document in Firestore...');
+      try {
+        // Store password temporarily for admin updates (in production, encrypt this)
+        // This allows admin to update password later
+        await firestore.collection(AppConstants.usersCollection).doc(userId).set({
+          'id': userId,
+          'email': email,
+          'name': name,
+          'phone': phone,
+          'userType': AppConstants.userTypeRestaurant,
+          'createdAt': FieldValue.serverTimestamp(),
+          'isActive': true,
+          'tempPassword':
+              password, // Temporary storage for admin password updates
+          // Note: In production, encrypt this field or use Cloud Function with Admin SDK
+        });
+        AppLogger.logSuccess('User document created');
+      } catch (e) {
+        // If user document creation fails, delete the auth user
+        await userCredential.user?.delete();
+        AppLogger.logError('Failed to create user document', error: e);
+        return Left(ServerFailure('Failed to create user document: $e'));
+      }
+
+      // Upload restaurant image to Supabase
       AppLogger.logInfo('Uploading restaurant image to Supabase...');
       final imageUploadResult = await uploadImageFile(
         imageFile,
@@ -142,9 +195,42 @@ class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
         },
       );
 
+      // Upload commercial registration photo if provided
+      String? commercialRegistrationPhotoUrl;
+      if (commercialRegistrationPhotoFile != null) {
+        AppLogger.logInfo(
+          'Uploading commercial registration photo to Supabase...',
+        );
+        final commercialRegUploadResult = await uploadImageFile(
+          commercialRegistrationPhotoFile,
+          SupabaseConstants.restaurantImagesBucket,
+          'commercial_registrations',
+        );
+
+        commercialRegUploadResult.fold(
+          (failure) {
+            AppLogger.logError(
+              'Failed to upload commercial registration photo',
+              error: failure.message,
+            );
+            throw Exception(
+              'Failed to upload commercial registration photo: ${failure.message}',
+            );
+          },
+          (url) {
+            AppLogger.logSuccess(
+              'Commercial registration photo uploaded successfully',
+            );
+            commercialRegistrationPhotoUrl = url;
+          },
+        );
+      }
+
       // Create restaurant document in Firestore
       AppLogger.logInfo('Creating restaurant document in Firestore...');
       final restaurantData = {
+        'id': '', // Will be set by document ID
+        'ownerId': userId, // Link restaurant to user account
         'name': name,
         'description': description,
         'address': address,
@@ -160,11 +246,16 @@ class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
         'rating': 0.0,
         'totalReviews': 0,
         'createdAt': FieldValue.serverTimestamp(),
-        if (commercialRegistration != null && commercialRegistration.isNotEmpty)
-          'commercialRegistration': commercialRegistration,
+        if (commercialRegistrationPhotoUrl != null)
+          'commercialRegistrationPhotoUrl': commercialRegistrationPhotoUrl,
       };
 
-      final docRef = await firestore.collection('restaurants').add(restaurantData);
+      final docRef = await firestore
+          .collection('restaurants')
+          .add(restaurantData);
+
+      // Update restaurant document with its ID
+      await docRef.update({'id': docRef.id});
 
       AppLogger.logSuccess('Restaurant created with ID: ${docRef.id}');
       return Right(docRef.id);
@@ -221,6 +312,35 @@ class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
 
       final restaurant = RestaurantModel.fromFirestore(snapshot.docs.first);
       AppLogger.logSuccess('Restaurant fetched for owner');
+      return Right(restaurant);
+    } on FirebaseException catch (e) {
+      AppLogger.logError('Firebase error fetching restaurant', error: e);
+      return Left(ServerFailure('Failed to fetch restaurant: ${e.message}'));
+    } catch (e) {
+      AppLogger.logError('Error fetching restaurant', error: e);
+      return Left(ServerFailure('Failed to fetch restaurant'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, RestaurantEntity>> getRestaurantById(
+    String restaurantId,
+  ) async {
+    try {
+      AppLogger.logInfo('Fetching restaurant by ID: $restaurantId');
+
+      final doc = await firestore
+          .collection('restaurants')
+          .doc(restaurantId)
+          .get();
+
+      if (!doc.exists) {
+        AppLogger.logWarning('Restaurant not found: $restaurantId');
+        return const Left(CacheFailure('Restaurant not found'));
+      }
+
+      final restaurant = RestaurantModel.fromFirestore(doc);
+      AppLogger.logSuccess('Restaurant fetched by ID');
       return Right(restaurant);
     } on FirebaseException catch (e) {
       AppLogger.logError('Firebase error fetching restaurant', error: e);
@@ -291,9 +411,9 @@ class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
       AppLogger.logInfo('Adding product: ${product.name}');
 
       final model = ProductModel.fromEntity(product);
-      final docRef = await firestore.collection('products').add(
-            model.toFirestore(),
-          );
+      final docRef = await firestore
+          .collection('products')
+          .add(model.toFirestore());
 
       final createdProduct = ProductEntity(
         id: docRef.id,
@@ -380,5 +500,155 @@ class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
       return Left(ServerFailure('Failed to update availability'));
     }
   }
-}
 
+  @override
+  Future<Either<Failure, List<ProductEntity>>> getRestaurantProducts(
+    String restaurantId,
+  ) async {
+    try {
+      AppLogger.logInfo('Fetching products for restaurant: $restaurantId');
+
+      final snapshot = await firestore
+          .collection('products')
+          .where('restaurantId', isEqualTo: restaurantId)
+          .get();
+
+      final products = snapshot.docs
+          .map((doc) => ProductModel.fromFirestore(doc))
+          .toList();
+
+      AppLogger.logSuccess('Products fetched: ${products.length}');
+      return Right(products);
+    } on FirebaseException catch (e) {
+      AppLogger.logError('Firebase error fetching products', error: e);
+      return Left(ServerFailure('Failed to fetch products: ${e.message}'));
+    } catch (e) {
+      AppLogger.logError('Error fetching products', error: e);
+      return Left(ServerFailure('Failed to fetch products'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> updateRestaurantPassword(
+    String restaurantId,
+    String newPassword,
+  ) async {
+    try {
+      AppLogger.logInfo('Updating password for restaurant: $restaurantId');
+
+      // Get restaurant to find ownerId and email
+      final restaurantDoc = await firestore
+          .collection('restaurants')
+          .doc(restaurantId)
+          .get();
+
+      if (!restaurantDoc.exists) {
+        return const Left(ServerFailure('Restaurant not found'));
+      }
+
+      final restaurantData = restaurantDoc.data()!;
+      final ownerId = restaurantData['ownerId'] as String?;
+      final email = restaurantData['email'] as String?;
+
+      if (ownerId == null || ownerId.isEmpty) {
+        return const Left(ServerFailure('Restaurant owner ID not found'));
+      }
+
+      if (email == null || email.isEmpty) {
+        return const Left(ServerFailure('Restaurant email not found'));
+      }
+
+      // Save current admin user to restore session later
+      final currentAdminUser = firebaseAuth.currentUser;
+      final adminEmail = currentAdminUser?.email;
+
+      // Check if we have a stored password in Firestore for this user
+      // This is a workaround - in production, use Firebase Admin SDK or Cloud Function
+      final userDoc = await firestore
+          .collection(AppConstants.usersCollection)
+          .doc(ownerId)
+          .get();
+
+      if (!userDoc.exists) {
+        return const Left(ServerFailure('User account not found'));
+      }
+
+      // Get stored password to sign in temporarily
+      final storedPassword = userDoc.data()?['tempPassword'] as String?;
+
+      if (storedPassword == null || storedPassword.isEmpty) {
+        return const Left(
+          ServerFailure(
+            'Password not found. Cannot update password without stored password.',
+          ),
+        );
+      }
+
+      try {
+        // Sign in as the restaurant user temporarily
+        AppLogger.logInfo(
+          'Signing in as restaurant user to update password...',
+        );
+        final restaurantCredential = await firebaseAuth
+            .signInWithEmailAndPassword(email: email, password: storedPassword);
+
+        if (restaurantCredential.user == null) {
+          return const Left(
+            ServerFailure('Failed to sign in as restaurant user'),
+          );
+        }
+
+        // Update password
+        AppLogger.logInfo('Updating password...');
+        await restaurantCredential.user!.updatePassword(newPassword);
+        AppLogger.logSuccess('Password updated successfully');
+
+        // Update stored password in Firestore
+        await firestore
+            .collection(AppConstants.usersCollection)
+            .doc(ownerId)
+            .update({
+              'tempPassword': newPassword, // Update stored password
+              'lastPasswordUpdate': FieldValue.serverTimestamp(),
+            });
+
+        // Sign out restaurant user
+        await firebaseAuth.signOut();
+
+        // Note: Admin session was lost - admin will need to sign in again
+        // In production, implement session preservation or Cloud Function
+        if (adminEmail != null) {
+          AppLogger.logInfo('Admin session ended. Please sign in again.');
+        }
+
+        AppLogger.logSuccess('Password updated successfully');
+        return const Right(null);
+      } on FirebaseAuthException catch (e) {
+        AppLogger.logError('Firebase Auth error updating password', error: e);
+
+        // Try to restore admin session if possible
+        if (currentAdminUser != null && adminEmail != null) {
+          // Can't automatically restore, but log for manual restoration
+          AppLogger.logInfo('Please sign in as admin again');
+        }
+
+        return Left(ServerFailure('Failed to update password: ${e.message}'));
+      } catch (e) {
+        AppLogger.logError('Error updating password', error: e);
+
+        // Try to restore admin session
+        if (currentAdminUser != null && adminEmail != null) {
+          AppLogger.logInfo('Please sign in as admin again');
+        }
+
+        return Left(ServerFailure('Failed to update password: $e'));
+      }
+    } on FirebaseException catch (e) {
+      AppLogger.logError('Firebase error updating password', error: e);
+      return Left(ServerFailure('Failed to update password: ${e.message}'));
+    } catch (e) {
+      AppLogger.logError('Error updating password', error: e);
+      return Left(ServerFailure('Failed to update password: $e'));
+    }
+  }
+}

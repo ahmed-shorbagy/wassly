@@ -451,6 +451,546 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Seafood'**
   String get seafood;
+
+  /// No description provided for @arabic.
+  ///
+  /// In en, this message translates to:
+  /// **'Arabic'**
+  String get arabic;
+
+  /// No description provided for @egyptian.
+  ///
+  /// In en, this message translates to:
+  /// **'Egyptian'**
+  String get egyptian;
+
+  /// No description provided for @lebanese.
+  ///
+  /// In en, this message translates to:
+  /// **'Lebanese'**
+  String get lebanese;
+
+  /// No description provided for @syrian.
+  ///
+  /// In en, this message translates to:
+  /// **'Syrian'**
+  String get syrian;
+
+  /// No description provided for @palestinian.
+  ///
+  /// In en, this message translates to:
+  /// **'Palestinian'**
+  String get palestinian;
+
+  /// No description provided for @jordanian.
+  ///
+  /// In en, this message translates to:
+  /// **'Jordanian'**
+  String get jordanian;
+
+  /// No description provided for @saudi.
+  ///
+  /// In en, this message translates to:
+  /// **'Saudi'**
+  String get saudi;
+
+  /// No description provided for @emirati.
+  ///
+  /// In en, this message translates to:
+  /// **'Emirati'**
+  String get emirati;
+
+  /// No description provided for @gulf.
+  ///
+  /// In en, this message translates to:
+  /// **'Gulf'**
+  String get gulf;
+
+  /// No description provided for @moroccan.
+  ///
+  /// In en, this message translates to:
+  /// **'Moroccan'**
+  String get moroccan;
+
+  /// No description provided for @tunisian.
+  ///
+  /// In en, this message translates to:
+  /// **'Tunisian'**
+  String get tunisian;
+
+  /// No description provided for @algerian.
+  ///
+  /// In en, this message translates to:
+  /// **'Algerian'**
+  String get algerian;
+
+  /// No description provided for @yemeni.
+  ///
+  /// In en, this message translates to:
+  /// **'Yemeni'**
+  String get yemeni;
+
+  /// No description provided for @iraqi.
+  ///
+  /// In en, this message translates to:
+  /// **'Iraqi'**
+  String get iraqi;
+
+  /// No description provided for @grilledMeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Grilled Meat'**
+  String get grilledMeat;
+
+  /// No description provided for @kebabs.
+  ///
+  /// In en, this message translates to:
+  /// **'Kebabs'**
+  String get kebabs;
+
+  /// No description provided for @shawarma.
+  ///
+  /// In en, this message translates to:
+  /// **'Shawarma'**
+  String get shawarma;
+
+  /// No description provided for @falafel.
+  ///
+  /// In en, this message translates to:
+  /// **'Falafel'**
+  String get falafel;
+
+  /// No description provided for @hummus.
+  ///
+  /// In en, this message translates to:
+  /// **'Hummus'**
+  String get hummus;
+
+  /// No description provided for @mezze.
+  ///
+  /// In en, this message translates to:
+  /// **'Mezze'**
+  String get mezze;
+
+  /// No description provided for @foul.
+  ///
+  /// In en, this message translates to:
+  /// **'Foul'**
+  String get foul;
+
+  /// No description provided for @taameya.
+  ///
+  /// In en, this message translates to:
+  /// **'Taameya'**
+  String get taameya;
+
+  /// No description provided for @koshary.
+  ///
+  /// In en, this message translates to:
+  /// **'Koshary'**
+  String get koshary;
+
+  /// No description provided for @mansaf.
+  ///
+  /// In en, this message translates to:
+  /// **'Mansaf'**
+  String get mansaf;
+
+  /// No description provided for @mansi.
+  ///
+  /// In en, this message translates to:
+  /// **'Mansi'**
+  String get mansi;
+
+  /// No description provided for @mandi.
+  ///
+  /// In en, this message translates to:
+  /// **'Mandi'**
+  String get mandi;
+
+  /// No description provided for @kabsa.
+  ///
+  /// In en, this message translates to:
+  /// **'Kabsa'**
+  String get kabsa;
+
+  /// No description provided for @majboos.
+  ///
+  /// In en, this message translates to:
+  /// **'Majboos'**
+  String get majboos;
+
+  /// No description provided for @maqluba.
+  ///
+  /// In en, this message translates to:
+  /// **'Maqluba'**
+  String get maqluba;
+
+  /// No description provided for @musakhan.
+  ///
+  /// In en, this message translates to:
+  /// **'Musakhan'**
+  String get musakhan;
+
+  /// No description provided for @mansafJordanian.
+  ///
+  /// In en, this message translates to:
+  /// **'Mansaf Jordanian'**
+  String get mansafJordanian;
+
+  /// No description provided for @waraqEnab.
+  ///
+  /// In en, this message translates to:
+  /// **'Waraq Enab'**
+  String get waraqEnab;
+
+  /// No description provided for @mahshi.
+  ///
+  /// In en, this message translates to:
+  /// **'Mahshi'**
+  String get mahshi;
+
+  /// No description provided for @kofta.
+  ///
+  /// In en, this message translates to:
+  /// **'Kofta'**
+  String get kofta;
+
+  /// No description provided for @samosa.
+  ///
+  /// In en, this message translates to:
+  /// **'Samosa'**
+  String get samosa;
+
+  /// No description provided for @knafeh.
+  ///
+  /// In en, this message translates to:
+  /// **'Knafeh'**
+  String get knafeh;
+
+  /// No description provided for @baklava.
+  ///
+  /// In en, this message translates to:
+  /// **'Baklava'**
+  String get baklava;
+
+  /// No description provided for @biryani.
+  ///
+  /// In en, this message translates to:
+  /// **'Biryani'**
+  String get biryani;
+
+  /// No description provided for @bakedGoods.
+  ///
+  /// In en, this message translates to:
+  /// **'Baked Goods'**
+  String get bakedGoods;
+
+  /// No description provided for @orientalSweets.
+  ///
+  /// In en, this message translates to:
+  /// **'Oriental Sweets'**
+  String get orientalSweets;
+
+  /// No description provided for @commercialRegistrationPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Commercial Registration Photo'**
+  String get commercialRegistrationPhoto;
+
+  /// No description provided for @takePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take Photo'**
+  String get takePhoto;
+
+  /// No description provided for @openCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Camera'**
+  String get openCamera;
+
+  /// No description provided for @pleaseTakeCommercialRegistrationPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Please take commercial registration photo'**
+  String get pleaseTakeCommercialRegistrationPhoto;
+
+  /// No description provided for @productManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Product Management'**
+  String get productManagement;
+
+  /// No description provided for @products.
+  ///
+  /// In en, this message translates to:
+  /// **'Products'**
+  String get products;
+
+  /// No description provided for @addProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Product'**
+  String get addProduct;
+
+  /// No description provided for @editProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Product'**
+  String get editProduct;
+
+  /// No description provided for @productName.
+  ///
+  /// In en, this message translates to:
+  /// **'Product Name'**
+  String get productName;
+
+  /// No description provided for @productDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Product Description'**
+  String get productDescription;
+
+  /// No description provided for @productPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Product Price'**
+  String get productPrice;
+
+  /// No description provided for @productCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Product Category'**
+  String get productCategory;
+
+  /// No description provided for @productImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Product Image'**
+  String get productImage;
+
+  /// No description provided for @productAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get productAvailable;
+
+  /// No description provided for @productUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable'**
+  String get productUnavailable;
+
+  /// No description provided for @pleaseEnterProductName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter product name'**
+  String get pleaseEnterProductName;
+
+  /// No description provided for @pleaseEnterProductDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter product description'**
+  String get pleaseEnterProductDescription;
+
+  /// No description provided for @pleaseEnterProductPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter product price'**
+  String get pleaseEnterProductPrice;
+
+  /// No description provided for @pleaseSelectProductCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select product category'**
+  String get pleaseSelectProductCategory;
+
+  /// No description provided for @pleaseSelectProductImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select product image'**
+  String get pleaseSelectProductImage;
+
+  /// No description provided for @productAddedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Product added successfully'**
+  String get productAddedSuccessfully;
+
+  /// No description provided for @productUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Product updated successfully'**
+  String get productUpdatedSuccessfully;
+
+  /// No description provided for @productDeletedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Product deleted successfully'**
+  String get productDeletedSuccessfully;
+
+  /// No description provided for @creatingProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating product...'**
+  String get creatingProduct;
+
+  /// No description provided for @updatingProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Updating product...'**
+  String get updatingProduct;
+
+  /// No description provided for @deletingProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting product...'**
+  String get deletingProduct;
+
+  /// No description provided for @areYouSureDeleteProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this product?'**
+  String get areYouSureDeleteProduct;
+
+  /// No description provided for @noProductsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No products yet'**
+  String get noProductsYet;
+
+  /// No description provided for @startByAddingYourFirstProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Start by adding your first product'**
+  String get startByAddingYourFirstProduct;
+
+  /// No description provided for @selectRestaurantFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a restaurant first'**
+  String get selectRestaurantFirst;
+
+  /// No description provided for @restaurantProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant Products'**
+  String get restaurantProducts;
+
+  /// No description provided for @password.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get password;
+
+  /// No description provided for @confirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Password'**
+  String get confirmPassword;
+
+  /// No description provided for @pleaseEnterPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter password'**
+  String get pleaseEnterPassword;
+
+  /// No description provided for @pleaseConfirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please confirm password'**
+  String get pleaseConfirmPassword;
+
+  /// No description provided for @passwordMustBeAtLeast6Characters.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get passwordMustBeAtLeast6Characters;
+
+  /// No description provided for @passwordsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordsDoNotMatch;
+
+  /// No description provided for @updatePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Password'**
+  String get updatePassword;
+
+  /// No description provided for @passwordUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Password updated successfully'**
+  String get passwordUpdatedSuccessfully;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New Password'**
+  String get newPassword;
+
+  /// No description provided for @confirmNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm New Password'**
+  String get confirmNewPassword;
+
+  /// No description provided for @currentPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Password'**
+  String get currentPassword;
+
+  /// No description provided for @editRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Restaurant'**
+  String get editRestaurant;
+
+  /// No description provided for @updateRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Restaurant'**
+  String get updateRestaurant;
+
+  /// No description provided for @restaurantUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant updated successfully'**
+  String get restaurantUpdatedSuccessfully;
+
+  /// No description provided for @updatingRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Updating restaurant...'**
+  String get updatingRestaurant;
+
+  /// No description provided for @restaurantNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant not found'**
+  String get restaurantNotFound;
+
+  /// No description provided for @back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get back;
+
+  /// No description provided for @loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
+  String get loading;
+
+  /// No description provided for @leavePasswordEmptyToKeepCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave password empty to keep current password'**
+  String get leavePasswordEmptyToKeepCurrent;
 }
 
 class _AppLocalizationsDelegate

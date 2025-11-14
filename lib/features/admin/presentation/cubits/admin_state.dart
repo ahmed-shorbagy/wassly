@@ -24,6 +24,17 @@ class RestaurantStatusUpdated extends AdminState {}
 
 class RestaurantDeletedSuccess extends AdminState {}
 
+class RestaurantUpdatedSuccess extends AdminState {}
+
+class RestaurantLoaded extends AdminState {
+  final RestaurantEntity restaurant;
+
+  const RestaurantLoaded(this.restaurant);
+
+  @override
+  List<Object?> get props => [restaurant];
+}
+
 class AdminError extends AdminState {
   final String message;
 

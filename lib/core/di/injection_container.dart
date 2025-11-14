@@ -26,6 +26,7 @@ import '../../features/orders/presentation/cubits/order_cubit.dart';
 import '../../features/partner/presentation/cubits/product_management_cubit.dart';
 import '../../features/partner/presentation/cubits/restaurant_onboarding_cubit.dart';
 import '../../features/admin/presentation/cubits/admin_cubit.dart';
+import '../../features/admin/presentation/cubits/admin_product_cubit.dart';
 import '../../features/restaurants/domain/repositories/restaurant_owner_repository.dart';
 import '../../features/restaurants/data/repositories/restaurant_owner_repository_impl.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -133,6 +134,11 @@ class InjectionContainer {
       ),
       BlocProvider<AdminCubit>(
         create: (_) => AdminCubit(
+          repository: _restaurantOwnerRepository,
+        ),
+      ),
+      BlocProvider<AdminProductCubit>(
+        create: (_) => AdminProductCubit(
           repository: _restaurantOwnerRepository,
         ),
       ),

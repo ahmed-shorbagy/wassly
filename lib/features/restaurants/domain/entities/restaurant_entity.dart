@@ -17,6 +17,7 @@ class RestaurantEntity extends Equatable {
   final double deliveryFee;
   final double minOrderAmount;
   final int estimatedDeliveryTime;
+  final String? commercialRegistrationPhotoUrl;
   final DateTime createdAt;
 
   const RestaurantEntity({
@@ -36,6 +37,7 @@ class RestaurantEntity extends Equatable {
     this.deliveryFee = 0.0,
     this.minOrderAmount = 0.0,
     this.estimatedDeliveryTime = 30,
+    this.commercialRegistrationPhotoUrl,
     required this.createdAt,
   });
 
@@ -57,6 +59,7 @@ class RestaurantEntity extends Equatable {
         deliveryFee,
         minOrderAmount,
         estimatedDeliveryTime,
+        commercialRegistrationPhotoUrl,
         createdAt,
       ];
 }

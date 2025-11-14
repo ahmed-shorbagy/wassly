@@ -4,6 +4,10 @@ import '../../features/admin/presentation/views/admin_splash_screen.dart';
 import '../../features/admin/presentation/views/admin_dashboard_screen.dart';
 import '../../features/admin/presentation/views/restaurant_management_screen.dart';
 import '../../features/admin/presentation/views/create_restaurant_screen.dart';
+import '../../features/admin/presentation/views/admin_product_list_screen.dart';
+import '../../features/admin/presentation/views/admin_add_product_screen.dart';
+import '../../features/admin/presentation/views/edit_restaurant_screen.dart';
+import '../../features/restaurants/domain/entities/restaurant_entity.dart';
 
 class AdminRouter {
   static final GoRouter router = GoRouter(
@@ -47,10 +51,47 @@ class AdminRouter {
         name: 'edit-restaurant',
         builder: (context, state) {
           final restaurantId = state.pathParameters['id'] ?? '';
-          final restaurant = state.extra;
+          final restaurant = state.extra is RestaurantEntity
+              ? state.extra as RestaurantEntity
+              : null;
           return EditRestaurantScreen(
             restaurantId: restaurantId,
             restaurant: restaurant,
+          );
+        },
+      ),
+      // Product Management Routes
+      GoRoute(
+        path: '/admin/restaurants/:restaurantId/products',
+        name: 'admin-restaurant-products',
+        builder: (context, state) {
+          final restaurantId = state.pathParameters['restaurantId'] ?? '';
+          final restaurant = state.extra as Map<String, dynamic>?;
+          return AdminProductListScreen(
+            restaurantId: restaurantId,
+            restaurantName: restaurant?['name'] ?? 'Restaurant',
+          );
+        },
+      ),
+      GoRoute(
+        path: '/admin/restaurants/:restaurantId/products/add',
+        name: 'admin-add-product',
+        builder: (context, state) {
+          final restaurantId = state.pathParameters['restaurantId'] ?? '';
+          return AdminAddProductScreen(restaurantId: restaurantId);
+        },
+      ),
+      GoRoute(
+        path: '/admin/restaurants/:restaurantId/products/edit/:productId',
+        name: 'admin-edit-product',
+        builder: (context, state) {
+          final restaurantId = state.pathParameters['restaurantId'] ?? '';
+          final productId = state.pathParameters['productId'] ?? '';
+          final product = state.extra;
+          return AdminEditProductScreen(
+            restaurantId: restaurantId,
+            productId: productId,
+            product: product,
           );
         },
       ),
@@ -159,27 +200,26 @@ class AdminSettingsScreen extends StatelessWidget {
   }
 }
 
-class EditRestaurantScreen extends StatelessWidget {
+class AdminEditProductScreen extends StatelessWidget {
   final String restaurantId;
-  final dynamic restaurant;
+  final String productId;
+  final dynamic product;
 
-  const EditRestaurantScreen({
+  const AdminEditProductScreen({
     super.key,
     required this.restaurantId,
-    this.restaurant,
+    required this.productId,
+    this.product,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Restaurant'),
+        title: const Text('Edit Product'),
         backgroundColor: Colors.purple,
       ),
-      body: Center(
-        child: Text('Edit Restaurant Screen - ID: $restaurantId'),
-      ),
+      body: Center(child: Text('Edit Product Screen - ID: $productId')),
     );
   }
 }
-

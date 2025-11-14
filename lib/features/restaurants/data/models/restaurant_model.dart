@@ -19,6 +19,7 @@ class RestaurantModel extends RestaurantEntity {
     super.deliveryFee,
     super.minOrderAmount,
     super.estimatedDeliveryTime,
+    super.commercialRegistrationPhotoUrl,
     required super.createdAt,
   });
 
@@ -62,6 +63,7 @@ class RestaurantModel extends RestaurantEntity {
       deliveryFee: (json['deliveryFee'] ?? 0.0).toDouble(),
       minOrderAmount: (json['minOrderAmount'] ?? 0.0).toDouble(),
       estimatedDeliveryTime: json['estimatedDeliveryTime'] ?? 30,
+      commercialRegistrationPhotoUrl: json['commercialRegistrationPhotoUrl'],
       createdAt: json['createdAt'] != null
           ? (json['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
@@ -86,6 +88,7 @@ class RestaurantModel extends RestaurantEntity {
       deliveryFee: entity.deliveryFee,
       minOrderAmount: entity.minOrderAmount,
       estimatedDeliveryTime: entity.estimatedDeliveryTime,
+      commercialRegistrationPhotoUrl: entity.commercialRegistrationPhotoUrl,
       createdAt: entity.createdAt,
     );
   }
@@ -108,6 +111,7 @@ class RestaurantModel extends RestaurantEntity {
       'deliveryFee': deliveryFee,
       'minOrderAmount': minOrderAmount,
       'estimatedDeliveryTime': estimatedDeliveryTime,
+      'commercialRegistrationPhotoUrl': commercialRegistrationPhotoUrl,
       'createdAt': Timestamp.fromDate(createdAt),
     };
   }
@@ -136,6 +140,7 @@ class RestaurantModel extends RestaurantEntity {
     double? deliveryFee,
     double? minOrderAmount,
     int? estimatedDeliveryTime,
+    String? commercialRegistrationPhotoUrl,
     DateTime? createdAt,
   }) {
     return RestaurantModel(
@@ -155,6 +160,7 @@ class RestaurantModel extends RestaurantEntity {
       deliveryFee: deliveryFee ?? this.deliveryFee,
       minOrderAmount: minOrderAmount ?? this.minOrderAmount,
       estimatedDeliveryTime: estimatedDeliveryTime ?? this.estimatedDeliveryTime,
+      commercialRegistrationPhotoUrl: commercialRegistrationPhotoUrl ?? this.commercialRegistrationPhotoUrl,
       createdAt: createdAt ?? this.createdAt,
     );
   }

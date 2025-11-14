@@ -279,6 +279,13 @@ class _RestaurantManagementScreenState
                   ),
                 ),
 
+                // Products Button
+                IconButton(
+                  icon: const Icon(Icons.fastfood, color: Colors.orange),
+                  onPressed: () => _navigateToProducts(restaurant),
+                  tooltip: 'Products',
+                ),
+
                 // Edit Button
                 IconButton(
                   icon: const Icon(Icons.edit, color: Colors.blue),
@@ -344,6 +351,13 @@ class _RestaurantManagementScreenState
 
   void _toggleRestaurantStatus(String restaurantId, bool isOpen) {
     context.read<AdminCubit>().updateRestaurantStatus(restaurantId, isOpen);
+  }
+
+  void _navigateToProducts(RestaurantEntity restaurant) {
+    context.go(
+      '/admin/restaurants/${restaurant.id}/products',
+      extra: {'id': restaurant.id, 'name': restaurant.name},
+    );
   }
 
   void _navigateToEdit(RestaurantEntity restaurant) {

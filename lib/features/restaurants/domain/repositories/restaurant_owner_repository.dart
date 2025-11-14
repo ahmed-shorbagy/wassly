@@ -23,21 +23,33 @@ abstract class RestaurantOwnerRepository {
     required String address,
     required String phone,
     required String email,
+    required String password,
     required List<String> categories,
     required LatLng location,
     required File imageFile,
     required double deliveryFee,
     required double minOrderAmount,
     required int estimatedDeliveryTime,
-    String? commercialRegistration, // Optional field
+    File? commercialRegistrationPhotoFile, // Optional photo file for commercial registration
   });
 
   /// Update restaurant information
   Future<Either<Failure, void>> updateRestaurant(RestaurantEntity restaurant);
 
+  /// Update restaurant password
+  Future<Either<Failure, void>> updateRestaurantPassword(
+    String restaurantId,
+    String newPassword,
+  );
+
   /// Get restaurant by owner ID
   Future<Either<Failure, RestaurantEntity>> getRestaurantByOwnerId(
     String ownerId,
+  );
+
+  /// Get restaurant by restaurant ID
+  Future<Either<Failure, RestaurantEntity>> getRestaurantById(
+    String restaurantId,
   );
 
   /// Toggle restaurant status (open/closed)
@@ -62,6 +74,11 @@ abstract class RestaurantOwnerRepository {
   Future<Either<Failure, void>> toggleProductAvailability(
     String productId,
     bool isAvailable,
+  );
+
+  /// Get all products for a restaurant
+  Future<Either<Failure, List<ProductEntity>>> getRestaurantProducts(
+    String restaurantId,
   );
 }
 

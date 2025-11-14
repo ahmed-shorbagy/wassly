@@ -8,16 +8,24 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/extensions.dart';
 import '../../../../shared/widgets/loading_widget.dart';
+import '../../../restaurants/domain/entities/restaurant_entity.dart';
 import '../cubits/admin_cubit.dart';
 
-class CreateRestaurantScreen extends StatefulWidget {
-  const CreateRestaurantScreen({super.key});
+class EditRestaurantScreen extends StatefulWidget {
+  final String restaurantId;
+  final RestaurantEntity? restaurant;
+
+  const EditRestaurantScreen({
+    super.key,
+    required this.restaurantId,
+    this.restaurant,
+  });
 
   @override
-  State<CreateRestaurantScreen> createState() => _CreateRestaurantScreenState();
+  State<EditRestaurantScreen> createState() => _EditRestaurantScreenState();
 }
 
-class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
+class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -36,6 +44,65 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
   final List<String> _selectedCategories = [];
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _isLoadingRestaurant = true;
+  RestaurantEntity? _currentRestaurant;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRestaurant();
+  }
+
+  Future<void> _loadRestaurant() async {
+    if (widget.restaurant != null) {
+      setState(() {
+        _currentRestaurant = widget.restaurant as RestaurantEntity;
+        _isLoadingRestaurant = false;
+      });
+      _populateForm();
+    } else {
+      // Fetch restaurant by ID using AdminCubit
+      context.read<AdminCubit>().getRestaurantById(widget.restaurantId);
+    }
+  }
+
+  void _handleCubitState(AdminState state) {
+    if (state is RestaurantLoaded) {
+      setState(() {
+        _currentRestaurant = state.restaurant;
+        _isLoadingRestaurant = false;
+      });
+      _populateForm();
+    } else if (state is AdminError) {
+      setState(() {
+        _isLoadingRestaurant = false;
+      });
+    }
+  }
+
+  void _populateForm() {
+    if (_currentRestaurant == null) return;
+
+    final restaurant = _currentRestaurant!;
+    _nameController.text = restaurant.name;
+    _descriptionController.text = restaurant.description;
+    _addressController.text = restaurant.address;
+    _phoneController.text = restaurant.phone;
+    _emailController.text = restaurant.email ?? '';
+    _deliveryFeeController.text = restaurant.deliveryFee.toStringAsFixed(2);
+    _minOrderAmountController.text = restaurant.minOrderAmount.toStringAsFixed(2);
+    _estimatedDeliveryController.text = restaurant.estimatedDeliveryTime.toString();
+    _selectedCategories.addAll(restaurant.categories);
+    
+    // Set location
+    if (restaurant.location.containsKey('latitude') && 
+        restaurant.location.containsKey('longitude')) {
+      _selectedLocation = LatLng(
+        (restaurant.location['latitude'] as num).toDouble(),
+        (restaurant.location['longitude'] as num).toDouble(),
+      );
+    }
+  }
 
   List<String> _getAvailableCategories(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -140,7 +207,7 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
         source: ImageSource.camera, // Camera only
         maxWidth: 1920,
         maxHeight: 1080,
-        imageQuality: 90, // Higher quality for documents
+        imageQuality: 90,
       );
 
       if (image != null) {
@@ -157,10 +224,9 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
   }
 
   Future<void> _pickLocation() async {
-    // For now, use a default location (Cairo, Egypt)
-    // In production, you'd integrate with Google Maps Place Picker
+    // For now, use a default location
     setState(() {
-      _selectedLocation = const LatLng(30.0444, 31.2357);
+      _selectedLocation = _selectedLocation ?? const LatLng(30.0444, 31.2357);
     });
     if (mounted) {
       final l10n = AppLocalizations.of(context)!;
@@ -218,11 +284,6 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
       return;
     }
 
-    if (_selectedImage == null) {
-      context.showErrorSnackBar(l10n.pleaseSelectImage);
-      return;
-    }
-
     if (_selectedLocation == null) {
       context.showErrorSnackBar(l10n.pleaseSelectLocation);
       return;
@@ -233,22 +294,31 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
       return;
     }
 
-    // Validate password match
-    if (_passwordController.text != _confirmPasswordController.text) {
-      context.showErrorSnackBar(l10n.passwordsDoNotMatch);
-      return;
+    // Validate password if provided
+    String? newPassword;
+    if (_passwordController.text.trim().isNotEmpty) {
+      if (_passwordController.text != _confirmPasswordController.text) {
+        context.showErrorSnackBar(l10n.passwordsDoNotMatch);
+        return;
+      }
+      if (_passwordController.text.length < 6) {
+        context.showErrorSnackBar(l10n.passwordMustBeAtLeast6Characters);
+        return;
+      }
+      newPassword = _passwordController.text.trim();
     }
 
-    context.read<AdminCubit>().createRestaurant(
+    context.read<AdminCubit>().updateRestaurant(
+      restaurantId: widget.restaurantId,
       name: _nameController.text.trim(),
       description: _descriptionController.text.trim(),
       address: _addressController.text.trim(),
       phone: _phoneController.text.trim(),
       email: _emailController.text.trim(),
-      password: _passwordController.text.trim(),
+      newPassword: newPassword,
       categories: _selectedCategories,
       location: _selectedLocation!,
-      imageFile: _selectedImage!,
+      imageFile: _selectedImage,
       deliveryFee: double.parse(_deliveryFeeController.text),
       minOrderAmount: double.parse(_minOrderAmountController.text),
       estimatedDeliveryTime: int.parse(_estimatedDeliveryController.text),
@@ -260,20 +330,54 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
+    if (_isLoadingRestaurant) {
+      return Scaffold(
+        appBar: AppBar(title: Text(l10n.editRestaurant)),
+        body: LoadingWidget(message: l10n.loading),
+      );
+    }
+
+    if (_currentRestaurant == null) {
+      return Scaffold(
+        appBar: AppBar(title: Text(l10n.editRestaurant)),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const SizedBox(height: 16),
+              Text(l10n.restaurantNotFound),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => context.go('/admin/restaurants'),
+                child: Text(l10n.back),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.createRestaurant)),
+      appBar: AppBar(
+        title: Text(l10n.editRestaurant),
+        backgroundColor: Colors.purple,
+      ),
       body: BlocConsumer<AdminCubit, AdminState>(
         listener: (context, state) {
-          if (state is RestaurantCreatedSuccess) {
-            context.showSuccessSnackBar(l10n.restaurantCreatedSuccessfully);
+          if (state is RestaurantLoaded) {
+            _handleCubitState(state);
+          } else if (state is RestaurantUpdatedSuccess) {
+            context.showSuccessSnackBar(l10n.restaurantUpdatedSuccessfully);
             context.go('/admin/restaurants');
           } else if (state is AdminError) {
             context.showErrorSnackBar(state.message);
+            _handleCubitState(state);
           }
         },
         builder: (context, state) {
           if (state is AdminLoading) {
-            return LoadingWidget(message: l10n.creatingRestaurant);
+            return LoadingWidget(message: l10n.updatingRestaurant);
           }
 
           return Form(
@@ -348,10 +452,23 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
+
+                // Password Section
+                _buildSectionTitle(l10n.updatePassword),
+                const SizedBox(height: 12),
+                Text(
+                  l10n.leavePasswordEmptyToKeepCurrent,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+                const SizedBox(height: 8),
                 _buildPasswordField(
                   controller: _passwordController,
-                  label: l10n.password,
+                  label: l10n.newPassword,
                   icon: Icons.lock,
                   obscureText: _obscurePassword,
                   onToggleObscure: () {
@@ -360,10 +477,7 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                     });
                   },
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return l10n.pleaseEnterPassword;
-                    }
-                    if (value.length < 6) {
+                    if (value != null && value.isNotEmpty && value.length < 6) {
                       return l10n.passwordMustBeAtLeast6Characters;
                     }
                     return null;
@@ -372,7 +486,7 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                 const SizedBox(height: 16),
                 _buildPasswordField(
                   controller: _confirmPasswordController,
-                  label: l10n.confirmPassword,
+                  label: l10n.confirmNewPassword,
                   icon: Icons.lock_outline,
                   obscureText: _obscureConfirmPassword,
                   onToggleObscure: () {
@@ -381,16 +495,19 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                     });
                   },
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return l10n.pleaseConfirmPassword;
-                    }
-                    if (value != _passwordController.text) {
-                      return l10n.passwordsDoNotMatch;
+                    if (_passwordController.text.isNotEmpty) {
+                      if (value == null || value.trim().isEmpty) {
+                        return l10n.pleaseConfirmPassword;
+                      }
+                      if (value != _passwordController.text) {
+                        return l10n.passwordsDoNotMatch;
+                      }
                     }
                     return null;
                   },
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
+
                 // Commercial Registration Photo
                 _buildSectionTitle(l10n.commercialRegistrationPhoto),
                 const SizedBox(height: 12),
@@ -482,11 +599,15 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                 ),
                 const SizedBox(height: 32),
 
-                // Submit Button
+                // Update Button
                 ElevatedButton(
                   onPressed: _submitForm,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.purple,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
                   child: Text(
-                    l10n.createRestaurant,
+                    l10n.updateRestaurant,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -548,31 +669,61 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                 ),
               ],
             )
-          : InkWell(
-              onTap: _pickImage,
-              borderRadius: BorderRadius.circular(12),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+          : _currentRestaurant?.imageUrl != null
+              ? Stack(
                   children: [
-                    const Icon(
-                      Icons.add_photo_alternate,
-                      size: 60,
-                      color: Colors.grey,
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        _currentRestaurant!.imageUrl!,
+                        width: double.infinity,
+                        height: 200,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return _buildPlaceholderImage(l10n);
+                        },
+                      ),
                     ),
-                    const SizedBox(height: 12),
-                    Text(
-                      l10n.tapToUploadRestaurantImage,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w500,
+                    Positioned(
+                      bottom: 8,
+                      right: 8,
+                      child: ElevatedButton.icon(
+                        onPressed: _pickImage,
+                        icon: const Icon(Icons.edit),
+                        label: Text(l10n.change),
                       ),
                     ),
                   ],
-                ),
+                )
+              : _buildPlaceholderImage(l10n),
+    );
+  }
+
+  Widget _buildPlaceholderImage(AppLocalizations l10n) {
+    return InkWell(
+      onTap: _pickImage,
+      borderRadius: BorderRadius.circular(12),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.add_photo_alternate,
+              size: 60,
+              color: Colors.grey,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              l10n.tapToUploadRestaurantImage,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
+                fontWeight: FontWeight.w500,
               ),
             ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -603,6 +754,41 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon, color: AppColors.primary),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPasswordField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    required bool obscureText,
+    required VoidCallback onToggleObscure,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      obscureText: obscureText,
+      validator: validator,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, color: AppColors.primary),
+        suffixIcon: IconButton(
+          icon: Icon(
+            obscureText ? Icons.visibility : Icons.visibility_off,
+            color: AppColors.textSecondary,
+          ),
+          onPressed: onToggleObscure,
+        ),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -774,67 +960,63 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                 ),
               ],
             )
-          : InkWell(
-              onTap: _takeCommercialRegistrationPhoto,
-              borderRadius: BorderRadius.circular(12),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+          : _currentRestaurant?.commercialRegistrationPhotoUrl != null
+              ? Stack(
                   children: [
-                    const Icon(Icons.camera_alt, size: 60, color: Colors.grey),
-                    const SizedBox(height: 12),
-                    Text(
-                      l10n.openCamera,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w500,
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        _currentRestaurant!.commercialRegistrationPhotoUrl!,
+                        width: double.infinity,
+                        height: 200,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return _buildCommercialRegistrationPlaceholder(l10n);
+                        },
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      l10n.commercialRegistrationPhoto,
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
+                    Positioned(
+                      bottom: 8,
+                      right: 8,
+                      child: ElevatedButton.icon(
+                        onPressed: _takeCommercialRegistrationPhoto,
+                        icon: const Icon(Icons.camera_alt),
+                        label: Text(l10n.change),
+                      ),
                     ),
                   ],
-                ),
-              ),
-            ),
+                )
+              : _buildCommercialRegistrationPlaceholder(l10n),
     );
   }
 
-  Widget _buildPasswordField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    required bool obscureText,
-    required VoidCallback onToggleObscure,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      obscureText: obscureText,
-      validator: validator,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon, color: AppColors.primary),
-        suffixIcon: IconButton(
-          icon: Icon(
-            obscureText ? Icons.visibility : Icons.visibility_off,
-            color: AppColors.textSecondary,
-          ),
-          onPressed: onToggleObscure,
-        ),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+  Widget _buildCommercialRegistrationPlaceholder(AppLocalizations l10n) {
+    return InkWell(
+      onTap: _takeCommercialRegistrationPhoto,
+      borderRadius: BorderRadius.circular(12),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.camera_alt, size: 60, color: Colors.grey),
+            const SizedBox(height: 12),
+            Text(
+              l10n.openCamera,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              l10n.commercialRegistrationPhoto,
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+          ],
         ),
       ),
     );
   }
 }
+
