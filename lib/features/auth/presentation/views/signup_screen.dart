@@ -207,7 +207,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     if (state is AuthAuthenticated) {
                       // Navigate based on user type
                       if (state.user.userType == 'customer') {
-                        context.go('/customer');
+                        context.go('/home');
                       } else if (state.user.userType == 'restaurant') {
                         context.go('/restaurant');
                       } else if (state.user.userType == 'driver') {

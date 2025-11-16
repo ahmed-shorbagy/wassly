@@ -122,13 +122,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         'User type: $userType, navigating to appropriate home',
                       );
                       if (userType == 'customer') {
-                        context.go('/customer');
+                        context.go('/home');
                       } else if (userType == 'restaurant') {
                         context.go('/restaurant');
                       } else if (userType == 'driver') {
                         context.go('/driver');
                       } else {
-                        context.go('/customer'); // Default fallback
+                        context.go('/home'); // Default fallback
                       }
                     } else if (state is AuthError) {
                       AppLogger.logError(

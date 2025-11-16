@@ -40,7 +40,7 @@ class _SplashScreenState extends State<SplashScreen> {
           AppLogger.logNavigation('Navigating from splash to home');
           // Navigate to appropriate home based on user type
           if (userType == AppConstants.userTypeCustomer) {
-            context.go('/customer');
+            context.go('/home');
           } else if (userType == AppConstants.userTypeRestaurant) {
             context.go('/restaurant');
           } else if (userType == AppConstants.userTypeDriver) {
