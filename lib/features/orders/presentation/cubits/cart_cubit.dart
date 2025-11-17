@@ -1,82 +1,151 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../../restaurants/domain/entities/product_entity.dart';
 import '../../domain/entities/cart_item_entity.dart';
+import '../../domain/repositories/cart_repository.dart';
 
 part 'cart_state.dart';
 
 class CartCubit extends Cubit<CartState> {
-  CartCubit() : super(CartInitial());
+  final CartRepository repository;
+  final FirebaseAuth firebaseAuth;
 
-  void addItem(ProductEntity product, {int quantity = 1}) {
-    final currentItems = List<CartItemEntity>.from(
-      state is CartLoaded ? (state as CartLoaded).items : [],
-    );
-
-    final existingIndex = currentItems.indexWhere(
-      (item) => item.product.id == product.id,
-    );
-
-    if (existingIndex >= 0) {
-      // Update quantity if item already exists
-      final existingItem = currentItems[existingIndex];
-      currentItems[existingIndex] = existingItem.copyWith(
-        quantity: existingItem.quantity + quantity,
-      );
-    } else {
-      // Add new item
-      currentItems.add(CartItemEntity(product: product, quantity: quantity));
-    }
-
-    emit(CartLoaded(currentItems));
+  CartCubit({
+    required this.repository,
+    required this.firebaseAuth,
+  }) : super(CartInitial()) {
+    _loadCart();
   }
 
-  void removeItem(String productId) {
-    final currentItems = List<CartItemEntity>.from(
-      state is CartLoaded ? (state as CartLoaded).items : [],
-    );
+  String? get _userId => firebaseAuth.currentUser?.uid;
 
-    currentItems.removeWhere((item) => item.product.id == productId);
-    emit(CartLoaded(currentItems));
-  }
-
-  void updateQuantity(String productId, int quantity) {
-    if (quantity <= 0) {
-      removeItem(productId);
+  void _loadCart() {
+    final userId = _userId;
+    if (userId == null) {
+      emit(const CartError('User not authenticated'));
       return;
     }
 
-    final currentItems = List<CartItemEntity>.from(
-      state is CartLoaded ? (state as CartLoaded).items : [],
-    );
+    emit(CartLoading());
 
-    final index = currentItems.indexWhere(
-      (item) => item.product.id == productId,
-    );
+    repository.getCartStream(userId).listen(
+      (items) {
+        // Determine restaurant ID from items
+        String? restaurantId;
+        if (items.isNotEmpty) {
+          restaurantId = items.first.product.restaurantId;
+        }
 
-    if (index >= 0) {
-      currentItems[index] = currentItems[index].copyWith(quantity: quantity);
-      emit(CartLoaded(currentItems));
-    }
+        emit(CartLoaded(items, restaurantId: restaurantId));
+      },
+      onError: (error) {
+        emit(CartError(error.toString()));
+      },
+    );
   }
 
-  void clearCart() {
-    emit(CartInitial());
+  Future<void> addItem(ProductEntity product, {int quantity = 1}) async {
+    final userId = _userId;
+    if (userId == null) {
+      emit(const CartError('User not authenticated'));
+      return;
+    }
+
+    // Check if adding item from different restaurant
+    if (state is CartLoaded) {
+      final currentState = state as CartLoaded;
+      if (currentState.restaurantId != null &&
+          currentState.restaurantId != product.restaurantId) {
+        emit(CartError(
+          'لا يمكن إضافة منتجات من مطاعم مختلفة. يرجى إفراغ السلة أولاً.',
+        ));
+        return;
+      }
+    }
+
+    final item = CartItemEntity(product: product, quantity: quantity);
+
+    final result = await repository.addItem(userId, item);
+
+    result.fold(
+      (failure) => emit(CartError(failure.message)),
+      (_) {
+        // State will be updated via stream
+      },
+    );
+  }
+
+  Future<void> removeItem(String productId) async {
+    final userId = _userId;
+    if (userId == null) {
+      emit(const CartError('User not authenticated'));
+      return;
+    }
+
+    final result = await repository.removeItem(userId, productId);
+
+    result.fold(
+      (failure) => emit(CartError(failure.message)),
+      (_) {
+        // State will be updated via stream
+      },
+    );
+  }
+
+  Future<void> updateQuantity(String productId, int quantity) async {
+    final userId = _userId;
+    if (userId == null) {
+      emit(const CartError('User not authenticated'));
+      return;
+    }
+
+    if (quantity <= 0) {
+      await removeItem(productId);
+      return;
+    }
+
+    final result = await repository.updateItemQuantity(
+      userId,
+      productId,
+      quantity,
+    );
+
+    result.fold(
+      (failure) => emit(CartError(failure.message)),
+      (_) {
+        // State will be updated via stream
+      },
+    );
+  }
+
+  Future<void> clearCart() async {
+    final userId = _userId;
+    if (userId == null) {
+      emit(const CartError('User not authenticated'));
+      return;
+    }
+
+    final result = await repository.clearCart(userId);
+
+    result.fold(
+      (failure) => emit(CartError(failure.message)),
+      (_) {
+        emit(CartLoaded([]));
+      },
+    );
   }
 
   int getItemCount() {
     if (state is CartLoaded) {
-      return (state as CartLoaded).items.length;
+      return (state as CartLoaded).itemCount;
     }
     return 0;
   }
 
   double getTotalPrice() {
     if (state is CartLoaded) {
-      return (state as CartLoaded).items.fold(
-        0.0,
-        (sum, item) => sum + item.totalPrice,
-      );
+      return (state as CartLoaded).totalPrice;
     }
     return 0.0;
   }

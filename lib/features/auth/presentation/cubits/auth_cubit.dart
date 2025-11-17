@@ -5,6 +5,7 @@ import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/signup_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
+import '../../domain/usecases/reset_password_usecase.dart';
 import '../../../../core/utils/use_case.dart';
 import '../../../../core/utils/logger.dart';
 
@@ -15,12 +16,14 @@ class AuthCubit extends Cubit<AuthState> {
   final SignupUseCase signupUseCase;
   final LogoutUseCase logoutUseCase;
   final GetCurrentUserUseCase getCurrentUserUseCase;
+  final ResetPasswordUseCase resetPasswordUseCase;
 
   AuthCubit({
     required this.loginUseCase,
     required this.signupUseCase,
     required this.logoutUseCase,
     required this.getCurrentUserUseCase,
+    required this.resetPasswordUseCase,
   }) : super(AuthInitial());
 
   Future<void> login(String email, String password) async {
@@ -120,6 +123,26 @@ class AuthCubit extends Cubit<AuthState> {
           AppLogger.logInfo('No authenticated user');
           emit(AuthUnauthenticated());
         }
+      },
+    );
+  }
+
+  Future<void> resetPassword(String email) async {
+    AppLogger.logAuth('Attempting password reset for email: $email');
+    emit(AuthLoading());
+
+    final result = await resetPasswordUseCase(
+      ResetPasswordParams(email: email),
+    );
+
+    result.fold(
+      (failure) {
+        AppLogger.logError('Password reset failed', error: failure.message);
+        emit(AuthError(failure.message));
+      },
+      (_) {
+        AppLogger.logSuccess('Password reset email sent successfully');
+        emit(AuthPasswordResetSent());
       },
     );
   }

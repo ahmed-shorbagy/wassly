@@ -7,16 +7,22 @@ import '../../features/auth/domain/usecases/login_usecase.dart';
 import '../../features/auth/domain/usecases/signup_usecase.dart';
 import '../../features/auth/domain/usecases/logout_usecase.dart';
 import '../../features/auth/domain/usecases/get_current_user_usecase.dart';
+import '../../features/auth/domain/usecases/reset_password_usecase.dart';
 import '../../features/auth/presentation/cubits/auth_cubit.dart';
 import '../../features/restaurants/data/repositories/restaurant_repository_impl.dart';
 import '../../features/restaurants/domain/repositories/restaurant_repository.dart';
+import '../../features/restaurants/domain/repositories/favorites_repository.dart';
 import '../../features/restaurants/domain/usecases/get_all_restaurants_usecase.dart';
 import '../../features/restaurants/domain/usecases/get_restaurant_by_id_usecase.dart';
 import '../../features/restaurants/domain/usecases/get_restaurant_products_usecase.dart';
 import '../../features/restaurants/presentation/cubits/restaurant_cubit.dart';
+import '../../features/restaurants/presentation/cubits/favorites_cubit.dart';
+import '../../features/restaurants/data/repositories/favorites_repository_impl.dart';
 import '../../features/orders/presentation/cubits/cart_cubit.dart';
 import '../../features/orders/data/repositories/order_repository_impl.dart';
 import '../../features/orders/domain/repositories/order_repository.dart';
+import '../../features/orders/domain/repositories/cart_repository.dart';
+import '../../features/orders/data/repositories/cart_repository_impl.dart';
 import '../../features/orders/domain/usecases/create_order_usecase.dart';
 import '../../features/orders/domain/usecases/get_customer_orders_usecase.dart';
 import '../../features/orders/domain/usecases/get_active_orders_usecase.dart';
@@ -29,10 +35,19 @@ import '../../features/admin/presentation/cubits/admin_cubit.dart';
 import '../../features/admin/presentation/cubits/admin_product_cubit.dart';
 import '../../features/restaurants/domain/repositories/restaurant_owner_repository.dart';
 import '../../features/restaurants/data/repositories/restaurant_owner_repository_impl.dart';
+import '../../features/market_products/domain/repositories/market_product_repository.dart';
+import '../../features/market_products/data/repositories/market_product_repository_impl.dart';
+import '../../features/market_products/presentation/cubits/market_product_cubit.dart';
+import '../../features/market_products/presentation/cubits/market_product_customer_cubit.dart';
+import '../../features/ads/domain/repositories/ad_repository.dart';
+import '../../features/ads/data/repositories/ad_repository_impl.dart';
+import '../../features/admin/presentation/cubits/ad_management_cubit.dart';
+import '../../features/ads/presentation/cubits/startup_ad_customer_cubit.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import '../network/network_info.dart';
 import '../network/supabase_service.dart';
 import '../utils/image_upload_helper.dart';
+import '../localization/locale_cubit.dart';
 
 class InjectionContainer {
   static final InjectionContainer _instance = InjectionContainer._internal();
@@ -49,6 +64,10 @@ class InjectionContainer {
   late final RestaurantRepository _restaurantRepository;
   late final OrderRepository _orderRepository;
   late final RestaurantOwnerRepository _restaurantOwnerRepository;
+  late final FavoritesRepository _favoritesRepository;
+  late final CartRepository _cartRepository;
+  late final MarketProductRepository _marketProductRepository;
+  late final AdRepository _adRepository;
 
   Future<void> init() async {
     // External dependencies
@@ -82,6 +101,24 @@ class InjectionContainer {
       storage: _firebaseStorage,
       supabaseService: _supabaseService,
     );
+
+    _favoritesRepository = FavoritesRepositoryImpl(
+      firestore: _firestore,
+    );
+
+    _cartRepository = CartRepositoryImpl(
+      firestore: _firestore,
+    );
+
+    _marketProductRepository = MarketProductRepositoryImpl(
+      firestore: _firestore,
+      imageUploadHelper: _imageUploadHelper,
+    );
+
+    _adRepository = AdRepositoryImpl(
+      firestore: _firestore,
+      imageUploadHelper: _imageUploadHelper,
+    );
   }
   
   // Getters for accessing services from other parts of the app
@@ -90,12 +127,16 @@ class InjectionContainer {
 
   List<BlocProvider> getBlocProviders() {
     return [
+      BlocProvider<LocaleCubit>(
+        create: (_) => LocaleCubit()..load(),
+      ),
       BlocProvider<AuthCubit>(
         create: (_) => AuthCubit(
           loginUseCase: LoginUseCase(_authRepository),
           signupUseCase: SignupUseCase(_authRepository),
           logoutUseCase: LogoutUseCase(_authRepository),
           getCurrentUserUseCase: GetCurrentUserUseCase(_authRepository),
+          resetPasswordUseCase: ResetPasswordUseCase(_authRepository),
         ),
       ),
       BlocProvider<RestaurantCubit>(
@@ -109,9 +150,21 @@ class InjectionContainer {
           getRestaurantProductsUseCase: GetRestaurantProductsUseCase(
             _restaurantRepository,
           ),
+          restaurantOwnerRepository: _restaurantOwnerRepository,
         ),
       ),
-      BlocProvider<CartCubit>(create: (_) => CartCubit()),
+      BlocProvider<CartCubit>(
+        create: (_) => CartCubit(
+          repository: _cartRepository,
+          firebaseAuth: _firebaseAuth,
+        ),
+      ),
+      BlocProvider<FavoritesCubit>(
+        create: (_) => FavoritesCubit(
+          repository: _favoritesRepository,
+          firebaseAuth: _firebaseAuth,
+        ),
+      ),
       BlocProvider<OrderCubit>(
         create: (_) => OrderCubit(
           createOrderUseCase: CreateOrderUseCase(_orderRepository),
@@ -140,6 +193,26 @@ class InjectionContainer {
       BlocProvider<AdminProductCubit>(
         create: (_) => AdminProductCubit(
           repository: _restaurantOwnerRepository,
+        ),
+      ),
+      BlocProvider<MarketProductCubit>(
+        create: (_) => MarketProductCubit(
+          repository: _marketProductRepository,
+        ),
+      ),
+      BlocProvider<MarketProductCustomerCubit>(
+        create: (_) => MarketProductCustomerCubit(
+          repository: _marketProductRepository,
+        ),
+      ),
+      BlocProvider<AdManagementCubit>(
+        create: (_) => AdManagementCubit(
+          repository: _adRepository,
+        ),
+      ),
+      BlocProvider<StartupAdCustomerCubit>(
+        create: (_) => StartupAdCustomerCubit(
+          repository: _adRepository,
         ),
       ),
     ];

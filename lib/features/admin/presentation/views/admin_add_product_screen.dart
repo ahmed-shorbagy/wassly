@@ -7,6 +7,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/extensions.dart';
 import '../../../../shared/widgets/loading_widget.dart';
+import '../../../../shared/widgets/safe_navigation_wrapper.dart';
 import '../cubits/admin_product_cubit.dart';
 
 class AdminAddProductScreen extends StatefulWidget {
@@ -189,15 +190,17 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.addProduct),
-        backgroundColor: Colors.purple,
-      ),
+    return SafeNavigationWrapper(
+      fallbackRoute: '/admin/restaurants/${widget.restaurantId}/products',
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(l10n.addProduct),
+          backgroundColor: Colors.purple,
+        ),
       body: BlocConsumer<AdminProductCubit, AdminProductState>(
         listener: (context, state) {
           if (state is AdminProductAdded) {
-            context.go('/admin/restaurants/${widget.restaurantId}/products');
+            context.pop();
           } else if (state is AdminProductError) {
             context.showErrorSnackBar(state.message);
           }
@@ -308,6 +311,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
             ),
           );
         },
+      ),
       ),
     );
   }

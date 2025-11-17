@@ -101,7 +101,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deliverySettings => 'Delivery Settings';
 
   @override
-  String get deliveryFee => 'Delivery Fee (\$)';
+  String get deliveryFee => 'Delivery Fee';
 
   @override
   String get minOrder => 'Min Order (\$)';
@@ -466,4 +466,541 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get leavePasswordEmptyToKeepCurrent =>
       'Leave password empty to keep current password';
+
+  @override
+  String get cart => 'Cart';
+
+  @override
+  String get cartEmpty => 'Cart is empty';
+
+  @override
+  String get browseRestaurants => 'Browse Restaurants';
+
+  @override
+  String get total => 'Total';
+
+  @override
+  String get proceedToCheckout => 'Proceed to Checkout';
+
+  @override
+  String get remove => 'Remove';
+
+  @override
+  String get quantity => 'Quantity';
+
+  @override
+  String itemAddedToCart(String productName) {
+    return '$productName added to cart';
+  }
+
+  @override
+  String get cannotAddDifferentRestaurant =>
+      'Cannot add items from different restaurants. Please clear cart first.';
+
+  @override
+  String get clearCart => 'Clear Cart';
+
+  @override
+  String get areYouSureClearCart => 'Are you sure you want to clear the cart?';
+
+  @override
+  String get subtotal => 'Subtotal';
+
+  @override
+  String get tax => 'Tax';
+
+  @override
+  String get grandTotal => 'Grand Total';
+
+  @override
+  String get restaurants => 'Restaurants';
+
+  @override
+  String get searchRestaurants => 'Search restaurants...';
+
+  @override
+  String get nearbyRestaurants => 'Nearby Restaurants';
+
+  @override
+  String get viewAll => 'View All';
+
+  @override
+  String get specialOffers => 'Special Offers';
+
+  @override
+  String get noRestaurants => 'No Restaurants';
+
+  @override
+  String get noRestaurantsAvailable => 'No restaurants available at the moment';
+
+  @override
+  String get exitApp => 'Exit App';
+
+  @override
+  String get exitAppConfirmation => 'Are you sure you want to exit the app?';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get exit => 'Exit';
+
+  @override
+  String get unsavedChanges => 'Unsaved Changes';
+
+  @override
+  String get unsavedChangesWarning =>
+      'You have unsaved changes. Do you want to discard them and continue?';
+
+  @override
+  String get discard => 'Discard';
+
+  @override
+  String get restaurantOrders => 'Restaurant Orders';
+
+  @override
+  String get pendingOrders => 'Pending Orders';
+
+  @override
+  String get activeOrders => 'Active Orders';
+
+  @override
+  String get orderHistory => 'Order History';
+
+  @override
+  String get noOrdersYet => 'No orders yet';
+
+  @override
+  String get noPendingOrders => 'No Pending Orders';
+
+  @override
+  String get noPendingOrdersMessage => 'No pending orders at the moment';
+
+  @override
+  String get noActiveOrders => 'No Active Orders';
+
+  @override
+  String get noActiveOrdersMessage => 'No active orders at the moment';
+
+  @override
+  String get noOrderHistory => 'No Order History';
+
+  @override
+  String get noOrderHistoryMessage => 'Your order history is empty';
+
+  @override
+  String get orderId => 'Order ID';
+
+  @override
+  String get orderItems => 'Order Items';
+
+  @override
+  String get moreItems => 'more items';
+
+  @override
+  String get pending => 'Pending';
+
+  @override
+  String get accepted => 'Accepted';
+
+  @override
+  String get preparing => 'Preparing';
+
+  @override
+  String get ready => 'Ready';
+
+  @override
+  String get onTheWay => 'On the Way';
+
+  @override
+  String get delivered => 'Delivered';
+
+  @override
+  String get cancelled => 'Cancelled';
+
+  @override
+  String get reject => 'Reject';
+
+  @override
+  String get accept => 'Accept';
+
+  @override
+  String get startPreparing => 'Start Preparing';
+
+  @override
+  String get markAsReady => 'Mark as Ready';
+
+  @override
+  String get waitingForDriver => 'Waiting for Driver';
+
+  @override
+  String get orderAccepted => 'Order accepted';
+
+  @override
+  String get rejectOrder => 'Reject Order';
+
+  @override
+  String get rejectOrderConfirmation =>
+      'Are you sure you want to reject this order?';
+
+  @override
+  String get orderRejected => 'Order rejected';
+
+  @override
+  String get orderStatusUpdated => 'Order status updated';
+
+  @override
+  String get marketProducts => 'Market Products';
+
+  @override
+  String get noMarketProducts => 'No Market Products';
+
+  @override
+  String get startByAddingYourFirstMarketProduct =>
+      'Start by adding your first market product';
+
+  @override
+  String get searchProducts => 'Search products...';
+
+  @override
+  String get deleteProduct => 'Delete Product';
+
+  @override
+  String get noProductsFound => 'No products found';
+
+  @override
+  String get startupAds => 'Startup Ads';
+
+  @override
+  String get bannerAds => 'Banner Ads';
+
+  @override
+  String get addAd => 'Add Ad';
+
+  @override
+  String get addStartupAd => 'Add Startup Ad';
+
+  @override
+  String get addBanner => 'Add Banner';
+
+  @override
+  String get editStartupAd => 'Edit Startup Ad';
+
+  @override
+  String get editBanner => 'Edit Banner';
+
+  @override
+  String get updateAd => 'Update Ad';
+
+  @override
+  String get updateBanner => 'Update Banner';
+
+  @override
+  String get adTitle => 'Ad Title';
+
+  @override
+  String get adDescription => 'Ad Description';
+
+  @override
+  String get deepLink => 'Deep Link';
+
+  @override
+  String get priority => 'Priority';
+
+  @override
+  String get active => 'Active';
+
+  @override
+  String get inactive => 'Inactive';
+
+  @override
+  String get adAddedSuccessfully => 'Ad added successfully';
+
+  @override
+  String get adUpdatedSuccessfully => 'Ad updated successfully';
+
+  @override
+  String get adDeletedSuccessfully => 'Ad deleted successfully';
+
+  @override
+  String get creatingAd => 'Creating ad...';
+
+  @override
+  String get updatingAd => 'Updating ad...';
+
+  @override
+  String get deleteAd => 'Delete Ad';
+
+  @override
+  String get deleteBanner => 'Delete Banner';
+
+  @override
+  String get areYouSureDeleteAd => 'Are you sure you want to delete';
+
+  @override
+  String get areYouSureDeleteBanner => 'Are you sure you want to delete';
+
+  @override
+  String get ad => 'ad';
+
+  @override
+  String get banner => 'banner';
+
+  @override
+  String get noStartupAds => 'No Startup Ads';
+
+  @override
+  String get noBannerAds => 'No Banner Ads';
+
+  @override
+  String get startByAddingYourFirstStartupAd =>
+      'Start by adding your first startup ad';
+
+  @override
+  String get startByAddingYourFirstBannerAd =>
+      'Start by adding your first banner ad';
+
+  @override
+  String get adminDashboard => 'Admin Dashboard';
+
+  @override
+  String get welcomeBack => 'Welcome Back';
+
+  @override
+  String get adminAccess => 'Admin Access';
+
+  @override
+  String get adminAccessDescription =>
+      'You have full administrative access to all platform features.\n\nNo authentication required.';
+
+  @override
+  String get totalRestaurants => 'Restaurants';
+
+  @override
+  String get totalOrders => 'Orders';
+
+  @override
+  String get totalUsers => 'Users';
+
+  @override
+  String get quickActions => 'Quick Actions';
+
+  @override
+  String get drivers => 'Drivers';
+
+  @override
+  String get users => 'Users';
+
+  @override
+  String get analytics => 'Analytics';
+
+  @override
+  String get orders => 'Orders';
+
+  @override
+  String get settings => 'Settings';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get info => 'Info';
+
+  @override
+  String get all => 'All';
+
+  @override
+  String get minutes => 'minutes';
+
+  @override
+  String get free => 'Free';
+
+  @override
+  String get viewCart => 'View Cart';
+
+  @override
+  String addProductsWorth(String amount) {
+    return 'Add products worth $amount to start the order';
+  }
+
+  @override
+  String get forgotPassword => 'Forgot Password?';
+
+  @override
+  String get resetPassword => 'Reset Password';
+
+  @override
+  String get enterEmailForPasswordReset =>
+      'Enter your email to receive a password reset link';
+
+  @override
+  String get passwordResetEmailSent =>
+      'Password reset link has been sent to your email';
+
+  @override
+  String get send => 'Send';
+
+  @override
+  String get cannotOpenPhoneApp => 'Cannot open phone app';
+
+  @override
+  String get errorCalling => 'Error occurred while calling';
+
+  @override
+  String get calling => 'Calling';
+
+  @override
+  String get orderPlacedSuccessfully => 'Order placed successfully';
+
+  @override
+  String get pleaseLoginToPlaceOrder => 'Please log in to place an order';
+
+  @override
+  String get addressRequired => 'Address is required';
+
+  @override
+  String get phoneNumberRequired => 'Phone number is required';
+
+  @override
+  String get deliveryAddress => 'Delivery Address';
+
+  @override
+  String get enterDeliveryAddress => 'Enter your delivery address';
+
+  @override
+  String get enterPhoneNumber => 'Enter your phone number';
+
+  @override
+  String get orderNotes => 'Order Notes (Optional)';
+
+  @override
+  String get notes => 'Notes';
+
+  @override
+  String get anySpecialInstructions => 'Any special instructions?';
+
+  @override
+  String get orderSummary => 'Order Summary';
+
+  @override
+  String get placeOrder => 'Place Order';
+
+  @override
+  String get cartIsEmpty => 'Cart is empty';
+
+  @override
+  String get startAddingProductsFromRestaurants =>
+      'Start adding products from restaurants';
+
+  @override
+  String get pleaseLogIn => 'Please log in';
+
+  @override
+  String get noOrdersFound => 'No orders found';
+
+  @override
+  String get loadingOrder => 'Loading order...';
+
+  @override
+  String get cancelOrder => 'Cancel Order';
+
+  @override
+  String get areYouSureCancelOrder =>
+      'Are you sure you want to cancel this order?';
+
+  @override
+  String get yesCancel => 'Yes, Cancel';
+
+  @override
+  String get no => 'No';
+
+  @override
+  String get orderCancelledSuccessfully => 'Order cancelled successfully';
+
+  @override
+  String get restaurant => 'Restaurant';
+
+  @override
+  String get orderTime => 'Order Time';
+
+  @override
+  String get totalAmount => 'Total Amount';
+
+  @override
+  String get driverInformation => 'Driver Information';
+
+  @override
+  String get driver => 'Driver';
+
+  @override
+  String get socialLoginComingSoon => 'Social login coming soon';
+
+  @override
+  String marketProductAddedToCart(String productName) {
+    return '$productName added to cart';
+  }
+
+  @override
+  String get failedToAddProductToCart => 'Failed to add product to cart';
+
+  @override
+  String get marketProductsOrderingComingSoon =>
+      'Market products ordering coming soon';
+
+  @override
+  String get myOrders => 'My Orders';
+
+  @override
+  String get viewDetails => 'View Details';
+
+  @override
+  String get checkout => 'Checkout';
+
+  @override
+  String get placingOrder => 'Placing your order...';
+
+  @override
+  String get orderDetails => 'Order Details';
+
+  @override
+  String get deliveryInformation => 'Delivery Information';
+
+  @override
+  String get favorites => 'Favorites';
+
+  @override
+  String get noFavoritesYet => 'No favorites yet';
+
+  @override
+  String get profile => 'Profile';
+
+  @override
+  String get myProfile => 'My Profile';
+
+  @override
+  String get personalInformation => 'Personal Information';
+
+  @override
+  String get fullName => 'Full Name';
+
+  @override
+  String get phone => 'Phone';
+
+  @override
+  String get logout => 'Logout';
+
+  @override
+  String get areYouSureLogout => 'Are you sure you want to logout?';
+
+  @override
+  String get accountInformation => 'Account Information';
+
+  @override
+  String get changePassword => 'Change Password';
+
+  @override
+  String get updateProfile => 'Update Profile';
+
+  @override
+  String get login => 'Login';
 }

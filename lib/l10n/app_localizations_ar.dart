@@ -51,7 +51,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get pleaseEnterPhoneNumber => 'الرجاء إدخال رقم الهاتف';
 
   @override
-  String get pleaseEnterValidPhoneNumber => 'الرجاء إدخال رقم هاتف صحيح';
+  String get pleaseEnterValidPhoneNumber => 'يرجى إدخال رقم هاتف صحيح';
 
   @override
   String get pleaseEnterEmail => 'الرجاء إدخال البريد الإلكتروني';
@@ -101,7 +101,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get deliverySettings => 'إعدادات التوصيل';
 
   @override
-  String get deliveryFee => 'رسوم التوصيل (ريال)';
+  String get deliveryFee => 'رسوم التوصيل';
 
   @override
   String get minOrder => 'الحد الأدنى للطلب (ريال)';
@@ -462,4 +462,538 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get leavePasswordEmptyToKeepCurrent =>
       'اترك كلمة المرور فارغة للاحتفاظ بالكلمة الحالية';
+
+  @override
+  String get cart => 'السلة';
+
+  @override
+  String get cartEmpty => 'السلة فارغة';
+
+  @override
+  String get browseRestaurants => 'تصفح المطاعم';
+
+  @override
+  String get total => 'المجموع';
+
+  @override
+  String get proceedToCheckout => 'إتمام الطلب';
+
+  @override
+  String get remove => 'حذف';
+
+  @override
+  String get quantity => 'الكمية';
+
+  @override
+  String itemAddedToCart(String productName) {
+    return 'تم إضافة $productName إلى السلة';
+  }
+
+  @override
+  String get cannotAddDifferentRestaurant =>
+      'لا يمكن إضافة منتجات من مطاعم مختلفة. يرجى إفراغ السلة أولاً.';
+
+  @override
+  String get clearCart => 'إفراغ السلة';
+
+  @override
+  String get areYouSureClearCart => 'هل أنت متأكد من إفراغ السلة؟';
+
+  @override
+  String get subtotal => 'المجموع الفرعي';
+
+  @override
+  String get tax => 'الضريبة';
+
+  @override
+  String get grandTotal => 'المجموع الكلي';
+
+  @override
+  String get restaurants => 'المطاعم';
+
+  @override
+  String get searchRestaurants => 'ابحث عن المطاعم...';
+
+  @override
+  String get nearbyRestaurants => 'مطاعم قريبة منك';
+
+  @override
+  String get viewAll => 'عرض الكل';
+
+  @override
+  String get specialOffers => 'عروض خاصة';
+
+  @override
+  String get noRestaurants => 'لا توجد مطاعم';
+
+  @override
+  String get noRestaurantsAvailable => 'لا توجد مطاعم متاحة حالياً';
+
+  @override
+  String get exitApp => 'الخروج';
+
+  @override
+  String get exitAppConfirmation => 'هل أنت متأكد من الخروج من التطبيق؟';
+
+  @override
+  String get cancel => 'إلغاء';
+
+  @override
+  String get exit => 'خروج';
+
+  @override
+  String get unsavedChanges => 'تغييرات غير محفوظة';
+
+  @override
+  String get unsavedChangesWarning =>
+      'لديك تغييرات غير محفوظة. هل تريد تجاهلها والمتابعة؟';
+
+  @override
+  String get discard => 'تجاهل';
+
+  @override
+  String get restaurantOrders => 'طلبات المطعم';
+
+  @override
+  String get pendingOrders => 'الطلبات المعلقة';
+
+  @override
+  String get activeOrders => 'الطلبات النشطة';
+
+  @override
+  String get orderHistory => 'سجل الطلبات';
+
+  @override
+  String get noOrdersYet => 'لا توجد طلبات حتى الآن';
+
+  @override
+  String get noPendingOrders => 'لا توجد طلبات معلقة';
+
+  @override
+  String get noPendingOrdersMessage => 'لا توجد طلبات معلقة حالياً';
+
+  @override
+  String get noActiveOrders => 'لا توجد طلبات نشطة';
+
+  @override
+  String get noActiveOrdersMessage => 'لا توجد طلبات نشطة حالياً';
+
+  @override
+  String get noOrderHistory => 'لا يوجد سجل طلبات';
+
+  @override
+  String get noOrderHistoryMessage => 'سجل الطلبات الخاص بك فارغ';
+
+  @override
+  String get orderId => 'رقم الطلب';
+
+  @override
+  String get orderItems => 'عناصر الطلب';
+
+  @override
+  String get moreItems => 'عناصر أخرى';
+
+  @override
+  String get pending => 'معلق';
+
+  @override
+  String get accepted => 'مقبول';
+
+  @override
+  String get preparing => 'قيد التحضير';
+
+  @override
+  String get ready => 'جاهز';
+
+  @override
+  String get onTheWay => 'في الطريق';
+
+  @override
+  String get delivered => 'تم التسليم';
+
+  @override
+  String get cancelled => 'ملغي';
+
+  @override
+  String get reject => 'رفض';
+
+  @override
+  String get accept => 'قبول';
+
+  @override
+  String get startPreparing => 'بدء التحضير';
+
+  @override
+  String get markAsReady => 'تحديد كجاهز';
+
+  @override
+  String get waitingForDriver => 'في انتظار السائق';
+
+  @override
+  String get orderAccepted => 'تم قبول الطلب';
+
+  @override
+  String get rejectOrder => 'رفض الطلب';
+
+  @override
+  String get rejectOrderConfirmation => 'هل أنت متأكد من رفض هذا الطلب؟';
+
+  @override
+  String get orderRejected => 'تم رفض الطلب';
+
+  @override
+  String get orderStatusUpdated => 'تم تحديث حالة الطلب';
+
+  @override
+  String get marketProducts => 'منتجات السوق';
+
+  @override
+  String get noMarketProducts => 'لا توجد منتجات سوق';
+
+  @override
+  String get startByAddingYourFirstMarketProduct =>
+      'ابدأ بإضافة منتج السوق الأول';
+
+  @override
+  String get searchProducts => 'ابحث عن المنتجات...';
+
+  @override
+  String get deleteProduct => 'حذف المنتج';
+
+  @override
+  String get noProductsFound => 'لم يتم العثور على منتجات';
+
+  @override
+  String get startupAds => 'إعلانات البداية';
+
+  @override
+  String get bannerAds => 'إعلانات البانر';
+
+  @override
+  String get addAd => 'إضافة إعلان';
+
+  @override
+  String get addStartupAd => 'إضافة إعلان بداية';
+
+  @override
+  String get addBanner => 'إضافة بانر';
+
+  @override
+  String get editStartupAd => 'تعديل إعلان البداية';
+
+  @override
+  String get editBanner => 'تعديل البانر';
+
+  @override
+  String get updateAd => 'تحديث الإعلان';
+
+  @override
+  String get updateBanner => 'تحديث البانر';
+
+  @override
+  String get adTitle => 'عنوان الإعلان';
+
+  @override
+  String get adDescription => 'وصف الإعلان';
+
+  @override
+  String get deepLink => 'رابط عميق';
+
+  @override
+  String get priority => 'الأولوية';
+
+  @override
+  String get active => 'نشط';
+
+  @override
+  String get inactive => 'غير نشط';
+
+  @override
+  String get adAddedSuccessfully => 'تم إضافة الإعلان بنجاح';
+
+  @override
+  String get adUpdatedSuccessfully => 'تم تحديث الإعلان بنجاح';
+
+  @override
+  String get adDeletedSuccessfully => 'تم حذف الإعلان بنجاح';
+
+  @override
+  String get creatingAd => 'جاري إنشاء الإعلان...';
+
+  @override
+  String get updatingAd => 'جاري تحديث الإعلان...';
+
+  @override
+  String get deleteAd => 'حذف الإعلان';
+
+  @override
+  String get deleteBanner => 'حذف البانر';
+
+  @override
+  String get areYouSureDeleteAd => 'هل أنت متأكد من حذف';
+
+  @override
+  String get areYouSureDeleteBanner => 'هل أنت متأكد من حذف';
+
+  @override
+  String get ad => 'الإعلان';
+
+  @override
+  String get banner => 'البانر';
+
+  @override
+  String get noStartupAds => 'لا توجد إعلانات بداية';
+
+  @override
+  String get noBannerAds => 'لا توجد إعلانات بانر';
+
+  @override
+  String get startByAddingYourFirstStartupAd =>
+      'ابدأ بإضافة إعلان البداية الأول';
+
+  @override
+  String get startByAddingYourFirstBannerAd => 'ابدأ بإضافة إعلان البانر الأول';
+
+  @override
+  String get adminDashboard => 'لوحة التحكم';
+
+  @override
+  String get welcomeBack => 'مرحباً بعودتك';
+
+  @override
+  String get adminAccess => 'وصول المدير';
+
+  @override
+  String get adminAccessDescription =>
+      'لديك وصول كامل لإدارة جميع ميزات المنصة.\n\nلا يتطلب المصادقة.';
+
+  @override
+  String get totalRestaurants => 'المطاعم';
+
+  @override
+  String get totalOrders => 'الطلبات';
+
+  @override
+  String get totalUsers => 'المستخدمين';
+
+  @override
+  String get quickActions => 'إجراءات سريعة';
+
+  @override
+  String get drivers => 'السائقين';
+
+  @override
+  String get users => 'المستخدمين';
+
+  @override
+  String get analytics => 'التحليلات';
+
+  @override
+  String get orders => 'الطلبات';
+
+  @override
+  String get settings => 'الإعدادات';
+
+  @override
+  String get ok => 'حسناً';
+
+  @override
+  String get info => 'معلومات';
+
+  @override
+  String get all => 'الكل';
+
+  @override
+  String get minutes => 'دقيقة';
+
+  @override
+  String get free => 'مجاني';
+
+  @override
+  String get viewCart => 'عرض السلة';
+
+  @override
+  String addProductsWorth(String amount) {
+    return 'أضف منتجات بقيمة $amount لتبدأ الطلب';
+  }
+
+  @override
+  String get forgotPassword => 'نسيت كلمة المرور؟';
+
+  @override
+  String get resetPassword => 'إعادة تعيين كلمة المرور';
+
+  @override
+  String get enterEmailForPasswordReset =>
+      'أدخل بريدك الإلكتروني لإرسال رابط إعادة تعيين كلمة المرور';
+
+  @override
+  String get passwordResetEmailSent =>
+      'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني';
+
+  @override
+  String get send => 'إرسال';
+
+  @override
+  String get cannotOpenPhoneApp => 'لا يمكن فتح تطبيق الهاتف';
+
+  @override
+  String get errorCalling => 'حدث خطأ أثناء الاتصال';
+
+  @override
+  String get calling => 'جاري الاتصال';
+
+  @override
+  String get orderPlacedSuccessfully => 'تم تقديم الطلب بنجاح';
+
+  @override
+  String get pleaseLoginToPlaceOrder => 'يرجى تسجيل الدخول لتقديم الطلب';
+
+  @override
+  String get addressRequired => 'العنوان مطلوب';
+
+  @override
+  String get phoneNumberRequired => 'رقم الهاتف مطلوب';
+
+  @override
+  String get deliveryAddress => 'عنوان التوصيل';
+
+  @override
+  String get enterDeliveryAddress => 'أدخل عنوان التوصيل';
+
+  @override
+  String get enterPhoneNumber => 'أدخل رقم الهاتف';
+
+  @override
+  String get orderNotes => 'ملاحظات الطلب (اختياري)';
+
+  @override
+  String get notes => 'ملاحظات';
+
+  @override
+  String get anySpecialInstructions => 'أي تعليمات خاصة؟';
+
+  @override
+  String get orderSummary => 'ملخص الطلب';
+
+  @override
+  String get placeOrder => 'تقديم الطلب';
+
+  @override
+  String get cartIsEmpty => 'السلة فارغة';
+
+  @override
+  String get startAddingProductsFromRestaurants =>
+      'ابدأ بإضافة منتجات من المطاعم';
+
+  @override
+  String get pleaseLogIn => 'يرجى تسجيل الدخول';
+
+  @override
+  String get noOrdersFound => 'لم يتم العثور على طلبات';
+
+  @override
+  String get loadingOrder => 'جاري تحميل الطلب...';
+
+  @override
+  String get cancelOrder => 'إلغاء الطلب';
+
+  @override
+  String get areYouSureCancelOrder => 'هل أنت متأكد من إلغاء هذا الطلب؟';
+
+  @override
+  String get yesCancel => 'نعم، إلغاء';
+
+  @override
+  String get no => 'لا';
+
+  @override
+  String get orderCancelledSuccessfully => 'تم إلغاء الطلب بنجاح';
+
+  @override
+  String get restaurant => 'المطعم';
+
+  @override
+  String get orderTime => 'وقت الطلب';
+
+  @override
+  String get totalAmount => 'المجموع الكلي';
+
+  @override
+  String get driverInformation => 'معلومات السائق';
+
+  @override
+  String get driver => 'السائق';
+
+  @override
+  String get socialLoginComingSoon =>
+      'تسجيل الدخول عبر وسائل التواصل الاجتماعي قريباً';
+
+  @override
+  String marketProductAddedToCart(String productName) {
+    return 'تم إضافة $productName إلى السلة';
+  }
+
+  @override
+  String get failedToAddProductToCart => 'فشل إضافة المنتج إلى السلة';
+
+  @override
+  String get marketProductsOrderingComingSoon => 'طلب منتجات السوق قريباً';
+
+  @override
+  String get myOrders => 'طلباتي';
+
+  @override
+  String get viewDetails => 'عرض التفاصيل';
+
+  @override
+  String get checkout => 'الدفع';
+
+  @override
+  String get placingOrder => 'جاري تقديم الطلب...';
+
+  @override
+  String get orderDetails => 'تفاصيل الطلب';
+
+  @override
+  String get deliveryInformation => 'معلومات التوصيل';
+
+  @override
+  String get favorites => 'المفضلة';
+
+  @override
+  String get noFavoritesYet => 'لا توجد عناصر مفضلة بعد';
+
+  @override
+  String get profile => 'الملف الشخصي';
+
+  @override
+  String get myProfile => 'ملفي الشخصي';
+
+  @override
+  String get personalInformation => 'المعلومات الشخصية';
+
+  @override
+  String get fullName => 'الاسم الكامل';
+
+  @override
+  String get phone => 'الهاتف';
+
+  @override
+  String get logout => 'تسجيل الخروج';
+
+  @override
+  String get areYouSureLogout => 'هل أنت متأكد من تسجيل الخروج؟';
+
+  @override
+  String get accountInformation => 'معلومات الحساب';
+
+  @override
+  String get changePassword => 'تغيير كلمة المرور';
+
+  @override
+  String get updateProfile => 'تحديث الملف الشخصي';
+
+  @override
+  String get login => 'تسجيل الدخول';
 }

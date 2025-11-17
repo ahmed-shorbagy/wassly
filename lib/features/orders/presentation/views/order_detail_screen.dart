@@ -3,8 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/extensions.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../../../../shared/widgets/error_widget.dart';
 import '../../domain/entities/order_entity.dart';
@@ -31,7 +33,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Order Details'),
+        title: Builder(
+          builder: (context) {
+            final l10n = AppLocalizations.of(context);
+            return Text(l10n?.orderDetails ?? 'تفاصيل الطلب');
+          },
+        ),
         actions: [
           BlocBuilder<OrderCubit, OrderState>(
             builder: (context, state) {
@@ -39,7 +46,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 return IconButton(
                   icon: const Icon(Icons.cancel_outlined),
                   onPressed: () => _showCancelDialog(context, state.order),
-                  tooltip: 'Cancel Order',
+                  tooltip: AppLocalizations.of(context)?.cancelOrder ?? 'إلغاء الطلب',
                 );
               }
               return const SizedBox.shrink();
@@ -49,8 +56,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       ),
       body: BlocConsumer<OrderCubit, OrderState>(
         listener: (context, state) {
+          final l10n = AppLocalizations.of(context);
           if (state is OrderCancelled) {
-            context.showSuccessSnackBar('Order cancelled successfully');
+            context.showSuccessSnackBar(
+              l10n?.orderCancelledSuccessfully ?? 'تم إلغاء الطلب بنجاح',
+            );
             context.pop();
           } else if (state is OrderError) {
             context.showErrorSnackBar(state.message);
@@ -74,7 +84,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             return _buildOrderDetails(context, state.order);
           }
 
-          return const Center(child: Text('Loading order...'));
+          final l10n = AppLocalizations.of(context);
+          return Center(child: Text(l10n?.loadingOrder ?? 'جاري تحميل الطلب...'));
         },
       ),
     );
@@ -261,9 +272,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Restaurant',
-                  style: TextStyle(
+                Text(
+                  AppLocalizations.of(context)?.restaurant ?? 'المطعم',
+                  style: const TextStyle(
                     fontSize: 12,
                     color: AppColors.textSecondary,
                   ),
@@ -290,9 +301,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Order Items',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context)?.orderItems ?? 'عناصر الطلب',
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -378,9 +389,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Delivery Information',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context)?.deliveryInformation ?? 'معلومات التوصيل',
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -395,9 +406,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Delivery Address',
-                      style: TextStyle(
+                    Text(
+                      AppLocalizations.of(context)?.deliveryAddress ?? 'عنوان التوصيل',
+                      style: const TextStyle(
                         fontSize: 12,
                         color: AppColors.textSecondary,
                       ),
@@ -421,9 +432,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Contact Number',
-                      style: TextStyle(
+                    Text(
+                      AppLocalizations.of(context)?.phoneNumber ?? 'رقم الهاتف',
+                      style: const TextStyle(
                         fontSize: 12,
                         color: AppColors.textSecondary,
                       ),
@@ -449,9 +460,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Notes',
-                        style: TextStyle(
+                      Text(
+                        AppLocalizations.of(context)?.notes ?? 'ملاحظات',
+                        style: const TextStyle(
                           fontSize: 12,
                           color: AppColors.textSecondary,
                         ),
@@ -478,9 +489,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Order Summary',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context)?.orderSummary ?? 'ملخص الطلب',
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -489,7 +500,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Order ID', style: TextStyle(fontSize: 14)),
+              Text(
+                AppLocalizations.of(context)?.orderId ?? 'رقم الطلب',
+                style: const TextStyle(fontSize: 14),
+              ),
               Text(
                 '#${order.id.substring(0, 8).toUpperCase()}',
                 style: const TextStyle(
@@ -503,7 +517,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Order Time', style: TextStyle(fontSize: 14)),
+              Text(
+                AppLocalizations.of(context)?.orderTime ?? 'وقت الطلب',
+                style: const TextStyle(fontSize: 14),
+              ),
               Text(
                 DateFormat('MMM dd, yyyy • HH:mm').format(order.createdAt),
                 style: const TextStyle(fontSize: 14),
@@ -514,9 +531,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Total Amount',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context)?.totalAmount ?? 'المجموع الكلي',
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -542,9 +559,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Driver Information',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context)?.driverInformation ?? 'معلومات السائق',
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -567,7 +584,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      order.driverName ?? 'Driver',
+                      order.driverName ?? (AppLocalizations.of(context)?.driver ?? 'السائق'),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -586,9 +603,25 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               ),
               if (order.driverPhone != null)
                 IconButton(
-                  onPressed: () {
-                    // TODO: Call driver
-                    context.showSuccessSnackBar('Calling ${order.driverName}...');
+                  onPressed: () async {
+                    try {
+                      final url = Uri.parse('tel:${order.driverPhone}');
+                      // ignore: deprecated_member_use
+                      if (await canLaunchUrl(url)) {
+                        // ignore: deprecated_member_use
+                        await launchUrl(url);
+                      } else {
+                        final l10n = AppLocalizations.of(context);
+                        context.showErrorSnackBar(
+                          l10n?.cannotOpenPhoneApp ?? 'لا يمكن فتح تطبيق الهاتف',
+                        );
+                      }
+                    } catch (e) {
+                      final l10n = AppLocalizations.of(context);
+                      context.showErrorSnackBar(
+                        l10n?.errorCalling ?? 'حدث خطأ أثناء الاتصال',
+                      );
+                    }
                   },
                   icon: const Icon(Icons.phone, color: AppColors.primary),
                 ),
@@ -628,17 +661,18 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   }
 
   void _showCancelDialog(BuildContext context, OrderEntity order) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Cancel Order'),
-        content: const Text(
-          'Are you sure you want to cancel this order?',
+        title: Text(l10n?.cancelOrder ?? 'إلغاء الطلب'),
+        content: Text(
+          l10n?.areYouSureCancelOrder ?? 'هل أنت متأكد من إلغاء هذا الطلب؟',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('No'),
+            child: Text(l10n?.no ?? 'لا'),
           ),
           ElevatedButton(
             onPressed: () {
@@ -648,7 +682,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.error,
             ),
-            child: const Text('Yes, Cancel'),
+            child: Text(l10n?.yesCancel ?? 'نعم، إلغاء'),
           ),
         ],
       ),

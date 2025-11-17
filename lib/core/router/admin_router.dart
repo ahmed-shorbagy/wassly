@@ -6,8 +6,20 @@ import '../../features/admin/presentation/views/restaurant_management_screen.dar
 import '../../features/admin/presentation/views/create_restaurant_screen.dart';
 import '../../features/admin/presentation/views/admin_product_list_screen.dart';
 import '../../features/admin/presentation/views/admin_add_product_screen.dart';
+import '../../features/admin/presentation/views/admin_market_product_list_screen.dart';
+import '../../features/admin/presentation/views/admin_add_market_product_screen.dart';
+import '../../features/admin/presentation/views/admin_edit_market_product_screen.dart';
+import '../../features/admin/presentation/views/admin_startup_ads_screen.dart';
+import '../../features/admin/presentation/views/admin_banner_ads_screen.dart';
+import '../../features/admin/presentation/views/admin_add_startup_ad_screen.dart';
+import '../../features/admin/presentation/views/admin_edit_startup_ad_screen.dart';
+import '../../features/admin/presentation/views/admin_add_banner_ad_screen.dart';
+import '../../features/admin/presentation/views/admin_edit_banner_ad_screen.dart';
 import '../../features/admin/presentation/views/edit_restaurant_screen.dart';
 import '../../features/restaurants/domain/entities/restaurant_entity.dart';
+import '../../features/market_products/domain/entities/market_product_entity.dart';
+import '../../features/ads/domain/entities/startup_ad_entity.dart';
+import '../../features/home/domain/entities/banner_entity.dart';
 
 class AdminRouter {
   static final GoRouter router = GoRouter(
@@ -109,6 +121,80 @@ class AdminRouter {
         path: '/admin/settings',
         name: 'settings',
         builder: (context, state) => const AdminSettingsScreen(),
+      ),
+      // Market Products Routes
+      GoRoute(
+        path: '/admin/market-products',
+        name: 'market-products',
+        builder: (context, state) => const AdminMarketProductListScreen(),
+      ),
+      GoRoute(
+        path: '/admin/market-products/add',
+        name: 'add-market-product',
+        builder: (context, state) => const AdminAddMarketProductScreen(),
+      ),
+      GoRoute(
+        path: '/admin/market-products/edit/:id',
+        name: 'edit-market-product',
+        builder: (context, state) {
+          final productId = state.pathParameters['id'] ?? '';
+          final product = state.extra is MarketProductEntity
+              ? state.extra as MarketProductEntity
+              : null;
+          return AdminEditMarketProductScreen(
+            productId: productId,
+            product: product,
+          );
+        },
+      ),
+      // Ads Management Routes
+      GoRoute(
+        path: '/admin/ads/startup',
+        name: 'startup-ads',
+        builder: (context, state) => const AdminStartupAdsScreen(),
+      ),
+      GoRoute(
+        path: '/admin/ads/startup/add',
+        name: 'add-startup-ad',
+        builder: (context, state) => const AdminAddStartupAdScreen(),
+      ),
+      GoRoute(
+        path: '/admin/ads/startup/edit/:id',
+        name: 'edit-startup-ad',
+        builder: (context, state) {
+          final adId = state.pathParameters['id'] ?? '';
+          final ad = state.extra is StartupAdEntity
+              ? state.extra as StartupAdEntity
+              : null;
+          return AdminEditStartupAdScreen(
+            adId: adId,
+            ad: ad,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/admin/ads/banners',
+        name: 'banner-ads',
+        builder: (context, state) => const AdminBannerAdsScreen(),
+      ),
+      GoRoute(
+        path: '/admin/ads/banners/add',
+        name: 'add-banner-ad',
+        builder: (context, state) => const AdminAddBannerAdScreen(),
+      ),
+      GoRoute(
+        path: '/admin/ads/banners/edit/:id',
+        name: 'edit-banner-ad',
+        builder: (context, state) {
+          final bannerId = state.pathParameters['id'] ?? '';
+          final banner = state.extra is BannerEntity
+              ? state.extra as BannerEntity
+              : null;
+          return AdminEditBannerAdScreen(
+            bannerId: bannerId,
+            banner: banner,
+          );
+        },
       ),
     ],
     errorBuilder: (context, state) => const ErrorScreen(),

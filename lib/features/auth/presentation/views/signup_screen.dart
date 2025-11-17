@@ -6,6 +6,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/utils/extensions.dart';
 import '../../../../shared/widgets/loading_widget.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 import '../cubits/auth_cubit.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -24,7 +25,6 @@ class _SignupScreenState extends State<SignupScreen> {
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-  String _selectedUserType = AppConstants.userTypeCustomer;
 
   @override
   void dispose() {
@@ -39,81 +39,74 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: 40),
-
-                // Logo
-                Center(
-                  child: Container(
-                    width: 150,
-                    height: 90,
-                    margin: const EdgeInsets.only(bottom: 24),
-                    child: Image.asset(
-                      'assets/images/logo.jpeg',
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(
-                          Icons.restaurant,
-                          size: 80,
-                          color: Colors.orange,
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                // Title
-                Text(
-                  AppStrings.signup,
-                  style: Theme.of(context).textTheme.displaySmall,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Join Wassly today',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 32),
-
-                // User Type Selection
-                Text(
-                  AppStrings.selectUserType,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
-                  initialValue: _selectedUserType,
-                  decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.person_outline),
-                  ),
-                  items: [
-                    DropdownMenuItem(
-                      value: AppConstants.userTypeCustomer,
-                      child: Text(AppStrings.customer),
-                    ),
-                    DropdownMenuItem(
-                      value: AppConstants.userTypeRestaurant,
-                      child: Text(AppStrings.restaurant),
-                    ),
-                    DropdownMenuItem(
-                      value: AppConstants.userTypeDriver,
-                      child: Text(AppStrings.driver),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF27AE60), Color(0xFF2ECC71)],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 28, 20, 20),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                // Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      padding: const EdgeInsets.all(10),
+                      child: Image.asset('assets/images/logo.jpeg', fit: BoxFit.contain),
                     ),
                   ],
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedUserType = value!;
-                    });
-                  },
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 18),
+                const Text(
+                  'حساب جديد',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'انضم إلى وسِّلي الآن',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white, fontSize: 14),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x22000000),
+                        blurRadius: 16,
+                        offset: Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+
+                // Note: In the customer app, only normal customers can sign up.
+                // User type is enforced to customer; no selection UI is shown.
+                const SizedBox(height: 8),
 
                 // Name Field
                 TextFormField(
@@ -138,15 +131,39 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Phone Field
-                TextFormField(
-                  controller: _phoneController,
-                  keyboardType: TextInputType.phone,
-                  validator: Validators.validatePhone,
+                // Phone Field (Egypt-only)
+                IntlPhoneField(
+                  initialCountryCode: 'EG',
+                  showDropdownIcon: false,
+                  disableLengthCheck: false,
                   decoration: InputDecoration(
                     labelText: AppStrings.phoneNumber,
                     prefixIcon: const Icon(Icons.phone_outlined),
+                    counterText: '',
                   ),
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  validator: (phone) {
+                    if (phone == null) return AppStrings.pleaseEnterPhoneNumber;
+                    // Egyptian mobile numbers are 10 national digits (without +20) and start with 10/11/12/15
+                    final national = phone.number;
+                    final validPrefix = national.startsWith('10') ||
+                        national.startsWith('11') ||
+                        national.startsWith('12') ||
+                        national.startsWith('15');
+                    if (!validPrefix || national.length != 10) {
+                      return AppStrings.pleaseEnterValidPhoneNumber;
+                    }
+                    return null;
+                  },
+                  onChanged: (phone) {
+                    // Persist the full international number (+20xxxxxxxxxx)
+                    _phoneController.text = phone.completeNumber;
+                  },
+                  onSaved: (phone) {
+                    if (phone != null) {
+                      _phoneController.text = phone.completeNumber;
+                    }
+                  },
                 ),
                 const SizedBox(height: 16),
 
@@ -199,20 +216,18 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 32),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
 
                 // Signup Button
                 BlocConsumer<AuthCubit, AuthState>(
                   listener: (context, state) {
                     if (state is AuthAuthenticated) {
-                      // Navigate based on user type
-                      if (state.user.userType == 'customer') {
-                        context.go('/home');
-                      } else if (state.user.userType == 'restaurant') {
-                        context.go('/restaurant');
-                      } else if (state.user.userType == 'driver') {
-                        context.go('/driver');
-                      }
+                      // Customer app - always navigate to home (only customers sign up)
+                      context.go('/home');
                     } else if (state is AuthError) {
                       context.showErrorSnackBar(state.message);
                     }
@@ -221,34 +236,50 @@ class _SignupScreenState extends State<SignupScreen> {
                     if (state is AuthLoading) {
                       return const LoadingWidget();
                     }
-
-                    return ElevatedButton(
-                      onPressed: _signup,
-                      child: const Text(AppStrings.signup),
+                    return SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _signup,
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(48),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(AppStrings.signup),
+                      ),
                     );
                   },
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
 
                 // Login Link
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(AppStrings.alreadyHaveAccount),
-                    TextButton(
-                      onPressed: () => context.go('/login'),
-                      child: const Text(AppStrings.login),
-                    ),
-                  ],
+                Center(
+                  child: Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        AppStrings.alreadyHaveAccount,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      TextButton(
+                        onPressed: () => context.go('/login'),
+                        style:
+                            TextButton.styleFrom(foregroundColor: Colors.white),
+                        child: const Text(AppStrings.login),
+                      ),
+                    ],
+                  ),
                 ),
 
-                const SizedBox(height: 40),
+                const SizedBox(height: 24),
               ],
             ),
           ),
         ),
       ),
+    ),
     );
   }
 
@@ -259,7 +290,7 @@ class _SignupScreenState extends State<SignupScreen> {
         password: _passwordController.text,
         name: _nameController.text.trim(),
         phone: _phoneController.text.trim(),
-        userType: _selectedUserType,
+        userType: AppConstants.userTypeCustomer,
       );
     }
   }

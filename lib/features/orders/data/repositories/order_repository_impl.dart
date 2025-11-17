@@ -227,5 +227,102 @@ class OrderRepositoryImpl implements OrderRepository {
           }).toList();
         });
   }
+
+  @override
+  Future<Either<Failure, List<OrderEntity>>> getRestaurantOrders(
+    String restaurantId,
+  ) async {
+    try {
+      AppLogger.logInfo('Fetching orders for restaurant: $restaurantId');
+
+      final snapshot = await firestore
+          .collection('orders')
+          .where('restaurantId', isEqualTo: restaurantId)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      final orders = snapshot.docs.map((doc) {
+        return OrderModel.fromFirestore(doc);
+      }).toList();
+
+      AppLogger.logSuccess('Fetched ${orders.length} orders for restaurant');
+      return Right(orders);
+    } on FirebaseException catch (e) {
+      AppLogger.logError('Firebase error fetching restaurant orders', error: e);
+      return Left(ServerFailure('Failed to fetch orders: ${e.message}'));
+    } catch (e) {
+      AppLogger.logError('Error fetching restaurant orders', error: e);
+      return Left(ServerFailure('Failed to fetch orders'));
+    }
+  }
+
+  @override
+  Stream<List<OrderEntity>> listenToRestaurantOrders(String restaurantId) {
+    AppLogger.logInfo('Setting up real-time listener for restaurant orders');
+
+    return firestore
+        .collection('orders')
+        .where('restaurantId', isEqualTo: restaurantId)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs.map((doc) {
+            return OrderModel.fromFirestore(doc);
+          }).toList();
+        });
+  }
+
+  @override
+  Future<Either<Failure, void>> updateOrderStatus(
+    String orderId,
+    OrderStatus status,
+  ) async {
+    try {
+      AppLogger.logInfo('Updating order status: $orderId to $status');
+
+      await firestore.collection('orders').doc(orderId).update({
+        'status': status.name,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      AppLogger.logSuccess('Order status updated successfully');
+      return const Right(null);
+    } on FirebaseException catch (e) {
+      AppLogger.logError('Firebase error updating order status', error: e);
+      return Left(ServerFailure('Failed to update order: ${e.message}'));
+    } catch (e) {
+      AppLogger.logError('Error updating order status', error: e);
+      return Left(ServerFailure('Failed to update order'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> assignDriverToOrder(
+    String orderId,
+    String driverId,
+    String driverName,
+    String driverPhone,
+  ) async {
+    try {
+      AppLogger.logInfo('Assigning driver to order: $orderId');
+
+      await firestore.collection('orders').doc(orderId).update({
+        'driverId': driverId,
+        'driverName': driverName,
+        'driverPhone': driverPhone,
+        'status': 'pickedUp',
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      AppLogger.logSuccess('Driver assigned successfully');
+      return const Right(null);
+    } on FirebaseException catch (e) {
+      AppLogger.logError('Firebase error assigning driver', error: e);
+      return Left(ServerFailure('Failed to assign driver: ${e.message}'));
+    } catch (e) {
+      AppLogger.logError('Error assigning driver', error: e);
+      return Left(ServerFailure('Failed to assign driver'));
+    }
+  }
 }
 

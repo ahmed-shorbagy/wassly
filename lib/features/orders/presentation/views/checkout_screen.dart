@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/extensions.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../../../auth/presentation/cubits/auth_cubit.dart';
 import '../../../restaurants/domain/entities/restaurant_entity.dart';
@@ -38,7 +39,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Checkout'),
+        title: Builder(
+          builder: (context) {
+            final l10n = AppLocalizations.of(context);
+            return Text(l10n?.checkout ?? 'الدفع');
+          },
+        ),
         elevation: 0,
       ),
       body: BlocConsumer<OrderCubit, OrderState>(
@@ -48,15 +54,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             context.read<CartCubit>().clearCart();
             
             // Show success and navigate to order detail
-            context.showSuccessSnackBar('Order placed successfully!');
-            context.go('/customer/order/${state.order.id}');
+            final l10n = AppLocalizations.of(context);
+            context.showSuccessSnackBar(
+              l10n?.orderPlacedSuccessfully ?? 'تم تقديم الطلب بنجاح',
+            );
+            context.go('/order/${state.order.id}');
           } else if (state is OrderError) {
             context.showErrorSnackBar(state.message);
           }
         },
         builder: (context, orderState) {
           if (orderState is OrderCreating) {
-            return const LoadingWidget(message: 'Placing your order...');
+            final l10n = AppLocalizations.of(context);
+            return LoadingWidget(
+              message: l10n?.placingOrder ?? 'جاري تقديم الطلب...',
+            );
           }
 
           return BlocBuilder<CartCubit, CartState>(
@@ -72,11 +84,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         color: AppColors.textSecondary.withValues(alpha: 0.5),
                       ),
                       const SizedBox(height: 16),
-                      const Text('Cart is empty'),
+                      Text(
+                        AppLocalizations.of(context)?.cartIsEmpty ?? 'السلة فارغة',
+                      ),
                       const SizedBox(height: 24),
                       ElevatedButton(
-                        onPressed: () => context.go('/customer'),
-                        child: const Text('Browse Restaurants'),
+                        onPressed: () => context.go('/home'),
+                        child: Text(
+                          AppLocalizations.of(context)?.browseRestaurants ?? 'تصفح المطاعم',
+                        ),
                       ),
                     ],
                   ),
@@ -94,64 +110,109 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // Delivery Address
-                            _buildSectionHeader('Delivery Address'),
-                            const SizedBox(height: 8),
-                            TextFormField(
-                              controller: _addressController,
-                              decoration: const InputDecoration(
-                                labelText: 'Address',
-                                hintText: 'Enter your delivery address',
-                                prefixIcon: Icon(Icons.location_on),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Address is required';
-                                }
-                                return null;
+                            Builder(
+                              builder: (context) {
+                                final l10n = AppLocalizations.of(context);
+                                return _buildSectionHeader(
+                                  l10n?.deliveryAddress ?? 'عنوان التوصيل',
+                                );
                               },
-                              maxLines: 2,
+                            ),
+                            const SizedBox(height: 8),
+                            Builder(
+                              builder: (context) {
+                                final l10n = AppLocalizations.of(context);
+                                return TextFormField(
+                                  controller: _addressController,
+                                  decoration: InputDecoration(
+                                    labelText: l10n?.deliveryAddress ?? 'عنوان التوصيل',
+                                    hintText: l10n?.enterDeliveryAddress ?? 'أدخل عنوان التوصيل',
+                                    prefixIcon: const Icon(Icons.location_on),
+                                  ),
+                                  validator: (value) {
+                                    final l10n = AppLocalizations.of(context);
+                                    if (value == null || value.trim().isEmpty) {
+                                      return l10n?.addressRequired ?? 'العنوان مطلوب';
+                                    }
+                                    return null;
+                                  },
+                                  maxLines: 2,
+                                );
+                              },
                             ),
                             const SizedBox(height: 16),
 
                             // Contact Phone
-                            _buildSectionHeader('Contact Information'),
-                            const SizedBox(height: 8),
-                            TextFormField(
-                              controller: _phoneController,
-                              decoration: const InputDecoration(
-                                labelText: 'Phone Number',
-                                hintText: 'Enter your phone number',
-                                prefixIcon: Icon(Icons.phone),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Phone number is required';
-                                }
-                                if (value.length < 10) {
-                                  return 'Please enter a valid phone number';
-                                }
-                                return null;
+                            Builder(
+                              builder: (context) {
+                                final l10n = AppLocalizations.of(context);
+                                return _buildSectionHeader(
+                                  l10n?.contactInformation ?? 'معلومات الاتصال',
+                                );
                               },
-                              keyboardType: TextInputType.phone,
+                            ),
+                            const SizedBox(height: 8),
+                            Builder(
+                              builder: (context) {
+                                final l10n = AppLocalizations.of(context);
+                                return TextFormField(
+                                  controller: _phoneController,
+                                  decoration: InputDecoration(
+                                    labelText: l10n?.phoneNumber ?? 'رقم الهاتف',
+                                    hintText: l10n?.enterPhoneNumber ?? 'أدخل رقم الهاتف',
+                                    prefixIcon: const Icon(Icons.phone),
+                                  ),
+                                  validator: (value) {
+                                    final l10n = AppLocalizations.of(context);
+                                    if (value == null || value.trim().isEmpty) {
+                                      return l10n?.phoneNumberRequired ?? 'رقم الهاتف مطلوب';
+                                    }
+                                    if (value.length < 10) {
+                                      return l10n?.pleaseEnterValidPhoneNumber ?? 'يرجى إدخال رقم هاتف صحيح';
+                                    }
+                                    return null;
+                                  },
+                                  keyboardType: TextInputType.phone,
+                                );
+                              },
                             ),
                             const SizedBox(height: 16),
 
                             // Order Notes
-                            _buildSectionHeader('Order Notes (Optional)'),
+                            Builder(
+                              builder: (context) {
+                                final l10n = AppLocalizations.of(context);
+                                return _buildSectionHeader(
+                                  l10n?.orderNotes ?? 'ملاحظات الطلب (اختياري)',
+                                );
+                              },
+                            ),
                             const SizedBox(height: 8),
-                            TextFormField(
-                              controller: _notesController,
-                              decoration: const InputDecoration(
-                                labelText: 'Notes',
-                                hintText: 'Any special instructions?',
-                                prefixIcon: Icon(Icons.note),
-                              ),
-                              maxLines: 3,
+                            Builder(
+                              builder: (context) {
+                                final l10n = AppLocalizations.of(context);
+                                return TextFormField(
+                                  controller: _notesController,
+                                  decoration: InputDecoration(
+                                    labelText: l10n?.notes ?? 'ملاحظات',
+                                    hintText: l10n?.anySpecialInstructions ?? 'أي تعليمات خاصة؟',
+                                    prefixIcon: const Icon(Icons.note),
+                                  ),
+                                  maxLines: 3,
+                                );
+                              },
                             ),
                             const SizedBox(height: 24),
 
                             // Order Summary
-                            _buildSectionHeader('Order Summary'),
+                            Builder(
+                              builder: (context) {
+                                final l10n = AppLocalizations.of(context);
+                                return _buildSectionHeader(
+                                  l10n?.orderSummary ?? 'ملخص الطلب',
+                                );
+                              },
+                            ),
                             const SizedBox(height: 12),
                             _buildOrderSummary(cartState),
                           ],
@@ -231,42 +292,61 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             const Divider(height: 24),
 
             // Subtotal
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Subtotal', style: TextStyle(fontSize: 14)),
-                Text(
-                  '\$${cartState.totalPrice.toStringAsFixed(2)}',
-                  style: const TextStyle(fontSize: 14),
-                ),
-              ],
+            Builder(
+              builder: (context) {
+                final l10n = AppLocalizations.of(context);
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      l10n?.subtotal ?? 'المجموع الفرعي',
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    Text(
+                      '\$${cartState.totalPrice.toStringAsFixed(2)}',
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  ],
+                );
+              },
             ),
             const SizedBox(height: 8),
 
             // Delivery Fee
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Delivery Fee', style: TextStyle(fontSize: 14)),
-                Text(
-                  '\$${_getDeliveryFee().toStringAsFixed(2)}',
-                  style: const TextStyle(fontSize: 14),
-                ),
-              ],
+            Builder(
+              builder: (context) {
+                final l10n = AppLocalizations.of(context);
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      l10n?.deliveryFee ?? 'رسوم التوصيل',
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    Text(
+                      '\$${_getDeliveryFee().toStringAsFixed(2)}',
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  ],
+                );
+              },
             ),
             const SizedBox(height: 12),
 
             // Total
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Total',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+            Builder(
+              builder: (context) {
+                final l10n = AppLocalizations.of(context);
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      l10n?.total ?? 'المجموع',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                 Text(
                   '\$${_getTotalAmount(cartState.totalPrice).toStringAsFixed(2)}',
                   style: const TextStyle(
@@ -274,8 +354,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     fontWeight: FontWeight.bold,
                     color: AppColors.primary,
                   ),
-                ),
-              ],
+                    ),
+                  ],
+                );
+              },
             ),
           ],
         ),
@@ -304,9 +386,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
             ),
-            child: Text(
-              'Place Order - \$${_getTotalAmount(cartState.totalPrice).toStringAsFixed(2)}',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            child: Builder(
+              builder: (context) {
+                final l10n = AppLocalizations.of(context);
+                return Text(
+                  '${l10n?.placeOrder ?? 'تقديم الطلب'} - \$${_getTotalAmount(cartState.totalPrice).toStringAsFixed(2)}',
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                );
+              },
             ),
           ),
         ),
@@ -331,7 +418,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     // Get current user
     final authState = context.read<AuthCubit>().state;
     if (authState is! AuthAuthenticated) {
-      context.showErrorSnackBar('Please log in to place an order');
+      final l10n = AppLocalizations.of(context);
+      context.showErrorSnackBar(
+        l10n?.pleaseLoginToPlaceOrder ?? 'يرجى تسجيل الدخول لتقديم الطلب',
+      );
       return;
     }
 
@@ -361,7 +451,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       totalAmount: _getTotalAmount(cartState.totalPrice),
       status: OrderStatus.pending,
       deliveryAddress: _addressController.text.trim(),
-      deliveryLocation: null, // TODO: Get from map/geolocation
+      deliveryLocation: _convertToGeoPoint(widget.restaurant.location), // Use restaurant location as fallback
       restaurantLocation: _convertToGeoPoint(widget.restaurant.location),
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),

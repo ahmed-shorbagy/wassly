@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../../../../shared/widgets/error_widget.dart';
 import '../../../auth/presentation/cubits/auth_cubit.dart';
@@ -46,7 +47,12 @@ class _OrderListScreenState extends State<OrderListScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Orders'),
+        title: Builder(
+          builder: (context) {
+            final l10n = AppLocalizations.of(context);
+            return Text(l10n?.myOrders ?? 'طلباتي');
+          },
+        ),
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.white,
@@ -81,7 +87,10 @@ class _OrderListScreenState extends State<OrderListScreen>
             );
           }
 
-          return const Center(child: Text('No orders yet'));
+          final l10n = AppLocalizations.of(context);
+          return Center(
+            child: Text(l10n?.noOrdersYet ?? 'لا توجد طلبات حتى الآن'),
+          );
         },
       ),
     );
@@ -114,7 +123,8 @@ class _OrderListScreenState extends State<OrderListScreen>
     return BlocBuilder<AuthCubit, AuthState>(
       builder: (context, authState) {
         if (authState is! AuthAuthenticated) {
-          return const Center(child: Text('Please log in'));
+          final l10n = AppLocalizations.of(context);
+          return Center(child: Text(l10n?.pleaseLogIn ?? 'يرجى تسجيل الدخول'));
         }
 
         return FutureBuilder<void>(
@@ -151,7 +161,10 @@ class _OrderListScreenState extends State<OrderListScreen>
                   );
                 }
 
-                return const Center(child: Text('No orders found'));
+                final l10n = AppLocalizations.of(context);
+                return Center(
+                  child: Text(l10n?.noOrdersFound ?? 'لم يتم العثور على طلبات'),
+                );
               },
             );
           },
@@ -170,7 +183,7 @@ class _OrderListScreenState extends State<OrderListScreen>
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
-        onTap: () => context.push('/customer/order/${order.id}'),
+        onTap: () => context.push('/order/${order.id}'),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -223,8 +236,9 @@ class _OrderListScreenState extends State<OrderListScreen>
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          DateFormat('MMM dd, yyyy • HH:mm')
-                              .format(order.createdAt),
+                          DateFormat(
+                            'MMM dd, yyyy • HH:mm',
+                          ).format(order.createdAt),
                           style: TextStyle(
                             fontSize: 12,
                             color: AppColors.textSecondary,
@@ -242,26 +256,30 @@ class _OrderListScreenState extends State<OrderListScreen>
               const Divider(height: 24),
 
               // Items
-              ...order.items.take(2).map((item) => Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: Row(
-                      children: [
-                        Text(
-                          '${item.quantity}x ',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: AppColors.textSecondary,
+              ...order.items
+                  .take(2)
+                  .map(
+                    (item) => Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Row(
+                        children: [
+                          Text(
+                            '${item.quantity}x ',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            item.productName,
-                            style: const TextStyle(fontSize: 14),
+                          Expanded(
+                            child: Text(
+                              item.productName,
+                              style: const TextStyle(fontSize: 14),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  )),
+                  ),
 
               if (order.items.length > 2)
                 Padding(
@@ -290,8 +308,11 @@ class _OrderListScreenState extends State<OrderListScreen>
                     ),
                   ),
                   TextButton(
-                    onPressed: () => context.push('/customer/order/${order.id}'),
-                    child: const Text('View Details'),
+                    onPressed: () => context.push('/order/${order.id}'),
+                    child: Text(
+                      AppLocalizations.of(context)?.viewDetails ??
+                          'عرض التفاصيل',
+                    ),
                   ),
                 ],
               ),
@@ -391,28 +412,23 @@ class _OrderListScreenState extends State<OrderListScreen>
           const SizedBox(height: 16),
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
             message,
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
           ElevatedButton(
-            onPressed: () => context.go('/customer'),
-            child: const Text('Browse Restaurants'),
+            onPressed: () => context.go('/home'),
+            child: Text(
+              AppLocalizations.of(context)?.browseRestaurants ?? 'تصفح المطاعم',
+            ),
           ),
         ],
       ),
     );
   }
 }
-

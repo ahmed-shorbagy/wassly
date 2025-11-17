@@ -205,6 +205,33 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, void>> resetPassword(String email) async {
+    if (await networkInfo.isConnected) {
+      try {
+        await firebaseAuth.sendPasswordResetEmail(email: email);
+        AppLogger.logSuccess('Password reset email sent to $email');
+        return const Right(null);
+      } on FirebaseAuthException catch (e) {
+        AppLogger.logError(
+          'Firebase Auth Exception during password reset',
+          error: 'Code: ${e.code}, Message: ${e.message}',
+        );
+        final errorMessage = _mapFirebaseAuthException(e);
+        return Left(AuthFailure(errorMessage));
+      } catch (e, stackTrace) {
+        AppLogger.logError(
+          'Unknown error during password reset',
+          error: e,
+          stackTrace: stackTrace,
+        );
+        return Left(ServerFailure('Failed to send password reset email'));
+      }
+    } else {
+      return const Left(NetworkFailure('No internet connection'));
+    }
+  }
+
   String _mapFirebaseAuthException(FirebaseAuthException e) {
     AppLogger.logAuth('Mapping Firebase error code: ${e.code}');
 

@@ -5,6 +5,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../auth/presentation/cubits/auth_cubit.dart';
 import '../cubits/restaurant_cubit.dart';
+import '../../../../shared/widgets/language_toggle_button.dart';
 
 class RestaurantHomeScreen extends StatelessWidget {
   const RestaurantHomeScreen({super.key});
@@ -15,6 +16,7 @@ class RestaurantHomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Restaurant Dashboard'),
         actions: [
+          const LanguageToggleButton(),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {

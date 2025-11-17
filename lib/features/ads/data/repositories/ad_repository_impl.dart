@@ -1,0 +1,330 @@
+import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dartz/dartz.dart';
+import '../../../../core/errors/failures.dart';
+import '../../../../core/utils/logger.dart';
+import '../../../../core/utils/image_upload_helper.dart';
+import '../../domain/entities/startup_ad_entity.dart';
+import '../../domain/repositories/ad_repository.dart';
+import '../models/startup_ad_model.dart';
+import '../../../home/domain/entities/banner_entity.dart';
+import '../../../home/data/models/banner_model.dart';
+
+class AdRepositoryImpl implements AdRepository {
+  final FirebaseFirestore firestore;
+  final ImageUploadHelper imageUploadHelper;
+
+  AdRepositoryImpl({
+    required this.firestore,
+    required this.imageUploadHelper,
+  });
+
+  @override
+  Future<Either<Failure, String>> uploadImageFile(
+    File file,
+    String bucketName,
+    String folder,
+  ) async {
+    try {
+      AppLogger.logInfo('Uploading image to $bucketName/$folder');
+      final result = await imageUploadHelper.uploadFile(
+        file: file,
+        bucketName: bucketName,
+        folder: folder,
+      );
+      return result.fold(
+        (failure) => Left(failure),
+        (url) {
+          AppLogger.logSuccess('Image uploaded successfully');
+          return Right(url);
+        },
+      );
+    } catch (e) {
+      AppLogger.logError('Error uploading image', error: e);
+      return Left(ServerFailure('Failed to upload image: $e'));
+    }
+  }
+
+  // Startup Ads
+  @override
+  Future<Either<Failure, List<StartupAdEntity>>> getAllStartupAds() async {
+    try {
+      AppLogger.logInfo('Fetching all startup ads');
+      QuerySnapshot snapshot;
+      try {
+        snapshot = await firestore
+            .collection('startup_ads')
+            .orderBy('priority', descending: false)
+            .get();
+      } catch (e) {
+        // Fallback if priority index doesn't exist
+        AppLogger.logWarning('Startup ads query with orderBy failed, using fallback: $e');
+        snapshot = await firestore
+            .collection('startup_ads')
+            .get();
+      }
+
+      final ads = snapshot.docs
+          .map((doc) => StartupAdModel.fromFirestore(doc))
+          .toList()
+        ..sort((a, b) => a.priority.compareTo(b.priority));
+
+      AppLogger.logSuccess('Fetched ${ads.length} startup ads');
+      return Right(ads);
+    } catch (e) {
+      AppLogger.logError('Error fetching startup ads', error: e);
+      return Left(ServerFailure('Failed to fetch startup ads: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, StartupAdEntity>> getStartupAdById(String adId) async {
+    try {
+      AppLogger.logInfo('Fetching startup ad: $adId');
+      final doc = await firestore.collection('startup_ads').doc(adId).get();
+
+      if (!doc.exists) {
+        return const Left(CacheFailure('Startup ad not found'));
+      }
+
+      final ad = StartupAdModel.fromFirestore(doc);
+      AppLogger.logSuccess('Startup ad fetched successfully');
+      return Right(ad);
+    } catch (e) {
+      AppLogger.logError('Error fetching startup ad', error: e);
+      return Left(ServerFailure('Failed to fetch startup ad: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, StartupAdEntity>> createStartupAd(
+    StartupAdEntity ad,
+  ) async {
+    try {
+      AppLogger.logInfo('Creating startup ad');
+      final model = StartupAdModel.fromEntity(ad);
+      final docRef = await firestore
+          .collection('startup_ads')
+          .add(model.toFirestore());
+
+      final createdAd = StartupAdModel(
+        id: docRef.id,
+        imageUrl: ad.imageUrl,
+        title: ad.title,
+        description: ad.description,
+        deepLink: ad.deepLink,
+        isActive: ad.isActive,
+        priority: ad.priority,
+        createdAt: ad.createdAt,
+        updatedAt: ad.updatedAt,
+      );
+
+      AppLogger.logSuccess('Startup ad created: ${docRef.id}');
+      return Right(createdAd);
+    } catch (e) {
+      AppLogger.logError('Error creating startup ad', error: e);
+      return Left(ServerFailure('Failed to create startup ad: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> updateStartupAd(StartupAdEntity ad) async {
+    try {
+      AppLogger.logInfo('Updating startup ad: ${ad.id}');
+      final model = StartupAdModel.fromEntity(ad);
+      await firestore
+          .collection('startup_ads')
+          .doc(ad.id)
+          .update(model.toFirestore());
+
+      AppLogger.logSuccess('Startup ad updated: ${ad.id}');
+      return const Right(null);
+    } catch (e) {
+      AppLogger.logError('Error updating startup ad', error: e);
+      return Left(ServerFailure('Failed to update startup ad: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteStartupAd(String adId) async {
+    try {
+      AppLogger.logInfo('Deleting startup ad: $adId');
+      await firestore.collection('startup_ads').doc(adId).delete();
+      AppLogger.logSuccess('Startup ad deleted: $adId');
+      return const Right(null);
+    } catch (e) {
+      AppLogger.logError('Error deleting startup ad', error: e);
+      return Left(ServerFailure('Failed to delete startup ad: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> toggleStartupAdStatus(
+    String adId,
+    bool isActive,
+  ) async {
+    try {
+      AppLogger.logInfo('Toggling startup ad status: $adId');
+      await firestore.collection('startup_ads').doc(adId).update({
+        'isActive': isActive,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      AppLogger.logSuccess('Startup ad status updated');
+      return const Right(null);
+    } catch (e) {
+      AppLogger.logError('Error toggling startup ad status', error: e);
+      return Left(ServerFailure('Failed to update startup ad status: $e'));
+    }
+  }
+
+  // Banner Ads
+  @override
+  Future<Either<Failure, List<BannerEntity>>> getAllBannerAds() async {
+    try {
+      AppLogger.logInfo('Fetching all banner ads');
+      QuerySnapshot snapshot;
+      try {
+        snapshot = await firestore
+            .collection('banners')
+            .orderBy('priority', descending: false)
+            .get();
+      } catch (e) {
+        // Fallback if priority index doesn't exist
+        AppLogger.logWarning('Banner ads query with orderBy failed, using fallback: $e');
+        snapshot = await firestore
+            .collection('banners')
+            .get();
+      }
+
+      final banners = snapshot.docs
+          .map((doc) => BannerModel.fromFirestore(doc))
+          .where((b) => b.imageUrl.isNotEmpty)
+          .toList();
+      
+      // Sort by priority client-side
+      banners.sort((a, b) {
+        final aPriority = a.priority ?? 0;
+        final bPriority = b.priority ?? 0;
+        return aPriority.compareTo(bPriority);
+      });
+
+      AppLogger.logSuccess('Fetched ${banners.length} banner ads');
+      return Right(banners);
+    } catch (e) {
+      AppLogger.logError('Error fetching banner ads', error: e);
+      return Left(ServerFailure('Failed to fetch banner ads: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, BannerEntity>> getBannerAdById(String bannerId) async {
+    try {
+      AppLogger.logInfo('Fetching banner ad: $bannerId');
+      final doc = await firestore.collection('banners').doc(bannerId).get();
+
+      if (!doc.exists) {
+        return const Left(CacheFailure('Banner ad not found'));
+      }
+
+      final banner = BannerModel.fromFirestore(doc);
+      AppLogger.logSuccess('Banner ad fetched successfully');
+      return Right(banner);
+    } catch (e) {
+      AppLogger.logError('Error fetching banner ad', error: e);
+      return Left(ServerFailure('Failed to fetch banner ad: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, BannerEntity>> createBannerAd(
+    BannerEntity banner,
+  ) async {
+    try {
+      AppLogger.logInfo('Creating banner ad');
+      final model = BannerModel.fromEntity(banner);
+      final docRef = await firestore
+          .collection('banners')
+          .add(model.toFirestore());
+
+      final createdBanner = BannerModel(
+        id: docRef.id,
+        imageUrl: banner.imageUrl,
+        title: banner.title,
+        deepLink: banner.deepLink,
+        isActive: true,
+        priority: 0,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      AppLogger.logSuccess('Banner ad created: ${docRef.id}');
+      return Right(createdBanner);
+    } catch (e) {
+      AppLogger.logError('Error creating banner ad', error: e);
+      return Left(ServerFailure('Failed to create banner ad: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> updateBannerAd(BannerEntity banner) async {
+    try {
+      AppLogger.logInfo('Updating banner ad: ${banner.id}');
+      final existingDoc = await firestore.collection('banners').doc(banner.id).get();
+      final existingData = existingDoc.data();
+      
+      final model = BannerModel(
+        id: banner.id,
+        imageUrl: banner.imageUrl,
+        title: banner.title,
+        deepLink: banner.deepLink,
+        isActive: existingData?['isActive'] ?? true,
+        priority: existingData?['priority'] ?? 0,
+        createdAt: existingData?['createdAt'] is Timestamp
+            ? (existingData!['createdAt'] as Timestamp).toDate()
+            : DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+      
+      await firestore.collection('banners').doc(banner.id).update(model.toFirestore());
+
+      AppLogger.logSuccess('Banner ad updated: ${banner.id}');
+      return const Right(null);
+    } catch (e) {
+      AppLogger.logError('Error updating banner ad', error: e);
+      return Left(ServerFailure('Failed to update banner ad: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteBannerAd(String bannerId) async {
+    try {
+      AppLogger.logInfo('Deleting banner ad: $bannerId');
+      await firestore.collection('banners').doc(bannerId).delete();
+      AppLogger.logSuccess('Banner ad deleted: $bannerId');
+      return const Right(null);
+    } catch (e) {
+      AppLogger.logError('Error deleting banner ad', error: e);
+      return Left(ServerFailure('Failed to delete banner ad: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> toggleBannerAdStatus(
+    String bannerId,
+    bool isActive,
+  ) async {
+    try {
+      AppLogger.logInfo('Toggling banner ad status: $bannerId');
+      await firestore.collection('banners').doc(bannerId).update({
+        'isActive': isActive,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      AppLogger.logSuccess('Banner ad status updated');
+      return const Right(null);
+    } catch (e) {
+      AppLogger.logError('Error toggling banner ad status', error: e);
+      return Left(ServerFailure('Failed to update banner ad status: $e'));
+    }
+  }
+}
+

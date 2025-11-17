@@ -5,6 +5,7 @@ import '../../domain/entities/product_entity.dart';
 import '../../domain/usecases/get_all_restaurants_usecase.dart';
 import '../../domain/usecases/get_restaurant_by_id_usecase.dart';
 import '../../domain/usecases/get_restaurant_products_usecase.dart';
+import '../../domain/repositories/restaurant_owner_repository.dart';
 import '../../../../core/utils/use_case.dart';
 
 part 'restaurant_state.dart';
@@ -13,11 +14,13 @@ class RestaurantCubit extends Cubit<RestaurantState> {
   final GetAllRestaurantsUseCase getAllRestaurantsUseCase;
   final GetRestaurantByIdUseCase getRestaurantByIdUseCase;
   final GetRestaurantProductsUseCase getRestaurantProductsUseCase;
+  final RestaurantOwnerRepository? restaurantOwnerRepository;
 
   RestaurantCubit({
     required this.getAllRestaurantsUseCase,
     required this.getRestaurantByIdUseCase,
     required this.getRestaurantProductsUseCase,
+    this.restaurantOwnerRepository,
   }) : super(RestaurantInitial());
 
   Future<void> getAllRestaurants() async {
@@ -50,6 +53,22 @@ class RestaurantCubit extends Cubit<RestaurantState> {
     result.fold(
       (failure) => emit(RestaurantError(failure.message)),
       (products) => emit(ProductsLoaded(products)),
+    );
+  }
+
+  Future<void> getRestaurantByOwnerId(String ownerId) async {
+    if (restaurantOwnerRepository == null) {
+      emit(const RestaurantError('Restaurant owner repository not available'));
+      return;
+    }
+
+    emit(RestaurantLoading());
+
+    final result = await restaurantOwnerRepository!.getRestaurantByOwnerId(ownerId);
+
+    result.fold(
+      (failure) => emit(RestaurantError(failure.message)),
+      (restaurant) => emit(RestaurantLoaded(restaurant)),
     );
   }
 }

@@ -1,16 +1,16 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../features/auth/presentation/views/splash_screen.dart';
 import '../../features/auth/presentation/views/login_screen.dart';
 import '../../features/auth/presentation/views/signup_screen.dart';
 import '../../features/restaurants/presentation/views/customer_home_screen.dart';
+import '../../features/restaurants/presentation/views/favorites_screen.dart';
 import '../../features/restaurants/presentation/views/restaurant_detail_screen.dart';
-import '../../features/restaurants/presentation/cubits/restaurant_cubit.dart';
 import '../../features/orders/presentation/views/cart_screen.dart';
 import '../../features/orders/presentation/views/checkout_screen.dart';
 import '../../features/orders/presentation/views/order_list_screen.dart';
 import '../../features/orders/presentation/views/order_detail_screen.dart';
+import '../../features/auth/presentation/views/customer_profile_screen.dart';
 
 class CustomerRouter {
   static final GoRouter router = GoRouter(
@@ -55,6 +55,11 @@ class CustomerRouter {
         builder: (context, state) => const CartScreen(),
       ),
       GoRoute(
+        path: '/favorites',
+        name: 'favorites',
+        builder: (context, state) => const FavoritesScreen(),
+      ),
+      GoRoute(
         path: '/checkout',
         name: 'checkout',
         builder: (context, state) {
@@ -79,6 +84,11 @@ class CustomerRouter {
           final orderId = state.pathParameters['id'] ?? '';
           return OrderDetailScreen(orderId: orderId);
         },
+      ),
+      GoRoute(
+        path: '/profile',
+        name: 'profile',
+        builder: (context, state) => const CustomerProfileScreen(),
       ),
     ],
     errorBuilder: (context, state) => const ErrorScreen(),

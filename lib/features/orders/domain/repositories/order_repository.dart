@@ -30,5 +30,27 @@ abstract class OrderRepository {
 
   /// Listen to customer's active orders (real-time)
   Stream<List<OrderEntity>> listenToCustomerOrders(String customerId);
+
+  /// Get all orders for a restaurant
+  Future<Either<Failure, List<OrderEntity>>> getRestaurantOrders(
+    String restaurantId,
+  );
+
+  /// Listen to restaurant orders (real-time)
+  Stream<List<OrderEntity>> listenToRestaurantOrders(String restaurantId);
+
+  /// Update order status
+  Future<Either<Failure, void>> updateOrderStatus(
+    String orderId,
+    OrderStatus status,
+  );
+
+  /// Assign driver to order
+  Future<Either<Failure, void>> assignDriverToOrder(
+    String orderId,
+    String driverId,
+    String driverName,
+    String driverPhone,
+  );
 }
 

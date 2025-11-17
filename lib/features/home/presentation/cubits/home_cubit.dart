@@ -26,19 +26,42 @@ class HomeCubit extends Cubit<HomeState> {
 
   Future<List<BannerEntity>> _loadBanners() async {
     try {
-      final snapshot = await firestore
-          .collection('banners')
-          .orderBy('priority', descending: false)
-          .get();
-      return snapshot.docs
-          .map((d) => BannerEntity(
-                id: d.id,
-                imageUrl: (d.data()['imageUrl'] ?? '') as String,
-                title: d.data()['title'] as String?,
-                deepLink: d.data()['deepLink'] as String?,
-              ))
-          .where((b) => b.imageUrl.isNotEmpty)
+      QuerySnapshot snapshot;
+      try {
+        // Try with isActive filter and priority order (requires composite index)
+        snapshot = await firestore
+            .collection('banners')
+            .where('isActive', isEqualTo: true)
+            .orderBy('priority', descending: false)
+            .get();
+      } catch (e) {
+        // Fallback: fetch all and filter client-side
+        AppLogger.logWarning('Banner query with filters failed, using fallback: $e');
+        snapshot = await firestore
+            .collection('banners')
+            .orderBy('priority', descending: false)
+            .get();
+      }
+      
+      final banners = snapshot.docs
+          .map((d) {
+            final data = d.data() as Map<String, dynamic>;
+            // Filter active banners client-side if query didn't include filter
+            final isActive = data['isActive'] ?? true;
+            if (!isActive) return null;
+            
+            return BannerEntity(
+              id: d.id,
+              imageUrl: (data['imageUrl'] ?? '') as String,
+              title: data['title'] as String?,
+              deepLink: data['deepLink'] as String?,
+            );
+          })
+          .where((b) => b != null && b.imageUrl.isNotEmpty)
+          .cast<BannerEntity>()
           .toList();
+      
+      return banners;
     } catch (e) {
       AppLogger.logError('Failed to fetch banners', error: e);
       return [];

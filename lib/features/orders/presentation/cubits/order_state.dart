@@ -44,6 +44,10 @@ class OrderCreated extends OrderState {
 
 class OrderCancelled extends OrderState {}
 
+class OrderUpdating extends OrderState {}
+
+class OrderUpdated extends OrderState {}
+
 class OrderError extends OrderState {
   final String message;
 

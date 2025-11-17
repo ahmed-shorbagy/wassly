@@ -208,5 +208,94 @@ class OrderCubit extends Cubit<OrderState> {
       emit(const OrderError('Failed to listen to orders updates'));
     }
   }
+
+  /// Listen to restaurant orders in real-time
+  void listenToRestaurantOrders(String restaurantId) {
+    try {
+      AppLogger.logInfo(
+        'Setting up real-time listener for restaurant orders: $restaurantId',
+      );
+
+      _ordersListSubscription?.cancel();
+      _ordersListSubscription =
+          repository.listenToRestaurantOrders(restaurantId).listen(
+        (orders) {
+          AppLogger.logInfo('Restaurant orders updated: ${orders.length} orders');
+          emit(OrdersLoaded(orders));
+        },
+        onError: (error) {
+          AppLogger.logError('Error in restaurant orders stream', error: error);
+          emit(const OrderError('Failed to get orders updates'));
+        },
+      );
+    } catch (e) {
+      AppLogger.logError('Error setting up restaurant orders listener', error: e);
+      emit(const OrderError('Failed to listen to orders updates'));
+    }
+  }
+
+  /// Update order status
+  Future<void> updateOrderStatus(
+    String orderId,
+    OrderStatus status,
+  ) async {
+    try {
+      emit(OrderUpdating());
+      AppLogger.logInfo('Updating order status: $orderId to $status');
+
+      final result = await repository.updateOrderStatus(orderId, status);
+
+      result.fold(
+        (failure) {
+          AppLogger.logError('Failed to update order', error: failure.message);
+          emit(OrderError(failure.message));
+        },
+        (_) {
+          AppLogger.logSuccess('Order status updated successfully');
+          emit(OrderUpdated());
+          // Reload order to get updated state
+          getOrderById(orderId);
+        },
+      );
+    } catch (e) {
+      AppLogger.logError('Error updating order status', error: e);
+      emit(const OrderError('Failed to update order status'));
+    }
+  }
+
+  /// Assign driver to order
+  Future<void> assignDriverToOrder(
+    String orderId,
+    String driverId,
+    String driverName,
+    String driverPhone,
+  ) async {
+    try {
+      emit(OrderUpdating());
+      AppLogger.logInfo('Assigning driver to order: $orderId');
+
+      final result = await repository.assignDriverToOrder(
+        orderId,
+        driverId,
+        driverName,
+        driverPhone,
+      );
+
+      result.fold(
+        (failure) {
+          AppLogger.logError('Failed to assign driver', error: failure.message);
+          emit(OrderError(failure.message));
+        },
+        (_) {
+          AppLogger.logSuccess('Driver assigned successfully');
+          emit(OrderUpdated());
+          getOrderById(orderId);
+        },
+      );
+    } catch (e) {
+      AppLogger.logError('Error assigning driver', error: e);
+      emit(const OrderError('Failed to assign driver'));
+    }
+  }
 }
 

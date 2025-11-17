@@ -5,6 +5,7 @@ import '../../features/auth/presentation/views/login_screen.dart';
 import '../../features/auth/presentation/views/signup_screen.dart';
 import '../../features/restaurants/presentation/views/restaurant_home_screen.dart';
 import '../../features/restaurants/presentation/views/driver_home_screen.dart';
+import '../../features/partner/presentation/views/restaurant_orders_screen.dart';
 
 class PartnerRouter {
   static final GoRouter router = GoRouter(
@@ -41,9 +42,20 @@ class PartnerRouter {
             builder: (context, state) => const RestaurantOrdersScreen(),
           ),
           GoRoute(
+            path: 'order/:id',
+            name: 'restaurant-order-detail',
+            builder: (context, state) {
+              final orderId = state.pathParameters['id'] ?? '';
+              return RestaurantOrderDetailScreen(orderId: orderId);
+            },
+          ),
+          GoRoute(
             path: 'products',
             name: 'restaurant-products',
-            builder: (context, state) => const ProductListScreen(),
+            builder: (context, state) {
+              // Restaurant ID will be fetched from auth state in the screen
+              return const RestaurantProductsScreen();
+            },
           ),
           GoRoute(
             path: 'settings',
@@ -86,22 +98,26 @@ class ErrorScreen extends StatelessWidget {
   }
 }
 
-class RestaurantOrdersScreen extends StatelessWidget {
-  const RestaurantOrdersScreen({super.key});
+class RestaurantOrderDetailScreen extends StatelessWidget {
+  final String orderId;
+  const RestaurantOrderDetailScreen({super.key, required this.orderId});
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text('Restaurant Orders - Coming Soon')),
+    // TODO: Implement restaurant order detail screen
+    return Scaffold(
+      appBar: AppBar(title: const Text('Order Details')),
+      body: Center(child: Text('Order Detail: $orderId')),
     );
   }
 }
 
-class ProductListScreen extends StatelessWidget {
-  const ProductListScreen({super.key});
+class RestaurantProductsScreen extends StatelessWidget {
+  const RestaurantProductsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // TODO: Get restaurant ID from auth state
     return const Scaffold(
       body: Center(child: Text('Product Management - Coming Soon')),
     );

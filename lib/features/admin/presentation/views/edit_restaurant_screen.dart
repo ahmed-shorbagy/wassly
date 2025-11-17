@@ -8,6 +8,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/extensions.dart';
 import '../../../../shared/widgets/loading_widget.dart';
+import '../../../../shared/widgets/safe_navigation_wrapper.dart';
 import '../../../restaurants/domain/entities/restaurant_entity.dart';
 import '../cubits/admin_cubit.dart';
 
@@ -358,18 +359,20 @@ class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.editRestaurant),
-        backgroundColor: Colors.purple,
-      ),
+    return SafeNavigationWrapper(
+      fallbackRoute: '/admin/restaurants',
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(l10n.editRestaurant),
+          backgroundColor: Colors.purple,
+        ),
       body: BlocConsumer<AdminCubit, AdminState>(
         listener: (context, state) {
           if (state is RestaurantLoaded) {
             _handleCubitState(state);
           } else if (state is RestaurantUpdatedSuccess) {
             context.showSuccessSnackBar(l10n.restaurantUpdatedSuccessfully);
-            context.go('/admin/restaurants');
+            context.pop();
           } else if (state is AdminError) {
             context.showErrorSnackBar(state.message);
             _handleCubitState(state);
@@ -619,6 +622,7 @@ class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
             ),
           );
         },
+      ),
       ),
     );
   }

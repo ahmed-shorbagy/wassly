@@ -9,6 +9,9 @@ import 'core/theme/partner_theme.dart';
 import 'core/constants/supabase_constants.dart';
 import 'core/di/injection_container.dart';
 import 'core/utils/logger.dart';
+import 'l10n/app_localizations.dart';
+import 'core/localization/locale_cubit.dart';
+import 'shared/widgets/back_button_handler.dart';
 
 void main() async {
   // Initialize flavor configuration
@@ -65,11 +68,20 @@ class WasslyPartnerApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: InjectionContainer().getBlocProviders(),
-      child: MaterialApp.router(
-        title: FlavorConfig.instance.appName,
-        theme: PartnerTheme.lightTheme,
-        routerConfig: PartnerRouter.router,
-        debugShowCheckedModeBanner: false,
+      child: BlocBuilder<LocaleCubit, LocaleState>(
+        builder: (context, localeState) {
+          return BackButtonHandler(
+            child: MaterialApp.router(
+              title: FlavorConfig.instance.appName,
+              theme: PartnerTheme.lightTheme,
+              routerConfig: PartnerRouter.router,
+              debugShowCheckedModeBanner: false,
+              locale: localeState.locale,
+              supportedLocales: AppLocalizations.supportedLocales,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+            ),
+          );
+        },
       ),
     );
   }

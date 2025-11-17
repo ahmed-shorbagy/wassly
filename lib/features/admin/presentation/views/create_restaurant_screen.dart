@@ -8,6 +8,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/extensions.dart';
 import '../../../../shared/widgets/loading_widget.dart';
+import '../../../../shared/widgets/back_button_handler.dart';
 import '../cubits/admin_cubit.dart';
 
 class CreateRestaurantScreen extends StatefulWidget {
@@ -256,11 +257,24 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
     );
   }
 
+  bool get _hasUnsavedChanges {
+    return _nameController.text.isNotEmpty ||
+        _descriptionController.text.isNotEmpty ||
+        _addressController.text.isNotEmpty ||
+        _phoneController.text.isNotEmpty ||
+        _emailController.text.isNotEmpty ||
+        _selectedImage != null ||
+        _commercialRegistrationPhoto != null ||
+        _selectedCategories.isNotEmpty;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
+    return UnsavedChangesHandler(
+      hasUnsavedChanges: _hasUnsavedChanges,
+      child: Scaffold(
       appBar: AppBar(title: Text(l10n.createRestaurant)),
       body: BlocConsumer<AdminCubit, AdminState>(
         listener: (context, state) {
@@ -498,6 +512,7 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
             ),
           );
         },
+      ),
       ),
     );
   }

@@ -10,6 +10,8 @@ import 'core/constants/supabase_constants.dart';
 import 'core/di/injection_container.dart';
 import 'core/utils/logger.dart';
 import 'core/utils/demo_data.dart';
+import 'l10n/app_localizations.dart';
+import 'core/localization/locale_cubit.dart';
 
 void main() async {
   AppLogger.logInfo('=== App Starting ===');
@@ -64,11 +66,18 @@ class WasslyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: InjectionContainer().getBlocProviders(),
-      child: MaterialApp.router(
-        title: AppConstants.appName,
-        theme: AppTheme.lightTheme,
-        routerConfig: AppRouter.router,
-        debugShowCheckedModeBanner: false,
+      child: BlocBuilder<LocaleCubit, LocaleState>(
+        builder: (context, localeState) {
+          return MaterialApp.router(
+            title: AppConstants.appName,
+            theme: AppTheme.lightTheme,
+            routerConfig: AppRouter.router,
+            debugShowCheckedModeBanner: false,
+            locale: localeState.locale,
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+          );
+        },
       ),
     );
   }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'l10n/app_localizations.dart';
@@ -11,6 +10,8 @@ import 'core/theme/admin_theme.dart';
 import 'core/constants/supabase_constants.dart';
 import 'core/di/injection_container.dart';
 import 'core/utils/logger.dart';
+import 'core/localization/locale_cubit.dart';
+import 'shared/widgets/back_button_handler.dart';
 
 void main() async {
   // Initialize flavor configuration
@@ -67,23 +68,20 @@ class WasslyAdminApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: InjectionContainer().getBlocProviders(),
-      child: MaterialApp.router(
-        title: FlavorConfig.instance.appName,
-        theme: AdminTheme.lightTheme,
-        routerConfig: AdminRouter.router,
-        debugShowCheckedModeBanner: false,
-        // Set Arabic as the primary locale
-        locale: const Locale('ar', 'EG'),
-        supportedLocales: const [
-          Locale('ar', 'EG'), // Arabic (Egypt)
-          Locale('en', 'US'), // English (US)
-        ],
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
+      child: BlocBuilder<LocaleCubit, LocaleState>(
+        builder: (context, localeState) {
+          return BackButtonHandler(
+            child: MaterialApp.router(
+              title: FlavorConfig.instance.appName,
+              theme: AdminTheme.lightTheme,
+              routerConfig: AdminRouter.router,
+              debugShowCheckedModeBanner: false,
+              locale: localeState.locale,
+              supportedLocales: AppLocalizations.supportedLocales,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+            ),
+          );
+        },
       ),
     );
   }

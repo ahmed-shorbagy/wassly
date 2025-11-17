@@ -109,6 +109,10 @@ class AppStrings {
   static const String changePassword = 'Change Password';
   static const String settings = 'Settings';
 
+  // Phone validation
+  static const String pleaseEnterPhoneNumber = 'Please enter phone number';
+  static const String pleaseEnterValidPhoneNumber = 'Please enter a valid phone number';
+
   // Errors
   static const String networkError = 'Network Error';
   static const String serverError = 'Server Error';

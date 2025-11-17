@@ -7,12 +7,11 @@ import '../../../../shared/widgets/loading_widget.dart';
 import '../../../../shared/widgets/error_widget.dart';
 import '../../../restaurants/domain/entities/product_entity.dart';
 import '../../../restaurants/presentation/cubits/restaurant_cubit.dart';
+import '../../../auth/presentation/cubits/auth_cubit.dart';
 import '../cubits/product_management_cubit.dart';
 
 class ProductManagementScreen extends StatefulWidget {
-  final String restaurantId;
-
-  const ProductManagementScreen({super.key, required this.restaurantId});
+  const ProductManagementScreen({super.key});
 
   @override
   State<ProductManagementScreen> createState() =>
@@ -20,14 +19,23 @@ class ProductManagementScreen extends StatefulWidget {
 }
 
 class _ProductManagementScreenState extends State<ProductManagementScreen> {
+  String? _restaurantId;
+
   @override
   void initState() {
     super.initState();
-    _loadProducts();
+    _loadRestaurantAndProducts();
   }
 
-  void _loadProducts() {
-    context.read<RestaurantCubit>().getRestaurantProducts(widget.restaurantId);
+  void _loadRestaurantAndProducts() {
+    final authState = context.read<AuthCubit>().state;
+    if (authState is AuthAuthenticated) {
+      context.read<RestaurantCubit>().getRestaurantByOwnerId(authState.user.id);
+    }
+  }
+
+  void _loadProducts(String restaurantId) {
+    context.read<RestaurantCubit>().getRestaurantProducts(restaurantId);
   }
 
   @override
@@ -38,7 +46,13 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: _loadProducts,
+            onPressed: () {
+              if (_restaurantId != null) {
+                _loadProducts(_restaurantId!);
+              } else {
+                _loadRestaurantAndProducts();
+              }
+            },
             tooltip: 'Refresh',
           ),
         ],
@@ -47,16 +61,28 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
         listener: (context, state) {
           if (state is ProductDeleted) {
             context.showSuccessSnackBar('Product deleted successfully');
-            _loadProducts();
+            if (_restaurantId != null) {
+              _loadProducts(_restaurantId!);
+            }
           } else if (state is ProductAvailabilityToggled) {
             context.showSuccessSnackBar('Availability updated');
-            _loadProducts();
+            if (_restaurantId != null) {
+              _loadProducts(_restaurantId!);
+            }
           } else if (state is ProductManagementError) {
             context.showErrorSnackBar(state.message);
           }
         },
         builder: (context, managementState) {
-          return BlocBuilder<RestaurantCubit, RestaurantState>(
+          return BlocConsumer<RestaurantCubit, RestaurantState>(
+            listener: (context, state) {
+              if (state is RestaurantLoaded) {
+                setState(() {
+                  _restaurantId = state.restaurant.id;
+                });
+                _loadProducts(state.restaurant.id);
+              }
+            },
             builder: (context, state) {
               if (state is RestaurantLoading) {
                 return const LoadingWidget();
@@ -65,8 +91,13 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
               if (state is RestaurantError) {
                 return ErrorDisplayWidget(
                   message: state.message,
-                  onRetry: _loadProducts,
+                  onRetry: _loadRestaurantAndProducts,
                 );
+              }
+
+              if (state is RestaurantLoaded && _restaurantId == null) {
+                // Restaurant loaded but products not yet loaded
+                return const LoadingWidget();
               }
 
               if (state is ProductsLoaded) {
@@ -92,7 +123,11 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
 
   Widget _buildProductList(List<ProductEntity> products) {
     return RefreshIndicator(
-      onRefresh: () async => _loadProducts(),
+      onRefresh: () async {
+        if (_restaurantId != null) {
+          _loadProducts(_restaurantId!);
+        }
+      },
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: products.length,
@@ -355,12 +390,12 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
   }
 
   void _navigateToAddProduct() {
-    // TODO: Navigate to add product screen
+    // Navigate to add product screen - will be implemented in admin product screens
     context.showInfoSnackBar('Add Product screen - Coming soon!');
   }
 
   void _navigateToEditProduct(ProductEntity product) {
-    // TODO: Navigate to edit product screen
+    // Navigate to edit product screen - will be implemented in admin product screens
     context.showInfoSnackBar('Edit Product screen - Coming soon!');
   }
 }
