@@ -204,7 +204,7 @@ class _RestaurantManagementScreenState
         ],
       ),
         floatingActionButton: FloatingActionButton.extended(
-          onPressed: () => context.go('/admin/restaurants/create'),
+          onPressed: () => context.push('/admin/restaurants/create'),
           icon: const Icon(Icons.add),
           label: const Text('Create Restaurant'),
           backgroundColor: Colors.purple,
@@ -454,7 +454,7 @@ class _RestaurantManagementScreenState
             ),
             const SizedBox(height: 32),
             ElevatedButton.icon(
-              onPressed: () => context.go('/admin/restaurants/create'),
+              onPressed: () => context.push('/admin/restaurants/create'),
               icon: const Icon(Icons.add),
               label: const Text('Create Restaurant'),
               style: ElevatedButton.styleFrom(

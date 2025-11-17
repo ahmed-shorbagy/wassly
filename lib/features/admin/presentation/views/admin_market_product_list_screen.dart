@@ -190,7 +190,7 @@ class _AdminMarketProductListScreenState
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.go('/admin/market-products/add'),
+        onPressed: () => context.push('/admin/market-products/add'),
         icon: const Icon(Icons.add),
         label: Text(l10n.addProduct),
         backgroundColor: Colors.purple,
@@ -418,7 +418,7 @@ class _AdminMarketProductListScreenState
             ),
             const SizedBox(height: 32),
             ElevatedButton.icon(
-              onPressed: () => context.go('/admin/market-products/add'),
+              onPressed: () => context.push('/admin/market-products/add'),
               icon: const Icon(Icons.add),
               label: Text(l10n.addProduct),
               style: ElevatedButton.styleFrom(
@@ -466,7 +466,7 @@ class _AdminMarketProductListScreenState
   }
 
   void _navigateToEdit(MarketProductEntity product) {
-    context.go(
+    context.push(
       '/admin/market-products/edit/${product.id}',
       extra: product,
     );

@@ -399,6 +399,11 @@
   "settings": "Settings",
   "changePassword": "Change Password",
   "updateProfile": "Update Profile",
-  "login": "Login"
+  "login": "Login",
+  "welcome": "Welcome",
+  "loginToContinue": "Log in to continue",
+  "dontHaveAccount": "Don't have an account?",
+  "signup": "Sign Up",
+  "or": "or"
 }
 

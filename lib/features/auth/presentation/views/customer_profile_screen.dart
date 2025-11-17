@@ -136,7 +136,7 @@ class CustomerProfileScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
-                  onPressed: () => context.go('/login'),
+                  onPressed: () => context.push('/login'),
                   child: Text(l10n.login),
                 ),
               ],
@@ -335,9 +335,8 @@ class CustomerProfileScreen extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () {
-              context.pop();
               context.read<AuthCubit>().logout();
-              context.go('/login');
+              context.push('/login');
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.error,

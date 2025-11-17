@@ -9,6 +9,7 @@ import '../../features/admin/presentation/views/admin_add_product_screen.dart';
 import '../../features/admin/presentation/views/admin_market_product_list_screen.dart';
 import '../../features/admin/presentation/views/admin_add_market_product_screen.dart';
 import '../../features/admin/presentation/views/admin_edit_market_product_screen.dart';
+import '../../features/admin/presentation/views/admin_edit_product_screen.dart';
 import '../../features/admin/presentation/views/admin_startup_ads_screen.dart';
 import '../../features/admin/presentation/views/admin_banner_ads_screen.dart';
 import '../../features/admin/presentation/views/admin_add_startup_ad_screen.dart';
@@ -32,169 +33,198 @@ class AdminRouter {
         builder: (context, state) => const AdminSplashScreen(),
       ),
 
-      // Admin Routes
+      // Admin Routes - Nested structure for proper navigation stack
       GoRoute(
         path: '/admin',
         name: 'admin',
         builder: (context, state) => const AdminDashboardScreen(),
-      ),
-      GoRoute(
-        path: '/admin/analytics',
-        name: 'analytics',
-        builder: (context, state) => const AnalyticsScreen(),
-      ),
-      GoRoute(
-        path: '/admin/users',
-        name: 'users',
-        builder: (context, state) => const UserManagementScreen(),
-      ),
-      GoRoute(
-        path: '/admin/restaurants',
-        name: 'restaurants',
-        builder: (context, state) => const RestaurantManagementScreen(),
-      ),
-      GoRoute(
-        path: '/admin/restaurants/create',
-        name: 'create-restaurant',
-        builder: (context, state) => const CreateRestaurantScreen(),
-      ),
-      GoRoute(
-        path: '/admin/restaurants/edit/:id',
-        name: 'edit-restaurant',
-        builder: (context, state) {
-          final restaurantId = state.pathParameters['id'] ?? '';
-          final restaurant = state.extra is RestaurantEntity
-              ? state.extra as RestaurantEntity
-              : null;
-          return EditRestaurantScreen(
-            restaurantId: restaurantId,
-            restaurant: restaurant,
-          );
-        },
-      ),
-      // Product Management Routes
-      GoRoute(
-        path: '/admin/restaurants/:restaurantId/products',
-        name: 'admin-restaurant-products',
-        builder: (context, state) {
-          final restaurantId = state.pathParameters['restaurantId'] ?? '';
-          final restaurant = state.extra as Map<String, dynamic>?;
-          return AdminProductListScreen(
-            restaurantId: restaurantId,
-            restaurantName: restaurant?['name'] ?? 'Restaurant',
-          );
-        },
-      ),
-      GoRoute(
-        path: '/admin/restaurants/:restaurantId/products/add',
-        name: 'admin-add-product',
-        builder: (context, state) {
-          final restaurantId = state.pathParameters['restaurantId'] ?? '';
-          return AdminAddProductScreen(restaurantId: restaurantId);
-        },
-      ),
-      GoRoute(
-        path: '/admin/restaurants/:restaurantId/products/edit/:productId',
-        name: 'admin-edit-product',
-        builder: (context, state) {
-          final restaurantId = state.pathParameters['restaurantId'] ?? '';
-          final productId = state.pathParameters['productId'] ?? '';
-          final product = state.extra;
-          return AdminEditProductScreen(
-            restaurantId: restaurantId,
-            productId: productId,
-            product: product,
-          );
-        },
-      ),
-      GoRoute(
-        path: '/admin/drivers',
-        name: 'drivers',
-        builder: (context, state) => const DriverManagementScreen(),
-      ),
-      GoRoute(
-        path: '/admin/orders',
-        name: 'orders',
-        builder: (context, state) => const OrderManagementScreen(),
-      ),
-      GoRoute(
-        path: '/admin/settings',
-        name: 'settings',
-        builder: (context, state) => const AdminSettingsScreen(),
-      ),
-      // Market Products Routes
-      GoRoute(
-        path: '/admin/market-products',
-        name: 'market-products',
-        builder: (context, state) => const AdminMarketProductListScreen(),
-      ),
-      GoRoute(
-        path: '/admin/market-products/add',
-        name: 'add-market-product',
-        builder: (context, state) => const AdminAddMarketProductScreen(),
-      ),
-      GoRoute(
-        path: '/admin/market-products/edit/:id',
-        name: 'edit-market-product',
-        builder: (context, state) {
-          final productId = state.pathParameters['id'] ?? '';
-          final product = state.extra is MarketProductEntity
-              ? state.extra as MarketProductEntity
-              : null;
-          return AdminEditMarketProductScreen(
-            productId: productId,
-            product: product,
-          );
-        },
-      ),
-      // Ads Management Routes
-      GoRoute(
-        path: '/admin/ads/startup',
-        name: 'startup-ads',
-        builder: (context, state) => const AdminStartupAdsScreen(),
-      ),
-      GoRoute(
-        path: '/admin/ads/startup/add',
-        name: 'add-startup-ad',
-        builder: (context, state) => const AdminAddStartupAdScreen(),
-      ),
-      GoRoute(
-        path: '/admin/ads/startup/edit/:id',
-        name: 'edit-startup-ad',
-        builder: (context, state) {
-          final adId = state.pathParameters['id'] ?? '';
-          final ad = state.extra is StartupAdEntity
-              ? state.extra as StartupAdEntity
-              : null;
-          return AdminEditStartupAdScreen(
-            adId: adId,
-            ad: ad,
-          );
-        },
-      ),
-      GoRoute(
-        path: '/admin/ads/banners',
-        name: 'banner-ads',
-        builder: (context, state) => const AdminBannerAdsScreen(),
-      ),
-      GoRoute(
-        path: '/admin/ads/banners/add',
-        name: 'add-banner-ad',
-        builder: (context, state) => const AdminAddBannerAdScreen(),
-      ),
-      GoRoute(
-        path: '/admin/ads/banners/edit/:id',
-        name: 'edit-banner-ad',
-        builder: (context, state) {
-          final bannerId = state.pathParameters['id'] ?? '';
-          final banner = state.extra is BannerEntity
-              ? state.extra as BannerEntity
-              : null;
-          return AdminEditBannerAdScreen(
-            bannerId: bannerId,
-            banner: banner,
-          );
-        },
+        routes: [
+          // Analytics
+          GoRoute(
+            path: 'analytics',
+            name: 'analytics',
+            builder: (context, state) => const AnalyticsScreen(),
+          ),
+          // Users
+          GoRoute(
+            path: 'users',
+            name: 'users',
+            builder: (context, state) => const UserManagementScreen(),
+          ),
+          // Restaurants - Nested routes
+          GoRoute(
+            path: 'restaurants',
+            name: 'restaurants',
+            builder: (context, state) => const RestaurantManagementScreen(),
+            routes: [
+              GoRoute(
+                path: 'create',
+                name: 'create-restaurant',
+                builder: (context, state) => const CreateRestaurantScreen(),
+              ),
+              GoRoute(
+                path: 'edit/:id',
+                name: 'edit-restaurant',
+                builder: (context, state) {
+                  final restaurantId = state.pathParameters['id'] ?? '';
+                  final restaurant = state.extra is RestaurantEntity
+                      ? state.extra as RestaurantEntity
+                      : null;
+                  return EditRestaurantScreen(
+                    restaurantId: restaurantId,
+                    restaurant: restaurant,
+                  );
+                },
+              ),
+              // Product Management Routes - Nested under restaurants
+              GoRoute(
+                path: ':restaurantId/products',
+                name: 'admin-restaurant-products',
+                builder: (context, state) {
+                  final restaurantId =
+                      state.pathParameters['restaurantId'] ?? '';
+                  final restaurant = state.extra as Map<String, dynamic>?;
+                  return AdminProductListScreen(
+                    restaurantId: restaurantId,
+                    restaurantName: restaurant?['name'] ?? 'Restaurant',
+                  );
+                },
+                routes: [
+                  GoRoute(
+                    path: 'add',
+                    name: 'admin-add-product',
+                    builder: (context, state) {
+                      final restaurantId =
+                          state.pathParameters['restaurantId'] ?? '';
+                      return AdminAddProductScreen(restaurantId: restaurantId);
+                    },
+                  ),
+                  GoRoute(
+                    path: 'edit/:productId',
+                    name: 'admin-edit-product',
+                    builder: (context, state) {
+                      final restaurantId =
+                          state.pathParameters['restaurantId'] ?? '';
+                      final productId = state.pathParameters['productId'] ?? '';
+                      final product = state.extra;
+                      return AdminEditProductScreen(
+                        restaurantId: restaurantId,
+                        productId: productId,
+                        product: product,
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          // Drivers
+          GoRoute(
+            path: 'drivers',
+            name: 'drivers',
+            builder: (context, state) => const DriverManagementScreen(),
+          ),
+          // Orders
+          GoRoute(
+            path: 'orders',
+            name: 'orders',
+            builder: (context, state) => const OrderManagementScreen(),
+          ),
+          // Settings
+          GoRoute(
+            path: 'settings',
+            name: 'settings',
+            builder: (context, state) => const AdminSettingsScreen(),
+          ),
+          // Market Products - Nested routes
+          GoRoute(
+            path: 'market-products',
+            name: 'market-products',
+            builder: (context, state) => const AdminMarketProductListScreen(),
+            routes: [
+              GoRoute(
+                path: 'add',
+                name: 'add-market-product',
+                builder: (context, state) =>
+                    const AdminAddMarketProductScreen(),
+              ),
+              GoRoute(
+                path: 'edit/:id',
+                name: 'edit-market-product',
+                builder: (context, state) {
+                  final productId = state.pathParameters['id'] ?? '';
+                  final product = state.extra is MarketProductEntity
+                      ? state.extra as MarketProductEntity
+                      : null;
+                  return AdminEditMarketProductScreen(
+                    productId: productId,
+                    product: product,
+                  );
+                },
+              ),
+            ],
+          ),
+          // Ads Management - Nested routes
+          GoRoute(
+            path: 'ads',
+            builder: (context, state) {
+              // Default to startup ads screen when navigating to /admin/ads
+              return const AdminStartupAdsScreen();
+            },
+            routes: [
+              GoRoute(
+                path: 'startup',
+                name: 'startup-ads',
+                builder: (context, state) => const AdminStartupAdsScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'add',
+                    name: 'add-startup-ad',
+                    builder: (context, state) =>
+                        const AdminAddStartupAdScreen(),
+                  ),
+                  GoRoute(
+                    path: 'edit/:id',
+                    name: 'edit-startup-ad',
+                    builder: (context, state) {
+                      final adId = state.pathParameters['id'] ?? '';
+                      final ad = state.extra is StartupAdEntity
+                          ? state.extra as StartupAdEntity
+                          : null;
+                      return AdminEditStartupAdScreen(adId: adId, ad: ad);
+                    },
+                  ),
+                ],
+              ),
+              GoRoute(
+                path: 'banners',
+                name: 'banner-ads',
+                builder: (context, state) => const AdminBannerAdsScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'add',
+                    name: 'add-banner-ad',
+                    builder: (context, state) => const AdminAddBannerAdScreen(),
+                  ),
+                  GoRoute(
+                    path: 'edit/:id',
+                    name: 'edit-banner-ad',
+                    builder: (context, state) {
+                      final bannerId = state.pathParameters['id'] ?? '';
+                      final banner = state.extra is BannerEntity
+                          ? state.extra as BannerEntity
+                          : null;
+                      return AdminEditBannerAdScreen(
+                        bannerId: bannerId,
+                        banner: banner,
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
       ),
     ],
     errorBuilder: (context, state) => const ErrorScreen(),
@@ -282,30 +312,6 @@ class AdminSettingsScreen extends StatelessWidget {
         backgroundColor: Colors.purple,
       ),
       body: const Center(child: Text('Settings - Coming Soon')),
-    );
-  }
-}
-
-class AdminEditProductScreen extends StatelessWidget {
-  final String restaurantId;
-  final String productId;
-  final dynamic product;
-
-  const AdminEditProductScreen({
-    super.key,
-    required this.restaurantId,
-    required this.productId,
-    this.product,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Edit Product'),
-        backgroundColor: Colors.purple,
-      ),
-      body: Center(child: Text('Edit Product Screen - ID: $productId')),
     );
   }
 }

@@ -996,4 +996,19 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get login => 'تسجيل الدخول';
+
+  @override
+  String get welcome => 'أهلاً بك';
+
+  @override
+  String get loginToContinue => 'سجّل دخولك للمتابعة';
+
+  @override
+  String get dontHaveAccount => 'ليس لديك حساب؟';
+
+  @override
+  String get signup => 'إنشاء حساب';
+
+  @override
+  String get or => 'أو';
 }

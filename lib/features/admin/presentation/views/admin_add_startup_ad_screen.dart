@@ -7,7 +7,6 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/extensions.dart';
 import '../../../../shared/widgets/loading_widget.dart';
-import '../../../../shared/widgets/safe_navigation_wrapper.dart';
 import '../cubits/ad_management_cubit.dart';
 
 class AdminAddStartupAdScreen extends StatefulWidget {
@@ -139,13 +138,11 @@ class _AdminAddStartupAdScreenState extends State<AdminAddStartupAdScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return SafeNavigationWrapper(
-      fallbackRoute: '/admin/ads/startup',
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(l10n.addStartupAd),
-          backgroundColor: Colors.purple,
-        ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.addStartupAd),
+        backgroundColor: Colors.purple,
+      ),
       body: BlocConsumer<AdManagementCubit, AdManagementState>(
         listener: (context, state) {
           if (state is StartupAdAdded) {
@@ -291,7 +288,6 @@ class _AdminAddStartupAdScreenState extends State<AdminAddStartupAdScreen> {
             ),
           );
         },
-      ),
       ),
     );
   }

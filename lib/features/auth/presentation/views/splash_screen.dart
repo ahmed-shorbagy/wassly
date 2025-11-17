@@ -74,7 +74,8 @@ class _SplashScreenState extends State<SplashScreen> {
                   Future.delayed(const Duration(seconds: 3), () {
                     if (mounted && _showAd) {
                       setState(() {
-                        _currentAdIndex = (_currentAdIndex + 1) % state.ads.length;
+                        _currentAdIndex =
+                            (_currentAdIndex + 1) % state.ads.length;
                       });
                     }
                   });
@@ -112,20 +113,23 @@ class _SplashScreenState extends State<SplashScreen> {
                 // Customer app - only navigate to home for customers
                 // Other user types should use their respective apps
                 if (userType == AppConstants.userTypeCustomer) {
-                  context.go('/home');
+                  context.pushReplacement('/home');
                 } else {
                   // For non-customer users, show error or redirect to login
-                  context.go('/login');
+                  context.pushReplacement('/login');
                 }
               } else if (state is AuthUnauthenticated) {
-                AppLogger.logInfo('User not authenticated, navigating to login');
-                context.go('/login');
+                AppLogger.logInfo(
+                  'User not authenticated, navigating to login',
+                );
+                context.pushReplacement('/login');
               } else if (state is AuthError) {
                 AppLogger.logWarning(
                   'Auth error in splash: ${state.message}, navigating to login',
                 );
-                context.go('/login');
+                context.pushReplacement('/login');
               }
+              // Note: AuthInitial and AuthLoading states are handled by showing the loading indicator
             }
           },
         ),
@@ -162,7 +166,10 @@ class _SplashScreenState extends State<SplashScreen> {
             right: 16,
             child: SafeArea(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(20),
@@ -286,10 +293,8 @@ class _SplashScreenState extends State<SplashScreen> {
                   tween: Tween(begin: 0.8, end: 1.0),
                   duration: const Duration(milliseconds: 900),
                   curve: Curves.easeOutBack,
-                  builder: (_, scale, child) => Transform.scale(
-                    scale: scale,
-                    child: child,
-                  ),
+                  builder: (_, scale, child) =>
+                      Transform.scale(scale: scale, child: child),
                   child: Container(
                     width: 200,
                     height: 200,
@@ -320,7 +325,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
                 const SizedBox(height: 24),
                 const Text(
-                  'وسِّلي',
+                  'وصلي',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 26,
@@ -333,10 +338,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   opacity: 0.9,
                   child: Text(
                     'أسرع طريقة لطلب طعامك',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: Colors.white, fontSize: 14),
                   ),
                 ),
                 const SizedBox(height: 28),
@@ -362,10 +364,7 @@ class _DecorativeCircle extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color,
-      ),
+      decoration: BoxDecoration(shape: BoxShape.circle, color: color),
     );
   }
 }

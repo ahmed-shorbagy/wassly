@@ -422,7 +422,7 @@ class _OrderListScreenState extends State<OrderListScreen>
           ),
           const SizedBox(height: 32),
           ElevatedButton(
-            onPressed: () => context.go('/home'),
+            onPressed: () => context.push('/home'),
             child: Text(
               AppLocalizations.of(context)?.browseRestaurants ?? 'تصفح المطاعم',
             ),

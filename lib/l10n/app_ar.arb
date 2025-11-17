@@ -382,6 +382,11 @@
   "settings": "الإعدادات",
   "changePassword": "تغيير كلمة المرور",
   "updateProfile": "تحديث الملف الشخصي",
-  "login": "تسجيل الدخول"
+  "login": "تسجيل الدخول",
+  "welcome": "أهلاً بك",
+  "loginToContinue": "سجّل دخولك للمتابعة",
+  "dontHaveAccount": "ليس لديك حساب؟",
+  "signup": "إنشاء حساب",
+  "or": "أو"
 }
 

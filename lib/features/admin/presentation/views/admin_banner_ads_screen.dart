@@ -82,7 +82,7 @@ class _AdminBannerAdsScreenState extends State<AdminBannerAdsScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.go('/admin/ads/banners/add'),
+        onPressed: () => context.push('/admin/ads/banners/add'),
         icon: const Icon(Icons.add),
         label: Text(l10n.addBanner),
         backgroundColor: Colors.purple,
@@ -223,7 +223,7 @@ class _AdminBannerAdsScreenState extends State<AdminBannerAdsScreen> {
             ),
             const SizedBox(height: 32),
             ElevatedButton.icon(
-              onPressed: () => context.go('/admin/ads/banners/add'),
+              onPressed: () => context.push('/admin/ads/banners/add'),
               icon: const Icon(Icons.add),
               label: Text(l10n.addBanner),
               style: ElevatedButton.styleFrom(
@@ -265,7 +265,7 @@ class _AdminBannerAdsScreenState extends State<AdminBannerAdsScreen> {
   }
 
   void _navigateToEdit(BannerEntity banner) {
-    context.go('/admin/ads/banners/edit/${banner.id}', extra: banner);
+    context.push('/admin/ads/banners/edit/${banner.id}', extra: banner);
   }
 }
 

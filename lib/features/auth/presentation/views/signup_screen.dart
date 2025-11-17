@@ -39,7 +39,10 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF27AE60),
       body: Container(
+        width: double.infinity,
+        height: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -55,231 +58,238 @@ class _SignupScreenState extends State<SignupScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                // Header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 56,
-                      height: 56,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                      padding: const EdgeInsets.all(10),
-                      child: Image.asset('assets/images/logo.jpeg', fit: BoxFit.contain),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 18),
-                const Text(
-                  'حساب جديد',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  'انضم إلى وسِّلي الآن',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white, fontSize: 14),
-                ),
-                const SizedBox(height: 20),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x22000000),
-                        blurRadius: 16,
-                        offset: Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
+                  // Header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-
-                // Note: In the customer app, only normal customers can sign up.
-                // User type is enforced to customer; no selection UI is shown.
-                const SizedBox(height: 8),
-
-                // Name Field
-                TextFormField(
-                  controller: _nameController,
-                  validator: Validators.validateName,
-                  decoration: InputDecoration(
-                    labelText: AppStrings.fullName,
-                    prefixIcon: const Icon(Icons.person_outlined),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Email Field
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  validator: Validators.validateEmail,
-                  decoration: InputDecoration(
-                    labelText: AppStrings.email,
-                    prefixIcon: const Icon(Icons.email_outlined),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Phone Field (Egypt-only)
-                IntlPhoneField(
-                  initialCountryCode: 'EG',
-                  showDropdownIcon: false,
-                  disableLengthCheck: false,
-                  decoration: InputDecoration(
-                    labelText: AppStrings.phoneNumber,
-                    prefixIcon: const Icon(Icons.phone_outlined),
-                    counterText: '',
-                  ),
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  validator: (phone) {
-                    if (phone == null) return AppStrings.pleaseEnterPhoneNumber;
-                    // Egyptian mobile numbers are 10 national digits (without +20) and start with 10/11/12/15
-                    final national = phone.number;
-                    final validPrefix = national.startsWith('10') ||
-                        national.startsWith('11') ||
-                        national.startsWith('12') ||
-                        national.startsWith('15');
-                    if (!validPrefix || national.length != 10) {
-                      return AppStrings.pleaseEnterValidPhoneNumber;
-                    }
-                    return null;
-                  },
-                  onChanged: (phone) {
-                    // Persist the full international number (+20xxxxxxxxxx)
-                    _phoneController.text = phone.completeNumber;
-                  },
-                  onSaved: (phone) {
-                    if (phone != null) {
-                      _phoneController.text = phone.completeNumber;
-                    }
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                // Password Field
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  validator: Validators.validatePassword,
-                  decoration: InputDecoration(
-                    labelText: AppStrings.password,
-                    prefixIcon: const Icon(Icons.lock_outlined),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility
-                            : Icons.visibility_off,
+                      Container(
+                        width: 56,
+                        height: 56,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        padding: const EdgeInsets.all(10),
+                        child: Image.asset(
+                          'assets/images/logo.jpeg',
+                          fit: BoxFit.contain,
+                        ),
                       ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Confirm Password Field
-                TextFormField(
-                  controller: _confirmPasswordController,
-                  obscureText: _obscureConfirmPassword,
-                  validator: (value) => Validators.validateConfirmPassword(
-                    value,
-                    _passwordController.text,
-                  ),
-                  decoration: InputDecoration(
-                    labelText: AppStrings.confirmPassword,
-                    prefixIcon: const Icon(Icons.lock_outlined),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscureConfirmPassword
-                            ? Icons.visibility
-                            : Icons.visibility_off,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscureConfirmPassword = !_obscureConfirmPassword;
-                        });
-                      },
-                    ),
-                  ),
-                ),
-                      const SizedBox(height: 24),
                     ],
                   ),
-                ),
-                const SizedBox(height: 16),
+                  const SizedBox(height: 18),
+                  const Text(
+                    'حساب جديد',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'انضم إلى وصلي الآن',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white, fontSize: 14),
+                  ),
+                  const SizedBox(height: 20),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x22000000),
+                          blurRadius: 16,
+                          offset: Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        // Note: In the customer app, only normal customers can sign up.
+                        // User type is enforced to customer; no selection UI is shown.
+                        const SizedBox(height: 8),
 
-                // Signup Button
-                BlocConsumer<AuthCubit, AuthState>(
-                  listener: (context, state) {
-                    if (state is AuthAuthenticated) {
-                      // Customer app - always navigate to home (only customers sign up)
-                      context.go('/home');
-                    } else if (state is AuthError) {
-                      context.showErrorSnackBar(state.message);
-                    }
-                  },
-                  builder: (context, state) {
-                    if (state is AuthLoading) {
-                      return const LoadingWidget();
-                    }
-                    return SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _signup,
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size.fromHeight(48),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                        // Name Field
+                        TextFormField(
+                          controller: _nameController,
+                          validator: Validators.validateName,
+                          decoration: InputDecoration(
+                            labelText: AppStrings.fullName,
+                            prefixIcon: const Icon(Icons.person_outlined),
                           ),
                         ),
-                        child: const Text(AppStrings.signup),
-                      ),
-                    );
-                  },
-                ),
+                        const SizedBox(height: 16),
 
-                const SizedBox(height: 12),
+                        // Email Field
+                        TextFormField(
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          validator: Validators.validateEmail,
+                          decoration: InputDecoration(
+                            labelText: AppStrings.email,
+                            prefixIcon: const Icon(Icons.email_outlined),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
 
-                // Login Link
-                Center(
-                  child: Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      Text(
-                        AppStrings.alreadyHaveAccount,
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                      TextButton(
-                        onPressed: () => context.go('/login'),
-                        style:
-                            TextButton.styleFrom(foregroundColor: Colors.white),
-                        child: const Text(AppStrings.login),
-                      ),
-                    ],
+                        // Phone Field (Egypt-only)
+                        IntlPhoneField(
+                          initialCountryCode: 'EG',
+                          showDropdownIcon: false,
+                          disableLengthCheck: false,
+                          decoration: InputDecoration(
+                            labelText: AppStrings.phoneNumber,
+                            prefixIcon: const Icon(Icons.phone_outlined),
+                            counterText: '',
+                          ),
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          validator: (phone) {
+                            if (phone == null)
+                              return AppStrings.pleaseEnterPhoneNumber;
+                            // Egyptian mobile numbers are 10 national digits (without +20) and start with 10/11/12/15
+                            final national = phone.number;
+                            final validPrefix =
+                                national.startsWith('10') ||
+                                national.startsWith('11') ||
+                                national.startsWith('12') ||
+                                national.startsWith('15');
+                            if (!validPrefix || national.length != 10) {
+                              return AppStrings.pleaseEnterValidPhoneNumber;
+                            }
+                            return null;
+                          },
+                          onChanged: (phone) {
+                            // Persist the full international number (+20xxxxxxxxxx)
+                            _phoneController.text = phone.completeNumber;
+                          },
+                          onSaved: (phone) {
+                            if (phone != null) {
+                              _phoneController.text = phone.completeNumber;
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Password Field
+                        TextFormField(
+                          controller: _passwordController,
+                          obscureText: _obscurePassword,
+                          validator: Validators.validatePassword,
+                          decoration: InputDecoration(
+                            labelText: AppStrings.password,
+                            prefixIcon: const Icon(Icons.lock_outlined),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Confirm Password Field
+                        TextFormField(
+                          controller: _confirmPasswordController,
+                          obscureText: _obscureConfirmPassword,
+                          validator: (value) =>
+                              Validators.validateConfirmPassword(
+                                value,
+                                _passwordController.text,
+                              ),
+                          decoration: InputDecoration(
+                            labelText: AppStrings.confirmPassword,
+                            prefixIcon: const Icon(Icons.lock_outlined),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscureConfirmPassword
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscureConfirmPassword =
+                                      !_obscureConfirmPassword;
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 16),
 
-                const SizedBox(height: 24),
-              ],
+                  // Signup Button
+                  BlocConsumer<AuthCubit, AuthState>(
+                    listener: (context, state) {
+                      if (state is AuthAuthenticated) {
+                        // Customer app - always navigate to home (only customers sign up)
+                        context.pushReplacement('/home');
+                      } else if (state is AuthError) {
+                        context.showErrorSnackBar(state.message);
+                      }
+                    },
+                    builder: (context, state) {
+                      if (state is AuthLoading) {
+                        return const LoadingWidget();
+                      }
+                      return SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _signup,
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size.fromHeight(48),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(AppStrings.signup),
+                        ),
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Login Link
+                  Center(
+                    child: Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          AppStrings.alreadyHaveAccount,
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        TextButton(
+                          onPressed: () => context.push('/login'),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white,
+                          ),
+                          child: const Text(AppStrings.login),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+                ],
+              ),
             ),
           ),
         ),
       ),
-    ),
     );
   }
 

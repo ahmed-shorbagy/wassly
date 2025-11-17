@@ -107,7 +107,7 @@ class CartScreen extends StatelessWidget {
             ),
             const SizedBox(height: 32),
             ElevatedButton.icon(
-              onPressed: () => context.go('/home'),
+              onPressed: () => context.push('/home'),
               icon: const Icon(Icons.restaurant_menu),
               label: Text(l10n.browseRestaurants),
               style: ElevatedButton.styleFrom(

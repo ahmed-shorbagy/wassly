@@ -82,7 +82,7 @@ class _AdminStartupAdsScreenState extends State<AdminStartupAdsScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.go('/admin/ads/startup/add'),
+        onPressed: () => context.push('/admin/ads/startup/add'),
         icon: const Icon(Icons.add),
         label: Text(l10n.addAd),
         backgroundColor: Colors.purple,
@@ -269,7 +269,7 @@ class _AdminStartupAdsScreenState extends State<AdminStartupAdsScreen> {
             ),
             const SizedBox(height: 32),
             ElevatedButton.icon(
-              onPressed: () => context.go('/admin/ads/startup/add'),
+              onPressed: () => context.push('/admin/ads/startup/add'),
               icon: const Icon(Icons.add),
               label: Text(l10n.addAd),
               style: ElevatedButton.styleFrom(
@@ -315,7 +315,7 @@ class _AdminStartupAdsScreenState extends State<AdminStartupAdsScreen> {
   }
 
   void _navigateToEdit(StartupAdEntity ad) {
-    context.go('/admin/ads/startup/edit/${ad.id}', extra: ad);
+    context.push('/admin/ads/startup/edit/${ad.id}', extra: ad);
   }
 }
 

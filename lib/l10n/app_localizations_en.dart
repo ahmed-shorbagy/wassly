@@ -1003,4 +1003,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get login => 'Login';
+
+  @override
+  String get welcome => 'Welcome';
+
+  @override
+  String get loginToContinue => 'Log in to continue';
+
+  @override
+  String get dontHaveAccount => 'Don\'t have an account?';
+
+  @override
+  String get signup => 'Sign Up';
+
+  @override
+  String get or => 'or';
 }

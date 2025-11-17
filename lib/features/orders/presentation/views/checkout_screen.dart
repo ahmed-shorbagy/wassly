@@ -58,7 +58,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             context.showSuccessSnackBar(
               l10n?.orderPlacedSuccessfully ?? 'تم تقديم الطلب بنجاح',
             );
-            context.go('/order/${state.order.id}');
+            context.push('/order/${state.order.id}');
           } else if (state is OrderError) {
             context.showErrorSnackBar(state.message);
           }
@@ -89,7 +89,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ),
                       const SizedBox(height: 24),
                       ElevatedButton(
-                        onPressed: () => context.go('/home'),
+                        onPressed: () => context.push('/home'),
                         child: Text(
                           AppLocalizations.of(context)?.browseRestaurants ?? 'تصفح المطاعم',
                         ),

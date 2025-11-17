@@ -387,7 +387,7 @@ class AdminDashboardScreen extends StatelessWidget {
           ),
         ),
         child: InkWell(
-          onTap: () => context.go(item.route),
+          onTap: () => context.push(item.route),
           borderRadius: BorderRadius.circular(20),
           child: Container(
             decoration: BoxDecoration(

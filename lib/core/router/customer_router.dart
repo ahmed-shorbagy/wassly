@@ -15,6 +15,13 @@ import '../../features/auth/presentation/views/customer_profile_screen.dart';
 class CustomerRouter {
   static final GoRouter router = GoRouter(
     initialLocation: '/splash',
+    redirect: (context, state) {
+      // Redirect root path to home if authenticated, otherwise to splash
+      if (state.uri.path == '/') {
+        return '/splash';
+      }
+      return null;
+    },
     routes: [
       // Splash Screen
       GoRoute(
@@ -100,8 +107,40 @@ class ErrorScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text('Page Not Found')),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Page Not Found'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Colors.grey,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Page Not Found',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'The page you are looking for does not exist.',
+              style: TextStyle(color: Colors.grey),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () => context.push('/home'),
+              child: const Text('Go to Home'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -23,7 +23,7 @@ class RestaurantDetailScreen extends StatefulWidget {
 }
 
 class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   RestaurantEntity? _restaurant;
   List<ProductEntity> _products = [];
   String _selectedCategory = 'all';
@@ -77,70 +77,86 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
       create: (context) => context.read<RestaurantCubit>()
         ..getRestaurantById(widget.restaurantId)
         ..getRestaurantProducts(widget.restaurantId),
-      child: Scaffold(
-        body: BlocConsumer<RestaurantCubit, RestaurantState>(
-          listener: (context, state) {
-            if (state is RestaurantLoaded) {
-              setState(() {
-                _restaurant = state.restaurant;
-              });
-            } else if (state is ProductsLoaded) {
-              setState(() {
-                _products = state.products;
-                // Compute categories after products are loaded
-                final categories = _products
-                    .map((p) => p.category)
-                    .whereType<String>()
-                    .where((c) => c.isNotEmpty)
-                    .toSet()
-                    .toList();
-                final allCategories = ['all', ...categories];
-                final newLength = allCategories.length;
-                
-                if (_tabController.length != newLength) {
-                  _tabController.dispose();
-                  _tabController = TabController(
-                    length: newLength,
-                    vsync: this,
-                  );
-                  _tabController.addListener(() {
-                    if (_tabController.indexIsChanging) {
-                      setState(() {
-                        _selectedCategory = allCategories[_tabController.index];
-                      });
-                    }
-                  });
-                }
-              });
+      child: PopScope(
+        canPop: true,
+        onPopInvokedWithResult: (didPop, result) {
+          if (!didPop && context.mounted) {
+            // Try to pop first, if we can't pop, push home
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              // If there's nothing to pop, navigate to home using push
+              context.push('/home');
             }
-          },
-          builder: (context, state) {
-            if (state is RestaurantLoading && _restaurant == null) {
+          }
+        },
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          body: BlocConsumer<RestaurantCubit, RestaurantState>(
+            listener: (context, state) {
+              if (state is RestaurantLoaded) {
+                setState(() {
+                  _restaurant = state.restaurant;
+                });
+              } else if (state is ProductsLoaded) {
+                setState(() {
+                  _products = state.products;
+                  // Compute categories after products are loaded
+                  final categories = _products
+                      .map((p) => p.category)
+                      .whereType<String>()
+                      .where((c) => c.isNotEmpty)
+                      .toSet()
+                      .toList();
+                  final allCategories = ['all', ...categories];
+                  final newLength = allCategories.length;
+
+                  if (_tabController.length != newLength) {
+                    _tabController.dispose();
+                    _tabController = TabController(
+                      length: newLength,
+                      vsync: this,
+                    );
+                    _tabController.addListener(() {
+                      if (_tabController.indexIsChanging) {
+                        setState(() {
+                          _selectedCategory =
+                              allCategories[_tabController.index];
+                        });
+                      }
+                    });
+                  }
+                });
+              }
+            },
+            builder: (context, state) {
+              if (state is RestaurantLoading && _restaurant == null) {
+                return const LoadingWidget();
+              }
+
+              if (state is RestaurantError && _restaurant == null) {
+                return ErrorDisplayWidget(
+                  message: state.message,
+                  onRetry: () {
+                    context.read<RestaurantCubit>().getRestaurantById(
+                      widget.restaurantId,
+                    );
+                    context.read<RestaurantCubit>().getRestaurantProducts(
+                      widget.restaurantId,
+                    );
+                  },
+                );
+              }
+
+              if (_restaurant != null) {
+                return _buildRestaurantDetail(context, _restaurant!, _products);
+              }
+
               return const LoadingWidget();
-            }
-
-            if (state is RestaurantError && _restaurant == null) {
-              return ErrorDisplayWidget(
-                message: state.message,
-                onRetry: () {
-                  context.read<RestaurantCubit>().getRestaurantById(
-                        widget.restaurantId,
-                      );
-                  context.read<RestaurantCubit>().getRestaurantProducts(
-                        widget.restaurantId,
-                      );
-                },
-              );
-            }
-
-            if (_restaurant != null) {
-              return _buildRestaurantDetail(context, _restaurant!, _products);
-            }
-
-            return const LoadingWidget();
-          },
+            },
+          ),
+          bottomNavigationBar: _buildBottomBar(context),
         ),
-        bottomNavigationBar: _buildBottomBar(context),
       ),
     );
   }
@@ -170,7 +186,9 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
                         fit: BoxFit.cover,
                         placeholder: (context, url) => Container(
                           color: AppColors.border,
-                          child: const Center(child: CircularProgressIndicator()),
+                          child: const Center(
+                            child: CircularProgressIndicator(),
+                          ),
                         ),
                         errorWidget: (context, url, error) => Container(
                           color: AppColors.border,
@@ -210,7 +228,15 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
                             // Back Button
                             _buildActionButton(
                               icon: Icons.arrow_back_ios,
-                              onTap: () => context.pop(),
+                              onTap: () {
+                                // Try to pop first, if we can't pop, push home
+                                if (context.canPop()) {
+                                  context.pop();
+                                } else {
+                                  // If there's nothing to pop, navigate to home using push
+                                  context.push('/home');
+                                }
+                              },
                             ),
                             // Right side buttons
                             Row(
@@ -230,8 +256,12 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
                                     final isFav = favState.favoriteRestaurantIds
                                         .contains(restaurant.id);
                                     return _buildActionButton(
-                                      icon: isFav ? Icons.favorite : Icons.favorite_border,
-                                      iconColor: isFav ? Colors.red : Colors.white,
+                                      icon: isFav
+                                          ? Icons.favorite
+                                          : Icons.favorite_border,
+                                      iconColor: isFav
+                                          ? Colors.red
+                                          : Colors.white,
                                       onTap: () => context
                                           .read<FavoritesCubit>()
                                           .toggleRestaurant(restaurant.id),
@@ -270,9 +300,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
                             // Restaurant Name
                             Text(
                               restaurant.name,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineMedium
+                              style: Theme.of(context).textTheme.headlineMedium
                                   ?.copyWith(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 24,
@@ -409,11 +437,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
               labelColor: AppColors.primary,
               unselectedLabelColor: AppColors.textSecondary,
               tabs: _categories.map((category) {
-                return Tab(
-                  text: category == 'all'
-                      ? l10n.all
-                      : category,
-                );
+                return Tab(text: category == 'all' ? l10n.all : category);
               }).toList(),
             ),
           ),
@@ -453,13 +477,10 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
               ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final product = _filteredProducts[index];
-                  return _buildProductCard(context, product);
-                },
-                childCount: _filteredProducts.length,
-              ),
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final product = _filteredProducts[index];
+                return _buildProductCard(context, product);
+              }, childCount: _filteredProducts.length),
             ),
           ),
       ],
@@ -480,11 +501,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
           color: Colors.black.withValues(alpha: 0.3),
           shape: BoxShape.circle,
         ),
-        child: Icon(
-          icon,
-          color: iconColor ?? Colors.white,
-          size: 20,
-        ),
+        child: Icon(icon, color: iconColor ?? Colors.white, size: 20),
       ),
     );
   }
@@ -496,10 +513,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: AppColors.border,
-          width: 1,
-        ),
+        side: BorderSide(color: AppColors.border, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -517,9 +531,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
                       width: double.infinity,
                       placeholder: (context, url) => Container(
                         color: AppColors.border,
-                        child: const Center(
-                          child: CircularProgressIndicator(),
-                        ),
+                        child: const Center(child: CircularProgressIndicator()),
                       ),
                       errorWidget: (context, url, error) => Container(
                         color: AppColors.border,
@@ -624,10 +636,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
             child: Text(
               l10n.addProductsWorth(minOrder.toStringAsFixed(2)),
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
             ),
           );
         }
@@ -669,18 +678,13 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
                     if (remaining > 0)
                       Text(
                         l10n.addProductsWorth(remaining.toStringAsFixed(2)),
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: AppColors.error,
-                        ),
+                        style: TextStyle(fontSize: 11, color: AppColors.error),
                       ),
                   ],
                 ),
               ),
               ElevatedButton(
-                onPressed: remaining == 0
-                    ? () => context.push('/cart')
-                    : null,
+                onPressed: remaining == 0 ? () => context.push('/cart') : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
@@ -719,10 +723,7 @@ class _TabBarDelegate extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
-    return Container(
-      color: Colors.white,
-      child: tabBar,
-    );
+    return Container(color: Colors.white, child: tabBar);
   }
 
   @override
