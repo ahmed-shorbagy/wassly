@@ -41,7 +41,8 @@ class AdminProductCubit extends Cubit<AdminProductState> {
     required String name,
     required String description,
     required double price,
-    required String? category,
+    String? categoryId,
+    String? category, // Keep for backward compatibility
     required File? imageFile,
     bool isAvailable = true,
   }) async {
@@ -81,7 +82,8 @@ class AdminProductCubit extends Cubit<AdminProductState> {
         description: description,
         price: price,
         imageUrl: imageUrl,
-        category: category,
+        categoryId: categoryId,
+        category: category, // Keep for backward compatibility
         isAvailable: isAvailable,
         createdAt: DateTime.now(),
       );
@@ -111,7 +113,8 @@ class AdminProductCubit extends Cubit<AdminProductState> {
     String? name,
     String? description,
     double? price,
-    String? category,
+    String? categoryId,
+    String? category, // Keep for backward compatibility
     File? imageFile,
     bool? isAvailable,
   }) async {
@@ -151,7 +154,8 @@ class AdminProductCubit extends Cubit<AdminProductState> {
         description: description ?? product.description,
         price: price ?? product.price,
         imageUrl: imageUrl,
-        category: category ?? product.category,
+        categoryId: categoryId ?? product.categoryId,
+        category: category ?? product.category, // Keep for backward compatibility
         isAvailable: isAvailable ?? product.isAvailable,
         createdAt: product.createdAt,
       );

@@ -23,6 +23,7 @@ class AppConstants {
   static const String productsCollection = 'products';
   static const String ordersCollection = 'orders';
   static const String driversCollection = 'drivers';
+  static const String foodCategoriesCollection = 'food_categories';
 
   // Storage Paths
   static const String restaurantImagesPath = 'restaurants';

@@ -11,7 +11,9 @@ import '../cubits/restaurant_cubit.dart';
 import '../../../orders/presentation/cubits/cart_cubit.dart';
 import '../../domain/entities/product_entity.dart';
 import '../../domain/entities/restaurant_entity.dart';
+import '../../domain/entities/food_category_entity.dart';
 import '../cubits/favorites_cubit.dart';
+import '../cubits/food_category_cubit.dart';
 
 class RestaurantDetailScreen extends StatefulWidget {
   final String restaurantId;
@@ -26,7 +28,9 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
     with TickerProviderStateMixin {
   RestaurantEntity? _restaurant;
   List<ProductEntity> _products = [];
-  String _selectedCategory = 'all';
+  List<FoodCategoryEntity> _categories = [];
+  String? _selectedCategoryId;
+  final TextEditingController _searchController = TextEditingController();
   late TabController _tabController;
 
   @override
@@ -36,31 +40,54 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) {
         setState(() {
-          _selectedCategory = _categories[_tabController.index];
+          if (_tabController.index == 0) {
+            _selectedCategoryId = null; // 'all'
+          } else {
+            _selectedCategoryId = _categories[_tabController.index - 1].id;
+          }
         });
       }
     });
+    _searchController.addListener(_filterProducts);
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _searchController.removeListener(_filterProducts);
+    _searchController.dispose();
     super.dispose();
   }
 
-  List<String> get _categories {
-    final categories = _products
-        .map((p) => p.category)
-        .whereType<String>()
-        .where((c) => c.isNotEmpty)
-        .toSet()
-        .toList();
-    return ['all', ...categories];
+  void _filterProducts() {
+    setState(() {
+      // Filtering is handled in _filteredProducts getter
+    });
   }
 
   List<ProductEntity> get _filteredProducts {
-    if (_selectedCategory == 'all') return _products;
-    return _products.where((p) => p.category == _selectedCategory).toList();
+    var filtered = _products;
+
+    // Filter by category
+    if (_selectedCategoryId != null) {
+      filtered = filtered
+          .where((p) => p.categoryId == _selectedCategoryId)
+          .toList();
+    }
+
+    // Filter by search query
+    final searchQuery = _searchController.text.toLowerCase().trim();
+    if (searchQuery.isNotEmpty) {
+      filtered = filtered.where((product) {
+        final nameMatch = product.name.toLowerCase().contains(searchQuery);
+        final descMatch = product.description.toLowerCase().contains(
+          searchQuery,
+        );
+        return nameMatch || descMatch;
+      }).toList();
+    }
+
+    return filtered;
   }
 
   double get _cartTotal {
@@ -73,10 +100,19 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => context.read<RestaurantCubit>()
-        ..getRestaurantById(widget.restaurantId)
-        ..getRestaurantProducts(widget.restaurantId),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => context.read<RestaurantCubit>()
+            ..getRestaurantById(widget.restaurantId)
+            ..getRestaurantProducts(widget.restaurantId),
+        ),
+        BlocProvider(
+          create: (context) =>
+              context.read<FoodCategoryCubit>()
+                ..loadRestaurantCategories(widget.restaurantId),
+        ),
+      ],
       child: PopScope(
         canPop: true,
         onPopInvokedWithResult: (didPop, result) {
@@ -92,24 +128,12 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
         },
         child: Scaffold(
           backgroundColor: Colors.white,
-          body: BlocConsumer<RestaurantCubit, RestaurantState>(
+          body: BlocListener<FoodCategoryCubit, FoodCategoryState>(
             listener: (context, state) {
-              if (state is RestaurantLoaded) {
+              if (state is FoodCategoryLoaded) {
                 setState(() {
-                  _restaurant = state.restaurant;
-                });
-              } else if (state is ProductsLoaded) {
-                setState(() {
-                  _products = state.products;
-                  // Compute categories after products are loaded
-                  final categories = _products
-                      .map((p) => p.category)
-                      .whereType<String>()
-                      .where((c) => c.isNotEmpty)
-                      .toSet()
-                      .toList();
-                  final allCategories = ['all', ...categories];
-                  final newLength = allCategories.length;
+                  _categories = state.categories;
+                  final newLength = _categories.length + 1; // +1 for 'all'
 
                   if (_tabController.length != newLength) {
                     _tabController.dispose();
@@ -120,8 +144,12 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
                     _tabController.addListener(() {
                       if (_tabController.indexIsChanging) {
                         setState(() {
-                          _selectedCategory =
-                              allCategories[_tabController.index];
+                          if (_tabController.index == 0) {
+                            _selectedCategoryId = null; // 'all'
+                          } else {
+                            _selectedCategoryId =
+                                _categories[_tabController.index - 1].id;
+                          }
                         });
                       }
                     });
@@ -129,31 +157,48 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
                 });
               }
             },
-            builder: (context, state) {
-              if (state is RestaurantLoading && _restaurant == null) {
+            child: BlocConsumer<RestaurantCubit, RestaurantState>(
+              listener: (context, state) {
+                if (state is RestaurantLoaded) {
+                  setState(() {
+                    _restaurant = state.restaurant;
+                  });
+                } else if (state is ProductsLoaded) {
+                  setState(() {
+                    _products = state.products;
+                  });
+                }
+              },
+              builder: (context, state) {
+                if (state is RestaurantLoading && _restaurant == null) {
+                  return const LoadingWidget();
+                }
+
+                if (state is RestaurantError && _restaurant == null) {
+                  return ErrorDisplayWidget(
+                    message: state.message,
+                    onRetry: () {
+                      context.read<RestaurantCubit>().getRestaurantById(
+                        widget.restaurantId,
+                      );
+                      context.read<RestaurantCubit>().getRestaurantProducts(
+                        widget.restaurantId,
+                      );
+                    },
+                  );
+                }
+
+                if (_restaurant != null) {
+                  return _buildRestaurantDetail(
+                    context,
+                    _restaurant!,
+                    _products,
+                  );
+                }
+
                 return const LoadingWidget();
-              }
-
-              if (state is RestaurantError && _restaurant == null) {
-                return ErrorDisplayWidget(
-                  message: state.message,
-                  onRetry: () {
-                    context.read<RestaurantCubit>().getRestaurantById(
-                      widget.restaurantId,
-                    );
-                    context.read<RestaurantCubit>().getRestaurantProducts(
-                      widget.restaurantId,
-                    );
-                  },
-                );
-              }
-
-              if (_restaurant != null) {
-                return _buildRestaurantDetail(context, _restaurant!, _products);
-              }
-
-              return const LoadingWidget();
-            },
+              },
+            ),
           ),
           bottomNavigationBar: _buildBottomBar(context),
         ),
@@ -426,6 +471,58 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
           ),
         ),
 
+        // Search Bar
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: StatefulBuilder(
+                builder: (context, setState) => TextField(
+                  controller: _searchController,
+                  onChanged: (_) {
+                    setState(() {});
+                    _filterProducts();
+                  },
+                  decoration: InputDecoration(
+                    hintText: l10n.searchProducts,
+                    hintStyle: TextStyle(color: AppColors.textHint),
+                    prefixIcon: Icon(Icons.search, color: AppColors.primary),
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: Icon(
+                              Icons.clear,
+                              color: AppColors.textSecondary,
+                            ),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() {});
+                              _filterProducts();
+                            },
+                          )
+                        : null,
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+
         // Tab Navigation
         SliverPersistentHeader(
           pinned: true,
@@ -436,9 +533,12 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
               indicatorColor: AppColors.primary,
               labelColor: AppColors.primary,
               unselectedLabelColor: AppColors.textSecondary,
-              tabs: _categories.map((category) {
-                return Tab(text: category == 'all' ? l10n.all : category);
-              }).toList(),
+              tabs: [
+                Tab(text: l10n.all),
+                ..._categories.map((category) {
+                  return Tab(text: category.name);
+                }),
+              ],
             ),
           ),
         ),

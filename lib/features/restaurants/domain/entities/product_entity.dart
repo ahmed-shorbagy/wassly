@@ -7,7 +7,8 @@ class ProductEntity extends Equatable {
   final String description;
   final double price;
   final String? imageUrl;
-  final String? category;
+  final String? categoryId; // Reference to FoodCategoryEntity
+  final String? category; // Keep for backward compatibility, will be deprecated
   final bool isAvailable;
   final DateTime createdAt;
 
@@ -18,6 +19,7 @@ class ProductEntity extends Equatable {
     required this.description,
     required this.price,
     this.imageUrl,
+    this.categoryId,
     this.category,
     required this.isAvailable,
     required this.createdAt,
@@ -31,6 +33,7 @@ class ProductEntity extends Equatable {
     description,
     price,
     imageUrl,
+    categoryId,
     category,
     isAvailable,
     createdAt,

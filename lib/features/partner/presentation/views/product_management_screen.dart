@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/extensions.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../../../../shared/widgets/error_widget.dart';
 import '../../../restaurants/domain/entities/product_entity.dart';
+import '../../../restaurants/domain/entities/food_category_entity.dart';
 import '../../../restaurants/presentation/cubits/restaurant_cubit.dart';
+import '../../../restaurants/presentation/cubits/food_category_cubit.dart';
 import '../../../auth/presentation/cubits/auth_cubit.dart';
 import '../cubits/product_management_cubit.dart';
 
@@ -20,6 +23,7 @@ class ProductManagementScreen extends StatefulWidget {
 
 class _ProductManagementScreenState extends State<ProductManagementScreen> {
   String? _restaurantId;
+  List<FoodCategoryEntity> _categories = [];
 
   @override
   void initState() {
@@ -36,11 +40,20 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
 
   void _loadProducts(String restaurantId) {
     context.read<RestaurantCubit>().getRestaurantProducts(restaurantId);
+    context.read<FoodCategoryCubit>().loadRestaurantCategories(restaurantId);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return BlocListener<FoodCategoryCubit, FoodCategoryState>(
+      listener: (context, state) {
+        if (state is FoodCategoryLoaded) {
+          setState(() {
+            _categories = state.categories;
+          });
+        }
+      },
+      child: Scaffold(
       appBar: AppBar(
         title: const Text('My Products'),
         actions: [
@@ -117,6 +130,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
         icon: const Icon(Icons.add),
         label: const Text('Add Product'),
         backgroundColor: Colors.green,
+      ),
       ),
     );
   }
@@ -218,27 +232,51 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                       const SizedBox(height: 4),
 
                       // Category
-                      if (product.category != null) ...[
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.orange.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            product.category!,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.orange.shade700,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                      if (product.categoryId != null || product.category != null)
+                        Builder(
+                          builder: (context) {
+                            String categoryName = product.category ?? '';
+                            if (product.categoryId != null) {
+                              try {
+                                final category = _categories.firstWhere(
+                                  (c) => c.id == product.categoryId,
+                                );
+                                categoryName = category.name;
+                              } catch (e) {
+                                // Category not found, use fallback
+                                if (categoryName.isEmpty) {
+                                  categoryName = 'Unknown Category';
+                                }
+                              }
+                            }
+                            if (categoryName.isNotEmpty) {
+                              return Column(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.orange.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      categoryName,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.orange.shade700,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                ],
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          },
                         ),
-                        const SizedBox(height: 8),
-                      ],
 
                       // Description
                       Text(
@@ -390,12 +428,18 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
   }
 
   void _navigateToAddProduct() {
-    // Navigate to add product screen - will be implemented in admin product screens
-    context.showInfoSnackBar('Add Product screen - Coming soon!');
+    if (_restaurantId == null) {
+      context.showErrorSnackBar('Restaurant ID not found');
+      return;
+    }
+    context.push('/restaurant/products/add');
   }
 
   void _navigateToEditProduct(ProductEntity product) {
-    // Navigate to edit product screen - will be implemented in admin product screens
-    context.showInfoSnackBar('Edit Product screen - Coming soon!');
+    if (_restaurantId == null) {
+      context.showErrorSnackBar('Restaurant ID not found');
+      return;
+    }
+    context.push('/restaurant/products/edit/${product.id}');
   }
 }

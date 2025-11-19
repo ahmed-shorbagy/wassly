@@ -9,6 +9,8 @@ import '../../../../core/utils/extensions.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../../../../shared/widgets/safe_navigation_wrapper.dart';
 import '../cubits/admin_product_cubit.dart';
+import '../../../restaurants/presentation/cubits/food_category_cubit.dart';
+import '../../../restaurants/domain/entities/food_category_entity.dart';
 
 class AdminAddProductScreen extends StatefulWidget {
   final String restaurantId;
@@ -28,65 +30,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
 
   File? _selectedImage;
   bool _isAvailable = true;
-  String? _selectedCategory;
-
-  List<String> _getAvailableCategories(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return [
-      // Arabian categories
-      l10n.arabic,
-      l10n.egyptian,
-      l10n.lebanese,
-      l10n.syrian,
-      l10n.palestinian,
-      l10n.jordanian,
-      l10n.saudi,
-      l10n.emirati,
-      l10n.gulf,
-      l10n.moroccan,
-      l10n.tunisian,
-      l10n.algerian,
-      l10n.yemeni,
-      l10n.iraqi,
-      // Specific dishes
-      l10n.kebabs,
-      l10n.shawarma,
-      l10n.falafel,
-      l10n.hummus,
-      l10n.mezze,
-      l10n.koshary,
-      l10n.mansaf,
-      l10n.mandi,
-      l10n.kabsa,
-      l10n.majboos,
-      l10n.maqluba,
-      l10n.musakhan,
-      l10n.waraqEnab,
-      l10n.mahshi,
-      l10n.kofta,
-      l10n.samosa,
-      l10n.grilledMeat,
-      l10n.bakedGoods,
-      l10n.orientalSweets,
-      // International
-      l10n.fastFood,
-      l10n.italian,
-      l10n.chinese,
-      l10n.indian,
-      l10n.mexican,
-      l10n.japanese,
-      l10n.thai,
-      l10n.mediterranean,
-      l10n.american,
-      l10n.vegetarian,
-      l10n.vegan,
-      l10n.desserts,
-      l10n.beverages,
-      l10n.healthy,
-      l10n.bbq,
-      l10n.seafood,
-    ];
-  }
+  String? _selectedCategoryId;
 
   @override
   void dispose() {
@@ -120,9 +64,13 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
     }
   }
 
-  void _showCategoryPicker() {
+  void _showCategoryPicker(BuildContext context, List<FoodCategoryEntity> categories) {
     final l10n = AppLocalizations.of(context)!;
-    final categories = _getAvailableCategories(context);
+
+    if (categories.isEmpty) {
+      context.showErrorSnackBar(l10n.noCategoriesFound);
+      return;
+    }
 
     showDialog(
       context: context,
@@ -136,11 +84,18 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
             itemBuilder: (context, index) {
               final category = categories[index];
               return ListTile(
-                title: Text(category),
-                selected: _selectedCategory == category,
+                title: Text(category.name),
+                subtitle: category.description != null
+                    ? Text(
+                        category.description!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      )
+                    : null,
+                selected: _selectedCategoryId == category.id,
                 onTap: () {
                   setState(() {
-                    _selectedCategory = category;
+                    _selectedCategoryId = category.id;
                   });
                   Navigator.pop(context);
                 },
@@ -170,7 +125,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
       return;
     }
 
-    if (_selectedCategory == null) {
+    if (_selectedCategoryId == null) {
       context.showErrorSnackBar(l10n.pleaseSelectProductCategory);
       return;
     }
@@ -180,7 +135,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
       name: _nameController.text.trim(),
       description: _descriptionController.text.trim(),
       price: double.parse(_priceController.text),
-      category: _selectedCategory,
+      categoryId: _selectedCategoryId,
       imageFile: _selectedImage!,
       isAvailable: _isAvailable,
     );
@@ -270,7 +225,22 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                 // Category
                 _buildSectionTitle(l10n.productCategory),
                 const SizedBox(height: 12),
-                _buildCategorySelector(l10n),
+                BlocProvider(
+                  create: (context) => context.read<FoodCategoryCubit>()
+                    ..loadRestaurantCategories(widget.restaurantId),
+                  child: BlocBuilder<FoodCategoryCubit, FoodCategoryState>(
+                    builder: (context, state) {
+                      if (state is FoodCategoryLoaded) {
+                        return _buildCategorySelector(
+                          context,
+                          l10n,
+                          state.categories,
+                        );
+                      }
+                      return _buildCategorySelector(context, l10n, []);
+                    },
+                  ),
+                ),
                 const SizedBox(height: 24),
 
                 // Availability
@@ -430,9 +400,25 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
     );
   }
 
-  Widget _buildCategorySelector(AppLocalizations l10n) {
+  Widget _buildCategorySelector(
+    BuildContext context,
+    AppLocalizations l10n,
+    List<FoodCategoryEntity> categories,
+  ) {
+    String displayName = l10n.tapToSelectCategories;
+    if (_selectedCategoryId != null && categories.isNotEmpty) {
+      try {
+        final selectedCategory = categories.firstWhere(
+          (c) => c.id == _selectedCategoryId,
+        );
+        displayName = selectedCategory.name;
+      } catch (e) {
+        // Category not found, use default
+      }
+    }
+
     return InkWell(
-      onTap: _showCategoryPicker,
+      onTap: () => _showCategoryPicker(context, categories),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -445,15 +431,25 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                _selectedCategory ?? l10n.tapToSelectCategories,
+                displayName,
                 style: TextStyle(
                   fontSize: 14,
-                  color: _selectedCategory != null
+                  color: _selectedCategoryId != null
                       ? AppColors.textPrimary
                       : AppColors.textSecondary,
                 ),
               ),
             ),
+            if (categories.isEmpty)
+              IconButton(
+                icon: const Icon(Icons.add, size: 20),
+                onPressed: () {
+                  context.push(
+                    '/admin/restaurants/${widget.restaurantId}/categories/add',
+                  );
+                },
+                tooltip: l10n.addCategory,
+              ),
             const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
           ],
         ),

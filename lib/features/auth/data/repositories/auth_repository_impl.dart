@@ -232,6 +232,49 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, void>> changePassword(
+    String currentPassword,
+    String newPassword,
+  ) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final user = firebaseAuth.currentUser;
+        if (user == null) {
+          return const Left(AuthFailure('User not authenticated'));
+        }
+
+        // Re-authenticate user with current password
+        final credential = EmailAuthProvider.credential(
+          email: user.email!,
+          password: currentPassword,
+        );
+        await user.reauthenticateWithCredential(credential);
+
+        // Update password
+        await user.updatePassword(newPassword);
+        AppLogger.logSuccess('Password changed successfully');
+        return const Right(null);
+      } on FirebaseAuthException catch (e) {
+        AppLogger.logError(
+          'Firebase Auth Exception during password change',
+          error: 'Code: ${e.code}, Message: ${e.message}',
+        );
+        final errorMessage = _mapFirebaseAuthException(e);
+        return Left(AuthFailure(errorMessage));
+      } catch (e, stackTrace) {
+        AppLogger.logError(
+          'Unknown error during password change',
+          error: e,
+          stackTrace: stackTrace,
+        );
+        return Left(ServerFailure('Failed to change password'));
+      }
+    } else {
+      return const Left(NetworkFailure('No internet connection'));
+    }
+  }
+
   String _mapFirebaseAuthException(FirebaseAuthException e) {
     AppLogger.logAuth('Mapping Firebase error code: ${e.code}');
 

@@ -138,6 +138,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get restaurantCreatedSuccessfully => 'تم إنشاء المطعم بنجاح!';
 
   @override
+  String get provideCredentialsToRestaurant =>
+      'يرجى توفير هذه البيانات للمالك:';
+
+  @override
+  String get restaurantCanChangePasswordAfterLogin =>
+      'ملاحظة: يمكن للمالك تغيير كلمة المرور بعد أول تسجيل دخول.';
+
+  @override
   String failedToPickImage(String error) {
     return 'فشل في اختيار الصورة: $error';
   }
@@ -442,6 +450,21 @@ class AppLocalizationsAr extends AppLocalizations {
   String get editRestaurant => 'تعديل المطعم';
 
   @override
+  String get restaurantInformation => 'معلومات المطعم';
+
+  @override
+  String get restaurantStatus => 'حالة المطعم';
+
+  @override
+  String get restaurantIsOpen => 'المطعم مفتوح';
+
+  @override
+  String get restaurantIsClosed => 'المطعم مغلق';
+
+  @override
+  String get manageProducts => 'إدارة المنتجات';
+
+  @override
   String get updateRestaurant => 'تحديث المطعم';
 
   @override
@@ -530,6 +553,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noRestaurantsAvailable => 'لا توجد مطاعم متاحة حالياً';
 
   @override
+  String get noRestaurantsAvailableMessage =>
+      'تحقق لاحقاً للحصول على مطاعم جديدة';
+
+  @override
+  String get noRestaurantsFound => 'لم يتم العثور على مطاعم';
+
+  @override
+  String get tryDifferentSearchTerm => 'جرب مصطلح بحث مختلف';
+
+  @override
   String get exitApp => 'الخروج';
 
   @override
@@ -564,6 +597,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get orderHistory => 'سجل الطلبات';
 
   @override
+  String get allOrders => 'جميع الطلبات';
+
+  @override
   String get noOrdersYet => 'لا توجد طلبات حتى الآن';
 
   @override
@@ -591,7 +627,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get orderItems => 'عناصر الطلب';
 
   @override
-  String get moreItems => 'عناصر أخرى';
+  String moreItems(int count) {
+    return '+ $count عناصر أخرى';
+  }
 
   @override
   String get pending => 'معلق';
@@ -613,6 +651,27 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get cancelled => 'ملغي';
+
+  @override
+  String get orderPending => 'معلق';
+
+  @override
+  String get orderPreparing => 'قيد التحضير';
+
+  @override
+  String get orderReady => 'جاهز';
+
+  @override
+  String get orderPickedUp => 'في الطريق';
+
+  @override
+  String get orderDelivered => 'تم التسليم';
+
+  @override
+  String get orderCancelled => 'ملغي';
+
+  @override
+  String get orderPlaced => 'تم تقديم الطلب';
 
   @override
   String get reject => 'رفض';
@@ -1011,4 +1070,51 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get or => 'أو';
+
+  @override
+  String get foodCategories => 'فئات الطعام';
+
+  @override
+  String get addCategory => 'إضافة فئة';
+
+  @override
+  String get editCategory => 'تعديل فئة';
+
+  @override
+  String get updateCategory => 'تحديث فئة';
+
+  @override
+  String get deleteCategory => 'حذف فئة';
+
+  @override
+  String get categoryName => 'اسم الفئة';
+
+  @override
+  String get pleaseEnterCategoryName => 'الرجاء إدخال اسم الفئة';
+
+  @override
+  String get noCategoriesFound => 'لم يتم العثور على فئات';
+
+  @override
+  String get categoryCreatedSuccessfully => 'تم إنشاء الفئة بنجاح';
+
+  @override
+  String get categoryUpdatedSuccessfully => 'تم تحديث الفئة بنجاح';
+
+  @override
+  String get categoryNotFound => 'الفئة غير موجودة';
+
+  @override
+  String get creatingCategory => 'جاري إنشاء الفئة...';
+
+  @override
+  String get updatingCategory => 'جاري تحديث الفئة...';
+
+  @override
+  String areYouSureDeleteCategory(String name) {
+    return 'هل أنت متأكد من حذف الفئة \"$name\"؟';
+  }
+
+  @override
+  String get displayOrder => 'ترتيب العرض';
 }

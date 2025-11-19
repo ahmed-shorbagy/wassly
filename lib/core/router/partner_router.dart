@@ -6,6 +6,11 @@ import '../../features/auth/presentation/views/signup_screen.dart';
 import '../../features/restaurants/presentation/views/restaurant_home_screen.dart';
 import '../../features/restaurants/presentation/views/driver_home_screen.dart';
 import '../../features/partner/presentation/views/restaurant_orders_screen.dart';
+import '../../features/partner/presentation/views/restaurant_settings_screen.dart';
+import '../../features/partner/presentation/views/product_management_screen.dart';
+import '../../features/orders/presentation/views/order_detail_screen.dart';
+import '../../features/drivers/presentation/views/driver_orders_screen.dart';
+import '../../features/auth/presentation/views/customer_profile_screen.dart';
 
 class PartnerRouter {
   static final GoRouter router = GoRouter(
@@ -77,6 +82,14 @@ class PartnerRouter {
             builder: (context, state) => const DriverOrdersScreen(),
           ),
           GoRoute(
+            path: 'order/:id',
+            name: 'driver-order-detail',
+            builder: (context, state) {
+              final orderId = state.pathParameters['id'] ?? '';
+              return DriverOrderDetailScreen(orderId: orderId);
+            },
+          ),
+          GoRoute(
             path: 'profile',
             name: 'driver-profile',
             builder: (context, state) => const DriverProfileScreen(),
@@ -104,11 +117,17 @@ class RestaurantOrderDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Implement restaurant order detail screen
-    return Scaffold(
-      appBar: AppBar(title: const Text('Order Details')),
-      body: Center(child: Text('Order Detail: $orderId')),
-    );
+    return OrderDetailScreen(orderId: orderId);
+  }
+}
+
+class DriverOrderDetailScreen extends StatelessWidget {
+  final String orderId;
+  const DriverOrderDetailScreen({super.key, required this.orderId});
+
+  @override
+  Widget build(BuildContext context) {
+    return OrderDetailScreen(orderId: orderId);
   }
 }
 
@@ -117,32 +136,7 @@ class RestaurantProductsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Get restaurant ID from auth state
-    return const Scaffold(
-      body: Center(child: Text('Product Management - Coming Soon')),
-    );
-  }
-}
-
-class RestaurantSettingsScreen extends StatelessWidget {
-  const RestaurantSettingsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text('Restaurant Settings - Coming Soon')),
-    );
-  }
-}
-
-class DriverOrdersScreen extends StatelessWidget {
-  const DriverOrdersScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text('Driver Orders - Coming Soon')),
-    );
+    return const ProductManagementScreen();
   }
 }
 
@@ -151,9 +145,8 @@ class DriverProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text('Driver Profile - Coming Soon')),
-    );
+    // Use customer profile screen for driver profile
+    return const CustomerProfileScreen();
   }
 }
 

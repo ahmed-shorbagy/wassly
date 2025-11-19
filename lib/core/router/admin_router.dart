@@ -17,6 +17,17 @@ import '../../features/admin/presentation/views/admin_edit_startup_ad_screen.dar
 import '../../features/admin/presentation/views/admin_add_banner_ad_screen.dart';
 import '../../features/admin/presentation/views/admin_edit_banner_ad_screen.dart';
 import '../../features/admin/presentation/views/edit_restaurant_screen.dart';
+import '../../features/admin/presentation/views/admin_category_list_screen.dart';
+import '../../features/admin/presentation/views/admin_add_category_screen.dart';
+import '../../features/admin/presentation/views/admin_edit_category_screen.dart';
+import '../../features/admin/presentation/views/order_management_screen.dart';
+import '../../features/admin/presentation/views/user_management_screen.dart';
+import '../../features/admin/presentation/views/analytics_screen.dart';
+import '../../features/admin/presentation/views/admin_settings_screen.dart';
+import '../../features/orders/presentation/views/order_detail_screen.dart';
+import '../../features/admin/presentation/views/driver_management_screen.dart';
+import '../../features/admin/presentation/views/create_driver_screen.dart';
+import '../../features/admin/presentation/views/edit_driver_screen.dart';
 import '../../features/restaurants/domain/entities/restaurant_entity.dart';
 import '../../features/market_products/domain/entities/market_product_entity.dart';
 import '../../features/ads/domain/entities/startup_ad_entity.dart';
@@ -116,6 +127,41 @@ class AdminRouter {
                   ),
                 ],
               ),
+              // Category Management Routes - Nested under restaurants
+              GoRoute(
+                path: ':restaurantId/categories',
+                name: 'admin-restaurant-categories',
+                builder: (context, state) {
+                  final restaurantId =
+                      state.pathParameters['restaurantId'] ?? '';
+                  return AdminCategoryListScreen(restaurantId: restaurantId);
+                },
+                routes: [
+                  GoRoute(
+                    path: 'add',
+                    name: 'admin-add-category',
+                    builder: (context, state) {
+                      final restaurantId =
+                          state.pathParameters['restaurantId'] ?? '';
+                      return AdminAddCategoryScreen(restaurantId: restaurantId);
+                    },
+                  ),
+                  GoRoute(
+                    path: ':categoryId/edit',
+                    name: 'admin-edit-category',
+                    builder: (context, state) {
+                      final restaurantId =
+                          state.pathParameters['restaurantId'] ?? '';
+                      final categoryId =
+                          state.pathParameters['categoryId'] ?? '';
+                      return AdminEditCategoryScreen(
+                        restaurantId: restaurantId,
+                        categoryId: categoryId,
+                      );
+                    },
+                  ),
+                ],
+              ),
             ],
           ),
           // Drivers
@@ -123,6 +169,21 @@ class AdminRouter {
             path: 'drivers',
             name: 'drivers',
             builder: (context, state) => const DriverManagementScreen(),
+            routes: [
+              GoRoute(
+                path: 'create',
+                name: 'create-driver',
+                builder: (context, state) => const CreateDriverScreen(),
+              ),
+              GoRoute(
+                path: 'edit/:id',
+                name: 'edit-driver',
+                builder: (context, state) {
+                  final driverId = state.pathParameters['id'] ?? '';
+                  return EditDriverScreen(driverId: driverId);
+                },
+              ),
+            ],
           ),
           // Orders
           GoRoute(
@@ -241,77 +302,3 @@ class ErrorScreen extends StatelessWidget {
   }
 }
 
-class AnalyticsScreen extends StatelessWidget {
-  const AnalyticsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Analytics'),
-        backgroundColor: Colors.purple,
-      ),
-      body: const Center(child: Text('Analytics - Coming Soon')),
-    );
-  }
-}
-
-class UserManagementScreen extends StatelessWidget {
-  const UserManagementScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('User Management'),
-        backgroundColor: Colors.purple,
-      ),
-      body: const Center(child: Text('User Management - Coming Soon')),
-    );
-  }
-}
-
-class DriverManagementScreen extends StatelessWidget {
-  const DriverManagementScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Driver Management'),
-        backgroundColor: Colors.purple,
-      ),
-      body: const Center(child: Text('Driver Management - Coming Soon')),
-    );
-  }
-}
-
-class OrderManagementScreen extends StatelessWidget {
-  const OrderManagementScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Order Management'),
-        backgroundColor: Colors.purple,
-      ),
-      body: const Center(child: Text('Order Management - Coming Soon')),
-    );
-  }
-}
-
-class AdminSettingsScreen extends StatelessWidget {
-  const AdminSettingsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-        backgroundColor: Colors.purple,
-      ),
-      body: const Center(child: Text('Settings - Coming Soon')),
-    );
-  }
-}

@@ -229,6 +229,31 @@ class OrderRepositoryImpl implements OrderRepository {
   }
 
   @override
+  Future<Either<Failure, List<OrderEntity>>> getAllOrders() async {
+    try {
+      AppLogger.logInfo('Fetching all orders (admin)');
+
+      final snapshot = await firestore
+          .collection('orders')
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      final orders = snapshot.docs.map((doc) {
+        return OrderModel.fromFirestore(doc);
+      }).toList();
+
+      AppLogger.logSuccess('Fetched ${orders.length} orders');
+      return Right(orders);
+    } on FirebaseException catch (e) {
+      AppLogger.logError('Firebase error fetching all orders', error: e);
+      return Left(ServerFailure('Failed to fetch orders: ${e.message}'));
+    } catch (e) {
+      AppLogger.logError('Error fetching all orders', error: e);
+      return Left(ServerFailure('Failed to fetch orders'));
+    }
+  }
+
+  @override
   Future<Either<Failure, List<OrderEntity>>> getRestaurantOrders(
     String restaurantId,
   ) async {

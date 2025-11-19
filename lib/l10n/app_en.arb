@@ -60,6 +60,8 @@
   
   "creatingRestaurant": "Creating your restaurant...",
   "restaurantCreatedSuccessfully": "Restaurant created successfully!",
+  "provideCredentialsToRestaurant": "Please provide these credentials to the restaurant owner:",
+  "restaurantCanChangePasswordAfterLogin": "Note: Restaurant owner can change password after first login.",
   "failedToPickImage": "Failed to pick image: {error}",
   "@failedToPickImage": {
     "placeholders": {
@@ -172,6 +174,11 @@
   "confirmNewPassword": "Confirm New Password",
   "currentPassword": "Current Password",
   "editRestaurant": "Edit Restaurant",
+  "restaurantInformation": "Restaurant Information",
+  "restaurantStatus": "Restaurant Status",
+  "restaurantIsOpen": "Restaurant is open",
+  "restaurantIsClosed": "Restaurant is closed",
+  "manageProducts": "Manage Products",
   "updateRestaurant": "Update Restaurant",
   "restaurantUpdatedSuccessfully": "Restaurant updated successfully",
   "updatingRestaurant": "Updating restaurant...",
@@ -210,6 +217,9 @@
   "specialOffers": "Special Offers",
   "noRestaurants": "No Restaurants",
   "noRestaurantsAvailable": "No restaurants available at the moment",
+  "noRestaurantsAvailableMessage": "Check back later for new restaurants",
+  "noRestaurantsFound": "No restaurants found",
+  "tryDifferentSearchTerm": "Try a different search term",
   
   "exitApp": "Exit App",
   "exitAppConfirmation": "Are you sure you want to exit the app?",
@@ -223,6 +233,7 @@
   "pendingOrders": "Pending Orders",
   "activeOrders": "Active Orders",
   "orderHistory": "Order History",
+  "allOrders": "All Orders",
   "noOrdersYet": "No orders yet",
   "noPendingOrders": "No Pending Orders",
   "noPendingOrdersMessage": "No pending orders at the moment",
@@ -232,7 +243,14 @@
   "noOrderHistoryMessage": "Your order history is empty",
   "orderId": "Order ID",
   "orderItems": "Order Items",
-  "moreItems": "more items",
+  "moreItems": "+ {count} more items",
+  "@moreItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "pending": "Pending",
   "accepted": "Accepted",
   "preparing": "Preparing",
@@ -240,6 +258,13 @@
   "onTheWay": "On the Way",
   "delivered": "Delivered",
   "cancelled": "Cancelled",
+  "orderPending": "Pending",
+  "orderPreparing": "Preparing",
+  "orderReady": "Ready",
+  "orderPickedUp": "On the Way",
+  "orderDelivered": "Delivered",
+  "orderCancelled": "Cancelled",
+  "orderPlaced": "Order Placed",
   "reject": "Reject",
   "accept": "Accept",
   "startPreparing": "Start Preparing",
@@ -404,6 +429,30 @@
   "loginToContinue": "Log in to continue",
   "dontHaveAccount": "Don't have an account?",
   "signup": "Sign Up",
-  "or": "or"
+  "or": "or",
+  
+  "foodCategories": "Food Categories",
+  "addCategory": "Add Category",
+  "editCategory": "Edit Category",
+  "updateCategory": "Update Category",
+  "deleteCategory": "Delete Category",
+  "categoryName": "Category Name",
+  "pleaseEnterCategoryName": "Please enter category name",
+  "noCategoriesFound": "No categories found",
+  "categoryCreatedSuccessfully": "Category created successfully",
+  "categoryUpdatedSuccessfully": "Category updated successfully",
+  "categoryNotFound": "Category not found",
+  "creatingCategory": "Creating category...",
+  "updatingCategory": "Updating category...",
+  "areYouSureDeleteCategory": "Are you sure you want to delete the category \"{name}\"?",
+  "@areYouSureDeleteCategory": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "displayOrder": "Display Order",
+  "cancel": "Cancel"
 }
 

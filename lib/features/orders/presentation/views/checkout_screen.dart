@@ -279,7 +279,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         ),
                       ),
                       Text(
-                        '\$${item.totalPrice.toStringAsFixed(2)}',
+                        '${item.totalPrice.toStringAsFixed(2)} ر.س',
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -303,7 +303,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       style: const TextStyle(fontSize: 14),
                     ),
                     Text(
-                      '\$${cartState.totalPrice.toStringAsFixed(2)}',
+                      '${cartState.totalPrice.toStringAsFixed(2)} ر.س',
                       style: const TextStyle(fontSize: 14),
                     ),
                   ],
@@ -324,7 +324,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       style: const TextStyle(fontSize: 14),
                     ),
                     Text(
-                      '\$${_getDeliveryFee().toStringAsFixed(2)}',
+                      '${_getDeliveryFee().toStringAsFixed(2)} ر.س',
                       style: const TextStyle(fontSize: 14),
                     ),
                   ],
@@ -348,7 +348,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ),
                     ),
                 Text(
-                  '\$${_getTotalAmount(cartState.totalPrice).toStringAsFixed(2)}',
+                  '${_getTotalAmount(cartState.totalPrice).toStringAsFixed(2)} ر.س',
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -390,7 +390,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               builder: (context) {
                 final l10n = AppLocalizations.of(context);
                 return Text(
-                  '${l10n?.placeOrder ?? 'تقديم الطلب'} - \$${_getTotalAmount(cartState.totalPrice).toStringAsFixed(2)}',
+                  '${l10n?.placeOrder ?? 'تقديم الطلب'} - ${_getTotalAmount(cartState.totalPrice).toStringAsFixed(2)} ر.س',
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 );
               },

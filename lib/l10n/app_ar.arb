@@ -50,6 +50,8 @@
   
   "creatingRestaurant": "جاري إنشاء المطعم...",
   "restaurantCreatedSuccessfully": "تم إنشاء المطعم بنجاح!",
+  "provideCredentialsToRestaurant": "يرجى توفير هذه البيانات للمالك:",
+  "restaurantCanChangePasswordAfterLogin": "ملاحظة: يمكن للمالك تغيير كلمة المرور بعد أول تسجيل دخول.",
   "failedToPickImage": "فشل في اختيار الصورة: {error}",
   
   "fastFood": "وجبات سريعة",
@@ -155,6 +157,11 @@
   "confirmNewPassword": "تأكيد كلمة المرور الجديدة",
   "currentPassword": "كلمة المرور الحالية",
   "editRestaurant": "تعديل المطعم",
+  "restaurantInformation": "معلومات المطعم",
+  "restaurantStatus": "حالة المطعم",
+  "restaurantIsOpen": "المطعم مفتوح",
+  "restaurantIsClosed": "المطعم مغلق",
+  "manageProducts": "إدارة المنتجات",
   "updateRestaurant": "تحديث المطعم",
   "restaurantUpdatedSuccessfully": "تم تحديث المطعم بنجاح",
   "updatingRestaurant": "جاري تحديث المطعم...",
@@ -193,6 +200,9 @@
   "specialOffers": "عروض خاصة",
   "noRestaurants": "لا توجد مطاعم",
   "noRestaurantsAvailable": "لا توجد مطاعم متاحة حالياً",
+  "noRestaurantsAvailableMessage": "تحقق لاحقاً للحصول على مطاعم جديدة",
+  "noRestaurantsFound": "لم يتم العثور على مطاعم",
+  "tryDifferentSearchTerm": "جرب مصطلح بحث مختلف",
   
   "exitApp": "الخروج",
   "exitAppConfirmation": "هل أنت متأكد من الخروج من التطبيق؟",
@@ -206,6 +216,7 @@
   "pendingOrders": "الطلبات المعلقة",
   "activeOrders": "الطلبات النشطة",
   "orderHistory": "سجل الطلبات",
+  "allOrders": "جميع الطلبات",
   "noOrdersYet": "لا توجد طلبات حتى الآن",
   "noPendingOrders": "لا توجد طلبات معلقة",
   "noPendingOrdersMessage": "لا توجد طلبات معلقة حالياً",
@@ -215,7 +226,14 @@
   "noOrderHistoryMessage": "سجل الطلبات الخاص بك فارغ",
   "orderId": "رقم الطلب",
   "orderItems": "عناصر الطلب",
-  "moreItems": "عناصر أخرى",
+  "moreItems": "+ {count} عناصر أخرى",
+  "@moreItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "pending": "معلق",
   "accepted": "مقبول",
   "preparing": "قيد التحضير",
@@ -223,6 +241,13 @@
   "onTheWay": "في الطريق",
   "delivered": "تم التسليم",
   "cancelled": "ملغي",
+  "orderPending": "معلق",
+  "orderPreparing": "قيد التحضير",
+  "orderReady": "جاهز",
+  "orderPickedUp": "في الطريق",
+  "orderDelivered": "تم التسليم",
+  "orderCancelled": "ملغي",
+  "orderPlaced": "تم تقديم الطلب",
   "reject": "رفض",
   "accept": "قبول",
   "startPreparing": "بدء التحضير",
@@ -387,6 +412,30 @@
   "loginToContinue": "سجّل دخولك للمتابعة",
   "dontHaveAccount": "ليس لديك حساب؟",
   "signup": "إنشاء حساب",
-  "or": "أو"
+  "or": "أو",
+  
+  "foodCategories": "فئات الطعام",
+  "addCategory": "إضافة فئة",
+  "editCategory": "تعديل فئة",
+  "updateCategory": "تحديث فئة",
+  "deleteCategory": "حذف فئة",
+  "categoryName": "اسم الفئة",
+  "pleaseEnterCategoryName": "الرجاء إدخال اسم الفئة",
+  "noCategoriesFound": "لم يتم العثور على فئات",
+  "categoryCreatedSuccessfully": "تم إنشاء الفئة بنجاح",
+  "categoryUpdatedSuccessfully": "تم تحديث الفئة بنجاح",
+  "categoryNotFound": "الفئة غير موجودة",
+  "creatingCategory": "جاري إنشاء الفئة...",
+  "updatingCategory": "جاري تحديث الفئة...",
+  "areYouSureDeleteCategory": "هل أنت متأكد من حذف الفئة \"{name}\"؟",
+  "@areYouSureDeleteCategory": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "displayOrder": "ترتيب العرض",
+  "cancel": "إلغاء"
 }
 

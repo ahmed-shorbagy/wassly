@@ -139,6 +139,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Restaurant created successfully!';
 
   @override
+  String get provideCredentialsToRestaurant =>
+      'Please provide these credentials to the restaurant owner:';
+
+  @override
+  String get restaurantCanChangePasswordAfterLogin =>
+      'Note: Restaurant owner can change password after first login.';
+
+  @override
   String failedToPickImage(String error) {
     return 'Failed to pick image: $error';
   }
@@ -446,6 +454,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editRestaurant => 'Edit Restaurant';
 
   @override
+  String get restaurantInformation => 'Restaurant Information';
+
+  @override
+  String get restaurantStatus => 'Restaurant Status';
+
+  @override
+  String get restaurantIsOpen => 'Restaurant is open';
+
+  @override
+  String get restaurantIsClosed => 'Restaurant is closed';
+
+  @override
+  String get manageProducts => 'Manage Products';
+
+  @override
   String get updateRestaurant => 'Update Restaurant';
 
   @override
@@ -534,6 +557,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noRestaurantsAvailable => 'No restaurants available at the moment';
 
   @override
+  String get noRestaurantsAvailableMessage =>
+      'Check back later for new restaurants';
+
+  @override
+  String get noRestaurantsFound => 'No restaurants found';
+
+  @override
+  String get tryDifferentSearchTerm => 'Try a different search term';
+
+  @override
   String get exitApp => 'Exit App';
 
   @override
@@ -568,6 +601,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orderHistory => 'Order History';
 
   @override
+  String get allOrders => 'All Orders';
+
+  @override
   String get noOrdersYet => 'No orders yet';
 
   @override
@@ -595,7 +631,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orderItems => 'Order Items';
 
   @override
-  String get moreItems => 'more items';
+  String moreItems(int count) {
+    return '+ $count more items';
+  }
 
   @override
   String get pending => 'Pending';
@@ -617,6 +655,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cancelled => 'Cancelled';
+
+  @override
+  String get orderPending => 'Pending';
+
+  @override
+  String get orderPreparing => 'Preparing';
+
+  @override
+  String get orderReady => 'Ready';
+
+  @override
+  String get orderPickedUp => 'On the Way';
+
+  @override
+  String get orderDelivered => 'Delivered';
+
+  @override
+  String get orderCancelled => 'Cancelled';
+
+  @override
+  String get orderPlaced => 'Order Placed';
 
   @override
   String get reject => 'Reject';
@@ -1018,4 +1077,51 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get or => 'or';
+
+  @override
+  String get foodCategories => 'Food Categories';
+
+  @override
+  String get addCategory => 'Add Category';
+
+  @override
+  String get editCategory => 'Edit Category';
+
+  @override
+  String get updateCategory => 'Update Category';
+
+  @override
+  String get deleteCategory => 'Delete Category';
+
+  @override
+  String get categoryName => 'Category Name';
+
+  @override
+  String get pleaseEnterCategoryName => 'Please enter category name';
+
+  @override
+  String get noCategoriesFound => 'No categories found';
+
+  @override
+  String get categoryCreatedSuccessfully => 'Category created successfully';
+
+  @override
+  String get categoryUpdatedSuccessfully => 'Category updated successfully';
+
+  @override
+  String get categoryNotFound => 'Category not found';
+
+  @override
+  String get creatingCategory => 'Creating category...';
+
+  @override
+  String get updatingCategory => 'Updating category...';
+
+  @override
+  String areYouSureDeleteCategory(String name) {
+    return 'Are you sure you want to delete the category \"$name\"?';
+  }
+
+  @override
+  String get displayOrder => 'Display Order';
 }

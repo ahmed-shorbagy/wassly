@@ -9,6 +9,7 @@ class ProductModel extends ProductEntity {
     required super.description,
     required super.price,
     super.imageUrl,
+    super.categoryId,
     super.category,
     required super.isAvailable,
     required super.createdAt,
@@ -22,7 +23,8 @@ class ProductModel extends ProductEntity {
       description: json['description'] ?? '',
       price: (json['price'] ?? 0).toDouble(),
       imageUrl: json['imageUrl'],
-      category: json['category'],
+      categoryId: json['categoryId'],
+      category: json['category'], // Keep for backward compatibility
       isAvailable: json['isAvailable'] ?? true,
       createdAt: (json['createdAt'] as Timestamp).toDate(),
     );
@@ -36,6 +38,7 @@ class ProductModel extends ProductEntity {
       description: entity.description,
       price: entity.price,
       imageUrl: entity.imageUrl,
+      categoryId: entity.categoryId,
       category: entity.category,
       isAvailable: entity.isAvailable,
       createdAt: entity.createdAt,
@@ -50,7 +53,8 @@ class ProductModel extends ProductEntity {
       'description': description,
       'price': price,
       'imageUrl': imageUrl,
-      'category': category,
+      'categoryId': categoryId,
+      'category': category, // Keep for backward compatibility
       'isAvailable': isAvailable,
       'createdAt': Timestamp.fromDate(createdAt),
     };
@@ -70,6 +74,7 @@ class ProductModel extends ProductEntity {
     String? description,
     double? price,
     String? imageUrl,
+    String? categoryId,
     String? category,
     bool? isAvailable,
     DateTime? createdAt,
@@ -81,6 +86,7 @@ class ProductModel extends ProductEntity {
       description: description ?? this.description,
       price: price ?? this.price,
       imageUrl: imageUrl ?? this.imageUrl,
+      categoryId: categoryId ?? this.categoryId,
       category: category ?? this.category,
       isAvailable: isAvailable ?? this.isAvailable,
       createdAt: createdAt ?? this.createdAt,

@@ -13,6 +13,14 @@ import '../../features/orders/presentation/views/cart_screen.dart';
 import '../../features/orders/presentation/views/checkout_screen.dart';
 import '../../features/orders/presentation/views/order_list_screen.dart';
 import '../../features/orders/presentation/views/order_detail_screen.dart';
+import '../../features/partner/presentation/views/product_management_screen.dart';
+import '../../features/admin/presentation/views/admin_add_product_screen.dart';
+import '../../features/admin/presentation/views/admin_edit_product_screen.dart';
+import '../../features/auth/presentation/views/customer_profile_screen.dart';
+import '../../features/partner/presentation/views/restaurant_orders_screen.dart';
+import '../../features/partner/presentation/views/restaurant_settings_screen.dart';
+import '../../features/drivers/presentation/views/driver_orders_screen.dart';
+import '../../features/auth/presentation/cubits/auth_cubit.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -106,7 +114,7 @@ class AppRouter {
           GoRoute(
             path: 'profile',
             name: 'customer-profile',
-            builder: (context, state) => const ProfileScreen(),
+            builder: (context, state) => const CustomerProfileScreen(),
           ),
         ],
       ),
@@ -123,21 +131,83 @@ class AppRouter {
             builder: (context, state) => const RestaurantOrdersScreen(),
           ),
           GoRoute(
+            path: 'order/:id',
+            name: 'restaurant-order-detail',
+            builder: (context, state) {
+              final orderId = state.pathParameters['id'] ?? '';
+              return RestaurantOrderDetailScreen(orderId: orderId);
+            },
+          ),
+          GoRoute(
             path: 'products',
             name: 'restaurant-products',
-            builder: (context, state) => const ProductListScreen(),
+            builder: (context, state) {
+              return const ProductManagementScreen();
+            },
           ),
           GoRoute(
-            path: 'product/add',
+            path: 'products/add',
             name: 'restaurant-add-product',
-            builder: (context, state) => const AddProductScreen(),
+            builder: (context, state) {
+              // Get restaurant ID from auth state
+              final authState = context.read<AuthCubit>().state;
+              if (authState is AuthAuthenticated) {
+                // Get restaurant by owner ID
+                return FutureBuilder(
+                  future: _getRestaurantByOwnerId(context, authState.user.id),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Scaffold(
+                        body: Center(child: CircularProgressIndicator()),
+                      );
+                    }
+                    if (snapshot.hasData && snapshot.data != null) {
+                      final restaurant = snapshot.data as dynamic;
+                      return AdminAddProductScreen(restaurantId: restaurant.id);
+                    }
+                    return const Scaffold(
+                      body: Center(child: Text('Restaurant not found')),
+                    );
+                  },
+                );
+              }
+              return const Scaffold(
+                body: Center(child: Text('Please login')),
+              );
+            },
           ),
           GoRoute(
-            path: 'product/edit/:id',
+            path: 'products/edit/:id',
             name: 'restaurant-edit-product',
             builder: (context, state) {
               final productId = state.pathParameters['id'] ?? '';
-              return EditProductScreen(productId: productId);
+              // Get restaurant ID from auth state
+              final authState = context.read<AuthCubit>().state;
+              if (authState is AuthAuthenticated) {
+                return FutureBuilder(
+                  future: _getRestaurantByOwnerId(context, authState.user.id),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Scaffold(
+                        body: Center(child: CircularProgressIndicator()),
+                      );
+                    }
+                    if (snapshot.hasData && snapshot.data != null) {
+                      final restaurant = snapshot.data as dynamic;
+                      return AdminEditProductScreen(
+                        restaurantId: restaurant.id,
+                        productId: productId,
+                      );
+                    }
+                    return const Scaffold(
+                      body: Center(child: Text('Restaurant not found')),
+                    );
+                  },
+                );
+              }
+              return const Scaffold(
+                body: Center(child: Text('Please login')),
+              );
             },
           ),
           GoRoute(
@@ -170,7 +240,7 @@ class AppRouter {
           GoRoute(
             path: 'profile',
             name: 'driver-profile',
-            builder: (context, state) => const DriverProfileScreen(),
+            builder: (context, state) => const CustomerProfileScreen(),
           ),
         ],
       ),
@@ -179,75 +249,15 @@ class AppRouter {
   );
 }
 
-// Placeholder screens - these will be implemented in the respective feature modules
-
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: Text('Profile Screen')));
-  }
-}
-
-class RestaurantOrdersScreen extends StatelessWidget {
-  const RestaurantOrdersScreen({super.key});
+// Restaurant Order Detail Screen
+class RestaurantOrderDetailScreen extends StatelessWidget {
+  final String orderId;
+  const RestaurantOrderDetailScreen({super.key, required this.orderId});
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text('Restaurant Orders Screen')),
-    );
-  }
-}
-
-class ProductListScreen extends StatelessWidget {
-  const ProductListScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: Text('Product List Screen')));
-  }
-}
-
-class AddProductScreen extends StatelessWidget {
-  const AddProductScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: Text('Add Product Screen')));
-  }
-}
-
-class EditProductScreen extends StatelessWidget {
-  final String productId;
-  const EditProductScreen({super.key, required this.productId});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(child: Text('Edit Product Screen - ID: $productId')),
-    );
-  }
-}
-
-class RestaurantSettingsScreen extends StatelessWidget {
-  const RestaurantSettingsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text('Restaurant Settings Screen')),
-    );
-  }
-}
-
-class DriverOrdersScreen extends StatelessWidget {
-  const DriverOrdersScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: Text('Driver Orders Screen')));
+    // Use the same order detail screen but with restaurant-specific actions
+    return OrderDetailScreen(orderId: orderId);
   }
 }
 
@@ -257,18 +267,7 @@ class DriverOrderDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(child: Text('Driver Order Detail Screen - ID: $orderId')),
-    );
-  }
-}
-
-class DriverProfileScreen extends StatelessWidget {
-  const DriverProfileScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: Text('Driver Profile Screen')));
+    return OrderDetailScreen(orderId: orderId);
   }
 }
 
@@ -283,9 +282,19 @@ class ErrorScreen extends StatelessWidget {
 
 // Helper function to get restaurant
 Future<dynamic> _getRestaurant(BuildContext context, String restaurantId) async {
-  // This is a workaround - in production, you'd want to handle this better
   final cubit = context.read<RestaurantCubit>();
   await cubit.getRestaurantById(restaurantId);
+  final state = cubit.state;
+  if (state is RestaurantLoaded) {
+    return state.restaurant;
+  }
+  return null;
+}
+
+// Helper function to get restaurant by owner ID
+Future<dynamic> _getRestaurantByOwnerId(BuildContext context, String ownerId) async {
+  final cubit = context.read<RestaurantCubit>();
+  await cubit.getRestaurantByOwnerId(ownerId);
   final state = cubit.state;
   if (state is RestaurantLoaded) {
     return state.restaurant;

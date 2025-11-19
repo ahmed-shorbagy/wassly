@@ -6,6 +6,7 @@ import '../../domain/usecases/signup_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
 import '../../domain/usecases/reset_password_usecase.dart';
+import '../../domain/repositories/auth_repository.dart';
 import '../../../../core/utils/use_case.dart';
 import '../../../../core/utils/logger.dart';
 
@@ -17,6 +18,7 @@ class AuthCubit extends Cubit<AuthState> {
   final LogoutUseCase logoutUseCase;
   final GetCurrentUserUseCase getCurrentUserUseCase;
   final ResetPasswordUseCase resetPasswordUseCase;
+  final AuthRepository repository;
 
   AuthCubit({
     required this.loginUseCase,
@@ -24,6 +26,7 @@ class AuthCubit extends Cubit<AuthState> {
     required this.logoutUseCase,
     required this.getCurrentUserUseCase,
     required this.resetPasswordUseCase,
+    required this.repository,
   }) : super(AuthInitial());
 
   Future<void> login(String email, String password) async {
@@ -143,6 +146,30 @@ class AuthCubit extends Cubit<AuthState> {
       (_) {
         AppLogger.logSuccess('Password reset email sent successfully');
         emit(AuthPasswordResetSent());
+      },
+    );
+  }
+
+  Future<void> changePassword(
+    String currentPassword,
+    String newPassword,
+  ) async {
+    AppLogger.logAuth('Attempting password change');
+    emit(AuthLoading());
+
+    final result = await repository.changePassword(
+      currentPassword,
+      newPassword,
+    );
+
+    result.fold(
+      (failure) {
+        AppLogger.logError('Password change failed', error: failure.message);
+        emit(AuthError(failure.message));
+      },
+      (_) {
+        AppLogger.logSuccess('Password changed successfully');
+        emit(AuthPasswordChanged());
       },
     );
   }

@@ -35,6 +35,9 @@ import '../../features/admin/presentation/cubits/admin_cubit.dart';
 import '../../features/admin/presentation/cubits/admin_product_cubit.dart';
 import '../../features/restaurants/domain/repositories/restaurant_owner_repository.dart';
 import '../../features/restaurants/data/repositories/restaurant_owner_repository_impl.dart';
+import '../../features/restaurants/domain/repositories/food_category_repository.dart';
+import '../../features/restaurants/data/repositories/food_category_repository_impl.dart';
+import '../../features/restaurants/presentation/cubits/food_category_cubit.dart';
 import '../../features/market_products/domain/repositories/market_product_repository.dart';
 import '../../features/market_products/data/repositories/market_product_repository_impl.dart';
 import '../../features/market_products/presentation/cubits/market_product_cubit.dart';
@@ -43,6 +46,9 @@ import '../../features/ads/domain/repositories/ad_repository.dart';
 import '../../features/ads/data/repositories/ad_repository_impl.dart';
 import '../../features/admin/presentation/cubits/ad_management_cubit.dart';
 import '../../features/ads/presentation/cubits/startup_ad_customer_cubit.dart';
+import '../../features/drivers/domain/repositories/driver_repository.dart';
+import '../../features/drivers/data/repositories/driver_repository_impl.dart';
+import '../../features/drivers/presentation/cubits/driver_cubit.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import '../network/network_info.dart';
 import '../network/supabase_service.dart';
@@ -68,6 +74,8 @@ class InjectionContainer {
   late final CartRepository _cartRepository;
   late final MarketProductRepository _marketProductRepository;
   late final AdRepository _adRepository;
+  late final FoodCategoryRepository _foodCategoryRepository;
+  late final DriverRepository _driverRepository;
 
   Future<void> init() async {
     // External dependencies
@@ -119,6 +127,17 @@ class InjectionContainer {
       firestore: _firestore,
       imageUploadHelper: _imageUploadHelper,
     );
+
+    _foodCategoryRepository = FoodCategoryRepositoryImpl(
+      firestore: _firestore,
+      networkInfo: _networkInfo,
+    );
+
+    _driverRepository = DriverRepositoryImpl(
+      firestore: _firestore,
+      networkInfo: _networkInfo,
+      supabaseService: _supabaseService,
+    );
   }
   
   // Getters for accessing services from other parts of the app
@@ -137,6 +156,7 @@ class InjectionContainer {
           logoutUseCase: LogoutUseCase(_authRepository),
           getCurrentUserUseCase: GetCurrentUserUseCase(_authRepository),
           resetPasswordUseCase: ResetPasswordUseCase(_authRepository),
+          repository: _authRepository,
         ),
       ),
       BlocProvider<RestaurantCubit>(
@@ -213,6 +233,17 @@ class InjectionContainer {
       BlocProvider<StartupAdCustomerCubit>(
         create: (_) => StartupAdCustomerCubit(
           repository: _adRepository,
+        ),
+      ),
+      BlocProvider<FoodCategoryCubit>(
+        create: (_) => FoodCategoryCubit(
+          repository: _foodCategoryRepository,
+        ),
+      ),
+      BlocProvider<DriverCubit>(
+        create: (_) => DriverCubit(
+          driverRepository: _driverRepository,
+          authRepository: _authRepository,
         ),
       ),
     ];

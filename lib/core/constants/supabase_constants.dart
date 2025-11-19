@@ -25,6 +25,9 @@ class SupabaseConstants {
   /// Bucket for user profile images
   static const String profileImagesBucket = 'profile-images';
   
+  /// Bucket for driver images (personal photos, licenses, vehicle photos)
+  static const String driverImagesBucket = 'driver-images';
+  
   /// General uploads bucket
   static const String uploadsBucket = 'uploads';
   

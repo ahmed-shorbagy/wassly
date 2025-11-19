@@ -350,6 +350,18 @@ abstract class AppLocalizations {
   /// **'Restaurant created successfully!'**
   String get restaurantCreatedSuccessfully;
 
+  /// No description provided for @provideCredentialsToRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Please provide these credentials to the restaurant owner:'**
+  String get provideCredentialsToRestaurant;
+
+  /// No description provided for @restaurantCanChangePasswordAfterLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Note: Restaurant owner can change password after first login.'**
+  String get restaurantCanChangePasswordAfterLogin;
+
   /// No description provided for @failedToPickImage.
   ///
   /// In en, this message translates to:
@@ -950,6 +962,36 @@ abstract class AppLocalizations {
   /// **'Edit Restaurant'**
   String get editRestaurant;
 
+  /// No description provided for @restaurantInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant Information'**
+  String get restaurantInformation;
+
+  /// No description provided for @restaurantStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant Status'**
+  String get restaurantStatus;
+
+  /// No description provided for @restaurantIsOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant is open'**
+  String get restaurantIsOpen;
+
+  /// No description provided for @restaurantIsClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant is closed'**
+  String get restaurantIsClosed;
+
+  /// No description provided for @manageProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Products'**
+  String get manageProducts;
+
   /// No description provided for @updateRestaurant.
   ///
   /// In en, this message translates to:
@@ -1118,6 +1160,24 @@ abstract class AppLocalizations {
   /// **'No restaurants available at the moment'**
   String get noRestaurantsAvailable;
 
+  /// No description provided for @noRestaurantsAvailableMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Check back later for new restaurants'**
+  String get noRestaurantsAvailableMessage;
+
+  /// No description provided for @noRestaurantsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No restaurants found'**
+  String get noRestaurantsFound;
+
+  /// No description provided for @tryDifferentSearchTerm.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different search term'**
+  String get tryDifferentSearchTerm;
+
   /// No description provided for @exitApp.
   ///
   /// In en, this message translates to:
@@ -1184,6 +1244,12 @@ abstract class AppLocalizations {
   /// **'Order History'**
   String get orderHistory;
 
+  /// No description provided for @allOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'All Orders'**
+  String get allOrders;
+
   /// No description provided for @noOrdersYet.
   ///
   /// In en, this message translates to:
@@ -1241,8 +1307,8 @@ abstract class AppLocalizations {
   /// No description provided for @moreItems.
   ///
   /// In en, this message translates to:
-  /// **'more items'**
-  String get moreItems;
+  /// **'+ {count} more items'**
+  String moreItems(int count);
 
   /// No description provided for @pending.
   ///
@@ -1285,6 +1351,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancelled'**
   String get cancelled;
+
+  /// No description provided for @orderPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get orderPending;
+
+  /// No description provided for @orderPreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing'**
+  String get orderPreparing;
+
+  /// No description provided for @orderReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get orderReady;
+
+  /// No description provided for @orderPickedUp.
+  ///
+  /// In en, this message translates to:
+  /// **'On the Way'**
+  String get orderPickedUp;
+
+  /// No description provided for @orderDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get orderDelivered;
+
+  /// No description provided for @orderCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get orderCancelled;
+
+  /// No description provided for @orderPlaced.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Placed'**
+  String get orderPlaced;
 
   /// No description provided for @reject.
   ///
@@ -2059,6 +2167,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'or'**
   String get or;
+
+  /// No description provided for @foodCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Food Categories'**
+  String get foodCategories;
+
+  /// No description provided for @addCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Category'**
+  String get addCategory;
+
+  /// No description provided for @editCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Category'**
+  String get editCategory;
+
+  /// No description provided for @updateCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Category'**
+  String get updateCategory;
+
+  /// No description provided for @deleteCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Category'**
+  String get deleteCategory;
+
+  /// No description provided for @categoryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Category Name'**
+  String get categoryName;
+
+  /// No description provided for @pleaseEnterCategoryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter category name'**
+  String get pleaseEnterCategoryName;
+
+  /// No description provided for @noCategoriesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No categories found'**
+  String get noCategoriesFound;
+
+  /// No description provided for @categoryCreatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Category created successfully'**
+  String get categoryCreatedSuccessfully;
+
+  /// No description provided for @categoryUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Category updated successfully'**
+  String get categoryUpdatedSuccessfully;
+
+  /// No description provided for @categoryNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Category not found'**
+  String get categoryNotFound;
+
+  /// No description provided for @creatingCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating category...'**
+  String get creatingCategory;
+
+  /// No description provided for @updatingCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Updating category...'**
+  String get updatingCategory;
+
+  /// No description provided for @areYouSureDeleteCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete the category \"{name}\"?'**
+  String areYouSureDeleteCategory(String name);
+
+  /// No description provided for @displayOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Display Order'**
+  String get displayOrder;
 }
 
 class _AppLocalizationsDelegate

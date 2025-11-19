@@ -27,12 +27,40 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   final PageController _bannerController = PageController(viewportFraction: 0.92);
   int _currentBannerIndex = 0;
   final TextEditingController _searchController = TextEditingController();
+  List<RestaurantEntity> _filteredRestaurants = [];
+  List<RestaurantEntity> _allRestaurants = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(_filterRestaurants);
+  }
 
   @override
   void dispose() {
     _bannerController.dispose();
+    _searchController.removeListener(_filterRestaurants);
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _filterRestaurants() {
+    final query = _searchController.text.toLowerCase().trim();
+    setState(() {
+      if (query.isEmpty) {
+        _filteredRestaurants = List.from(_allRestaurants);
+      } else {
+        _filteredRestaurants = _allRestaurants.where((restaurant) {
+          final nameMatch = restaurant.name.toLowerCase().contains(query);
+          final descMatch = restaurant.description.toLowerCase().contains(query);
+          final categoryMatch = restaurant.categories.any(
+            (cat) => cat.toLowerCase().contains(query),
+          );
+          final addressMatch = restaurant.address.toLowerCase().contains(query);
+          return nameMatch || descMatch || categoryMatch || addressMatch;
+        }).toList();
+      }
+    });
   }
 
   @override
@@ -54,7 +82,20 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 context.read<MarketProductCustomerCubit>()..loadMarketProducts(),
           ),
         ],
-        child: BlocBuilder<RestaurantCubit, RestaurantState>(
+        child: BlocConsumer<RestaurantCubit, RestaurantState>(
+          listener: (context, state) {
+            if (state is RestaurantsLoaded) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  setState(() {
+                    _allRestaurants = state.restaurants;
+                    _filteredRestaurants = state.restaurants;
+                  });
+                  _filterRestaurants();
+                }
+              });
+            }
+          },
           builder: (context, state) {
             if (state is RestaurantLoading) {
               return _buildShimmerLoading();
@@ -65,7 +106,13 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     context.read<RestaurantCubit>().getAllRestaurants(),
               );
             } else if (state is RestaurantsLoaded) {
-              return _buildHome(context, state.restaurants, l10n);
+              return _buildHome(
+                context,
+                _filteredRestaurants.isEmpty && _searchController.text.isNotEmpty
+                    ? []
+                    : _filteredRestaurants,
+                l10n,
+              );
             }
             return const SizedBox.shrink();
           },
@@ -210,26 +257,32 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     ),
                   ],
                 ),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'ابحث عن مطعم...',
-                    hintStyle: TextStyle(color: AppColors.textHint),
-                    prefixIcon: Icon(Icons.search, color: AppColors.primary),
-                    suffixIcon: _searchController.text.isNotEmpty
-                        ? IconButton(
-                            icon: Icon(Icons.clear, color: AppColors.textSecondary),
-                            onPressed: () {
-                              setState(() {
+                child: StatefulBuilder(
+                  builder: (context, setState) => TextField(
+                    controller: _searchController,
+                    onChanged: (_) {
+                      setState(() {});
+                      _filterRestaurants();
+                    },
+                    decoration: InputDecoration(
+                      hintText: l10n.searchRestaurants,
+                      hintStyle: TextStyle(color: AppColors.textHint),
+                      prefixIcon: Icon(Icons.search, color: AppColors.primary),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: Icon(Icons.clear, color: AppColors.textSecondary),
+                              onPressed: () {
                                 _searchController.clear();
-                              });
-                            },
-                          )
-                        : null,
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 16,
+                                setState(() {});
+                                _filterRestaurants();
+                              },
+                            )
+                          : null,
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 16,
+                      ),
                     ),
                   ),
                 ),
@@ -366,9 +419,15 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           if (restaurants.isEmpty)
             SliverFillRemaining(
               child: _EmptyStateWidget(
-                title: 'لا توجد مطاعم',
-                message: 'لا توجد مطاعم متاحة حالياً',
-                icon: Icons.restaurant_outlined,
+                title: _searchController.text.isNotEmpty
+                    ? l10n.noRestaurantsFound
+                    : l10n.noRestaurantsAvailable,
+                message: _searchController.text.isNotEmpty
+                    ? l10n.tryDifferentSearchTerm
+                    : l10n.noRestaurantsAvailableMessage,
+                icon: _searchController.text.isNotEmpty
+                    ? Icons.search_off
+                    : Icons.restaurant_outlined,
               ),
             )
           else

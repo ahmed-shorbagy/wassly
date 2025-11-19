@@ -209,6 +209,30 @@ class OrderCubit extends Cubit<OrderState> {
     }
   }
 
+  /// Get all orders (admin only)
+  Future<void> getAllOrders() async {
+    try {
+      emit(OrderLoading());
+      AppLogger.logInfo('Fetching all orders (admin)');
+
+      final result = await repository.getAllOrders();
+
+      result.fold(
+        (failure) {
+          AppLogger.logError('Failed to fetch all orders', error: failure.message);
+          emit(OrderError(failure.message));
+        },
+        (orders) {
+          AppLogger.logSuccess('Fetched ${orders.length} orders');
+          emit(OrdersLoaded(orders));
+        },
+      );
+    } catch (e) {
+      AppLogger.logError('Error fetching all orders', error: e);
+      emit(const OrderError('Failed to fetch all orders'));
+    }
+  }
+
   /// Listen to restaurant orders in real-time
   void listenToRestaurantOrders(String restaurantId) {
     try {

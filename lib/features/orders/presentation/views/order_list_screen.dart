@@ -58,9 +58,9 @@ class _OrderListScreenState extends State<OrderListScreen>
           indicatorColor: Colors.white,
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
-          tabs: const [
-            Tab(text: 'Active'),
-            Tab(text: 'History'),
+          tabs: [
+            Tab(text: AppLocalizations.of(context)?.activeOrders ?? 'Active'),
+            Tab(text: AppLocalizations.of(context)?.orderHistory ?? 'History'),
           ],
         ),
       ),
@@ -100,10 +100,11 @@ class _OrderListScreenState extends State<OrderListScreen>
     final activeOrders = orders.where((order) => order.isActive).toList();
 
     if (activeOrders.isEmpty) {
+      final l10n = AppLocalizations.of(context);
       return _buildEmptyState(
         icon: Icons.receipt_long,
-        title: 'No Active Orders',
-        message: 'You don\'t have any active orders',
+        title: l10n?.noActiveOrders ?? 'No Active Orders',
+        message: l10n?.noActiveOrdersMessage ?? 'You don\'t have any active orders',
       );
     }
 
@@ -142,10 +143,11 @@ class _OrderListScreenState extends State<OrderListScreen>
                       .toList();
 
                   if (completedOrders.isEmpty) {
+                    final l10n = AppLocalizations.of(context);
                     return _buildEmptyState(
                       icon: Icons.history,
-                      title: 'No Order History',
-                      message: 'Your completed orders will appear here',
+                      title: l10n?.noOrderHistory ?? 'No Order History',
+                      message: l10n?.noOrderHistoryMessage ?? 'Your completed orders will appear here',
                     );
                   }
 
@@ -285,7 +287,8 @@ class _OrderListScreenState extends State<OrderListScreen>
                 Padding(
                   padding: const EdgeInsets.only(top: 4),
                   child: Text(
-                    '+ ${order.items.length - 2} more items',
+                    AppLocalizations.of(context)?.moreItems(order.items.length - 2) ??
+                        '+ ${order.items.length - 2} more items',
                     style: TextStyle(
                       fontSize: 12,
                       color: AppColors.textSecondary,
@@ -300,7 +303,7 @@ class _OrderListScreenState extends State<OrderListScreen>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Total: \$${order.totalAmount.toStringAsFixed(2)}',
+                    '${AppLocalizations.of(context)?.total ?? 'Total'}: ${order.totalAmount.toStringAsFixed(2)} ر.س',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -377,21 +380,22 @@ class _OrderListScreenState extends State<OrderListScreen>
   }
 
   String _getStatusText(OrderStatus status) {
+    final l10n = AppLocalizations.of(context);
     switch (status) {
       case OrderStatus.pending:
-        return 'Pending';
+        return l10n?.orderPending ?? 'Pending';
       case OrderStatus.accepted:
-        return 'Accepted';
+        return l10n?.orderAccepted ?? 'Accepted';
       case OrderStatus.preparing:
-        return 'Preparing';
+        return l10n?.orderPreparing ?? 'Preparing';
       case OrderStatus.ready:
-        return 'Ready';
+        return l10n?.orderReady ?? 'Ready';
       case OrderStatus.pickedUp:
-        return 'On the Way';
+        return l10n?.orderPickedUp ?? 'On the Way';
       case OrderStatus.delivered:
-        return 'Delivered';
+        return l10n?.orderDelivered ?? 'Delivered';
       case OrderStatus.cancelled:
-        return 'Cancelled';
+        return l10n?.orderCancelled ?? 'Cancelled';
     }
   }
 

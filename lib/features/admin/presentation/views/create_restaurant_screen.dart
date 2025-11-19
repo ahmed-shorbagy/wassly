@@ -279,8 +279,46 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
       body: BlocConsumer<AdminCubit, AdminState>(
         listener: (context, state) {
           if (state is RestaurantCreatedSuccess) {
-            context.showSuccessSnackBar(l10n.restaurantCreatedSuccessfully);
-            context.go('/admin/restaurants');
+            // Show credentials dialog
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (dialogContext) => AlertDialog(
+                title: Text(l10n.restaurantCreatedSuccessfully),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.provideCredentialsToRestaurant,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildCredentialRow('Email:', _emailController.text),
+                    const SizedBox(height: 8),
+                    _buildCredentialRow('Password:', _passwordController.text),
+                    const SizedBox(height: 16),
+                    Text(
+                      l10n.restaurantCanChangePasswordAfterLogin,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+                actions: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(dialogContext);
+                      context.go('/admin/restaurants');
+                    },
+                    child: Text(l10n.ok),
+                  ),
+                ],
+              ),
+            );
           } else if (state is AdminError) {
             context.showErrorSnackBar(state.message);
           }
@@ -850,6 +888,27 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
           borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
       ),
+    );
+  }
+
+  Widget _buildCredentialRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 80,
+          child: Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.w500),
+          ),
+        ),
+        Expanded(
+          child: SelectableText(
+            value,
+            style: const TextStyle(fontFamily: 'monospace'),
+          ),
+        ),
+      ],
     );
   }
 }

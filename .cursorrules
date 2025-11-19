@@ -1,0 +1,136 @@
+# Cursor Rules for Project
+
+## 🔍 Package Management & Research
+- ALWAYS search for the best and most suitable packages on pub.dev before implementing custom solutions
+- Prefer well-maintained, popular packages with good documentation and active community
+- Check package compatibility with current Flutter/Dart SDK versions
+- Use packages that align with the project's architecture (MVVM, Cubit)
+- Research alternatives and choose the most performant and reliable option
+- Before adding dependencies, verify they don't conflict with existing packages
+
+## 📋 Following Instructions
+- Read and follow all user instructions carefully and completely
+- If instructions are unclear, ask for clarification before proceeding
+- Implement exactly what is requested without adding unnecessary features
+- Verify that implementations match the requirements before completing
+
+## 🎨 Widget Architecture Rules
+- **CRITICAL**: ALWAYS create widgets as classes (StatelessWidget or StatefulWidget), NEVER as methods or functions
+- Each widget must be a proper class with its own file when reusable
+- Widget methods like `build()` should only contain UI structure, not business logic
+- Use meaningful class names that describe the widget's purpose
+- Prefer StatelessWidget over StatefulWidget when possible for better performance
+
+## ♻️ Code Reusability & Component Organization
+- **ALWAYS** create separate files for reusable components/widgets - never recreate them
+- Before creating a new component, search the codebase to see if a similar component exists
+- If a similar component exists, extend or modify it rather than creating a duplicate
+- Organize reusable components in appropriate directories (e.g., `lib/core/widgets/`, `lib/features/[feature]/views/widgets/`)
+- Name reusable components clearly to indicate their purpose
+- Share common widgets across features through the `lib/core/widgets/` directory
+- When a component is used in multiple places, it MUST be in a separate file
+
+## 🏗️ Architecture: MVVM with Cubit
+- **STRICTLY** follow MVVM (Model-View-ViewModel) architecture pattern
+- All state management MUST use Cubit (from flutter_bloc package)
+- Business logic belongs in Cubits, NOT in Widgets or Views
+- Views should only observe Cubit state and emit events
+- Keep ViewModels (Cubits) independent of UI concerns
+- Use immutable state classes for Cubit states
+- One Cubit per logical feature/screen - avoid monolithic Cubits
+- Keep Cubit states focused and single-responsibility
+
+## 🎨 UI/UX Guidelines - Theme & Colors
+- **ALWAYS** use theme colors from `AppColors` class - NEVER hardcode colors
+- Import and use: `import 'package:parcel_express_driver/core/utilities/app_color.dart';`
+- Available theme colors:
+  - Primary: `AppColors.primaryColor` (Dark Blue #2F457D) - for buttons/primary actions
+  - Secondary: `AppColors.secondryColor` (Orange #DC773F) - for secondary elements
+  - Third: `AppColors.thirdColor` (Green #51A64D) - for success states
+  - Text: `AppColors.textPrimaryColor`, `AppColors.textSecondaryColor`
+  - Surface: `AppColors.surfaceColor`, `AppColors.cardColor`
+  - Status: `AppColors.successColor`, `AppColors.warningColor`, `AppColors.errorColor`
+- Use Material 3 design principles
+- Apply consistent spacing, typography, and elevation
+- Use `AppThemes.theme` for theme data
+- Ensure UI is pixel-perfect and visually polished
+- Consider RTL (Arabic) and LTR (English) layouts from the start
+- Use appropriate gradients from `AppColors` for buttons and backgrounds
+
+## 🚀 Performance Optimization
+- **ALWAYS** optimize for performance - this is a critical requirement
+- Use `const` constructors wherever possible to reduce rebuilds
+- Implement `const` widgets for static UI elements
+- Use `BlocBuilder` with `buildWhen` to prevent unnecessary rebuilds
+- Use `BlocSelector` when only specific state properties need to trigger rebuilds
+- Avoid rebuilding entire widget trees - rebuild only what changed
+- Extract widgets to minimize build method complexity
+- Profile performance regularly using Flutter DevTools
+- Lazy load heavy resources (images, data)
+- Debounce/throttle user inputs when appropriate
+- Use `ListView.builder` instead of `ListView` for long lists
+- Cache expensive computations
+- Optimize image loading and sizing
+- Avoid deep widget nesting - flatten widget trees when possible
+- Use `RepaintBoundary` for complex widgets that don't need frequent updates
+
+## 🧭 Navigation
+- Use GoRouter exclusively for all navigation - NO `Navigator.push()`
+- Define all routes in a centralized `router.dart` file
+- Use named routes with appropriate path parameters
+- Navigation logic must be in ViewModels/Cubits, not in UI layer
+- Support deep linking where appropriate
+
+## 🌐 Localization
+- ALWAYS use localization strings from `MyLocalization` or `AppLocalizations`
+- NEVER hardcode text strings in the UI
+- Support both Arabic (RTL) and English (LTL)
+- Ensure all user-facing text is localized
+- Use proper locale-aware formatting for dates, numbers, and currency
+
+## 📁 File Organization
+- Follow existing project structure: `lib/features/[feature]/`
+- Organize files by layer: `cubit/`, `views/`, `models/`, `services/`, `widgets/`
+- Keep related files together
+- Use clear, descriptive file names following Dart naming conventions
+- Place shared utilities in `lib/core/`
+- Reusable widgets go in `lib/core/widgets/` or feature-specific `widgets/` folders
+
+## ✅ Code Quality
+- Follow Flutter/Dart style guide (use `flutter format` and `flutter analyze`)
+- Write clean, readable, and maintainable code
+- Use meaningful variable, function, and class names
+- Keep functions and classes focused and single-purpose (SOLID principles)
+- Avoid code duplication - use extensions, mixins, or base classes
+- Add meaningful comments for complex logic
+- Handle errors gracefully with appropriate user feedback
+
+## 🧪 Testing
+- Write unit tests for business logic in Cubits
+- Write widget tests for UI components
+- Ensure Cubit state transitions are testable
+- Test edge cases and error scenarios
+
+## 🔒 Error Handling
+- Implement comprehensive error handling in Cubits
+- Provide user-friendly error messages
+- Handle network errors, validation errors, and edge cases
+- Use appropriate error states in Cubit states
+- Never let errors crash the app silently
+
+## 📱 Responsiveness & Accessibility
+- Design for different screen sizes from the start
+- Test on multiple device sizes
+- Ensure touch targets are appropriately sized
+- Support accessibility features (semantics, screen readers)
+- Test with both light and dark mode if applicable
+
+## 🎯 Summary Priorities
+1. **Performance**: Always optimize - no exceptions
+2. **Reusability**: Never duplicate - always check for existing components
+3. **Architecture**: Strict MVVM with Cubit - no compromises
+4. **Widgets as Classes**: Always - never use methods
+5. **Theme Colors**: Always use AppColors - never hardcode
+6. **Best Packages**: Research and use the best available packages
+7. **UI Quality**: Make UI exceptional, polished, and user-friendly
+

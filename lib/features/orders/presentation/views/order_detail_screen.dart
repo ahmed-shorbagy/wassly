@@ -172,13 +172,14 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   }
 
   Widget _buildStatusProgress(OrderStatus currentStatus) {
+    final l10n = AppLocalizations.of(context);
     final statuses = [
-      (OrderStatus.pending, 'Order Placed', Icons.receipt),
-      (OrderStatus.accepted, 'Accepted', Icons.check_circle_outline),
-      (OrderStatus.preparing, 'Preparing', Icons.restaurant_menu),
-      (OrderStatus.ready, 'Ready', Icons.shopping_bag),
-      (OrderStatus.pickedUp, 'On the Way', Icons.delivery_dining),
-      (OrderStatus.delivered, 'Delivered', Icons.done_all),
+      (OrderStatus.pending, l10n?.orderPlaced ?? 'Order Placed', Icons.receipt),
+      (OrderStatus.accepted, l10n?.orderAccepted ?? 'Accepted', Icons.check_circle_outline),
+      (OrderStatus.preparing, l10n?.orderPreparing ?? 'Preparing', Icons.restaurant_menu),
+      (OrderStatus.ready, l10n?.orderReady ?? 'Ready', Icons.shopping_bag),
+      (OrderStatus.pickedUp, l10n?.orderPickedUp ?? 'On the Way', Icons.delivery_dining),
+      (OrderStatus.delivered, l10n?.orderDelivered ?? 'Delivered', Icons.done_all),
     ];
 
     final currentIndex = statuses.indexWhere((s) => s.$1 == currentStatus);
@@ -357,7 +358,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '${item.quantity}x \$${item.price.toStringAsFixed(2)}',
+                            '${item.quantity}x ${item.price.toStringAsFixed(2)} ر.س',
                             style: TextStyle(
                               fontSize: 14,
                               color: AppColors.textSecondary,
@@ -369,7 +370,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
                     // Item total
                     Text(
-                      '\$${item.totalPrice.toStringAsFixed(2)}',
+                      '${item.totalPrice.toStringAsFixed(2)} ر.س',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -539,7 +540,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 ),
               ),
               Text(
-                '\$${order.totalAmount.toStringAsFixed(2)}',
+                '${order.totalAmount.toStringAsFixed(2)} ر.س',
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,

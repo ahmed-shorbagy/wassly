@@ -8,7 +8,9 @@ import '../../../../core/utils/extensions.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../../../../shared/widgets/error_widget.dart';
 import '../../../restaurants/domain/entities/product_entity.dart';
+import '../../../restaurants/domain/entities/food_category_entity.dart';
 import '../cubits/admin_product_cubit.dart';
+import '../../../restaurants/presentation/cubits/food_category_cubit.dart';
 
 class AdminProductListScreen extends StatefulWidget {
   final String restaurantId;
@@ -28,12 +30,18 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
   final TextEditingController _searchController = TextEditingController();
   List<ProductEntity> _filteredProducts = [];
   List<ProductEntity> _allProducts = [];
+  List<FoodCategoryEntity> _categories = [];
 
   @override
   void initState() {
     super.initState();
     _loadProducts();
+    _loadCategories();
     _searchController.addListener(_filterProducts);
+  }
+
+  void _loadCategories() {
+    context.read<FoodCategoryCubit>().loadRestaurantCategories(widget.restaurantId);
   }
 
   @override
@@ -57,7 +65,19 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
           final nameMatch = product.name.toLowerCase().contains(query);
           final descMatch = product.description.toLowerCase().contains(query);
           final categoryMatch = product.category?.toLowerCase().contains(query) ?? false;
-          return nameMatch || descMatch || categoryMatch;
+          // Also search in category names from database
+          bool categoryNameMatch = false;
+          if (product.categoryId != null) {
+            try {
+              final category = _categories.firstWhere(
+                (c) => c.id == product.categoryId,
+              );
+              categoryNameMatch = category.name.toLowerCase().contains(query);
+            } catch (e) {
+              // Category not found
+            }
+          }
+          return nameMatch || descMatch || categoryMatch || categoryNameMatch;
         }).toList();
       }
     });
@@ -67,19 +87,34 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('${l10n.restaurantProducts} - ${widget.restaurantName}'),
-        backgroundColor: Colors.purple,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadProducts,
-            tooltip: l10n.edit,
-          ),
-        ],
-      ),
-      body: Column(
+    return BlocProvider(
+      create: (context) => context.read<FoodCategoryCubit>()
+        ..loadRestaurantCategories(widget.restaurantId),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('${l10n.restaurantProducts} - ${widget.restaurantName}'),
+          backgroundColor: Colors.purple,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.category),
+              onPressed: () {
+                context.push(
+                  '/admin/restaurants/${widget.restaurantId}/categories',
+                );
+              },
+              tooltip: l10n.foodCategories,
+            ),
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () {
+                _loadProducts();
+                _loadCategories();
+              },
+              tooltip: l10n.edit,
+            ),
+          ],
+        ),
+        body: Column(
         children: [
           // Search Bar
           Padding(
@@ -113,7 +148,15 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
           ),
           // Products List
           Expanded(
-            child: BlocConsumer<AdminProductCubit, AdminProductState>(
+            child: BlocListener<FoodCategoryCubit, FoodCategoryState>(
+              listener: (context, state) {
+                if (state is FoodCategoryLoaded) {
+                  setState(() {
+                    _categories = state.categories;
+                  });
+                }
+              },
+              child: BlocConsumer<AdminProductCubit, AdminProductState>(
               listener: (context, state) {
                 if (state is AdminProductAdded) {
                   context.showSuccessSnackBar(l10n.productAddedSuccessfully);
@@ -191,6 +234,7 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                 return _buildEmptyState(l10n);
               },
             ),
+            ),
           ),
         ],
       ),
@@ -201,6 +245,7 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
         icon: const Icon(Icons.add),
         label: Text(l10n.addProduct),
         backgroundColor: Colors.purple,
+      ),
       ),
     );
   }
@@ -295,24 +340,45 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                       const SizedBox(height: 8),
 
                       // Category
-                      if (product.category != null)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            product.category!,
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                      if (product.categoryId != null || product.category != null)
+                        Builder(
+                          builder: (context) {
+                            String categoryName = product.category ?? '';
+                            if (product.categoryId != null) {
+                              try {
+                                final category = _categories.firstWhere(
+                                  (c) => c.id == product.categoryId,
+                                );
+                                categoryName = category.name;
+                              } catch (e) {
+                                // Category not found, use fallback
+                                if (categoryName.isEmpty) {
+                                  categoryName = 'Unknown Category';
+                                }
+                              }
+                            }
+                            if (categoryName.isNotEmpty) {
+                              return Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  categoryName,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          },
                         ),
                       const SizedBox(height: 8),
 

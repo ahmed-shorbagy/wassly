@@ -82,12 +82,7 @@ class CustomerProfileScreen extends StatelessWidget {
                         context,
                         icon: Icons.lock_outline,
                         title: l10n.changePassword,
-                        onTap: () {
-                          // TODO: Implement change password
-                          context.showInfoSnackBar(
-                            'تغيير كلمة المرور قريباً',
-                          );
-                        },
+                        onTap: () => _showChangePasswordDialog(context, l10n),
                       ),
                     ],
                   ),
@@ -319,6 +314,106 @@ class CustomerProfileScreen extends StatelessWidget {
         color: AppColors.textSecondary,
       ),
       onTap: onTap,
+    );
+  }
+
+  void _showChangePasswordDialog(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) {
+    final currentPasswordController = TextEditingController();
+    final newPasswordController = TextEditingController();
+    final confirmPasswordController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => BlocListener<AuthCubit, AuthState>(
+        listener: (context, state) {
+          if (state is AuthPasswordChanged) {
+            context.pop();
+            context.showSuccessSnackBar(l10n.passwordUpdatedSuccessfully);
+          } else if (state is AuthError) {
+            context.showErrorSnackBar(state.message);
+          }
+        },
+        child: AlertDialog(
+          title: Text(l10n.changePassword),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: currentPasswordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: l10n.currentPassword,
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: newPasswordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: l10n.newPassword,
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: confirmPasswordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: l10n.confirmNewPassword,
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => context.pop(),
+              child: Text(l10n.cancel),
+            ),
+            BlocBuilder<AuthCubit, AuthState>(
+              builder: (context, state) {
+                final isLoading = state is AuthLoading;
+                return ElevatedButton(
+                  onPressed: isLoading
+                      ? null
+                      : () {
+                          if (newPasswordController.text !=
+                              confirmPasswordController.text) {
+                            context.showErrorSnackBar(
+                              'Passwords do not match',
+                            );
+                            return;
+                          }
+                          if (newPasswordController.text.length < 6) {
+                            context.showErrorSnackBar(
+                              'Password must be at least 6 characters',
+                            );
+                            return;
+                          }
+                          context.read<AuthCubit>().changePassword(
+                                currentPasswordController.text,
+                                newPasswordController.text,
+                              );
+                        },
+                  child: isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(l10n.updatePassword),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 
