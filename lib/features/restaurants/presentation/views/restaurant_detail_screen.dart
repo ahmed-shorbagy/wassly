@@ -50,6 +50,17 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
       }
     });
     _searchController.addListener(_filterProducts);
+    
+    // Load data when screen first loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<RestaurantCubit>()
+          ..getRestaurantById(widget.restaurantId)
+          ..getRestaurantProducts(widget.restaurantId);
+        context.read<FoodCategoryCubit>()
+          ..loadRestaurantCategories(widget.restaurantId);
+      }
+    });
   }
 
   @override
@@ -101,17 +112,6 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
 
   @override
   Widget build(BuildContext context) {
-    // Load data when screen is first built
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        context.read<RestaurantCubit>()
-          ..getRestaurantById(widget.restaurantId)
-          ..getRestaurantProducts(widget.restaurantId);
-        context.read<FoodCategoryCubit>()
-          ..loadRestaurantCategories(widget.restaurantId);
-      }
-    });
-
     return Scaffold(
       backgroundColor: Colors.white,
         body: BlocListener<FoodCategoryCubit, FoodCategoryState>(

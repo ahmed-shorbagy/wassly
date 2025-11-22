@@ -46,12 +46,16 @@ class RestaurantCubit extends Cubit<RestaurantState> {
   }
 
   Future<void> getRestaurantProducts(String restaurantId) async {
-    emit(RestaurantLoading());
-
+    // Don't emit loading state to avoid overwriting restaurant state
+    // Just fetch products and emit ProductsLoaded
     final result = await getRestaurantProductsUseCase(restaurantId);
 
     result.fold(
-      (failure) => emit(RestaurantError(failure.message)),
+      (failure) {
+        // If there's an error, still emit ProductsLoaded with empty list
+        // to avoid breaking the UI
+        emit(ProductsLoaded([]));
+      },
       (products) => emit(ProductsLoaded(products)),
     );
   }

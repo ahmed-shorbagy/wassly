@@ -217,95 +217,16 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
       child: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
-          // Delivery Address Bar (outside SafeArea - under status bar)
-          SliverToBoxAdapter(
-            child: BlocBuilder<DeliveryAddressCubit, DeliveryAddressState>(
-              builder: (context, state) {
-                String displayText;
-                if (state is DeliveryAddressSelected) {
-                  displayText = state.displayAddress;
-                } else {
-                  displayText = 'حدد عنوان التوصيل'; // Select delivery address
-                }
-
-                return Container(
-                  width: double.infinity,
-                  color: AppColors.primary,
-                  padding: EdgeInsets.only(
-                    top: MediaQuery.of(context).padding.top,
-                  ),
-                  child: InkWell(
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => const DeliveryAddressDialog(),
-                      );
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      child: Row(
-                        children: [
-                          // Headphone Icon
-                          const Icon(
-                            Icons.headset_mic,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 12),
-                          // Delivery Text
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'التوصيل إلى:', // Delivery to:
-                                  style: Theme.of(context).textTheme.bodySmall
-                                      ?.copyWith(
-                                        color: Colors.white.withOpacity(0.9),
-                                        fontSize: 12,
-                                      ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  displayText,
-                                  style: Theme.of(context).textTheme.bodyMedium
-                                      ?.copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 14,
-                                      ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                          // Chevron Icon
-                          const Icon(
-                            Icons.keyboard_arrow_down,
-                            color: Colors.white,
-                            size: 24,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          // Top App Bar with Search Field
+          // Combined App Bar with Delivery Address and Search Field
           SliverAppBar(
             expandedHeight: 0,
-            floating: true,
+            floating: false,
             pinned: true,
             elevation: 0,
-            backgroundColor: AppColors.surface,
-            toolbarHeight: 100,
-            flexibleSpace: _TopAppBarWithSearch(
+            backgroundColor: AppColors.primaryDark,
+            toolbarHeight: 120,
+            automaticallyImplyLeading: false,
+            flexibleSpace: _CombinedAppBar(
               searchController: _searchController,
               onSearchChanged: _filterRestaurants,
             ),
@@ -691,14 +612,50 @@ class _CategoriesSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = [
-      _Category('برجر', Icons.lunch_dining, AppColors.primary),
-      _Category('بيتزا', Icons.local_pizza, Colors.orange),
-      _Category('نودلز', Icons.ramen_dining, Colors.amber),
-      _Category('لحوم', Icons.set_meal, Colors.red),
-      _Category('نباتي', Icons.eco, Colors.green),
-      _Category('حلويات', Icons.cake, Colors.pink),
-      _Category('مشروبات', Icons.local_drink, Colors.blue),
-      _Category('المزيد', Icons.more_horiz, AppColors.textSecondary),
+      _Category(
+        'لحوم',
+        Icons.set_meal,
+        const Color(0xFFFFE0E0),
+      ), // Light red/pink
+      _Category(
+        'نودلز',
+        Icons.ramen_dining,
+        const Color(0xFFFFF8E1),
+      ), // Light yellow/cream
+      _Category(
+        'بيتزا',
+        Icons.local_pizza,
+        const Color(0xFFFFE0B2),
+      ), // Light orange/peach
+      _Category(
+        'برجر',
+        Icons.lunch_dining,
+        const Color(0xFFE0F2E0),
+      ), // Light green/mint
+      _Category('نباتي', Icons.eco, const Color(0xFFE8F5E9)), // Light green
+      _Category('حلويات', Icons.cake, const Color(0xFFFFE0F0)), // Light pink
+      _Category(
+        'مشروبات',
+        Icons.local_drink,
+        const Color(0xFFE3F2FD),
+      ), // Light blue
+      _Category(
+        'المزيد',
+        Icons.more_horiz,
+        const Color(0xFFF5F5F5),
+      ), // Light gray
+    ];
+
+    // Icon colors matching their background themes
+    final iconColors = [
+      const Color(0xFFFF5252), // Red for لحوم
+      const Color(0xFFFFC107), // Yellow for نودلز
+      const Color(0xFFFF9800), // Orange for بيتزا
+      const Color(0xFF4CAF50), // Green for برجر
+      const Color(0xFF66BB6A), // Green for نباتي
+      const Color(0xFFFF4081), // Pink for حلويات
+      const Color(0xFF2196F3), // Blue for مشروبات
+      AppColors.textSecondary, // Gray for المزيد
     ];
 
     return Column(
@@ -708,20 +665,17 @@ class _CategoriesSection extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'عروض خاصة',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              'عرض الكل',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: const Color(0xFF4CAF50), // Green text as in design
               ),
             ),
-            TextButton(
-              onPressed: onTapSeeAll,
-              child: Text(
-                'عرض الكل',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w600,
-                ),
+            Text(
+              'عروض خاصة',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary, // Dark gray text
               ),
             ),
           ],
@@ -734,8 +688,9 @@ class _CategoriesSection extends StatelessWidget {
             itemCount: items.length,
             itemBuilder: (context, index) {
               final c = items[index];
+              final iconColor = iconColors[index];
               return Container(
-                width: 80,
+                width: 70,
                 margin: EdgeInsets.only(
                   right: index == items.length - 1 ? 0 : 12,
                 ),
@@ -745,21 +700,14 @@ class _CategoriesSection extends StatelessWidget {
                       width: 64,
                       height: 64,
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            c.color.withValues(alpha: 0.2),
-                            c.color.withValues(alpha: 0.1),
-                          ],
-                        ),
+                        color: c.color, // Solid pastel background color
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: c.color.withValues(alpha: 0.3),
-                          width: 1.5,
-                        ),
                       ),
-                      child: Icon(c.icon, color: c.color, size: 28),
+                      child: Icon(
+                        c.icon,
+                        color: iconColor, // Solid colored icon matching theme
+                        size: 32,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -769,7 +717,7 @@ class _CategoriesSection extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
-                        color: AppColors.textPrimary,
+                        color: AppColors.textPrimary, // Dark gray text
                       ),
                     ),
                   ],
@@ -786,7 +734,7 @@ class _CategoriesSection extends StatelessWidget {
 class _Category {
   final String label;
   final IconData icon;
-  final Color color;
+  final Color color; // Background color (pastel)
   _Category(this.label, this.icon, this.color);
 }
 
@@ -1101,11 +1049,11 @@ class _EmptyStateWidget extends StatelessWidget {
   }
 }
 
-class _TopAppBarWithSearch extends StatelessWidget {
+class _CombinedAppBar extends StatelessWidget {
   final TextEditingController searchController;
   final VoidCallback onSearchChanged;
 
-  const _TopAppBarWithSearch({
+  const _CombinedAppBar({
     required this.searchController,
     required this.onSearchChanged,
   });
@@ -1113,165 +1061,262 @@ class _TopAppBarWithSearch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    // Use darker primary color for the app bar
+    const appBarColor = AppColors.primaryDark;
 
-    return SafeArea(
-      bottom: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-        child: Row(
-          children: [
-            // Search Field - Rounded like selected tab in design
-            Expanded(
-              child: Container(
-                height: 48,
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: AppColors.border, width: 1),
-                ),
-                child: StatefulBuilder(
-                  builder: (context, setState) => TextField(
-                    controller: searchController,
-                    onChanged: (_) {
-                      setState(() {});
-                      onSearchChanged();
+    return Container(
+      decoration: const BoxDecoration(
+        color: appBarColor,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(0),
+          bottomRight: Radius.circular(0),
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+          child: Column(
+            children: [
+              // Delivery Address Bar
+              BlocBuilder<DeliveryAddressCubit, DeliveryAddressState>(
+                builder: (context, state) {
+                  String displayText;
+                  if (state is DeliveryAddressSelected) {
+                    displayText = state.displayAddress;
+                  } else {
+                    displayText =
+                        'حدد عنوان التوصيل'; // Select delivery address
+                  }
+
+                  return InkWell(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => const DeliveryAddressDialog(),
+                      );
                     },
-                    decoration: InputDecoration(
-                      hintText: l10n.searchRestaurants,
-                      hintStyle: TextStyle(
-                        color: AppColors.textHint,
-                        fontSize: 14,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        children: [
+                          // Headphone Icon
+                          const Icon(
+                            Icons.headset_mic,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 12),
+                          // Delivery Text
+                          Expanded(
+                            child: Text(
+                              displayText,
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 14,
+                                  ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          // Chevron Icon
+                          const Icon(
+                            Icons.keyboard_arrow_down,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ],
                       ),
-                      prefixIcon: Icon(
-                        Icons.search,
-                        color: AppColors.textSecondary,
-                        size: 20,
-                      ),
-                      suffixIcon: searchController.text.isNotEmpty
-                          ? IconButton(
-                              icon: Icon(
-                                Icons.clear,
-                                color: AppColors.textSecondary,
-                                size: 20,
-                              ),
-                              onPressed: () {
-                                searchController.clear();
-                                setState(() {});
-                                onSearchChanged();
-                              },
-                            )
-                          : null,
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      isDense: true,
                     ),
-                    style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
+                  );
+                },
               ),
-            ),
-            const SizedBox(width: 12),
-            // Profile Button
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.border, width: 1),
-              ),
-              child: IconButton(
-                icon: Icon(
-                  Icons.person_outline,
-                  color: AppColors.textPrimary,
-                  size: 22,
-                ),
-                padding: EdgeInsets.zero,
-                onPressed: () => context.push('/profile'),
-              ),
-            ),
-            const SizedBox(width: 8),
-            // Favorites Button
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.border, width: 1),
-              ),
-              child: IconButton(
-                icon: Icon(
-                  Icons.favorite_border,
-                  color: AppColors.textPrimary,
-                  size: 22,
-                ),
-                padding: EdgeInsets.zero,
-                onPressed: () => context.push('/favorites'),
-              ),
-            ),
-            const SizedBox(width: 8),
-            // Cart Button with Badge
-            BlocBuilder<CartCubit, CartState>(
-              builder: (context, state) {
-                final itemCount = state is CartLoaded ? state.itemCount : 0;
-                return Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Container(
-                      width: 48,
+              // Search Field and Action Buttons Row
+              Row(
+                children: [
+                  // Search Field - White rounded container
+                  Expanded(
+                    child: Container(
                       height: 48,
                       decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: AppColors.border, width: 1),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                      child: IconButton(
-                        icon: Icon(
-                          Icons.shopping_cart_outlined,
-                          color: AppColors.textPrimary,
-                          size: 22,
+                      child: StatefulBuilder(
+                        builder: (context, setState) => TextField(
+                          controller: searchController,
+                          onChanged: (_) {
+                            setState(() {});
+                            onSearchChanged();
+                          },
+                          decoration: InputDecoration(
+                            hintText: l10n.searchRestaurants,
+                            hintStyle: TextStyle(
+                              color: AppColors.textHint,
+                              fontSize: 14,
+                            ),
+                            prefixIcon: Icon(
+                              Icons.search,
+                              color: AppColors.textSecondary,
+                              size: 20,
+                            ),
+                            suffixIcon: searchController.text.isNotEmpty
+                                ? IconButton(
+                                    icon: Icon(
+                                      Icons.clear,
+                                      color: AppColors.textSecondary,
+                                      size: 20,
+                                    ),
+                                    onPressed: () {
+                                      searchController.clear();
+                                      setState(() {});
+                                      onSearchChanged();
+                                    },
+                                  )
+                                : null,
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                            isDense: true,
+                          ),
+                          style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 14,
+                          ),
                         ),
-                        padding: EdgeInsets.zero,
-                        onPressed: () => context.push('/cart'),
                       ),
                     ),
-                    if (itemCount > 0)
-                      Positioned(
-                        right: -2,
-                        top: -2,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: AppColors.error,
-                            shape: BoxShape.circle,
-                          ),
-                          constraints: const BoxConstraints(
-                            minWidth: 18,
-                            minHeight: 18,
-                          ),
-                          child: Text(
-                            itemCount > 99 ? '99+' : '$itemCount',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
+                  ),
+                  const SizedBox(width: 12),
+                  // Profile Button
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
                         ),
+                      ],
+                    ),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.person_outline,
+                        color: appBarColor,
+                        size: 22,
                       ),
-                  ],
-                );
-              },
-            ),
-          ],
+                      padding: EdgeInsets.zero,
+                      onPressed: () => context.push('/profile'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Favorites Button
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.favorite_border,
+                        color: appBarColor,
+                        size: 22,
+                      ),
+                      padding: EdgeInsets.zero,
+                      onPressed: () => context.push('/favorites'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Cart Button with Badge
+                  BlocBuilder<CartCubit, CartState>(
+                    builder: (context, state) {
+                      final itemCount = state is CartLoaded
+                          ? state.itemCount
+                          : 0;
+                      return Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.shopping_cart_outlined,
+                                color: appBarColor,
+                                size: 22,
+                              ),
+                              padding: EdgeInsets.zero,
+                              onPressed: () => context.push('/cart'),
+                            ),
+                          ),
+                          if (itemCount > 0)
+                            Positioned(
+                              right: -2,
+                              top: -2,
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: const BoxDecoration(
+                                  color: AppColors.error,
+                                  shape: BoxShape.circle,
+                                ),
+                                constraints: const BoxConstraints(
+                                  minWidth: 18,
+                                  minHeight: 18,
+                                ),
+                                child: Text(
+                                  itemCount > 99 ? '99+' : '$itemCount',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                        ],
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
