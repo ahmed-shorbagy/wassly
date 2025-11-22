@@ -49,6 +49,8 @@ import '../../features/ads/presentation/cubits/startup_ad_customer_cubit.dart';
 import '../../features/drivers/domain/repositories/driver_repository.dart';
 import '../../features/drivers/data/repositories/driver_repository_impl.dart';
 import '../../features/drivers/presentation/cubits/driver_cubit.dart';
+import '../../features/delivery_address/domain/repositories/delivery_address_repository.dart';
+import '../../features/delivery_address/data/repositories/delivery_address_repository_impl.dart';
 import '../../features/delivery_address/presentation/cubits/delivery_address_cubit.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import '../network/network_info.dart';
@@ -77,6 +79,7 @@ class InjectionContainer {
   late final AdRepository _adRepository;
   late final FoodCategoryRepository _foodCategoryRepository;
   late final DriverRepository _driverRepository;
+  late final DeliveryAddressRepository _deliveryAddressRepository;
 
   Future<void> init() async {
     // External dependencies
@@ -138,6 +141,10 @@ class InjectionContainer {
       firestore: _firestore,
       networkInfo: _networkInfo,
       supabaseService: _supabaseService,
+    );
+
+    _deliveryAddressRepository = DeliveryAddressRepositoryImpl(
+      firestore: _firestore,
     );
   }
   
@@ -247,8 +254,11 @@ class InjectionContainer {
           authRepository: _authRepository,
         ),
       ),
-      BlocProvider(
-        create: (_) => DeliveryAddressCubit(),
+      BlocProvider<DeliveryAddressCubit>(
+        create: (context) => DeliveryAddressCubit(
+          repository: _deliveryAddressRepository,
+          authCubit: context.read<AuthCubit>(),
+        ),
       ),
     ];
   }

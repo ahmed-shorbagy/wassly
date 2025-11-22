@@ -9,6 +9,8 @@ abstract class DeliveryAddressState extends Equatable {
 
 class DeliveryAddressInitial extends DeliveryAddressState {}
 
+class DeliveryAddressLoading extends DeliveryAddressState {}
+
 class DeliveryAddressNotSet extends DeliveryAddressState {}
 
 class DeliveryAddressSelected extends DeliveryAddressState {
