@@ -58,7 +58,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             context.showSuccessSnackBar(
               l10n?.orderPlacedSuccessfully ?? 'تم تقديم الطلب بنجاح',
             );
-            context.push('/order/${state.order.id}');
+            // Use pushReplacement to replace checkout screen with order detail
+            // This prevents going back to empty checkout and maintains proper navigation stack
+            context.pushReplacement('/order/${state.order.id}');
           } else if (state is OrderError) {
             context.showErrorSnackBar(state.message);
           }

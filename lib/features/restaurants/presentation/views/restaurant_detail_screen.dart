@@ -7,6 +7,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/extensions.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../../../../shared/widgets/error_widget.dart';
+import '../../../../shared/widgets/product_card.dart';
 import '../cubits/restaurant_cubit.dart';
 import '../../../orders/presentation/cubits/cart_cubit.dart';
 import '../../domain/entities/product_entity.dart';
@@ -117,13 +118,11 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
         canPop: true,
         onPopInvokedWithResult: (didPop, result) {
           if (!didPop && context.mounted) {
-            // Try to pop first, if we can't pop, push home
+            // Try to pop first - let BackButtonHandler handle root navigation
             if (context.canPop()) {
               context.pop();
-            } else {
-              // If there's nothing to pop, navigate to home using push
-              context.push('/home');
             }
+            // If we can't pop, let the root BackButtonHandler handle navigation to home
           }
         },
         child: Scaffold(
@@ -274,12 +273,13 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
                             _buildActionButton(
                               icon: Icons.arrow_back_ios,
                               onTap: () {
-                                // Try to pop first, if we can't pop, push home
+                                // Try to pop first - let BackButtonHandler handle root navigation
                                 if (context.canPop()) {
                                   context.pop();
                                 } else {
-                                  // If there's nothing to pop, navigate to home using push
-                                  context.push('/home');
+                                  // If we can't pop, navigate to home
+                                  // This allows proper back navigation stack
+                                  context.go('/home');
                                 }
                               },
                             ),
@@ -572,8 +572,8 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
             padding: const EdgeInsets.all(16),
             sliver: SliverGrid(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.75,
+                crossAxisCount: 3,
+                childAspectRatio: 0.65,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
               ),
@@ -608,101 +608,26 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
 
   Widget _buildProductCard(BuildContext context, ProductEntity product) {
     final l10n = AppLocalizations.of(context)!;
+    final restaurant = _restaurant;
 
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: AppColors.border, width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Product Image
-          Expanded(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(16),
-              ),
-              child: product.imageUrl != null && product.imageUrl!.isNotEmpty
-                  ? CachedNetworkImage(
-                      imageUrl: product.imageUrl!,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      placeholder: (context, url) => Container(
-                        color: AppColors.border,
-                        child: const Center(child: CircularProgressIndicator()),
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        color: AppColors.border,
-                        child: const Icon(Icons.fastfood),
-                      ),
-                    )
-                  : Container(
-                      color: AppColors.border,
-                      child: const Icon(Icons.fastfood),
-                    ),
-            ),
-          ),
-
-          // Product Info
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Product Name
-                Text(
-                  product.name,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                // Price
-                Text(
-                  '\$${product.price.toStringAsFixed(2)}',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // Add Button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: product.isAvailable
-                        ? () async {
-                            await context.read<CartCubit>().addItem(product);
-                            if (context.mounted) {
-                              context.showSuccessSnackBar(
-                                l10n.itemAddedToCart(product.name),
-                              );
-                            }
-                          }
-                        : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: const Icon(Icons.add, size: 20),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+    return ProductCard(
+      productId: product.id,
+      productName: product.name,
+      description: product.description,
+      price: product.price,
+      imageUrl: product.imageUrl,
+      isAvailable: product.isAvailable,
+      restaurantId: restaurant?.id,
+      onTap: () async {
+        if (product.isAvailable) {
+          await context.read<CartCubit>().addItem(product);
+          if (context.mounted) {
+            context.showSuccessSnackBar(
+              l10n.itemAddedToCart(product.name),
+            );
+          }
+        }
+      },
     );
   }
 

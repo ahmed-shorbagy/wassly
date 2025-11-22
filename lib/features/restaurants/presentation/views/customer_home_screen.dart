@@ -3,9 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/utils/extensions.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/error_widget.dart';
+import '../../../../shared/widgets/product_card.dart';
 import '../../../home/presentation/cubits/home_cubit.dart';
 import '../../../home/domain/entities/banner_entity.dart';
 import '../cubits/restaurant_cubit.dart';
@@ -13,8 +13,8 @@ import '../../../orders/presentation/cubits/cart_cubit.dart';
 import '../../domain/entities/restaurant_entity.dart';
 import '../cubits/favorites_cubit.dart';
 import '../../../market_products/presentation/cubits/market_product_customer_cubit.dart';
-import '../../../market_products/domain/entities/market_product_entity.dart';
-import '../../../../shared/widgets/language_toggle_button.dart';
+import '../../../ads/presentation/cubits/startup_ad_customer_cubit.dart';
+import '../../../../shared/widgets/startup_ad_popup.dart';
 
 class CustomerHomeScreen extends StatefulWidget {
   const CustomerHomeScreen({super.key});
@@ -34,6 +34,12 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   void initState() {
     super.initState();
     _searchController.addListener(_filterRestaurants);
+    // Load startup ads when home screen loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<StartupAdCustomerCubit>().loadActiveStartupAds();
+      }
+    });
   }
 
   @override
@@ -82,40 +88,63 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 context.read<MarketProductCustomerCubit>()..loadMarketProducts(),
           ),
         ],
-        child: BlocConsumer<RestaurantCubit, RestaurantState>(
-          listener: (context, state) {
-            if (state is RestaurantsLoaded) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (mounted) {
-                  setState(() {
-                    _allRestaurants = state.restaurants;
-                    _filteredRestaurants = state.restaurants;
+        child: MultiBlocListener(
+          listeners: [
+            BlocListener<RestaurantCubit, RestaurantState>(
+              listener: (context, state) {
+                if (state is RestaurantsLoaded) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted) {
+                      setState(() {
+                        _allRestaurants = state.restaurants;
+                        _filteredRestaurants = state.restaurants;
+                      });
+                      _filterRestaurants();
+                    }
                   });
-                  _filterRestaurants();
                 }
-              });
-            }
-          },
-          builder: (context, state) {
-            if (state is RestaurantLoading) {
-              return _buildShimmerLoading();
-            } else if (state is RestaurantError) {
-              return ErrorDisplayWidget(
-                message: state.message,
-                onRetry: () =>
-                    context.read<RestaurantCubit>().getAllRestaurants(),
-              );
-            } else if (state is RestaurantsLoaded) {
-              return _buildHome(
-                context,
-                _filteredRestaurants.isEmpty && _searchController.text.isNotEmpty
-                    ? []
-                    : _filteredRestaurants,
-                l10n,
-              );
-            }
-            return const SizedBox.shrink();
-          },
+              },
+            ),
+            BlocListener<StartupAdCustomerCubit, StartupAdCustomerState>(
+              listener: (context, state) {
+                if (state is StartupAdCustomerLoaded && state.ads.isNotEmpty) {
+                  // Show popup after a short delay to allow UI to settle
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted) {
+                      Future.delayed(const Duration(milliseconds: 500), () {
+                        if (mounted && context.mounted) {
+                          // Show the first ad as popup
+                          StartupAdPopup.show(context, state.ads.first);
+                        }
+                      });
+                    }
+                  });
+                }
+              },
+            ),
+          ],
+          child: BlocBuilder<RestaurantCubit, RestaurantState>(
+            builder: (context, state) {
+              if (state is RestaurantLoading) {
+                return _buildShimmerLoading();
+              } else if (state is RestaurantError) {
+                return ErrorDisplayWidget(
+                  message: state.message,
+                  onRetry: () =>
+                      context.read<RestaurantCubit>().getAllRestaurants(),
+                );
+              } else if (state is RestaurantsLoaded) {
+                return _buildHome(
+                  context,
+                  _filteredRestaurants.isEmpty && _searchController.text.isNotEmpty
+                      ? []
+                      : _filteredRestaurants,
+                  l10n,
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
         ),
       ),
     );
@@ -134,159 +163,17 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
       child: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
-          // Enhanced App Bar with Gradient
+          // Top App Bar with Search Field
           SliverAppBar(
-            expandedHeight: 180,
-            floating: false,
+            expandedHeight: 0,
+            floating: true,
             pinned: true,
             elevation: 0,
-            backgroundColor: Colors.transparent,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.person_outline),
-                color: Colors.white,
-                onPressed: () => context.push('/profile'),
-              ),
-              IconButton(
-                icon: const Icon(Icons.favorite_border),
-                color: Colors.white,
-                onPressed: () => context.push('/favorites'),
-              ),
-              const LanguageToggleButton(),
-              // Cart Button with Badge
-              BlocBuilder<CartCubit, CartState>(
-                builder: (context, state) {
-                  final itemCount = state is CartLoaded ? state.itemCount : 0;
-                  return Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.shopping_cart_outlined),
-                        color: Colors.white,
-                        onPressed: () => context.push('/cart'),
-                      ),
-                      if (itemCount > 0)
-                        Positioned(
-                          right: 6,
-                          top: 6,
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: const BoxDecoration(
-                              color: AppColors.error,
-                              shape: BoxShape.circle,
-                            ),
-                            constraints: const BoxConstraints(
-                              minWidth: 18,
-                              minHeight: 18,
-                            ),
-                            child: Text(
-                              itemCount > 99 ? '99+' : '$itemCount',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                    ],
-                  );
-                },
-              ),
-              const SizedBox(width: 8),
-            ],
-            flexibleSpace: FlexibleSpaceBar(
-              titlePadding: const EdgeInsets.only(left: 16, bottom: 16),
-              title: const Text(
-                'المطاعم',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 24,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black26,
-                      offset: Offset(0, 2),
-                      blurRadius: 4,
-                    ),
-                  ],
-                ),
-              ),
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      AppColors.primary,
-                      AppColors.primaryDark,
-                      AppColors.secondary,
-                    ],
-                  ),
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withValues(alpha: 0.1),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          // Enhanced Search Bar
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.08),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: StatefulBuilder(
-                  builder: (context, setState) => TextField(
-                    controller: _searchController,
-                    onChanged: (_) {
-                      setState(() {});
-                      _filterRestaurants();
-                    },
-                    decoration: InputDecoration(
-                      hintText: l10n.searchRestaurants,
-                      hintStyle: TextStyle(color: AppColors.textHint),
-                      prefixIcon: Icon(Icons.search, color: AppColors.primary),
-                      suffixIcon: _searchController.text.isNotEmpty
-                          ? IconButton(
-                              icon: Icon(Icons.clear, color: AppColors.textSecondary),
-                              onPressed: () {
-                                _searchController.clear();
-                                setState(() {});
-                                _filterRestaurants();
-                              },
-                            )
-                          : null,
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 16,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+            backgroundColor: AppColors.surface,
+            toolbarHeight: 100,
+            flexibleSpace: _TopAppBarWithSearch(
+              searchController: _searchController,
+              onSearchChanged: _filterRestaurants,
             ),
           ),
 
@@ -367,17 +254,29 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 if (state.products.isEmpty) {
                   return const SliverToBoxAdapter(child: SizedBox.shrink());
                 }
-                return SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 200,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: state.products.length,
-                      itemBuilder: (context, index) {
+                return SliverPadding(
+                  padding: const EdgeInsets.all(16),
+                  sliver: SliverGrid(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      childAspectRatio: 0.65,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
                         final product = state.products[index];
-                        return _MarketProductCard(product: product);
+                        return ProductCard(
+                          productId: product.id,
+                          productName: product.name,
+                          description: product.description,
+                          price: product.price,
+                          imageUrl: product.imageUrl,
+                          isAvailable: product.isAvailable,
+                          isMarketProduct: true,
+                        );
                       },
+                      childCount: state.products.length,
                     ),
                   ),
                 );
@@ -458,10 +357,21 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     return CustomScrollView(
       slivers: [
         SliverAppBar(
-          expandedHeight: 180,
-          floating: false,
+          expandedHeight: 0,
+          floating: true,
           pinned: true,
-          backgroundColor: AppColors.primary,
+          toolbarHeight: 100,
+          backgroundColor: AppColors.surface,
+          flexibleSpace: Container(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+            child: Container(
+              height: 48,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(24),
+              ),
+            ),
+          ),
         ),
         SliverToBoxAdapter(
           child: Padding(
@@ -998,106 +908,6 @@ class _RestaurantCard extends StatelessWidget {
   }
 }
 
-class _MarketProductCard extends StatelessWidget {
-  final MarketProductEntity product;
-
-  const _MarketProductCard({required this.product});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 160,
-      margin: const EdgeInsets.only(right: 12),
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: InkWell(
-          onTap: () async {
-            // Add market product to cart
-            try {
-              // Convert market product to cart item format
-              // Note: Market products are added directly without restaurant context
-              final l10n = AppLocalizations.of(context);
-              context.showInfoSnackBar(
-                l10n?.marketProductsOrderingComingSoon ?? 'طلب منتجات السوق قريباً',
-              );
-            } catch (e) {
-              final l10n = AppLocalizations.of(context);
-              context.showErrorSnackBar(
-                l10n?.failedToAddProductToCart ?? 'فشل إضافة المنتج إلى السلة',
-              );
-            }
-          },
-          borderRadius: BorderRadius.circular(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Product Image
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(16),
-                ),
-                child: product.imageUrl != null
-                    ? CachedNetworkImage(
-                        imageUrl: product.imageUrl!,
-                        width: double.infinity,
-                        height: 120,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => Container(
-                          height: 120,
-                          color: AppColors.border,
-                          child: const Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                        ),
-                        errorWidget: (context, url, error) => Container(
-                          height: 120,
-                          color: AppColors.border,
-                          child: const Icon(Icons.shopping_bag),
-                        ),
-                      )
-                    : Container(
-                        height: 120,
-                        color: AppColors.border,
-                        child: const Icon(Icons.shopping_bag),
-                      ),
-              ),
-              // Product Info
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      product.name,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${product.price.toStringAsFixed(2)} ر.س',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class _EmptyStateWidget extends StatelessWidget {
   final String title;
@@ -1145,6 +955,195 @@ class _EmptyStateWidget extends StatelessWidget {
                     color: AppColors.textSecondary,
                   ),
               textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TopAppBarWithSearch extends StatelessWidget {
+  final TextEditingController searchController;
+  final VoidCallback onSearchChanged;
+
+  const _TopAppBarWithSearch({
+    required this.searchController,
+    required this.onSearchChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
+    return SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+        child: Row(
+          children: [
+            // Search Field - Rounded like selected tab in design
+            Expanded(
+              child: Container(
+                height: 48,
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: AppColors.border,
+                    width: 1,
+                  ),
+                ),
+                child: StatefulBuilder(
+                  builder: (context, setState) => TextField(
+                    controller: searchController,
+                    onChanged: (_) {
+                      setState(() {});
+                      onSearchChanged();
+                    },
+                    decoration: InputDecoration(
+                      hintText: l10n.searchRestaurants,
+                      hintStyle: TextStyle(
+                        color: AppColors.textHint,
+                        fontSize: 14,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: AppColors.textSecondary,
+                        size: 20,
+                      ),
+                      suffixIcon: searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: Icon(
+                                Icons.clear,
+                                color: AppColors.textSecondary,
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                searchController.clear();
+                                setState(() {});
+                                onSearchChanged();
+                              },
+                            )
+                          : null,
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      isDense: true,
+                    ),
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Profile Button
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppColors.border,
+                  width: 1,
+                ),
+              ),
+              child: IconButton(
+                icon: Icon(
+                  Icons.person_outline,
+                  color: AppColors.textPrimary,
+                  size: 22,
+                ),
+                padding: EdgeInsets.zero,
+                onPressed: () => context.push('/profile'),
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Favorites Button
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppColors.border,
+                  width: 1,
+                ),
+              ),
+              child: IconButton(
+                icon: Icon(
+                  Icons.favorite_border,
+                  color: AppColors.textPrimary,
+                  size: 22,
+                ),
+                padding: EdgeInsets.zero,
+                onPressed: () => context.push('/favorites'),
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Cart Button with Badge
+            BlocBuilder<CartCubit, CartState>(
+              builder: (context, state) {
+                final itemCount = state is CartLoaded ? state.itemCount : 0;
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: AppColors.border,
+                          width: 1,
+                        ),
+                      ),
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.shopping_cart_outlined,
+                          color: AppColors.textPrimary,
+                          size: 22,
+                        ),
+                        padding: EdgeInsets.zero,
+                        onPressed: () => context.push('/cart'),
+                      ),
+                    ),
+                    if (itemCount > 0)
+                      Positioned(
+                        right: -2,
+                        top: -2,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: AppColors.error,
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 18,
+                            minHeight: 18,
+                          ),
+                          child: Text(
+                            itemCount > 99 ? '99+' : '$itemCount',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
             ),
           ],
         ),

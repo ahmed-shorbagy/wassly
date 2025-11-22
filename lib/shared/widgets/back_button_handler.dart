@@ -25,6 +25,7 @@ class BackButtonHandler extends StatelessWidget {
 
         final router = GoRouter.of(context);
         final canPopRoute = router.canPop();
+        final currentLocation = router.routeInformationProvider.value.uri.path;
 
         // If we can pop a route, do it normally
         if (canPopRoute) {
@@ -32,13 +33,22 @@ class BackButtonHandler extends StatelessWidget {
           return;
         }
 
-        // If we're at the root and user tries to exit, show confirmation
+        // If we're at the root and user tries to go back
         if (!canPopRoute) {
-          final shouldExit = await _showExitConfirmation(context);
-          if (shouldExit && context.mounted) {
-            // Exit the app
-            // Note: On mobile, this might not work as expected
-            // The system handles app lifecycle
+          // If we're already at home, show exit confirmation
+          if (currentLocation == '/home') {
+            final shouldExit = await _showExitConfirmation(context);
+            if (shouldExit && context.mounted) {
+              // Exit the app
+              // Note: On mobile, this might not work as expected
+              // The system handles app lifecycle
+            }
+          } else {
+            // If we're not at home and can't pop, navigate to home
+            // This ensures proper navigation stack and prevents app closure
+            if (context.mounted) {
+              router.go('/home');
+            }
           }
         }
       },
