@@ -62,6 +62,7 @@ dependencies:
   intl: ^0.20.2
   intl_phone_field: ^3.2.0
   url_launcher: ^6.2.5
+  shared_preferences: ^2.2.2
   
   # Localization
   flutter_localizations:

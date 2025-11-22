@@ -101,33 +101,20 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (context) => context.read<RestaurantCubit>()
-            ..getRestaurantById(widget.restaurantId)
-            ..getRestaurantProducts(widget.restaurantId),
-        ),
-        BlocProvider(
-          create: (context) =>
-              context.read<FoodCategoryCubit>()
-                ..loadRestaurantCategories(widget.restaurantId),
-        ),
-      ],
-      child: PopScope(
-        canPop: true,
-        onPopInvokedWithResult: (didPop, result) {
-          if (!didPop && context.mounted) {
-            // Try to pop first - let BackButtonHandler handle root navigation
-            if (context.canPop()) {
-              context.pop();
-            }
-            // If we can't pop, let the root BackButtonHandler handle navigation to home
-          }
-        },
-        child: Scaffold(
-          backgroundColor: Colors.white,
-          body: BlocListener<FoodCategoryCubit, FoodCategoryState>(
+    // Load data when screen is first built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<RestaurantCubit>()
+          ..getRestaurantById(widget.restaurantId)
+          ..getRestaurantProducts(widget.restaurantId);
+        context.read<FoodCategoryCubit>()
+          ..loadRestaurantCategories(widget.restaurantId);
+      }
+    });
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+        body: BlocListener<FoodCategoryCubit, FoodCategoryState>(
             listener: (context, state) {
               if (state is FoodCategoryLoaded) {
                 setState(() {
@@ -200,9 +187,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
             ),
           ),
           bottomNavigationBar: _buildBottomBar(context),
-        ),
-      ),
-    );
+        );
   }
 
   Widget _buildRestaurantDetail(

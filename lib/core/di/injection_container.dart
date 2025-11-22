@@ -49,6 +49,7 @@ import '../../features/ads/presentation/cubits/startup_ad_customer_cubit.dart';
 import '../../features/drivers/domain/repositories/driver_repository.dart';
 import '../../features/drivers/data/repositories/driver_repository_impl.dart';
 import '../../features/drivers/presentation/cubits/driver_cubit.dart';
+import '../../features/delivery_address/presentation/cubits/delivery_address_cubit.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import '../network/network_info.dart';
 import '../network/supabase_service.dart';
@@ -245,6 +246,9 @@ class InjectionContainer {
           driverRepository: _driverRepository,
           authRepository: _authRepository,
         ),
+      ),
+      BlocProvider(
+        create: (_) => DeliveryAddressCubit(),
       ),
     ];
   }

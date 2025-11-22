@@ -15,6 +15,8 @@ import '../cubits/favorites_cubit.dart';
 import '../../../market_products/presentation/cubits/market_product_customer_cubit.dart';
 import '../../../ads/presentation/cubits/startup_ad_customer_cubit.dart';
 import '../../../../shared/widgets/startup_ad_popup.dart';
+import '../../../delivery_address/presentation/cubits/delivery_address_cubit.dart';
+import '../../../delivery_address/presentation/widgets/delivery_address_dialog.dart';
 
 class CustomerHomeScreen extends StatefulWidget {
   const CustomerHomeScreen({super.key});
@@ -24,7 +26,9 @@ class CustomerHomeScreen extends StatefulWidget {
 }
 
 class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
-  final PageController _bannerController = PageController(viewportFraction: 0.92);
+  final PageController _bannerController = PageController(
+    viewportFraction: 0.92,
+  );
   int _currentBannerIndex = 0;
   final TextEditingController _searchController = TextEditingController();
   List<RestaurantEntity> _filteredRestaurants = [];
@@ -34,9 +38,11 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   void initState() {
     super.initState();
     _searchController.addListener(_filterRestaurants);
-    // Load startup ads when home screen loads
+    // Load restaurants and startup ads when home screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
+        // Load restaurants when screen first loads
+        context.read<RestaurantCubit>().getAllRestaurants();
         context.read<StartupAdCustomerCubit>().loadActiveStartupAds();
       }
     });
@@ -58,7 +64,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
       } else {
         _filteredRestaurants = _allRestaurants.where((restaurant) {
           final nameMatch = restaurant.name.toLowerCase().contains(query);
-          final descMatch = restaurant.description.toLowerCase().contains(query);
+          final descMatch = restaurant.description.toLowerCase().contains(
+            query,
+          );
           final categoryMatch = restaurant.categories.any(
             (cat) => cat.toLowerCase().contains(query),
           );
@@ -72,20 +80,18 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Scaffold(
       body: MultiBlocProvider(
         providers: [
-          BlocProvider<RestaurantCubit>(
-            create: (context) =>
-                context.read<RestaurantCubit>()..getAllRestaurants(),
+          BlocProvider<RestaurantCubit>.value(
+            value: context.read<RestaurantCubit>(),
           ),
-          BlocProvider<HomeCubit>(
-            create: (_) => HomeCubit()..loadHome(),
-          ),
+          BlocProvider<HomeCubit>(create: (_) => HomeCubit()..loadHome()),
           BlocProvider<MarketProductCustomerCubit>(
             create: (context) =>
-                context.read<MarketProductCustomerCubit>()..loadMarketProducts(),
+                context.read<MarketProductCustomerCubit>()
+                  ..loadMarketProducts(),
           ),
         ],
         child: MultiBlocListener(
@@ -124,7 +130,53 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             ),
           ],
           child: BlocBuilder<RestaurantCubit, RestaurantState>(
+            buildWhen: (previous, current) {
+              // Always rebuild when we get RestaurantsLoaded to update local state
+              if (current is RestaurantsLoaded) {
+                return true; // Always rebuild to update local state
+              }
+              // If we have local data and state changes to RestaurantLoaded (from detail screen), don't rebuild
+              // This prevents flicker when navigating back from detail screen
+              if (_allRestaurants.isNotEmpty &&
+                  current is! RestaurantsLoaded &&
+                  current is! RestaurantLoading &&
+                  current is! RestaurantError) {
+                return false; // Don't rebuild when state is RestaurantLoaded (from detail) if we have local data
+              }
+              // Rebuild for loading and error states if we don't have local data
+              if (_allRestaurants.isEmpty) {
+                return current is RestaurantLoading ||
+                    current is RestaurantError ||
+                    current is RestaurantsLoaded;
+              }
+              // Rebuild for error states even if we have local data
+              return current is RestaurantError;
+            },
             builder: (context, state) {
+              // If we have local restaurants, show them immediately to prevent flicker
+              if (_allRestaurants.isNotEmpty) {
+                // Reload restaurants in background when we detect wrong state (e.g., RestaurantLoaded from detail)
+                if (state is! RestaurantsLoaded &&
+                    state is! RestaurantLoading &&
+                    state is! RestaurantError) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted) {
+                      context.read<RestaurantCubit>().getAllRestaurants();
+                    }
+                  });
+                }
+                // Show local state immediately to prevent flicker
+                return _buildHome(
+                  context,
+                  _filteredRestaurants.isEmpty &&
+                          _searchController.text.isNotEmpty
+                      ? []
+                      : _filteredRestaurants,
+                  l10n,
+                );
+              }
+
+              // Show loading/error only if we don't have local data
               if (state is RestaurantLoading) {
                 return _buildShimmerLoading();
               } else if (state is RestaurantError) {
@@ -136,13 +188,15 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               } else if (state is RestaurantsLoaded) {
                 return _buildHome(
                   context,
-                  _filteredRestaurants.isEmpty && _searchController.text.isNotEmpty
+                  _filteredRestaurants.isEmpty &&
+                          _searchController.text.isNotEmpty
                       ? []
                       : _filteredRestaurants,
                   l10n,
                 );
               }
-              return const SizedBox.shrink();
+              // Default to loading if state is unknown and we have no local data
+              return _buildShimmerLoading();
             },
           ),
         ),
@@ -163,6 +217,86 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
       child: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
+          // Delivery Address Bar (outside SafeArea - under status bar)
+          SliverToBoxAdapter(
+            child: BlocBuilder<DeliveryAddressCubit, DeliveryAddressState>(
+              builder: (context, state) {
+                String displayText;
+                if (state is DeliveryAddressSelected) {
+                  displayText = state.displayAddress;
+                } else {
+                  displayText = 'حدد عنوان التوصيل'; // Select delivery address
+                }
+
+                return Container(
+                  width: double.infinity,
+                  color: AppColors.primary,
+                  padding: EdgeInsets.only(
+                    top: MediaQuery.of(context).padding.top,
+                  ),
+                  child: InkWell(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => const DeliveryAddressDialog(),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      child: Row(
+                        children: [
+                          // Headphone Icon
+                          const Icon(
+                            Icons.headset_mic,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 12),
+                          // Delivery Text
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'التوصيل إلى:', // Delivery to:
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: Colors.white.withOpacity(0.9),
+                                        fontSize: 12,
+                                      ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  displayText,
+                                  style: Theme.of(context).textTheme.bodyMedium
+                                      ?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 14,
+                                      ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Chevron Icon
+                          const Icon(
+                            Icons.keyboard_arrow_down,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
           // Top App Bar with Search Field
           SliverAppBar(
             expandedHeight: 0,
@@ -180,7 +314,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           // Enhanced Banner Carousel with Indicators
           BlocBuilder<HomeCubit, HomeState>(
             builder: (context, state) {
-              final banners = state is HomeLoaded ? state.banners : <BannerEntity>[];
+              final banners = state is HomeLoaded
+                  ? state.banners
+                  : <BannerEntity>[];
               return SliverToBoxAdapter(
                 child: _BannerCarousel(
                   banners: banners,
@@ -217,9 +353,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       Text(
                         l10n.marketProducts,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
-                            ),
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                     ],
                   ),
@@ -257,27 +393,25 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 return SliverPadding(
                   padding: const EdgeInsets.all(16),
                   sliver: SliverGrid(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      childAspectRatio: 0.65,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final product = state.products[index];
-                        return ProductCard(
-                          productId: product.id,
-                          productName: product.name,
-                          description: product.description,
-                          price: product.price,
-                          imageUrl: product.imageUrl,
-                          isAvailable: product.isAvailable,
-                          isMarketProduct: true,
-                        );
-                      },
-                      childCount: state.products.length,
-                    ),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          childAspectRatio: 0.65,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                        ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final product = state.products[index];
+                      return ProductCard(
+                        productId: product.id,
+                        productName: product.name,
+                        description: product.description,
+                        price: product.price,
+                        imageUrl: product.imageUrl,
+                        isAvailable: product.isAvailable,
+                        isMarketProduct: true,
+                      );
+                    }, childCount: state.products.length),
                   ),
                 );
               }
@@ -295,9 +429,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   Text(
                     'مطاعم قريبة منك',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                   TextButton(
                     onPressed: () {},
@@ -339,13 +473,10 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
                 ),
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final restaurant = restaurants[index];
-                    return _RestaurantCard(restaurant: restaurant);
-                  },
-                  childCount: restaurants.length,
-                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final restaurant = restaurants[index];
+                  return _RestaurantCard(restaurant: restaurant);
+                }, childCount: restaurants.length),
               ),
             ),
         ],
@@ -440,7 +571,7 @@ class _BannerCarousel extends StatelessWidget {
               imageUrl:
                   'https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=1200',
               title: 'عروض خاصة',
-            )
+            ),
           ]
         : banners;
 
@@ -466,12 +597,17 @@ class _BannerCarousel extends StatelessWidget {
                         fit: BoxFit.cover,
                         placeholder: (c, u) => Container(
                           color: AppColors.surface,
-                          child: const Center(child: CircularProgressIndicator()),
+                          child: const Center(
+                            child: CircularProgressIndicator(),
+                          ),
                         ),
                         errorWidget: (c, u, e) => Container(
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
-                              colors: [AppColors.primary, AppColors.primaryDark],
+                              colors: [
+                                AppColors.primary,
+                                AppColors.primaryDark,
+                              ],
                             ),
                           ),
                           child: const Icon(
@@ -574,9 +710,9 @@ class _CategoriesSection extends StatelessWidget {
             Text(
               'عروض خاصة',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
             ),
             TextButton(
               onPressed: onTapSeeAll,
@@ -600,7 +736,9 @@ class _CategoriesSection extends StatelessWidget {
               final c = items[index];
               return Container(
                 width: 80,
-                margin: EdgeInsets.only(right: index == items.length - 1 ? 0 : 12),
+                margin: EdgeInsets.only(
+                  right: index == items.length - 1 ? 0 : 12,
+                ),
                 child: Column(
                   children: [
                     Container(
@@ -663,10 +801,7 @@ class _RestaurantCard extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: BorderSide(
-          color: AppColors.border,
-          width: 1,
-        ),
+        side: BorderSide(color: AppColors.border, width: 1),
       ),
       child: InkWell(
         onTap: () {
@@ -685,7 +820,8 @@ class _RestaurantCard extends StatelessWidget {
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(20),
                     ),
-                    child: restaurant.imageUrl != null &&
+                    child:
+                        restaurant.imageUrl != null &&
                             restaurant.imageUrl!.isNotEmpty
                         ? CachedNetworkImage(
                             imageUrl: restaurant.imageUrl!,
@@ -735,8 +871,9 @@ class _RestaurantCard extends StatelessWidget {
                     right: 8,
                     child: BlocBuilder<FavoritesCubit, FavoritesState>(
                       builder: (context, favState) {
-                        final isFav =
-                            favState.favoriteRestaurantIds.contains(restaurant.id);
+                        final isFav = favState.favoriteRestaurantIds.contains(
+                          restaurant.id,
+                        );
                         return Container(
                           decoration: BoxDecoration(
                             color: Colors.white,
@@ -752,7 +889,9 @@ class _RestaurantCard extends StatelessWidget {
                           child: IconButton(
                             icon: Icon(
                               isFav ? Icons.favorite : Icons.favorite_border,
-                              color: isFav ? Colors.red : AppColors.textSecondary,
+                              color: isFav
+                                  ? Colors.red
+                                  : AppColors.textSecondary,
                               size: 20,
                             ),
                             padding: EdgeInsets.zero,
@@ -761,9 +900,9 @@ class _RestaurantCard extends StatelessWidget {
                               minHeight: 36,
                             ),
                             onPressed: () {
-                              context
-                                  .read<FavoritesCubit>()
-                                  .toggleRestaurant(restaurant.id);
+                              context.read<FavoritesCubit>().toggleRestaurant(
+                                restaurant.id,
+                              );
                             },
                           ),
                         );
@@ -908,7 +1047,6 @@ class _RestaurantCard extends StatelessWidget {
   }
 }
 
-
 class _EmptyStateWidget extends StatelessWidget {
   final String title;
   final String message;
@@ -944,16 +1082,16 @@ class _EmptyStateWidget extends StatelessWidget {
             Text(
               title,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               message,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
           ],
@@ -975,7 +1113,7 @@ class _TopAppBarWithSearch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return SafeArea(
       bottom: false,
       child: Padding(
@@ -989,10 +1127,7 @@ class _TopAppBarWithSearch extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.surface,
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: AppColors.border,
-                    width: 1,
-                  ),
+                  border: Border.all(color: AppColors.border, width: 1),
                 ),
                 child: StatefulBuilder(
                   builder: (context, setState) => TextField(
@@ -1049,10 +1184,7 @@ class _TopAppBarWithSearch extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.surface,
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: AppColors.border,
-                  width: 1,
-                ),
+                border: Border.all(color: AppColors.border, width: 1),
               ),
               child: IconButton(
                 icon: Icon(
@@ -1072,10 +1204,7 @@ class _TopAppBarWithSearch extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.surface,
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: AppColors.border,
-                  width: 1,
-                ),
+                border: Border.all(color: AppColors.border, width: 1),
               ),
               child: IconButton(
                 icon: Icon(
@@ -1101,10 +1230,7 @@ class _TopAppBarWithSearch extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: AppColors.surface,
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: AppColors.border,
-                          width: 1,
-                        ),
+                        border: Border.all(color: AppColors.border, width: 1),
                       ),
                       child: IconButton(
                         icon: Icon(
