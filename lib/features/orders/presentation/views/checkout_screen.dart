@@ -8,6 +8,8 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../../../auth/presentation/cubits/auth_cubit.dart';
 import '../../../restaurants/domain/entities/restaurant_entity.dart';
+import '../../../delivery_address/presentation/cubits/delivery_address_cubit.dart';
+import '../../../delivery_address/presentation/widgets/delivery_address_dialog.dart';
 import '../../domain/entities/order_entity.dart';
 import '../cubits/cart_cubit.dart';
 import '../cubits/order_cubit.dart';
@@ -26,6 +28,28 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final _addressController = TextEditingController();
   final _notesController = TextEditingController();
   final _phoneController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    // Load delivery address from cubit when screen opens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final addressState = context.read<DeliveryAddressCubit>().state;
+        if (addressState is DeliveryAddressSelected) {
+          _addressController.text = addressState.address;
+        }
+        // Load user phone from auth if available
+        final authState = context.read<AuthCubit>().state;
+        if (authState is AuthAuthenticated) {
+          final phone = authState.user.phone;
+          if (phone.isNotEmpty) {
+            _phoneController.text = phone;
+          }
+        }
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -112,33 +136,60 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // Delivery Address
-                            Builder(
-                              builder: (context) {
+                            BlocBuilder<DeliveryAddressCubit, DeliveryAddressState>(
+                              builder: (context, addressState) {
                                 final l10n = AppLocalizations.of(context);
-                                return _buildSectionHeader(
-                                  l10n?.deliveryAddress ?? 'عنوان التوصيل',
-                                );
-                              },
-                            ),
-                            const SizedBox(height: 8),
-                            Builder(
-                              builder: (context) {
-                                final l10n = AppLocalizations.of(context);
-                                return TextFormField(
-                                  controller: _addressController,
-                                  decoration: InputDecoration(
-                                    labelText: l10n?.deliveryAddress ?? 'عنوان التوصيل',
-                                    hintText: l10n?.enterDeliveryAddress ?? 'أدخل عنوان التوصيل',
-                                    prefixIcon: const Icon(Icons.location_on),
-                                  ),
-                                  validator: (value) {
-                                    final l10n = AppLocalizations.of(context);
-                                    if (value == null || value.trim().isEmpty) {
-                                      return l10n?.addressRequired ?? 'العنوان مطلوب';
-                                    }
-                                    return null;
-                                  },
-                                  maxLines: 2,
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        _buildSectionHeader(
+                                          l10n?.deliveryAddress ?? 'عنوان التوصيل',
+                                        ),
+                                        if (addressState is DeliveryAddressSelected)
+                                          TextButton.icon(
+                                            onPressed: () {
+                                              // Show dialog to manage addresses
+                                              showDialog(
+                                                context: context,
+                                                builder: (context) => const DeliveryAddressDialog(),
+                                              );
+                                            },
+                                            icon: const Icon(Icons.edit, size: 16),
+                                            label: Text(
+                                              l10n?.edit ?? 'تعديل',
+                                              style: const TextStyle(fontSize: 12),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    TextFormField(
+                                      controller: _addressController,
+                                      decoration: InputDecoration(
+                                        labelText: l10n?.deliveryAddress ?? 'عنوان التوصيل',
+                                        hintText: l10n?.enterDeliveryAddress ?? 'أدخل عنوان التوصيل',
+                                        prefixIcon: const Icon(Icons.location_on),
+                                        suffixIcon: addressState is DeliveryAddressSelected
+                                            ? Icon(
+                                                Icons.check_circle,
+                                                color: AppColors.success,
+                                                size: 20,
+                                              )
+                                            : null,
+                                      ),
+                                      validator: (value) {
+                                        final l10n = AppLocalizations.of(context);
+                                        if (value == null || value.trim().isEmpty) {
+                                          return l10n?.addressRequired ?? 'العنوان مطلوب';
+                                        }
+                                        return null;
+                                      },
+                                      maxLines: 2,
+                                    ),
+                                  ],
                                 );
                               },
                             ),
@@ -280,12 +331,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           style: const TextStyle(fontSize: 14),
                         ),
                       ),
-                      Text(
-                        '${item.totalPrice.toStringAsFixed(2)} ر.س',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      Builder(
+                        builder: (context) {
+                          final l10n = AppLocalizations.of(context);
+                          return Text(
+                            '${item.totalPrice.toStringAsFixed(2)} ${l10n?.currencySymbol ?? 'ر.س'}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -305,7 +361,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       style: const TextStyle(fontSize: 14),
                     ),
                     Text(
-                      '${cartState.totalPrice.toStringAsFixed(2)} ر.س',
+                      '${cartState.totalPrice.toStringAsFixed(2)} ${l10n?.currencySymbol ?? 'ر.س'}',
                       style: const TextStyle(fontSize: 14),
                     ),
                   ],
@@ -326,7 +382,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       style: const TextStyle(fontSize: 14),
                     ),
                     Text(
-                      '${_getDeliveryFee().toStringAsFixed(2)} ر.س',
+                      '${_getDeliveryFee().toStringAsFixed(2)} ${l10n?.currencySymbol ?? 'ر.س'}',
                       style: const TextStyle(fontSize: 14),
                     ),
                   ],
@@ -350,7 +406,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ),
                     ),
                 Text(
-                  '${_getTotalAmount(cartState.totalPrice).toStringAsFixed(2)} ر.س',
+                  '${_getTotalAmount(cartState.totalPrice).toStringAsFixed(2)} ${l10n?.currencySymbol ?? 'ر.س'}',
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -392,7 +448,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               builder: (context) {
                 final l10n = AppLocalizations.of(context);
                 return Text(
-                  '${l10n?.placeOrder ?? 'تقديم الطلب'} - ${_getTotalAmount(cartState.totalPrice).toStringAsFixed(2)} ر.س',
+                  '${l10n?.placeOrder ?? 'تقديم الطلب'} - ${_getTotalAmount(cartState.totalPrice).toStringAsFixed(2)} ${l10n?.currencySymbol ?? 'ر.س'}',
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 );
               },
@@ -429,6 +485,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     final user = authState.user;
 
+    // Get delivery location - use restaurant location as default
+    // Note: DeliveryAddressSelected state only contains address string, not GeoPoint
+    // For now, we use restaurant location. In future, we could fetch full address entity
+    // from repository if location is needed for distance calculations
+    final deliveryLocation = _convertToGeoPoint(widget.restaurant.location);
+
     // Create order items
     final items = cartState.items.map((cartItem) {
       return OrderItemEntity(
@@ -453,13 +515,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       totalAmount: _getTotalAmount(cartState.totalPrice),
       status: OrderStatus.pending,
       deliveryAddress: _addressController.text.trim(),
-      deliveryLocation: _convertToGeoPoint(widget.restaurant.location), // Use restaurant location as fallback
+      deliveryLocation: deliveryLocation,
       restaurantLocation: _convertToGeoPoint(widget.restaurant.location),
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
       notes: _notesController.text.trim().isEmpty
           ? null
           : _notesController.text.trim(),
+    );
+
+    // Save delivery address to cubit for future use (syncs across all apps)
+    // This ensures the address is synced in Firebase and available across all apps
+    final l10nForAddress = AppLocalizations.of(context);
+    context.read<DeliveryAddressCubit>().setDeliveryAddress(
+      address: _addressController.text.trim(),
+      addressLabel: l10nForAddress?.defaultAddress ?? 'Default',
     );
 
     // Place order

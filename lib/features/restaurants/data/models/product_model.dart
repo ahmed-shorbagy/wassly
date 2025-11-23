@@ -66,11 +66,20 @@ class ProductModel extends ProductEntity {
     };
   }
 
-  Map<String, dynamic> toFirestore() => toJson();
+  /// Converts to Firestore format - excludes 'id' field since document ID is the ID
+  Map<String, dynamic> toFirestore() {
+    final json = toJson();
+    json.remove('id'); // Remove id field - document ID is the ID
+    return json;
+  }
 
   factory ProductModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    return ProductModel.fromJson({...data, 'id': doc.id});
+    // Remove any existing 'id' field from data and use document ID
+    final cleanData = Map<String, dynamic>.from(data);
+    cleanData.remove('id'); // Remove any id field from data
+    cleanData['id'] = doc.id; // Always use document ID
+    return ProductModel.fromJson(cleanData);
   }
 
   ProductModel copyWith({

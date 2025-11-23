@@ -175,7 +175,7 @@ class CartScreen extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   Text(
-                    '${state.totalPrice.toStringAsFixed(2)} ر.س',
+                    '${state.totalPrice.toStringAsFixed(2)} ${l10n.currencySymbol}',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
@@ -203,7 +203,7 @@ class CartScreen extends StatelessWidget {
                         ),
                   ),
                   Text(
-                    '${state.totalPrice.toStringAsFixed(2)} ر.س',
+                    '${state.totalPrice.toStringAsFixed(2)} ${l10n.currencySymbol}',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: AppColors.primary,
@@ -248,13 +248,21 @@ class CartScreen extends StatelessWidget {
     // Fetch restaurant data
     await context.read<RestaurantCubit>().getRestaurantById(restaurantId);
 
+    // Check if context is still mounted before using it
+    if (!context.mounted) return;
+
     // Get the restaurant from cubit state
     final restaurantState = context.read<RestaurantCubit>().state;
     if (restaurantState is RestaurantLoaded) {
       // Navigate to checkout with restaurant data
-      context.push('/checkout', extra: restaurantState.restaurant);
+      if (context.mounted) {
+        context.push('/checkout', extra: restaurantState.restaurant);
+      }
     } else {
-      context.showErrorSnackBar('فشل تحميل بيانات المطعم');
+      if (context.mounted) {
+        final l10n = AppLocalizations.of(context);
+        context.showErrorSnackBar(l10n?.failedToLoadRestaurantData ?? 'Failed to load restaurant data');
+      }
     }
   }
 
@@ -361,7 +369,7 @@ class _CartItemCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${item.product.price.toStringAsFixed(2)} ر.س',
+                    '${item.product.price.toStringAsFixed(2)} ${l10n.currencySymbol}',
                     style: TextStyle(
                       fontSize: 14,
                       color: AppColors.primary,

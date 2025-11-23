@@ -194,203 +194,295 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
 
     return CustomScrollView(
       slivers: [
-        // Hero Image Section
+        // Top Section with Logo and Overlay Icons
         SliverAppBar(
-          expandedHeight: 300,
+          expandedHeight: 280,
           pinned: false,
           floating: false,
+          automaticallyImplyLeading: false, // Remove default back button
           flexibleSpace: FlexibleSpaceBar(
-            background: Stack(
-              fit: StackFit.expand,
-              children: [
-                // Main Image
-                restaurant.imageUrl != null && restaurant.imageUrl!.isNotEmpty
-                    ? CachedNetworkImage(
-                        imageUrl: restaurant.imageUrl!,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => Container(
-                          color: AppColors.border,
-                          child: const Center(
-                            child: CircularProgressIndicator(),
+            background: Container(
+              color: AppColors.promoBackground, // Light pastel green background
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // Large Circular Logo
+                  Center(
+                    child: Container(
+                      width: 180,
+                      height: 180,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                        border: Border.all(color: AppColors.primary, width: 8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
                           ),
-                        ),
-                        errorWidget: (context, url, error) => Container(
-                          color: AppColors.border,
-                          child: const Icon(Icons.restaurant, size: 80),
-                        ),
-                      )
-                    : Container(
-                        color: AppColors.border,
-                        child: const Icon(Icons.restaurant, size: 80),
+                        ],
                       ),
+                      child: ClipOval(
+                        child:
+                            restaurant.imageUrl != null &&
+                                restaurant.imageUrl!.isNotEmpty
+                            ? CachedNetworkImage(
+                                imageUrl: restaurant.imageUrl!,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => Container(
+                                  color: AppColors.border,
+                                  child: const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                ),
+                                errorWidget: (context, url, error) => Container(
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.1,
+                                  ),
+                                  child: Icon(
+                                    Icons.restaurant,
+                                    size: 60,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              )
+                            : Container(
+                                color: AppColors.primary.withValues(alpha: 0.1),
+                                child: Icon(
+                                  Icons.restaurant,
+                                  size: 60,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ),
 
-                // Gradient Overlay
-                Positioned.fill(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withValues(alpha: 0.3),
+                  // Overlay Icons
+                  SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              // Left side: Back and Favorite
+                              Row(
+                                children: [
+                                  _buildOverlayIconButton(
+                                    icon: Icons.arrow_back_ios,
+                                    onTap: () {
+                                      if (context.canPop()) {
+                                        context.pop();
+                                      } else {
+                                        context.go('/home');
+                                      }
+                                    },
+                                  ),
+                                  const SizedBox(width: 12),
+                                  BlocBuilder<FavoritesCubit, FavoritesState>(
+                                    builder: (context, favState) {
+                                      final isFav = favState
+                                          .favoriteRestaurantIds
+                                          .contains(restaurant.id);
+                                      return _buildOverlayIconButton(
+                                        icon: isFav
+                                            ? Icons.favorite
+                                            : Icons.favorite_border,
+                                        iconColor: isFav
+                                            ? Colors.red
+                                            : AppColors.textPrimary,
+                                        onTap: () => context
+                                            .read<FavoritesCubit>()
+                                            .toggleRestaurant(restaurant.id),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                              // Right side: Share, Search, and Navigation
+                              Row(
+                                children: [
+                                  _buildOverlayIconButton(
+                                    icon: Icons.share,
+                                    onTap: () {},
+                                  ),
+                                  const SizedBox(width: 12),
+                                  _buildOverlayIconButton(
+                                    icon: Icons.search,
+                                    onTap: () {
+                                      // Scroll to search bar or focus it
+                                    },
+                                  ),
+                                  const SizedBox(width: 12),
+                                  _buildOverlayIconButton(
+                                    icon: Icons.arrow_forward_ios,
+                                    onTap: () {},
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     ),
                   ),
-                ),
-
-                // Action Buttons Overlay
-                SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            // Back Button
-                            _buildActionButton(
-                              icon: Icons.arrow_back_ios,
-                              onTap: () {
-                                // Try to pop first - let BackButtonHandler handle root navigation
-                                if (context.canPop()) {
-                                  context.pop();
-                                } else {
-                                  // If we can't pop, navigate to home
-                                  // This allows proper back navigation stack
-                                  context.go('/home');
-                                }
-                              },
-                            ),
-                            // Right side buttons
-                            Row(
-                              children: [
-                                _buildActionButton(
-                                  icon: Icons.search,
-                                  onTap: () {},
-                                ),
-                                const SizedBox(width: 12),
-                                _buildActionButton(
-                                  icon: Icons.share,
-                                  onTap: () {},
-                                ),
-                                const SizedBox(width: 12),
-                                BlocBuilder<FavoritesCubit, FavoritesState>(
-                                  builder: (context, favState) {
-                                    final isFav = favState.favoriteRestaurantIds
-                                        .contains(restaurant.id);
-                                    return _buildActionButton(
-                                      icon: isFav
-                                          ? Icons.favorite
-                                          : Icons.favorite_border,
-                                      iconColor: isFav
-                                          ? Colors.red
-                                          : Colors.white,
-                                      onTap: () => context
-                                          .read<FavoritesCubit>()
-                                          .toggleRestaurant(restaurant.id),
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
 
-        // Restaurant Info Card
+        // Restaurant Info Section
         SliverToBoxAdapter(
           child: Container(
             color: Colors.white,
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Restaurant Name with Icon
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Restaurant Name
-                            Text(
-                              restaurant.name,
-                              style: Theme.of(context).textTheme.headlineMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 24,
-                                  ),
-                            ),
-                            const SizedBox(height: 4),
-                            // Cuisine Type
-                            Text(
-                              restaurant.categories.isNotEmpty
-                                  ? restaurant.categories.join(', ')
-                                  : l10n.restaurants,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            // Rating
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.star,
-                                  color: Colors.amber,
-                                  size: 18,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  restaurant.rating.toStringAsFixed(1),
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '(+${restaurant.totalReviews})',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      // Restaurant Logo Placeholder
                       Container(
-                        width: 60,
-                        height: 60,
+                        width: 40,
+                        height: 40,
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
+                          color: AppColors.success.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         child: Icon(
-                          Icons.restaurant,
-                          color: AppColors.primary,
-                          size: 30,
+                          Icons.restaurant_menu,
+                          color: AppColors.success,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          restaurant.name,
+                          style: Theme.of(context).textTheme.headlineMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 22,
+                                color: AppColors.textPrimary,
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  // Cuisine Type
+                  Text(
+                    restaurant.categories.isNotEmpty
+                        ? restaurant.categories.join(', ')
+                        : l10n.restaurants,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  // Rating
+                  Row(
+                    children: [
+                      const Icon(Icons.star, color: Colors.amber, size: 18),
+                      const SizedBox(width: 4),
+                      Text(
+                        restaurant.rating.toStringAsFixed(1),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '(+${restaurant.totalReviews})',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textSecondary,
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
 
-                  // Delivery Info
+                  // Discount Banner (if active)
+                  if (restaurant.isDiscountActive)
+                    Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppColors.warning,
+                            AppColors.warning.withValues(alpha: 0.8),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.warning.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.local_offer,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  restaurant.discountPercentage != null
+                                      ? '${restaurant.discountPercentage!.toStringAsFixed(0)}% ${l10n.off}'
+                                      : l10n.specialOffer,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                if (restaurant.discountDescription != null &&
+                                    restaurant.discountDescription!.isNotEmpty)
+                                  const SizedBox(height: 4),
+                                if (restaurant.discountDescription != null &&
+                                    restaurant.discountDescription!.isNotEmpty)
+                                  Text(
+                                    restaurant.discountDescription!,
+                                    style: TextStyle(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.9,
+                                      ),
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  // Delivery Info Cards
                   Row(
                     children: [
                       Expanded(
@@ -423,23 +515,35 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.border,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          restaurant.deliveryFee == 0
-                              ? l10n.free
-                              : '\$${restaurant.deliveryFee.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.success.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.delivery_dining,
+                                size: 16,
+                                color: AppColors.success,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                restaurant.deliveryFee == 0
+                                    ? l10n.free
+                                    : '${restaurant.deliveryFee.toStringAsFixed(0)} ${l10n.currencySymbol}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.success,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -451,54 +555,74 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
           ),
         ),
 
-        // Search Bar
+        // Search Bar and Category Filter
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: StatefulBuilder(
-                builder: (context, setState) => TextField(
-                  controller: _searchController,
-                  onChanged: (_) {
-                    setState(() {});
-                    _filterProducts();
-                  },
-                  decoration: InputDecoration(
-                    hintText: l10n.searchProducts,
-                    hintStyle: TextStyle(color: AppColors.textHint),
-                    prefixIcon: Icon(Icons.search, color: AppColors.primary),
-                    suffixIcon: _searchController.text.isNotEmpty
-                        ? IconButton(
-                            icon: Icon(
-                              Icons.clear,
-                              color: AppColors.textSecondary,
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+            child: Row(
+              children: [
+                // Search Bar
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.border.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: StatefulBuilder(
+                      builder: (context, setState) => TextField(
+                        controller: _searchController,
+                        onChanged: (_) {
+                          setState(() {});
+                          _filterProducts();
+                        },
+                        decoration: InputDecoration(
+                          hintText: l10n.searchProducts,
+                          hintStyle: TextStyle(
+                            color: AppColors.textSecondary.withValues(
+                              alpha: 0.6,
                             ),
-                            onPressed: () {
-                              _searchController.clear();
-                              setState(() {});
-                              _filterProducts();
-                            },
-                          )
-                        : null,
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
+                            fontSize: 14,
+                          ),
+                          prefixIcon: Icon(
+                            Icons.search,
+                            color: AppColors.success,
+                            size: 20,
+                          ),
+                          suffixIcon: _searchController.text.isNotEmpty
+                              ? IconButton(
+                                  icon: Icon(
+                                    Icons.clear,
+                                    color: AppColors.textSecondary,
+                                    size: 18,
+                                  ),
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    setState(() {});
+                                    _filterProducts();
+                                  },
+                                )
+                              : null,
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
+                const SizedBox(width: 12),
+                // Category Filter Label
+                Text(
+                  l10n.all,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.success,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -567,7 +691,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
     );
   }
 
-  Widget _buildActionButton({
+  Widget _buildOverlayIconButton({
     required IconData icon,
     required VoidCallback onTap,
     Color? iconColor,
@@ -575,13 +699,20 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 40,
-        height: 40,
+        width: 36,
+        height: 36,
         decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.3),
+          color: Colors.white,
           shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
-        child: Icon(icon, color: iconColor ?? Colors.white, size: 20),
+        child: Icon(icon, size: 18, color: iconColor ?? AppColors.textPrimary),
       ),
     );
   }
@@ -669,7 +800,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
                       ),
                     ),
                     Text(
-                      '\$${currentTotal.toStringAsFixed(2)}',
+                      '${currentTotal.toStringAsFixed(2)} ${l10n.currencySymbol}',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,

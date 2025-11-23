@@ -285,7 +285,7 @@ class _AdminMarketProductListScreenState
                             ),
                           ),
                           Text(
-                            '${product.price.toStringAsFixed(2)} ر.س',
+                            '${product.price.toStringAsFixed(2)} ${l10n.currencySymbol}',
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,

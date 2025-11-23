@@ -59,36 +59,8 @@ class StartupAdPopup extends StatelessWidget {
           ],
         ),
         child: Stack(
+          clipBehavior: Clip.none,
           children: [
-            // Close Button - White X in top right
-            Positioned(
-              top: 16,
-              right: 16,
-              child: GestureDetector(
-                onTap: () => _handleClose(context),
-                child: Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.close,
-                    color: Colors.black87,
-                    size: 16,
-                  ),
-                ),
-              ),
-            ),
-            
             // Content
             Column(
               mainAxisSize: MainAxisSize.min,
@@ -131,40 +103,80 @@ class StartupAdPopup extends StatelessWidget {
                   ),
                 
                 // Ad Image
-                GestureDetector(
-                  onTap: () => _handleAdTap(context),
-                  child: ClipRRect(
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => _handleAdTap(context),
                     borderRadius: BorderRadius.only(
                       bottomLeft: const Radius.circular(28),
                       bottomRight: const Radius.circular(28),
                     ),
-                    child: CachedNetworkImage(
-                      imageUrl: ad.imageUrl,
-                      width: double.infinity,
-                      height: 450,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        width: double.infinity,
-                        height: 450,
-                        color: AppColors.surface,
-                        child: const Center(
-                          child: CircularProgressIndicator(),
-                        ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: const Radius.circular(28),
+                        bottomRight: const Radius.circular(28),
                       ),
-                      errorWidget: (context, url, error) => Container(
+                      child: CachedNetworkImage(
+                        imageUrl: ad.imageUrl,
                         width: double.infinity,
                         height: 450,
-                        color: AppColors.surface,
-                        child: const Icon(
-                          Icons.image_not_supported,
-                          size: 48,
-                          color: AppColors.textSecondary,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          width: double.infinity,
+                          height: 450,
+                          color: AppColors.surface,
+                          child: const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          width: double.infinity,
+                          height: 450,
+                          color: AppColors.surface,
+                          child: const Icon(
+                            Icons.image_not_supported,
+                            size: 48,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
               ],
+            ),
+            
+            // Close Button - White X in top right (placed last to be on top)
+            Positioned(
+              top: 16,
+              right: 16,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => _handleClose(context),
+                  borderRadius: BorderRadius.circular(14),
+                  child: Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.close,
+                      color: Colors.black87,
+                      size: 16,
+                    ),
+                  ),
+                ),
+              ),
             ),
           ],
         ),

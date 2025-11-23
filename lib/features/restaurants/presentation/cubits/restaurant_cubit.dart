@@ -81,4 +81,65 @@ class RestaurantCubit extends Cubit<RestaurantState> {
       (restaurant) => emit(RestaurantLoaded(restaurant)),
     );
   }
+
+  /// Update restaurant information (for partner app)
+  Future<void> updateRestaurant(RestaurantEntity restaurant) async {
+    if (restaurantOwnerRepository == null) {
+      emit(const RestaurantError('Restaurant owner repository not available'));
+      return;
+    }
+
+    try {
+      AppLogger.logInfo('Updating restaurant: ${restaurant.id}');
+      
+      final result = await restaurantOwnerRepository!.updateRestaurant(restaurant);
+
+      result.fold(
+        (failure) {
+          AppLogger.logError('Failed to update restaurant', error: failure.message);
+          emit(RestaurantError(failure.message));
+        },
+        (_) {
+          AppLogger.logSuccess('Restaurant updated successfully');
+          // Reload restaurant to get updated data
+          getRestaurantById(restaurant.id);
+        },
+      );
+    } catch (e) {
+      AppLogger.logError('Error updating restaurant', error: e);
+      emit(RestaurantError('Failed to update restaurant: $e'));
+    }
+  }
+
+  /// Toggle restaurant status (open/closed) - for partner app
+  Future<void> toggleRestaurantStatus(String restaurantId, bool isOpen) async {
+    if (restaurantOwnerRepository == null) {
+      emit(const RestaurantError('Restaurant owner repository not available'));
+      return;
+    }
+
+    try {
+      AppLogger.logInfo('Toggling restaurant status: $restaurantId to $isOpen');
+      
+      final result = await restaurantOwnerRepository!.toggleRestaurantStatus(
+        restaurantId,
+        isOpen,
+      );
+
+      result.fold(
+        (failure) {
+          AppLogger.logError('Failed to toggle status', error: failure.message);
+          emit(RestaurantError(failure.message));
+        },
+        (_) {
+          AppLogger.logSuccess('Restaurant status updated');
+          // Reload restaurant to get updated status
+          getRestaurantById(restaurantId);
+        },
+      );
+    } catch (e) {
+      AppLogger.logError('Error toggling restaurant status', error: e);
+      emit(RestaurantError('Failed to toggle restaurant status: $e'));
+    }
+  }
 }

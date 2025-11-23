@@ -444,10 +444,14 @@ class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
       AppLogger.logInfo('Updating product: ${product.id}');
 
       final model = ProductModel.fromEntity(product);
+      final updateData = model.toFirestore();
+      // Ensure 'id' field is not included in update (document ID is the ID)
+      updateData.remove('id');
+      
       await firestore
           .collection('products')
           .doc(product.id)
-          .update(model.toFirestore());
+          .update(updateData);
 
       AppLogger.logSuccess('Product updated: ${product.id}');
       return const Right(null);

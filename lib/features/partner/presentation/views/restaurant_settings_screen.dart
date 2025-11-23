@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/utils/extensions.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../../../auth/presentation/cubits/auth_cubit.dart';
 import '../../../restaurants/presentation/cubits/restaurant_cubit.dart';
 import '../../../restaurants/domain/entities/restaurant_entity.dart';
+import '../../../restaurants/data/models/restaurant_model.dart';
 
 class RestaurantSettingsScreen extends StatefulWidget {
   const RestaurantSettingsScreen({super.key});
@@ -138,11 +139,8 @@ class _RestaurantSettingsScreenState extends State<RestaurantSettingsScreen> {
                         title: Text(l10n.editRestaurant),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () {
-                          final restaurantId = _restaurantId;
-                          if (restaurantId != null) {
-                            context.push('/admin/restaurants/edit/$restaurantId',
-                                extra: _restaurant);
-                          }
+                          // Navigate to edit restaurant screen (partner version)
+                          _showEditRestaurantDialog();
                         },
                       ),
                       const Divider(height: 1),
@@ -181,11 +179,61 @@ class _RestaurantSettingsScreenState extends State<RestaurantSettingsScreen> {
                     ),
                     value: _restaurant!.isOpen,
                     onChanged: (value) {
-                      // Update restaurant status
-                      // This would need to be implemented in RestaurantCubit
-                      context.showInfoSnackBar(
-                        'Status update coming soon',
-                      );
+                      if (_restaurantId != null) {
+                        context.read<RestaurantCubit>().toggleRestaurantStatus(
+                          _restaurantId!,
+                          value,
+                        );
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Discount Management
+                Card(
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: const Icon(
+                          Icons.local_offer,
+                          color: AppColors.warning,
+                        ),
+                        title: Text(l10n.discount),
+                        subtitle: Text(
+                          _restaurant!.isDiscountActive
+                              ? _restaurant!.discountPercentage != null
+                                  ? '${_restaurant!.discountPercentage!.toStringAsFixed(0)}% ${l10n.off}'
+                                  : l10n.activeDiscount
+                              : l10n.disableDiscount,
+                        ),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () {
+                          // Navigate to discount management
+                          _showDiscountDialog();
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Category Management
+                Card(
+                  child: ListTile(
+                    leading: const Icon(
+                      Icons.category,
+                      color: AppColors.primary,
+                    ),
+                    title: Text(l10n.foodCategories),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      if (_restaurantId != null) {
+                        context.push(
+                          '/restaurant/categories',
+                          extra: {'restaurantId': _restaurantId},
+                        );
+                      }
                     },
                   ),
                 ),
@@ -225,6 +273,353 @@ class _RestaurantSettingsScreenState extends State<RestaurantSettingsScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  void _showDiscountDialog() {
+    final restaurant = _restaurant!;
+    final l10n = AppLocalizations.of(context)!;
+    final discountPercentageController = TextEditingController(
+      text: restaurant.discountPercentage?.toStringAsFixed(0) ?? '',
+    );
+    final discountDescriptionController = TextEditingController(
+      text: restaurant.discountDescription ?? '',
+    );
+    bool hasDiscount = restaurant.hasDiscount;
+    DateTime? startDate = restaurant.discountStartDate;
+    DateTime? endDate = restaurant.discountEndDate;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text(l10n.discount),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Enable Discount Switch
+                SwitchListTile(
+                  title: Text(l10n.enableDiscount),
+                  value: hasDiscount,
+                  onChanged: (value) {
+                    setDialogState(() {
+                      hasDiscount = value;
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                if (hasDiscount) ...[
+                  // Discount Percentage
+                  TextFormField(
+                    controller: discountPercentageController,
+                    decoration: InputDecoration(
+                      labelText: l10n.discountPercentage,
+                      hintText: 'e.g., 20 for 20%',
+                      prefixIcon: const Icon(Icons.percent),
+                      suffixText: '%',
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Discount Description
+                  TextFormField(
+                    controller: discountDescriptionController,
+                    decoration: InputDecoration(
+                      labelText: l10n.discountDescription,
+                      hintText: l10n.discountDescription,
+                    ),
+                    maxLines: 2,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Start Date
+                  ListTile(
+                    title: Text('${l10n.discountStartDate} (${l10n.optional})'),
+                    subtitle: Text(
+                      startDate != null
+                          ? DateFormat('yyyy-MM-dd').format(startDate!)
+                          : 'No start date',
+                    ),
+                    trailing: const Icon(Icons.calendar_today),
+                    onTap: () async {
+                      final date = await showDatePicker(
+                        context: context,
+                        initialDate: startDate ?? DateTime.now(),
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime.now().add(const Duration(days: 365)),
+                      );
+                      if (date != null) {
+                        setDialogState(() {
+                          startDate = date;
+                        });
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 8),
+
+                  // End Date
+                  ListTile(
+                    title: Text('${l10n.discountEndDate} (${l10n.optional})'),
+                    subtitle: Text(
+                      endDate != null
+                          ? DateFormat('yyyy-MM-dd').format(endDate!)
+                          : 'No end date',
+                    ),
+                    trailing: const Icon(Icons.calendar_today),
+                    onTap: () async {
+                      final date = await showDatePicker(
+                        context: context,
+                        initialDate: endDate ?? DateTime.now().add(const Duration(days: 30)),
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime.now().add(const Duration(days: 365)),
+                      );
+                      if (date != null) {
+                        setDialogState(() {
+                          endDate = date;
+                        });
+                      }
+                    },
+                  ),
+                ],
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(l10n.cancel),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (hasDiscount && discountPercentageController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(l10n.discountPercentage)),
+                  );
+                  return;
+                }
+
+                final model = RestaurantModel.fromEntity(restaurant);
+                final updatedModel = model.copyWith(
+                  hasDiscount: hasDiscount,
+                  discountPercentage: hasDiscount &&
+                          discountPercentageController.text.isNotEmpty
+                      ? double.tryParse(discountPercentageController.text)
+                      : null,
+                  discountDescription: hasDiscount &&
+                          discountDescriptionController.text.isNotEmpty
+                      ? discountDescriptionController.text.trim()
+                      : null,
+                  discountStartDate: hasDiscount ? startDate : null,
+                  discountEndDate: hasDiscount ? endDate : null,
+                );
+                final updatedRestaurant = updatedModel;
+
+                context.read<RestaurantCubit>().updateRestaurant(updatedRestaurant);
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('${l10n.discount} ${l10n.updatedSuccessfully}')),
+                );
+              },
+              child: Text(l10n.save),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showEditRestaurantDialog() {
+    final restaurant = _restaurant!;
+    final l10n = AppLocalizations.of(context)!;
+    final nameController = TextEditingController(text: restaurant.name);
+    final descriptionController = TextEditingController(text: restaurant.description);
+    final phoneController = TextEditingController(text: restaurant.phone);
+    final emailController = TextEditingController(text: restaurant.email ?? '');
+    final addressController = TextEditingController(text: restaurant.address);
+    final deliveryFeeController = TextEditingController(
+      text: restaurant.deliveryFee.toStringAsFixed(2),
+    );
+    final minOrderController = TextEditingController(
+      text: restaurant.minOrderAmount.toStringAsFixed(2),
+    );
+    final deliveryTimeController = TextEditingController(
+      text: restaurant.estimatedDeliveryTime.toString(),
+    );
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.editRestaurant),
+        content: SingleChildScrollView(
+          child: Form(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    labelText: l10n.restaurantName,
+                    prefixIcon: const Icon(Icons.restaurant),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return l10n.pleaseEnterRestaurantName;
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: descriptionController,
+                  decoration: InputDecoration(
+                    labelText: l10n.description,
+                    prefixIcon: const Icon(Icons.description),
+                  ),
+                  maxLines: 3,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return l10n.pleaseEnterDescription;
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: phoneController,
+                  decoration: InputDecoration(
+                    labelText: l10n.phoneNumber,
+                    prefixIcon: const Icon(Icons.phone),
+                  ),
+                  keyboardType: TextInputType.phone,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return l10n.pleaseEnterPhoneNumber;
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: emailController,
+                  decoration: InputDecoration(
+                    labelText: l10n.email,
+                    prefixIcon: const Icon(Icons.email),
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: addressController,
+                  decoration: InputDecoration(
+                    labelText: l10n.address,
+                    prefixIcon: const Icon(Icons.location_on),
+                  ),
+                  maxLines: 2,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return l10n.pleaseEnterAddress;
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: deliveryFeeController,
+                  decoration: InputDecoration(
+                    labelText: l10n.deliveryFee,
+                    prefixIcon: const Icon(Icons.delivery_dining),
+                    suffixText: l10n.currencySymbol,
+                  ),
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return l10n.pleaseEnterDeliveryFee;
+                    }
+                    if (double.tryParse(value) == null) {
+                      return l10n.invalidNumber;
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: minOrderController,
+                  decoration: InputDecoration(
+                    labelText: l10n.minOrder,
+                    prefixIcon: const Icon(Icons.shopping_cart),
+                    suffixText: l10n.currencySymbol,
+                  ),
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return l10n.pleaseEnterMinimumOrderAmount;
+                    }
+                    if (double.tryParse(value) == null) {
+                      return l10n.invalidNumber;
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: deliveryTimeController,
+                  decoration: InputDecoration(
+                    labelText: l10n.estimatedDeliveryTime,
+                    prefixIcon: const Icon(Icons.access_time),
+                    suffixText: l10n.minutes,
+                  ),
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return l10n.pleaseEnterDeliveryTime;
+                    }
+                    if (int.tryParse(value) == null) {
+                      return l10n.invalidNumber;
+                    }
+                    return null;
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              // Validate and update
+              final model = RestaurantModel.fromEntity(restaurant);
+              final updatedModel = model.copyWith(
+                name: nameController.text.trim(),
+                description: descriptionController.text.trim(),
+                phone: phoneController.text.trim(),
+                email: emailController.text.trim().isEmpty
+                    ? null
+                    : emailController.text.trim(),
+                address: addressController.text.trim(),
+                deliveryFee: double.parse(deliveryFeeController.text),
+                minOrderAmount: double.parse(minOrderController.text),
+                estimatedDeliveryTime: int.parse(deliveryTimeController.text),
+              );
+              final updatedRestaurant = updatedModel;
+
+              context.read<RestaurantCubit>().updateRestaurant(updatedRestaurant);
+              Navigator.of(context).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(l10n.restaurantUpdatedSuccessfully)),
+              );
+            },
+            child: Text(l10n.save),
+          ),
+        ],
+      ),
     );
   }
 }

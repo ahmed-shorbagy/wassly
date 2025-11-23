@@ -1085,7 +1085,7 @@ abstract class AppLocalizations {
   /// No description provided for @cannotAddDifferentRestaurant.
   ///
   /// In en, this message translates to:
-  /// **'Cannot add items from different restaurants. Please clear cart first.'**
+  /// **'Cannot add products from different restaurants. Please clear cart first.'**
   String get cannotAddDifferentRestaurant;
 
   /// No description provided for @clearCart.
@@ -1658,6 +1658,12 @@ abstract class AppLocalizations {
   /// **'No Banner Ads'**
   String get noBannerAds;
 
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
   /// No description provided for @startByAddingYourFirstStartupAd.
   ///
   /// In en, this message translates to:
@@ -1747,12 +1753,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Settings'**
   String get settings;
-
-  /// No description provided for @ok.
-  ///
-  /// In en, this message translates to:
-  /// **'OK'**
-  String get ok;
 
   /// No description provided for @info.
   ///
@@ -2257,6 +2257,456 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Display Order'**
   String get displayOrder;
+
+  /// No description provided for @currency.
+  ///
+  /// In en, this message translates to:
+  /// **'SAR'**
+  String get currency;
+
+  /// No description provided for @currencySymbol.
+  ///
+  /// In en, this message translates to:
+  /// **'ر.س'**
+  String get currencySymbol;
+
+  /// No description provided for @open.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get open;
+
+  /// No description provided for @closed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get closed;
+
+  /// No description provided for @selectDeliveryAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Delivery Address'**
+  String get selectDeliveryAddress;
+
+  /// No description provided for @defaultAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get defaultAddress;
+
+  /// No description provided for @failedToLoadRestaurantData.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load restaurant data'**
+  String get failedToLoadRestaurantData;
+
+  /// No description provided for @burger.
+  ///
+  /// In en, this message translates to:
+  /// **'Burger'**
+  String get burger;
+
+  /// No description provided for @pizza.
+  ///
+  /// In en, this message translates to:
+  /// **'Pizza'**
+  String get pizza;
+
+  /// No description provided for @noodles.
+  ///
+  /// In en, this message translates to:
+  /// **'Noodles'**
+  String get noodles;
+
+  /// No description provided for @meat.
+  ///
+  /// In en, this message translates to:
+  /// **'Meat'**
+  String get meat;
+
+  /// No description provided for @min.
+  ///
+  /// In en, this message translates to:
+  /// **'min'**
+  String get min;
+
+  /// No description provided for @minutesAbbreviation.
+  ///
+  /// In en, this message translates to:
+  /// **'min'**
+  String get minutesAbbreviation;
+
+  /// No description provided for @pleaseLoginToContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Please login to continue'**
+  String get pleaseLoginToContinue;
+
+  /// No description provided for @invalidProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid product. Please try again.'**
+  String get invalidProduct;
+
+  /// No description provided for @quantityMustBeGreaterThanZero.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity must be greater than zero'**
+  String get quantityMustBeGreaterThanZero;
+
+  /// No description provided for @failedToAddItemToCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to add item to cart. Please try again.'**
+  String get failedToAddItemToCart;
+
+  /// No description provided for @productAddedToCart.
+  ///
+  /// In en, this message translates to:
+  /// **'{productName} added to cart'**
+  String productAddedToCart(String productName);
+
+  /// No description provided for @items.
+  ///
+  /// In en, this message translates to:
+  /// **'items'**
+  String get items;
+
+  /// No description provided for @nA.
+  ///
+  /// In en, this message translates to:
+  /// **'N/A'**
+  String get nA;
+
+  /// No description provided for @creatingDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating driver...'**
+  String get creatingDriver;
+
+  /// No description provided for @personalPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Photo'**
+  String get personalPhoto;
+
+  /// No description provided for @pleaseEnterFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter full name'**
+  String get pleaseEnterFullName;
+
+  /// No description provided for @off.
+  ///
+  /// In en, this message translates to:
+  /// **'OFF'**
+  String get off;
+
+  /// No description provided for @specialOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Special Offer'**
+  String get specialOffer;
+
+  /// No description provided for @discount.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount'**
+  String get discount;
+
+  /// No description provided for @discountPercentage.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount Percentage'**
+  String get discountPercentage;
+
+  /// No description provided for @discountDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount Description'**
+  String get discountDescription;
+
+  /// No description provided for @discountStartDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount Start Date'**
+  String get discountStartDate;
+
+  /// No description provided for @discountEndDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount End Date'**
+  String get discountEndDate;
+
+  /// No description provided for @enableDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Discount'**
+  String get enableDiscount;
+
+  /// No description provided for @disableDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable Discount'**
+  String get disableDiscount;
+
+  /// No description provided for @activeDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Discount'**
+  String get activeDiscount;
+
+  /// No description provided for @discountUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount updated successfully'**
+  String get discountUpdatedSuccessfully;
+
+  /// No description provided for @updatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'updated successfully'**
+  String get updatedSuccessfully;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @pleaseEnterDeliveryFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter delivery fee'**
+  String get pleaseEnterDeliveryFee;
+
+  /// No description provided for @pleaseEnterMinimumOrderAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter minimum order amount'**
+  String get pleaseEnterMinimumOrderAmount;
+
+  /// No description provided for @pleaseEnterDeliveryTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter delivery time'**
+  String get pleaseEnterDeliveryTime;
+
+  /// No description provided for @createDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Driver'**
+  String get createDriver;
+
+  /// No description provided for @pleaseSelectPersonalImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select personal image'**
+  String get pleaseSelectPersonalImage;
+
+  /// No description provided for @pleaseSelectDriverLicense.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select driver license'**
+  String get pleaseSelectDriverLicense;
+
+  /// No description provided for @pleaseSelectVehicleLicense.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select vehicle license'**
+  String get pleaseSelectVehicleLicense;
+
+  /// No description provided for @pleaseSelectVehiclePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select vehicle photo'**
+  String get pleaseSelectVehiclePhoto;
+
+  /// No description provided for @licenseInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'License Information'**
+  String get licenseInformation;
+
+  /// No description provided for @vehicleInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Information'**
+  String get vehicleInformation;
+
+  /// No description provided for @vehicleType.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Type'**
+  String get vehicleType;
+
+  /// No description provided for @pleaseSelectVehicleType.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select vehicle type'**
+  String get pleaseSelectVehicleType;
+
+  /// No description provided for @vehicleModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Model'**
+  String get vehicleModel;
+
+  /// No description provided for @pleaseEnterVehicleModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter vehicle model'**
+  String get pleaseEnterVehicleModel;
+
+  /// No description provided for @vehicleColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Color'**
+  String get vehicleColor;
+
+  /// No description provided for @pleaseEnterVehicleColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter vehicle color'**
+  String get pleaseEnterVehicleColor;
+
+  /// No description provided for @vehiclePlateNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Plate Number'**
+  String get vehiclePlateNumber;
+
+  /// No description provided for @pleaseEnterVehiclePlateNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter vehicle plate number'**
+  String get pleaseEnterVehiclePlateNumber;
+
+  /// No description provided for @driverLicense.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver License'**
+  String get driverLicense;
+
+  /// No description provided for @vehicleLicense.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle License'**
+  String get vehicleLicense;
+
+  /// No description provided for @vehiclePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Photo'**
+  String get vehiclePhoto;
+
+  /// No description provided for @selectImageSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Image Source'**
+  String get selectImageSource;
+
+  /// No description provided for @camera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get camera;
+
+  /// No description provided for @gallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get gallery;
+
+  /// No description provided for @driverCreatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver Created Successfully'**
+  String get driverCreatedSuccessfully;
+
+  /// No description provided for @pleaseProvideTheseCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Please provide these credentials to the driver:'**
+  String get pleaseProvideTheseCredentials;
+
+  /// No description provided for @noteDriverCanChangePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Note: Driver can change password after first login.'**
+  String get noteDriverCanChangePassword;
+
+  /// No description provided for @tapToUploadImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to upload image'**
+  String get tapToUploadImage;
+
+  /// No description provided for @marketProductCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Market Categories'**
+  String get marketProductCategories;
+
+  /// No description provided for @vegetables.
+  ///
+  /// In en, this message translates to:
+  /// **'Vegetables'**
+  String get vegetables;
+
+  /// No description provided for @fruits.
+  ///
+  /// In en, this message translates to:
+  /// **'Fruits'**
+  String get fruits;
+
+  /// No description provided for @snacks.
+  ///
+  /// In en, this message translates to:
+  /// **'Snacks'**
+  String get snacks;
+
+  /// No description provided for @dairy.
+  ///
+  /// In en, this message translates to:
+  /// **'Dairy'**
+  String get dairy;
+
+  /// No description provided for @bakery.
+  ///
+  /// In en, this message translates to:
+  /// **'Bakery'**
+  String get bakery;
+
+  /// No description provided for @frozen.
+  ///
+  /// In en, this message translates to:
+  /// **'Frozen'**
+  String get frozen;
+
+  /// No description provided for @canned.
+  ///
+  /// In en, this message translates to:
+  /// **'Canned'**
+  String get canned;
+
+  /// No description provided for @spices.
+  ///
+  /// In en, this message translates to:
+  /// **'Spices'**
+  String get spices;
+
+  /// No description provided for @cleaning.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleaning'**
+  String get cleaning;
+
+  /// No description provided for @personalCare.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Care'**
+  String get personalCare;
 }
 
 class _AppLocalizationsDelegate

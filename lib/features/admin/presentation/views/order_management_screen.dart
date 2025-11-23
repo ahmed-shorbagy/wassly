@@ -53,8 +53,12 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
       } else {
         _filteredOrders = _allOrders.where((order) {
           final orderIdMatch = order.id.toLowerCase().contains(query);
-          final customerMatch = order.customerName.toLowerCase().contains(query);
-          final restaurantMatch = order.restaurantName.toLowerCase().contains(query);
+          final customerMatch = order.customerName.toLowerCase().contains(
+            query,
+          );
+          final restaurantMatch = order.restaurantName.toLowerCase().contains(
+            query,
+          );
           final phoneMatch = order.customerPhone.toLowerCase().contains(query);
           return orderIdMatch || customerMatch || restaurantMatch || phoneMatch;
         }).toList();
@@ -169,14 +173,10 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
                             .toList(),
                       ),
                       _buildOrdersList(
-                        _filteredOrders
-                            .where((o) => o.isActive)
-                            .toList(),
+                        _filteredOrders.where((o) => o.isActive).toList(),
                       ),
                       _buildOrdersList(
-                        _filteredOrders
-                            .where((o) => !o.isActive)
-                            .toList(),
+                        _filteredOrders.where((o) => !o.isActive).toList(),
                       ),
                     ],
                   );
@@ -203,10 +203,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
             const SizedBox(height: 16),
             const Text(
               'No orders found',
-              style: TextStyle(
-                fontSize: 18,
-                color: AppColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 18, color: AppColors.textSecondary),
             ),
           ],
         ),
@@ -229,9 +226,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () {
           // Navigate to order detail
@@ -295,7 +290,9 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
                           ),
                         ),
                         Text(
-                          DateFormat('MMM dd, yyyy • HH:mm').format(order.createdAt),
+                          DateFormat(
+                            'MMM dd, yyyy • HH:mm',
+                          ).format(order.createdAt),
                           style: TextStyle(
                             fontSize: 12,
                             color: AppColors.textSecondary,
@@ -312,7 +309,11 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
               // Customer Info
               Row(
                 children: [
-                  const Icon(Icons.person, size: 16, color: AppColors.textSecondary),
+                  const Icon(
+                    Icons.person,
+                    size: 16,
+                    color: AppColors.textSecondary,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -333,10 +334,14 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
               // Items Count
               Row(
                 children: [
-                  const Icon(Icons.shopping_bag, size: 16, color: AppColors.textSecondary),
+                  const Icon(
+                    Icons.shopping_bag,
+                    size: 16,
+                    color: AppColors.textSecondary,
+                  ),
                   const SizedBox(width: 8),
                   Text(
-                    '${order.items.length} items',
+                    '${order.items.length} ${AppLocalizations.of(context)!.items}',
                     style: TextStyle(
                       fontSize: 14,
                       color: AppColors.textSecondary,
@@ -425,4 +430,3 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
     );
   }
 }
-

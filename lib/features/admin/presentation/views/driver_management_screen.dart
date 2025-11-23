@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:wassly/l10n/app_localizations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/extensions.dart';
 import '../../../../shared/widgets/loading_widget.dart';
@@ -13,8 +14,7 @@ class DriverManagementScreen extends StatefulWidget {
   const DriverManagementScreen({super.key});
 
   @override
-  State<DriverManagementScreen> createState() =>
-      _DriverManagementScreenState();
+  State<DriverManagementScreen> createState() => _DriverManagementScreenState();
 }
 
 class _DriverManagementScreenState extends State<DriverManagementScreen> {
@@ -50,9 +50,15 @@ class _DriverManagementScreenState extends State<DriverManagementScreen> {
           final nameMatch = driver.name.toLowerCase().contains(query);
           final emailMatch = driver.email.toLowerCase().contains(query);
           final phoneMatch = driver.phone.toLowerCase().contains(query);
-          final vehicleMatch = driver.vehicleModel?.toLowerCase().contains(query) ?? false;
-          final plateMatch = driver.vehiclePlateNumber?.toLowerCase().contains(query) ?? false;
-          return nameMatch || emailMatch || phoneMatch || vehicleMatch || plateMatch;
+          final vehicleMatch =
+              driver.vehicleModel?.toLowerCase().contains(query) ?? false;
+          final plateMatch =
+              driver.vehiclePlateNumber?.toLowerCase().contains(query) ?? false;
+          return nameMatch ||
+              emailMatch ||
+              phoneMatch ||
+              vehicleMatch ||
+              plateMatch;
         }).toList();
       }
     });
@@ -155,7 +161,9 @@ class _DriverManagementScreenState extends State<DriverManagementScreen> {
                           Icon(
                             Icons.delivery_dining,
                             size: 64,
-                            color: AppColors.textSecondary.withValues(alpha: 0.5),
+                            color: AppColors.textSecondary.withValues(
+                              alpha: 0.5,
+                            ),
                           ),
                           const SizedBox(height: 16),
                           Text(
@@ -170,7 +178,8 @@ class _DriverManagementScreenState extends State<DriverManagementScreen> {
                           const SizedBox(height: 8),
                           if (_searchController.text.isEmpty)
                             ElevatedButton.icon(
-                              onPressed: () => context.push('/admin/drivers/create'),
+                              onPressed: () =>
+                                  context.push('/admin/drivers/create'),
                               icon: const Icon(Icons.add),
                               label: const Text('Add First Driver'),
                             ),
@@ -203,9 +212,7 @@ class _DriverManagementScreenState extends State<DriverManagementScreen> {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () => context.push('/admin/drivers/edit/${driver.id}'),
         borderRadius: BorderRadius.circular(12),
@@ -216,7 +223,8 @@ class _DriverManagementScreenState extends State<DriverManagementScreen> {
               // Driver Image
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: driver.personalImageUrl != null &&
+                child:
+                    driver.personalImageUrl != null &&
                         driver.personalImageUrl!.isNotEmpty
                     ? CachedNetworkImage(
                         imageUrl: driver.personalImageUrl!,
@@ -269,7 +277,7 @@ class _DriverManagementScreenState extends State<DriverManagementScreen> {
                     if (driver.vehicleModel != null) ...[
                       const SizedBox(height: 4),
                       Text(
-                        '${driver.vehicleModel} • ${driver.vehiclePlateNumber ?? 'N/A'}',
+                        '${driver.vehicleModel} • ${driver.vehiclePlateNumber ?? AppLocalizations.of(context)!.nA}',
                         style: TextStyle(
                           fontSize: 12,
                           color: AppColors.textSecondary,
@@ -309,9 +317,7 @@ class _DriverManagementScreenState extends State<DriverManagementScreen> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: driver.isOnline
-                          ? Colors.green
-                          : Colors.grey,
+                      color: driver.isOnline ? Colors.green : Colors.grey,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -332,4 +338,3 @@ class _DriverManagementScreenState extends State<DriverManagementScreen> {
     );
   }
 }
-

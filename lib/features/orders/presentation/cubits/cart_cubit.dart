@@ -73,24 +73,45 @@ class CartCubit extends Cubit<CartState> {
   }) async {
     final userId = _userId;
     if (userId == null) {
-      ToastService.showError('Please login to continue');
+      // Try to get localization from context if available
+      String message = 'Please login to continue';
+      if (context != null) {
+        final l10n = AppLocalizations.of(context);
+        message = l10n?.pleaseLoginToContinue ?? message;
+      }
+      ToastService.showError(message);
       return;
     }
 
     // Validate product ID - this is critical
     if (product.id.isEmpty || product.id.trim().isEmpty) {
-      ToastService.showError('Invalid product. Please try again.');
+      String message = 'Invalid product. Please try again.';
+      if (context != null) {
+        final l10n = AppLocalizations.of(context);
+        message = l10n?.invalidProduct ?? message;
+      }
+      ToastService.showError(message);
       return;
     }
 
     // Validate restaurant ID
     if (product.restaurantId.isEmpty || product.restaurantId.trim().isEmpty) {
-      ToastService.showError('Invalid product. Please try again.');
+      String message = 'Invalid product. Please try again.';
+      if (context != null) {
+        final l10n = AppLocalizations.of(context);
+        message = l10n?.invalidProduct ?? message;
+      }
+      ToastService.showError(message);
       return;
     }
 
     if (quantity <= 0) {
-      ToastService.showError('Quantity must be greater than zero');
+      String message = 'Quantity must be greater than zero';
+      if (context != null) {
+        final l10n = AppLocalizations.of(context);
+        message = l10n?.quantityMustBeGreaterThanZero ?? message;
+      }
+      ToastService.showError(message);
       return;
     }
 
@@ -99,9 +120,12 @@ class CartCubit extends Cubit<CartState> {
       final currentState = state as CartLoaded;
       if (currentState.restaurantId != null &&
           currentState.restaurantId != product.restaurantId) {
-        ToastService.showWarning(
-          'Cannot add products from different restaurants. Please clear cart first.',
-        );
+        String message = 'Cannot add products from different restaurants. Please clear cart first.';
+        if (context != null) {
+          final l10n = AppLocalizations.of(context);
+          message = l10n?.cannotAddDifferentRestaurant ?? message;
+        }
+        ToastService.showWarning(message);
         return;
       }
     }
@@ -113,7 +137,7 @@ class CartCubit extends Cubit<CartState> {
     result.fold(
       (failure) {
         // Show user-friendly error message
-        final errorMessage = _getUserFriendlyErrorMessage(failure.message);
+        final errorMessage = _getUserFriendlyErrorMessage(failure.message, context);
         ToastService.showError(errorMessage);
       },
       (_) {
@@ -129,21 +153,24 @@ class CartCubit extends Cubit<CartState> {
     );
   }
 
-  String _getUserFriendlyErrorMessage(String error) {
+  String _getUserFriendlyErrorMessage(String error, [BuildContext? context]) {
+    // Try to get localized messages if context is available
+    final l10n = context != null ? AppLocalizations.of(context) : null;
+    
     // Map technical errors to user-friendly messages
     if (error.contains('Product ID is required') ||
         error.contains('Product ID is missing')) {
-      return 'Invalid product. Please try again.';
+      return l10n?.invalidProduct ?? 'Invalid product. Please try again.';
     }
     if (error.contains('User ID is required') ||
         error.contains('not authenticated')) {
-      return 'Please login to continue';
+      return l10n?.pleaseLoginToContinue ?? 'Please login to continue';
     }
     if (error.contains('Failed to add item to cart')) {
-      return 'Failed to add item to cart. Please try again.';
+      return l10n?.failedToAddItemToCart ?? 'Failed to add item to cart. Please try again.';
     }
     if (error.contains('document path must be a non-empty string')) {
-      return 'Invalid product. Please try again.';
+      return l10n?.invalidProduct ?? 'Invalid product. Please try again.';
     }
     
     // Return user-friendly version of error

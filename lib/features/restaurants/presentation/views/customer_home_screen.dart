@@ -3,9 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/market_product_categories.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/error_widget.dart';
-import '../../../../shared/widgets/product_card.dart';
 import '../../../home/presentation/cubits/home_cubit.dart';
 import '../../../home/domain/entities/banner_entity.dart';
 import '../cubits/restaurant_cubit.dart';
@@ -29,7 +29,11 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   final PageController _bannerController = PageController(
     viewportFraction: 0.92,
   );
+  final PageController _discountRestaurantsController = PageController(
+    viewportFraction: 0.92,
+  );
   int _currentBannerIndex = 0;
+  int _currentDiscountIndex = 0;
   final TextEditingController _searchController = TextEditingController();
   List<RestaurantEntity> _filteredRestaurants = [];
   List<RestaurantEntity> _allRestaurants = [];
@@ -51,6 +55,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   @override
   void dispose() {
     _bannerController.dispose();
+    _discountRestaurantsController.dispose();
     _searchController.removeListener(_filterRestaurants);
     _searchController.dispose();
     super.dispose();
@@ -209,9 +214,19 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     List<RestaurantEntity> restaurants,
     AppLocalizations l10n,
   ) {
+    // Separate restaurants with active discounts from regular restaurants
+    final discountedRestaurants = restaurants
+        .where((r) => r.isDiscountActive)
+        .toList();
+    final regularRestaurants = restaurants
+        .where((r) => !r.isDiscountActive)
+        .toList();
+
     return RefreshIndicator(
       onRefresh: () async {
+        if (!context.mounted) return;
         await context.read<RestaurantCubit>().getAllRestaurants();
+        if (!context.mounted) return;
         await context.read<HomeCubit>().loadHome();
       },
       child: CustomScrollView(
@@ -253,91 +268,39 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             },
           ),
 
-          // Enhanced Categories Section
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-              child: _CategoriesSection(onTapSeeAll: () {}),
-            ),
-          ),
-
-          // Market Products Section
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        l10n.marketProducts,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                ],
+          // Discounted Restaurants Carousel (Banner Style) - Replaces Categories Section
+          if (discountedRestaurants.isNotEmpty)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+                child: _DiscountRestaurantsCarousel(
+                  restaurants: discountedRestaurants,
+                  controller: _discountRestaurantsController,
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentDiscountIndex = index;
+                    });
+                  },
+                  currentIndex: _currentDiscountIndex,
+                ),
               ),
             ),
-          ),
-          BlocBuilder<MarketProductCustomerCubit, MarketProductCustomerState>(
-            builder: (context, state) {
-              if (state is MarketProductCustomerLoading) {
-                return SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 200,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: 3,
-                      itemBuilder: (context, index) => Container(
-                        width: 160,
-                        margin: const EdgeInsets.only(right: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              }
-              if (state is MarketProductCustomerLoaded) {
-                if (state.products.isEmpty) {
-                  return const SliverToBoxAdapter(child: SizedBox.shrink());
-                }
-                return SliverPadding(
-                  padding: const EdgeInsets.all(16),
-                  sliver: SliverGrid(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          childAspectRatio: 0.65,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                        ),
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      final product = state.products[index];
-                      return ProductCard(
-                        productId: product.id,
-                        productName: product.name,
-                        description: product.description,
-                        price: product.price,
-                        imageUrl: product.imageUrl,
-                        isAvailable: product.isAvailable,
-                        isMarketProduct: true,
-                      );
-                    }, childCount: state.products.length),
-                  ),
-                );
-              }
-              return const SliverToBoxAdapter(child: SizedBox.shrink());
-            },
+
+          // Market Products Categories Section
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+              child: _MarketProductCategoriesSection(
+                onCategoryTap: (category) {
+                  context.push(
+                    '/market-products?category=${Uri.encodeComponent(category)}',
+                  );
+                },
+                onViewAllTap: () {
+                  context.push('/market-products');
+                },
+              ),
+            ),
           ),
 
           // Restaurants Section Header
@@ -348,7 +311,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'مطاعم قريبة منك',
+                    l10n.nearbyRestaurants,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
@@ -357,7 +320,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   TextButton(
                     onPressed: () {},
                     child: Text(
-                      'عرض الكل',
+                      l10n.viewAll,
                       style: TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
@@ -369,8 +332,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             ),
           ),
 
-          // Enhanced Restaurants Grid
-          if (restaurants.isEmpty)
+          // Enhanced Restaurants Grid (only regular restaurants, excluding discounted ones)
+          if (regularRestaurants.isEmpty && discountedRestaurants.isEmpty)
             SliverFillRemaining(
               child: _EmptyStateWidget(
                 title: _searchController.text.isNotEmpty
@@ -384,7 +347,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     : Icons.restaurant_outlined,
               ),
             )
-          else
+          else if (regularRestaurants.isNotEmpty)
             SliverPadding(
               padding: const EdgeInsets.all(16),
               sliver: SliverGrid(
@@ -395,9 +358,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   mainAxisSpacing: 16,
                 ),
                 delegate: SliverChildBuilderDelegate((context, index) {
-                  final restaurant = restaurants[index];
+                  final restaurant = regularRestaurants[index];
                   return _RestaurantCard(restaurant: restaurant);
-                }, childCount: restaurants.length),
+                }, childCount: regularRestaurants.length),
               ),
             ),
         ],
@@ -485,13 +448,14 @@ class _BannerCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final effective = banners.isEmpty
         ? [
-            const BannerEntity(
+            BannerEntity(
               id: 'placeholder',
               imageUrl:
                   'https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=1200',
-              title: 'عروض خاصة',
+              title: l10n.specialOffers,
             ),
           ]
         : banners;
@@ -605,139 +569,6 @@ class _BannerCarousel extends StatelessWidget {
   }
 }
 
-class _CategoriesSection extends StatelessWidget {
-  final VoidCallback onTapSeeAll;
-  const _CategoriesSection({required this.onTapSeeAll});
-
-  @override
-  Widget build(BuildContext context) {
-    final items = [
-      _Category(
-        'لحوم',
-        Icons.set_meal,
-        const Color(0xFFFFE0E0),
-      ), // Light red/pink
-      _Category(
-        'نودلز',
-        Icons.ramen_dining,
-        const Color(0xFFFFF8E1),
-      ), // Light yellow/cream
-      _Category(
-        'بيتزا',
-        Icons.local_pizza,
-        const Color(0xFFFFE0B2),
-      ), // Light orange/peach
-      _Category(
-        'برجر',
-        Icons.lunch_dining,
-        const Color(0xFFE0F2E0),
-      ), // Light green/mint
-      _Category('نباتي', Icons.eco, const Color(0xFFE8F5E9)), // Light green
-      _Category('حلويات', Icons.cake, const Color(0xFFFFE0F0)), // Light pink
-      _Category(
-        'مشروبات',
-        Icons.local_drink,
-        const Color(0xFFE3F2FD),
-      ), // Light blue
-      _Category(
-        'المزيد',
-        Icons.more_horiz,
-        const Color(0xFFF5F5F5),
-      ), // Light gray
-    ];
-
-    // Icon colors matching their background themes
-    final iconColors = [
-      const Color(0xFFFF5252), // Red for لحوم
-      const Color(0xFFFFC107), // Yellow for نودلز
-      const Color(0xFFFF9800), // Orange for بيتزا
-      const Color(0xFF4CAF50), // Green for برجر
-      const Color(0xFF66BB6A), // Green for نباتي
-      const Color(0xFFFF4081), // Pink for حلويات
-      const Color(0xFF2196F3), // Blue for مشروبات
-      AppColors.textSecondary, // Gray for المزيد
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'عرض الكل',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF4CAF50), // Green text as in design
-              ),
-            ),
-            Text(
-              'عروض خاصة',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary, // Dark gray text
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        SizedBox(
-          height: 100,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              final c = items[index];
-              final iconColor = iconColors[index];
-              return Container(
-                width: 70,
-                margin: EdgeInsets.only(
-                  right: index == items.length - 1 ? 0 : 12,
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      width: 64,
-                      height: 64,
-                      decoration: BoxDecoration(
-                        color: c.color, // Solid pastel background color
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        c.icon,
-                        color: iconColor, // Solid colored icon matching theme
-                        size: 32,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      c.label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textPrimary, // Dark gray text
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _Category {
-  final String label;
-  final IconData icon;
-  final Color color; // Background color (pastel)
-  _Category(this.label, this.icon, this.color);
-}
-
 class _RestaurantCard extends StatelessWidget {
   final RestaurantEntity restaurant;
 
@@ -746,10 +577,15 @@ class _RestaurantCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 0,
+      elevation: restaurant.isDiscountActive ? 4 : 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: AppColors.border, width: 1),
+        side: BorderSide(
+          color: restaurant.isDiscountActive
+              ? AppColors.warning
+              : AppColors.border,
+          width: restaurant.isDiscountActive ? 2 : 1,
+        ),
       ),
       child: InkWell(
         onTap: () {
@@ -857,6 +693,51 @@ class _RestaurantCard extends StatelessWidget {
                       },
                     ),
                   ),
+                  // Discount Badge (Top Left)
+                  if (restaurant.isDiscountActive)
+                    Positioned(
+                      top: 8,
+                      left: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color:
+                              AppColors.warning, // Orange/Yellow for discount
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.local_offer,
+                              color: Colors.white,
+                              size: 14,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              restaurant.discountPercentage != null
+                                  ? '${restaurant.discountPercentage!.toStringAsFixed(0)}%'
+                                  : 'OFF',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   // Status Badge
                   Positioned(
                     bottom: 8,
@@ -891,13 +772,18 @@ class _RestaurantCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 6),
-                          Text(
-                            restaurant.isOpen ? 'مفتوح' : 'مغلق',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          Builder(
+                            builder: (context) {
+                              final l10n = AppLocalizations.of(context)!;
+                              return Text(
+                                restaurant.isOpen ? l10n.open : l10n.closed,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),
@@ -959,13 +845,18 @@ class _RestaurantCard extends StatelessWidget {
                           color: AppColors.primary,
                         ),
                         const SizedBox(width: 4),
-                        Text(
-                          '${restaurant.deliveryFee.toStringAsFixed(0)} ر.س',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w500,
-                          ),
+                        Builder(
+                          builder: (context) {
+                            final l10n = AppLocalizations.of(context)!;
+                            return Text(
+                              '${restaurant.deliveryFee.toStringAsFixed(0)} ${l10n.currencySymbol}',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            );
+                          },
                         ),
                         const SizedBox(width: 8),
                         Icon(
@@ -974,13 +865,18 @@ class _RestaurantCard extends StatelessWidget {
                           color: AppColors.textSecondary,
                         ),
                         const SizedBox(width: 4),
-                        Text(
-                          '${restaurant.estimatedDeliveryTime} د',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w500,
-                          ),
+                        Builder(
+                          builder: (context) {
+                            final l10n = AppLocalizations.of(context)!;
+                            return Text(
+                              '${restaurant.estimatedDeliveryTime} ${l10n.minutesAbbreviation}',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -989,6 +885,482 @@ class _RestaurantCard extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MarketProductCategoriesSection extends StatelessWidget {
+  final Function(String) onCategoryTap;
+  final VoidCallback onViewAllTap;
+
+  const _MarketProductCategoriesSection({
+    required this.onCategoryTap,
+    required this.onViewAllTap,
+  });
+
+  Widget _buildCategoryItem(
+    String category,
+    AppLocalizations l10n,
+    Function(String) onTap,
+  ) {
+    final icon = MarketProductCategories.getCategoryIcon(category, l10n);
+    final bgColor = Color(
+      MarketProductCategories.getCategoryColor(category, l10n),
+    );
+
+    return GestureDetector(
+      onTap: () => onTap(category),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: bgColor,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: bgColor.withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(icon, style: const TextStyle(fontSize: 36)),
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: 80,
+            child: Text(
+              category,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+                height: 1.2,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final categories = MarketProductCategories.getCategories(l10n);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              l10n.marketProductCategories,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            GestureDetector(
+              onTap: onViewAllTap,
+              child: Text(
+                l10n.viewAll,
+                style: TextStyle(
+                  color: AppColors.success,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        // Categories - Horizontal scrollable with 3 items per row (2 rows visible)
+        SizedBox(
+          height:
+              MediaQuery.of(context).size.height *
+              0.3, // Height for 2 rows of categories
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            itemCount: (categories.length / 6)
+                .ceil(), // Each page shows 6 items (2 rows x 3)
+            itemBuilder: (context, pageIndex) {
+              final startIndex = pageIndex * 6;
+
+              return SizedBox(
+                width:
+                    MediaQuery.of(context).size.width -
+                    32, // Full width minus padding
+                child: Column(
+                  children: [
+                    // First row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: List.generate(3, (colIndex) {
+                        final index = startIndex + colIndex;
+                        if (index >= categories.length) {
+                          return const SizedBox(width: 80);
+                        }
+                        return _buildCategoryItem(
+                          categories[index],
+                          l10n,
+                          onCategoryTap,
+                        );
+                      }),
+                    ),
+                    const SizedBox(height: 16),
+                    // Second row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: List.generate(3, (colIndex) {
+                        final index = startIndex + 3 + colIndex;
+                        if (index >= categories.length) {
+                          return const SizedBox(width: 80);
+                        }
+                        return _buildCategoryItem(
+                          categories[index],
+                          l10n,
+                          onCategoryTap,
+                        );
+                      }),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DiscountRestaurantsCarousel extends StatelessWidget {
+  final List<RestaurantEntity> restaurants;
+  final PageController controller;
+  final Function(int) onPageChanged;
+  final int currentIndex;
+
+  const _DiscountRestaurantsCarousel({
+    required this.restaurants,
+    required this.controller,
+    required this.onPageChanged,
+    required this.currentIndex,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              l10n.specialOffers,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            if (restaurants.length > 1)
+              Text(
+                l10n.viewAll,
+                style: TextStyle(
+                  color: AppColors.success,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        // Carousel
+        SizedBox(
+          height: 200,
+          child: PageView.builder(
+            controller: controller,
+            onPageChanged: onPageChanged,
+            itemCount: restaurants.length,
+            itemBuilder: (context, index) {
+              final restaurant = restaurants[index];
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: _DiscountRestaurantBanner(restaurant: restaurant),
+              );
+            },
+          ),
+        ),
+        // Indicators
+        if (restaurants.length > 1) ...[
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+              restaurants.length,
+              (index) => Container(
+                width: currentIndex == index ? 24 : 8,
+                height: 8,
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                decoration: BoxDecoration(
+                  color: currentIndex == index
+                      ? AppColors.primary
+                      : AppColors.textHint,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _DiscountRestaurantBanner extends StatelessWidget {
+  final RestaurantEntity restaurant;
+
+  const _DiscountRestaurantBanner({required this.restaurant});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return GestureDetector(
+      onTap: () => context.push('/restaurant/${restaurant.id}'),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.15),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Stack(
+            children: [
+              // Restaurant Image
+              restaurant.imageUrl != null && restaurant.imageUrl!.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: restaurant.imageUrl!,
+                      width: double.infinity,
+                      height: double.infinity,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        color: AppColors.border,
+                        child: const Center(child: CircularProgressIndicator()),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [AppColors.primaryLight, AppColors.primary],
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.restaurant,
+                          size: 50,
+                          color: Colors.white,
+                        ),
+                      ),
+                    )
+                  : Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [AppColors.primaryLight, AppColors.primary],
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.restaurant,
+                        size: 50,
+                        color: Colors.white,
+                      ),
+                    ),
+
+              // Gradient Overlay
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withValues(alpha: 0.7),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              // Discount Badge
+              Positioned(
+                top: 12,
+                left: 12,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.warning,
+                        AppColors.warning.withValues(alpha: 0.8),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.3),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.local_offer,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        restaurant.discountPercentage != null
+                            ? '${restaurant.discountPercentage!.toStringAsFixed(0)}% ${l10n.off}'
+                            : l10n.specialOffer,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Restaurant Info at Bottom
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withValues(alpha: 0.9),
+                      ],
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        restaurant.name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (restaurant.discountDescription != null &&
+                          restaurant.discountDescription!.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          restaurant.discountDescription!,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            fontSize: 14,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          if (restaurant.rating > 0) ...[
+                            const Icon(
+                              Icons.star,
+                              color: Colors.amber,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              restaurant.rating.toStringAsFixed(1),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                          ],
+                          Icon(
+                            Icons.access_time,
+                            color: Colors.white.withValues(alpha: 0.8),
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${restaurant.estimatedDeliveryTime} ${l10n.minutesAbbreviation}',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.8),
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Icon(
+                            Icons.delivery_dining,
+                            color: Colors.white.withValues(alpha: 0.8),
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${restaurant.deliveryFee.toStringAsFixed(2)} ${l10n.currencySymbol}',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.8),
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1085,8 +1457,7 @@ class _CombinedAppBar extends StatelessWidget {
                   if (state is DeliveryAddressSelected) {
                     displayText = state.displayAddress;
                   } else {
-                    displayText =
-                        'حدد عنوان التوصيل'; // Select delivery address
+                    displayText = l10n.selectDeliveryAddress;
                   }
 
                   return InkWell(
@@ -1145,7 +1516,7 @@ class _CombinedAppBar extends StatelessWidget {
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black.withValues(alpha: 0.1),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -1208,7 +1579,7 @@ class _CombinedAppBar extends StatelessWidget {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
@@ -1234,7 +1605,7 @@ class _CombinedAppBar extends StatelessWidget {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
@@ -1268,7 +1639,7 @@ class _CombinedAppBar extends StatelessWidget {
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
+                                  color: Colors.black.withValues(alpha: 0.1),
                                   blurRadius: 4,
                                   offset: const Offset(0, 2),
                                 ),

@@ -11,6 +11,7 @@ import '../../features/orders/presentation/views/checkout_screen.dart';
 import '../../features/orders/presentation/views/order_list_screen.dart';
 import '../../features/orders/presentation/views/order_detail_screen.dart';
 import '../../features/auth/presentation/views/customer_profile_screen.dart';
+import '../../features/market_products/presentation/views/market_products_screen.dart';
 
 class CustomerRouter {
   static final GoRouter router = GoRouter(
@@ -96,6 +97,14 @@ class CustomerRouter {
         path: '/profile',
         name: 'profile',
         builder: (context, state) => const CustomerProfileScreen(),
+      ),
+      GoRoute(
+        path: '/market-products',
+        name: 'market-products',
+        builder: (context, state) {
+          // Pass extra data (like category) to the screen
+          return MarketProductsScreen();
+        },
       ),
     ],
     errorBuilder: (context, state) => const ErrorScreen(),

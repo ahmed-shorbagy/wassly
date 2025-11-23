@@ -518,7 +518,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cannotAddDifferentRestaurant =>
-      'Cannot add items from different restaurants. Please clear cart first.';
+      'Cannot add products from different restaurants. Please clear cart first.';
 
   @override
   String get clearCart => 'Clear Cart';
@@ -812,6 +812,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noBannerAds => 'No Banner Ads';
 
   @override
+  String get ok => 'OK';
+
+  @override
   String get startByAddingYourFirstStartupAd =>
       'Start by adding your first startup ad';
 
@@ -858,9 +861,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings => 'Settings';
-
-  @override
-  String get ok => 'OK';
 
   @override
   String get info => 'Info';
@@ -1124,4 +1124,237 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get displayOrder => 'Display Order';
+
+  @override
+  String get currency => 'SAR';
+
+  @override
+  String get currencySymbol => 'ر.س';
+
+  @override
+  String get open => 'Open';
+
+  @override
+  String get closed => 'Closed';
+
+  @override
+  String get selectDeliveryAddress => 'Select Delivery Address';
+
+  @override
+  String get defaultAddress => 'Default';
+
+  @override
+  String get failedToLoadRestaurantData => 'Failed to load restaurant data';
+
+  @override
+  String get burger => 'Burger';
+
+  @override
+  String get pizza => 'Pizza';
+
+  @override
+  String get noodles => 'Noodles';
+
+  @override
+  String get meat => 'Meat';
+
+  @override
+  String get min => 'min';
+
+  @override
+  String get minutesAbbreviation => 'min';
+
+  @override
+  String get pleaseLoginToContinue => 'Please login to continue';
+
+  @override
+  String get invalidProduct => 'Invalid product. Please try again.';
+
+  @override
+  String get quantityMustBeGreaterThanZero =>
+      'Quantity must be greater than zero';
+
+  @override
+  String get failedToAddItemToCart =>
+      'Failed to add item to cart. Please try again.';
+
+  @override
+  String productAddedToCart(String productName) {
+    return '$productName added to cart';
+  }
+
+  @override
+  String get items => 'items';
+
+  @override
+  String get nA => 'N/A';
+
+  @override
+  String get creatingDriver => 'Creating driver...';
+
+  @override
+  String get personalPhoto => 'Personal Photo';
+
+  @override
+  String get pleaseEnterFullName => 'Please enter full name';
+
+  @override
+  String get off => 'OFF';
+
+  @override
+  String get specialOffer => 'Special Offer';
+
+  @override
+  String get discount => 'Discount';
+
+  @override
+  String get discountPercentage => 'Discount Percentage';
+
+  @override
+  String get discountDescription => 'Discount Description';
+
+  @override
+  String get discountStartDate => 'Discount Start Date';
+
+  @override
+  String get discountEndDate => 'Discount End Date';
+
+  @override
+  String get enableDiscount => 'Enable Discount';
+
+  @override
+  String get disableDiscount => 'Disable Discount';
+
+  @override
+  String get activeDiscount => 'Active Discount';
+
+  @override
+  String get discountUpdatedSuccessfully => 'Discount updated successfully';
+
+  @override
+  String get updatedSuccessfully => 'updated successfully';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get pleaseEnterDeliveryFee => 'Please enter delivery fee';
+
+  @override
+  String get pleaseEnterMinimumOrderAmount =>
+      'Please enter minimum order amount';
+
+  @override
+  String get pleaseEnterDeliveryTime => 'Please enter delivery time';
+
+  @override
+  String get createDriver => 'Create Driver';
+
+  @override
+  String get pleaseSelectPersonalImage => 'Please select personal image';
+
+  @override
+  String get pleaseSelectDriverLicense => 'Please select driver license';
+
+  @override
+  String get pleaseSelectVehicleLicense => 'Please select vehicle license';
+
+  @override
+  String get pleaseSelectVehiclePhoto => 'Please select vehicle photo';
+
+  @override
+  String get licenseInformation => 'License Information';
+
+  @override
+  String get vehicleInformation => 'Vehicle Information';
+
+  @override
+  String get vehicleType => 'Vehicle Type';
+
+  @override
+  String get pleaseSelectVehicleType => 'Please select vehicle type';
+
+  @override
+  String get vehicleModel => 'Vehicle Model';
+
+  @override
+  String get pleaseEnterVehicleModel => 'Please enter vehicle model';
+
+  @override
+  String get vehicleColor => 'Vehicle Color';
+
+  @override
+  String get pleaseEnterVehicleColor => 'Please enter vehicle color';
+
+  @override
+  String get vehiclePlateNumber => 'Vehicle Plate Number';
+
+  @override
+  String get pleaseEnterVehiclePlateNumber =>
+      'Please enter vehicle plate number';
+
+  @override
+  String get driverLicense => 'Driver License';
+
+  @override
+  String get vehicleLicense => 'Vehicle License';
+
+  @override
+  String get vehiclePhoto => 'Vehicle Photo';
+
+  @override
+  String get selectImageSource => 'Select Image Source';
+
+  @override
+  String get camera => 'Camera';
+
+  @override
+  String get gallery => 'Gallery';
+
+  @override
+  String get driverCreatedSuccessfully => 'Driver Created Successfully';
+
+  @override
+  String get pleaseProvideTheseCredentials =>
+      'Please provide these credentials to the driver:';
+
+  @override
+  String get noteDriverCanChangePassword =>
+      'Note: Driver can change password after first login.';
+
+  @override
+  String get tapToUploadImage => 'Tap to upload image';
+
+  @override
+  String get marketProductCategories => 'Market Categories';
+
+  @override
+  String get vegetables => 'Vegetables';
+
+  @override
+  String get fruits => 'Fruits';
+
+  @override
+  String get snacks => 'Snacks';
+
+  @override
+  String get dairy => 'Dairy';
+
+  @override
+  String get bakery => 'Bakery';
+
+  @override
+  String get frozen => 'Frozen';
+
+  @override
+  String get canned => 'Canned';
+
+  @override
+  String get spices => 'Spices';
+
+  @override
+  String get cleaning => 'Cleaning';
+
+  @override
+  String get personalCare => 'Personal Care';
 }

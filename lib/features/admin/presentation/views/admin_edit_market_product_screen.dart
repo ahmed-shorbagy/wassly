@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/market_product_categories.dart';
 import '../../../../core/utils/extensions.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../../../../shared/widgets/safe_navigation_wrapper.dart';
@@ -65,57 +66,7 @@ class _AdminEditMarketProductScreenState
 
   List<String> _getAvailableCategories(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return [
-      l10n.arabic,
-      l10n.egyptian,
-      l10n.lebanese,
-      l10n.syrian,
-      l10n.palestinian,
-      l10n.jordanian,
-      l10n.saudi,
-      l10n.emirati,
-      l10n.gulf,
-      l10n.moroccan,
-      l10n.tunisian,
-      l10n.algerian,
-      l10n.yemeni,
-      l10n.iraqi,
-      l10n.kebabs,
-      l10n.shawarma,
-      l10n.falafel,
-      l10n.hummus,
-      l10n.mezze,
-      l10n.koshary,
-      l10n.mansaf,
-      l10n.mandi,
-      l10n.kabsa,
-      l10n.majboos,
-      l10n.maqluba,
-      l10n.musakhan,
-      l10n.waraqEnab,
-      l10n.mahshi,
-      l10n.kofta,
-      l10n.samosa,
-      l10n.grilledMeat,
-      l10n.bakedGoods,
-      l10n.orientalSweets,
-      l10n.fastFood,
-      l10n.italian,
-      l10n.chinese,
-      l10n.indian,
-      l10n.mexican,
-      l10n.japanese,
-      l10n.thai,
-      l10n.mediterranean,
-      l10n.american,
-      l10n.vegetarian,
-      l10n.vegan,
-      l10n.desserts,
-      l10n.beverages,
-      l10n.healthy,
-      l10n.bbq,
-      l10n.seafood,
-    ];
+    return MarketProductCategories.getCategories(l10n);
   }
 
   Future<void> _pickImage() async {
@@ -357,7 +308,7 @@ class _AdminEditMarketProductScreenState
                         borderRadius: BorderRadius.circular(12),
                       ),
                       prefixIcon: const Icon(Icons.attach_money),
-                      suffixText: 'ر.س',
+                      suffixText: l10n.currencySymbol,
                     ),
                     keyboardType: TextInputType.number,
                     validator: (value) {

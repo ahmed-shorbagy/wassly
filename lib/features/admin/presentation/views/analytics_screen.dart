@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class AnalyticsScreen extends StatelessWidget {
   const AnalyticsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Analytics'),
@@ -77,7 +79,7 @@ class AnalyticsScreen extends StatelessWidget {
                             ),
                             _buildStatCard(
                               'Total Revenue',
-                              '${totalRevenue.toStringAsFixed(2)} ر.س',
+                              '${totalRevenue.toStringAsFixed(2)} ${l10n.currencySymbol}',
                               Icons.attach_money,
                               Colors.purple,
                             ),
@@ -118,7 +120,7 @@ class AnalyticsScreen extends StatelessWidget {
                                         data['restaurantName'] ?? 'Unknown',
                                       ),
                                       subtitle: Text(
-                                        '${data['totalAmount'] ?? 0.0} ر.س',
+                                        '${data['totalAmount'] ?? 0.0} ${l10n.currencySymbol}',
                                       ),
                                       trailing: Text(
                                         data['status'] ?? 'pending',

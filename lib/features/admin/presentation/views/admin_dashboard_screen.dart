@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 
@@ -146,42 +147,71 @@ class AdminDashboardScreen extends StatelessWidget {
             ],
           ),
 
-          // Statistics Cards Section
+          // Statistics Cards Section with Live Data
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _buildStatCard(
-                      context,
-                      title: l10n.totalRestaurants,
-                      value: '0',
-                      icon: Icons.restaurant,
-                      color: Colors.orange,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildStatCard(
-                      context,
-                      title: l10n.totalOrders,
-                      value: '0',
-                      icon: Icons.shopping_bag,
-                      color: Colors.red,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildStatCard(
-                      context,
-                      title: l10n.totalUsers,
-                      value: '0',
-                      icon: Icons.people,
-                      color: Colors.blue,
-                    ),
-                  ),
-                ],
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('restaurants')
+                    .snapshots(),
+                builder: (context, restaurantsSnapshot) {
+                  return StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('orders')
+                        .snapshots(),
+                    builder: (context, ordersSnapshot) {
+                      return StreamBuilder<QuerySnapshot>(
+                        stream: FirebaseFirestore.instance
+                            .collection('users')
+                            .where('userType', isEqualTo: 'customer')
+                            .snapshots(),
+                        builder: (context, usersSnapshot) {
+                          final restaurantsCount =
+                              restaurantsSnapshot.data?.docs.length ?? 0;
+                          final ordersCount =
+                              ordersSnapshot.data?.docs.length ?? 0;
+                          final usersCount =
+                              usersSnapshot.data?.docs.length ?? 0;
+
+                          return Row(
+                            children: [
+                              Expanded(
+                                child: _buildStatCard(
+                                  context,
+                                  title: l10n.totalRestaurants,
+                                  value: restaurantsCount.toString(),
+                                  icon: Icons.restaurant,
+                                  color: Colors.orange,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _buildStatCard(
+                                  context,
+                                  title: l10n.totalOrders,
+                                  value: ordersCount.toString(),
+                                  icon: Icons.shopping_bag,
+                                  color: Colors.red,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _buildStatCard(
+                                  context,
+                                  title: l10n.totalUsers,
+                                  value: usersCount.toString(),
+                                  icon: Icons.people,
+                                  color: Colors.blue,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
               ),
             ),
           ),

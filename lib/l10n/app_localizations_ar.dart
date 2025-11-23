@@ -807,6 +807,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noBannerAds => 'لا توجد إعلانات بانر';
 
   @override
+  String get ok => 'موافق';
+
+  @override
   String get startByAddingYourFirstStartupAd =>
       'ابدأ بإضافة إعلان البداية الأول';
 
@@ -852,9 +855,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settings => 'الإعدادات';
-
-  @override
-  String get ok => 'حسناً';
 
   @override
   String get info => 'معلومات';
@@ -1117,4 +1117,235 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get displayOrder => 'ترتيب العرض';
+
+  @override
+  String get currency => 'ريال سعودي';
+
+  @override
+  String get currencySymbol => 'ر.س';
+
+  @override
+  String get open => 'مفتوح';
+
+  @override
+  String get closed => 'مغلق';
+
+  @override
+  String get selectDeliveryAddress => 'حدد عنوان التوصيل';
+
+  @override
+  String get defaultAddress => 'افتراضي';
+
+  @override
+  String get failedToLoadRestaurantData => 'فشل تحميل بيانات المطعم';
+
+  @override
+  String get burger => 'برجر';
+
+  @override
+  String get pizza => 'بيتزا';
+
+  @override
+  String get noodles => 'نودلز';
+
+  @override
+  String get meat => 'لحوم';
+
+  @override
+  String get min => 'د';
+
+  @override
+  String get minutesAbbreviation => 'د';
+
+  @override
+  String get pleaseLoginToContinue => 'يرجى تسجيل الدخول للمتابعة';
+
+  @override
+  String get invalidProduct => 'منتج غير صالح. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get quantityMustBeGreaterThanZero =>
+      'يجب أن تكون الكمية أكبر من الصفر';
+
+  @override
+  String get failedToAddItemToCart =>
+      'فشل إضافة المنتج إلى السلة. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String productAddedToCart(String productName) {
+    return 'تم إضافة $productName إلى السلة';
+  }
+
+  @override
+  String get items => 'عناصر';
+
+  @override
+  String get nA => 'غير متاح';
+
+  @override
+  String get creatingDriver => 'جاري إنشاء السائق...';
+
+  @override
+  String get personalPhoto => 'الصورة الشخصية';
+
+  @override
+  String get pleaseEnterFullName => 'يرجى إدخال الاسم الكامل';
+
+  @override
+  String get off => 'خصم';
+
+  @override
+  String get specialOffer => 'عرض خاص';
+
+  @override
+  String get discount => 'الخصم';
+
+  @override
+  String get discountPercentage => 'نسبة الخصم';
+
+  @override
+  String get discountDescription => 'وصف الخصم';
+
+  @override
+  String get discountStartDate => 'تاريخ بداية الخصم';
+
+  @override
+  String get discountEndDate => 'تاريخ نهاية الخصم';
+
+  @override
+  String get enableDiscount => 'تفعيل الخصم';
+
+  @override
+  String get disableDiscount => 'تعطيل الخصم';
+
+  @override
+  String get activeDiscount => 'خصم نشط';
+
+  @override
+  String get discountUpdatedSuccessfully => 'تم تحديث الخصم بنجاح';
+
+  @override
+  String get updatedSuccessfully => 'تم التحديث بنجاح';
+
+  @override
+  String get save => 'حفظ';
+
+  @override
+  String get pleaseEnterDeliveryFee => 'يرجى إدخال رسوم التوصيل';
+
+  @override
+  String get pleaseEnterMinimumOrderAmount =>
+      'يرجى إدخال الحد الأدنى لمبلغ الطلب';
+
+  @override
+  String get pleaseEnterDeliveryTime => 'يرجى إدخال وقت التوصيل';
+
+  @override
+  String get createDriver => 'إنشاء سائق';
+
+  @override
+  String get pleaseSelectPersonalImage => 'يرجى اختيار الصورة الشخصية';
+
+  @override
+  String get pleaseSelectDriverLicense => 'يرجى اختيار رخصة القيادة';
+
+  @override
+  String get pleaseSelectVehicleLicense => 'يرجى اختيار رخصة المركبة';
+
+  @override
+  String get pleaseSelectVehiclePhoto => 'يرجى اختيار صورة المركبة';
+
+  @override
+  String get licenseInformation => 'معلومات الرخصة';
+
+  @override
+  String get vehicleInformation => 'معلومات المركبة';
+
+  @override
+  String get vehicleType => 'نوع المركبة';
+
+  @override
+  String get pleaseSelectVehicleType => 'يرجى اختيار نوع المركبة';
+
+  @override
+  String get vehicleModel => 'موديل المركبة';
+
+  @override
+  String get pleaseEnterVehicleModel => 'يرجى إدخال موديل المركبة';
+
+  @override
+  String get vehicleColor => 'لون المركبة';
+
+  @override
+  String get pleaseEnterVehicleColor => 'يرجى إدخال لون المركبة';
+
+  @override
+  String get vehiclePlateNumber => 'رقم لوحة المركبة';
+
+  @override
+  String get pleaseEnterVehiclePlateNumber => 'يرجى إدخال رقم لوحة المركبة';
+
+  @override
+  String get driverLicense => 'رخصة القيادة';
+
+  @override
+  String get vehicleLicense => 'رخصة المركبة';
+
+  @override
+  String get vehiclePhoto => 'صورة المركبة';
+
+  @override
+  String get selectImageSource => 'اختر مصدر الصورة';
+
+  @override
+  String get camera => 'الكاميرا';
+
+  @override
+  String get gallery => 'المعرض';
+
+  @override
+  String get driverCreatedSuccessfully => 'تم إنشاء السائق بنجاح';
+
+  @override
+  String get pleaseProvideTheseCredentials => 'يرجى توفير هذه البيانات للسائق:';
+
+  @override
+  String get noteDriverCanChangePassword =>
+      'ملاحظة: يمكن للسائق تغيير كلمة المرور بعد أول تسجيل دخول.';
+
+  @override
+  String get tapToUploadImage => 'اضغط لرفع الصورة';
+
+  @override
+  String get marketProductCategories => 'فئات السوق';
+
+  @override
+  String get vegetables => 'خضروات';
+
+  @override
+  String get fruits => 'فواكه';
+
+  @override
+  String get snacks => 'وجبات خفيفة';
+
+  @override
+  String get dairy => 'ألبان';
+
+  @override
+  String get bakery => 'مخبوزات';
+
+  @override
+  String get frozen => 'مجمدة';
+
+  @override
+  String get canned => 'معلبات';
+
+  @override
+  String get spices => 'بهارات';
+
+  @override
+  String get cleaning => 'منظفات';
+
+  @override
+  String get personalCare => 'العناية الشخصية';
 }

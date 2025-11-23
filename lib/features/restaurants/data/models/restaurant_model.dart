@@ -20,6 +20,11 @@ class RestaurantModel extends RestaurantEntity {
     super.minOrderAmount,
     super.estimatedDeliveryTime,
     super.commercialRegistrationPhotoUrl,
+    super.hasDiscount,
+    super.discountPercentage,
+    super.discountDescription,
+    super.discountStartDate,
+    super.discountEndDate,
     required super.createdAt,
   });
 
@@ -46,6 +51,16 @@ class RestaurantModel extends RestaurantEntity {
       }
     }
 
+    // Handle discount dates
+    DateTime? discountStartDate;
+    DateTime? discountEndDate;
+    if (json['discountStartDate'] != null) {
+      discountStartDate = (json['discountStartDate'] as Timestamp).toDate();
+    }
+    if (json['discountEndDate'] != null) {
+      discountEndDate = (json['discountEndDate'] as Timestamp).toDate();
+    }
+
     return RestaurantModel(
       id: json['id'] ?? '',
       ownerId: json['ownerId'] ?? '',
@@ -64,6 +79,13 @@ class RestaurantModel extends RestaurantEntity {
       minOrderAmount: (json['minOrderAmount'] ?? 0.0).toDouble(),
       estimatedDeliveryTime: json['estimatedDeliveryTime'] ?? 30,
       commercialRegistrationPhotoUrl: json['commercialRegistrationPhotoUrl'],
+      hasDiscount: json['hasDiscount'] ?? false,
+      discountPercentage: json['discountPercentage'] != null
+          ? (json['discountPercentage'] as num).toDouble()
+          : null,
+      discountDescription: json['discountDescription'],
+      discountStartDate: discountStartDate,
+      discountEndDate: discountEndDate,
       createdAt: json['createdAt'] != null
           ? (json['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
@@ -89,6 +111,11 @@ class RestaurantModel extends RestaurantEntity {
       minOrderAmount: entity.minOrderAmount,
       estimatedDeliveryTime: entity.estimatedDeliveryTime,
       commercialRegistrationPhotoUrl: entity.commercialRegistrationPhotoUrl,
+      hasDiscount: entity.hasDiscount,
+      discountPercentage: entity.discountPercentage,
+      discountDescription: entity.discountDescription,
+      discountStartDate: entity.discountStartDate,
+      discountEndDate: entity.discountEndDate,
       createdAt: entity.createdAt,
     );
   }
@@ -112,6 +139,15 @@ class RestaurantModel extends RestaurantEntity {
       'minOrderAmount': minOrderAmount,
       'estimatedDeliveryTime': estimatedDeliveryTime,
       'commercialRegistrationPhotoUrl': commercialRegistrationPhotoUrl,
+      'hasDiscount': hasDiscount,
+      'discountPercentage': discountPercentage,
+      'discountDescription': discountDescription,
+      'discountStartDate': discountStartDate != null
+          ? Timestamp.fromDate(discountStartDate!)
+          : null,
+      'discountEndDate': discountEndDate != null
+          ? Timestamp.fromDate(discountEndDate!)
+          : null,
       'createdAt': Timestamp.fromDate(createdAt),
     };
   }
@@ -141,6 +177,11 @@ class RestaurantModel extends RestaurantEntity {
     double? minOrderAmount,
     int? estimatedDeliveryTime,
     String? commercialRegistrationPhotoUrl,
+    bool? hasDiscount,
+    double? discountPercentage,
+    String? discountDescription,
+    DateTime? discountStartDate,
+    DateTime? discountEndDate,
     DateTime? createdAt,
   }) {
     return RestaurantModel(
@@ -161,6 +202,11 @@ class RestaurantModel extends RestaurantEntity {
       minOrderAmount: minOrderAmount ?? this.minOrderAmount,
       estimatedDeliveryTime: estimatedDeliveryTime ?? this.estimatedDeliveryTime,
       commercialRegistrationPhotoUrl: commercialRegistrationPhotoUrl ?? this.commercialRegistrationPhotoUrl,
+      hasDiscount: hasDiscount ?? this.hasDiscount,
+      discountPercentage: discountPercentage ?? this.discountPercentage,
+      discountDescription: discountDescription ?? this.discountDescription,
+      discountStartDate: discountStartDate ?? this.discountStartDate,
+      discountEndDate: discountEndDate ?? this.discountEndDate,
       createdAt: createdAt ?? this.createdAt,
     );
   }
