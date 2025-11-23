@@ -72,10 +72,14 @@ class _AdminEditCategoryScreenState extends State<AdminEditCategoryScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return BlocProvider(
-      create: (context) => context.read<FoodCategoryCubit>()
-        ..loadRestaurantCategories(widget.restaurantId),
-      child: Scaffold(
+    // Load categories when screen opens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<FoodCategoryCubit>().loadRestaurantCategories(widget.restaurantId);
+      }
+    });
+
+    return Scaffold(
         appBar: AppBar(
           title: Text(l10n.editCategory),
           backgroundColor: Colors.purple,
@@ -198,7 +202,6 @@ class _AdminEditCategoryScreenState extends State<AdminEditCategoryScreen> {
             );
           },
         ),
-      ),
     );
   }
 

@@ -1,9 +1,13 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../../restaurants/domain/entities/product_entity.dart';
 import '../../domain/entities/cart_item_entity.dart';
 import '../../domain/repositories/cart_repository.dart';
+import '../../../../core/services/toast_service.dart';
+import '../../../../l10n/app_localizations.dart';
 
 part 'cart_state.dart';
 
@@ -15,40 +19,78 @@ class CartCubit extends Cubit<CartState> {
     required this.repository,
     required this.firebaseAuth,
   }) : super(CartInitial()) {
-    _loadCart();
+    loadCart();
   }
 
   String? get _userId => firebaseAuth.currentUser?.uid;
 
-  void _loadCart() {
+  StreamSubscription<List<CartItemEntity>>? _cartSubscription;
+
+  void loadCart() {
     final userId = _userId;
     if (userId == null) {
       emit(const CartError('User not authenticated'));
       return;
     }
 
+    // Cancel existing subscription if any
+    _cartSubscription?.cancel();
+
     emit(CartLoading());
 
-    repository.getCartStream(userId).listen(
+    _cartSubscription = repository.getCartStream(userId).listen(
       (items) {
+        if (isClosed) return;
+        
+        // Filter out invalid items (products without IDs)
+        final validItems = items.where((item) => item.product.id.isNotEmpty).toList();
+        
         // Determine restaurant ID from items
         String? restaurantId;
-        if (items.isNotEmpty) {
-          restaurantId = items.first.product.restaurantId;
+        if (validItems.isNotEmpty) {
+          restaurantId = validItems.first.product.restaurantId;
         }
 
-        emit(CartLoaded(items, restaurantId: restaurantId));
+        emit(CartLoaded(validItems, restaurantId: restaurantId));
       },
       onError: (error) {
-        emit(CartError(error.toString()));
+        if (isClosed) return;
+        emit(CartError('Failed to load cart: ${error.toString()}'));
       },
     );
   }
 
-  Future<void> addItem(ProductEntity product, {int quantity = 1}) async {
+  @override
+  Future<void> close() {
+    _cartSubscription?.cancel();
+    return super.close();
+  }
+
+  Future<void> addItem(
+    ProductEntity product, {
+    int quantity = 1,
+    BuildContext? context,
+  }) async {
     final userId = _userId;
     if (userId == null) {
-      emit(const CartError('User not authenticated'));
+      ToastService.showError('Please login to continue');
+      return;
+    }
+
+    // Validate product ID - this is critical
+    if (product.id.isEmpty || product.id.trim().isEmpty) {
+      ToastService.showError('Invalid product. Please try again.');
+      return;
+    }
+
+    // Validate restaurant ID
+    if (product.restaurantId.isEmpty || product.restaurantId.trim().isEmpty) {
+      ToastService.showError('Invalid product. Please try again.');
+      return;
+    }
+
+    if (quantity <= 0) {
+      ToastService.showError('Quantity must be greater than zero');
       return;
     }
 
@@ -57,9 +99,9 @@ class CartCubit extends Cubit<CartState> {
       final currentState = state as CartLoaded;
       if (currentState.restaurantId != null &&
           currentState.restaurantId != product.restaurantId) {
-        emit(CartError(
-          'لا يمكن إضافة منتجات من مطاعم مختلفة. يرجى إفراغ السلة أولاً.',
-        ));
+        ToastService.showWarning(
+          'Cannot add products from different restaurants. Please clear cart first.',
+        );
         return;
       }
     }
@@ -69,11 +111,43 @@ class CartCubit extends Cubit<CartState> {
     final result = await repository.addItem(userId, item);
 
     result.fold(
-      (failure) => emit(CartError(failure.message)),
+      (failure) {
+        // Show user-friendly error message
+        final errorMessage = _getUserFriendlyErrorMessage(failure.message);
+        ToastService.showError(errorMessage);
+      },
       (_) {
+        // Success - show success message if context is available
+        if (context != null) {
+          final l10n = AppLocalizations.of(context);
+          final message = l10n?.itemAddedToCart(product.name) ??
+              '${product.name} added to cart';
+          ToastService.showSuccess(message);
+        }
         // State will be updated via stream
       },
     );
+  }
+
+  String _getUserFriendlyErrorMessage(String error) {
+    // Map technical errors to user-friendly messages
+    if (error.contains('Product ID is required') ||
+        error.contains('Product ID is missing')) {
+      return 'Invalid product. Please try again.';
+    }
+    if (error.contains('User ID is required') ||
+        error.contains('not authenticated')) {
+      return 'Please login to continue';
+    }
+    if (error.contains('Failed to add item to cart')) {
+      return 'Failed to add item to cart. Please try again.';
+    }
+    if (error.contains('document path must be a non-empty string')) {
+      return 'Invalid product. Please try again.';
+    }
+    
+    // Return user-friendly version of error
+    return error.replaceAll('Failed to add item to cart: ', '');
   }
 
   Future<void> removeItem(String productId) async {

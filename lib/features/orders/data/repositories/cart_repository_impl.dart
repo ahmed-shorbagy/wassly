@@ -14,6 +14,10 @@ class CartRepositoryImpl implements CartRepository {
 
   @override
   Stream<List<CartItemEntity>> getCartStream(String userId) {
+    if (userId.isEmpty) {
+      return Stream.error('User ID is required');
+    }
+
     try {
       return firestore
           .collection(AppConstants.usersCollection)
@@ -21,12 +25,28 @@ class CartRepositoryImpl implements CartRepository {
           .collection('cart')
           .snapshots()
           .map((snapshot) {
-        return snapshot.docs
-            .map((doc) => CartItemModel.fromFirestore(doc))
-            .toList();
+        try {
+          return snapshot.docs
+              .map((doc) {
+                try {
+                  return CartItemModel.fromFirestore(doc);
+                } catch (e) {
+                  // Skip invalid documents
+                  return null;
+                }
+              })
+              .where((item) => item != null)
+              .cast<CartItemEntity>()
+              .toList();
+        } catch (e) {
+          // Return empty list if parsing fails
+          return <CartItemEntity>[];
+        }
+      }).handleError((error) {
+        throw ServerException('Failed to get cart stream: ${error.toString()}');
       });
     } catch (e) {
-      throw ServerException('Failed to get cart stream: ${e.toString()}');
+      return Stream.error(ServerException('Failed to get cart stream: ${e.toString()}'));
     }
   }
 
@@ -36,6 +56,15 @@ class CartRepositoryImpl implements CartRepository {
     CartItemEntity item,
   ) async {
     try {
+      // Validate inputs
+      if (userId.isEmpty) {
+        return const Left(ServerFailure('User ID is required'));
+      }
+      
+      if (item.product.id.isEmpty) {
+        return const Left(ServerFailure('Product ID is required'));
+      }
+
       final cartRef = firestore
           .collection(AppConstants.usersCollection)
           .doc(userId)
@@ -69,6 +98,15 @@ class CartRepositoryImpl implements CartRepository {
     int quantity,
   ) async {
     try {
+      // Validate inputs
+      if (userId.isEmpty) {
+        return const Left(ServerFailure('User ID is required'));
+      }
+      
+      if (productId.isEmpty) {
+        return const Left(ServerFailure('Product ID is required'));
+      }
+
       if (quantity <= 0) {
         // Remove item if quantity is 0 or less
         return await removeItem(userId, productId);
@@ -95,6 +133,15 @@ class CartRepositoryImpl implements CartRepository {
     String productId,
   ) async {
     try {
+      // Validate inputs
+      if (userId.isEmpty) {
+        return const Left(ServerFailure('User ID is required'));
+      }
+      
+      if (productId.isEmpty) {
+        return const Left(ServerFailure('Product ID is required'));
+      }
+
       await firestore
           .collection(AppConstants.usersCollection)
           .doc(userId)
@@ -113,6 +160,11 @@ class CartRepositoryImpl implements CartRepository {
   @override
   Future<Either<Failure, void>> clearCart(String userId) async {
     try {
+      // Validate input
+      if (userId.isEmpty) {
+        return const Left(ServerFailure('User ID is required'));
+      }
+
       final cartSnapshot = await firestore
           .collection(AppConstants.usersCollection)
           .doc(userId)

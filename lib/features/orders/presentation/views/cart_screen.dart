@@ -37,7 +37,12 @@ class CartScreen extends StatelessWidget {
       ),
       body: BlocConsumer<CartCubit, CartState>(
         listener: (context, state) {
-          if (state is CartError) {
+          // Only show error snackbar for stream errors, not validation errors
+          // Validation errors are handled by ToastService in CartCubit
+          if (state is CartError && 
+              !state.message.contains('Invalid product') &&
+              !state.message.contains('not authenticated') &&
+              !state.message.contains('Quantity must be')) {
             context.showErrorSnackBar(state.message);
           }
         },
@@ -46,11 +51,15 @@ class CartScreen extends StatelessWidget {
             return const LoadingWidget();
           }
 
-          if (state is CartError) {
+          // Only show error screen for critical stream errors
+          if (state is CartError && 
+              (state.message.contains('Failed to load cart') ||
+               state.message.contains('stream'))) {
             return ErrorDisplayWidget(
               message: state.message,
               onRetry: () {
-                // Cart will reload automatically via stream
+                // Reload cart by re-initializing the stream
+                context.read<CartCubit>().loadCart();
               },
             );
           }

@@ -97,23 +97,70 @@ class RestaurantRepositoryImpl implements RestaurantRepository {
   ) async {
     if (await networkInfo.isConnected) {
       try {
+        AppLogger.logInfo('Fetching products from Firestore for restaurant: $restaurantId');
+        
+        // First try to get all products for the restaurant
         final snapshot = await firestore
             .collection(AppConstants.productsCollection)
             .where('restaurantId', isEqualTo: restaurantId)
-            .where('isAvailable', isEqualTo: true)
             .get();
 
+        AppLogger.logInfo('Found ${snapshot.docs.length} total products in Firestore for restaurant');
+
+        // Filter products in memory to include:
+        // 1. Products with isAvailable == true
+        // 2. Products where isAvailable is null or missing (treat as available)
         final products = snapshot.docs
-            .map((doc) => ProductModel.fromJson({'id': doc.id, ...doc.data()}))
+            .map((doc) {
+              try {
+                // Ensure document has a valid ID
+                if (doc.id.isEmpty) {
+                  AppLogger.logWarning('Skipping product with empty document ID');
+                  return null;
+                }
+                
+                final data = doc.data();
+                final isAvailable = data['isAvailable'];
+                // Include product if isAvailable is true, null, or missing
+                if (isAvailable == false) {
+                  return null; // Skip unavailable products
+                }
+                
+                // Remove 'id' from data if it exists, then set it to doc.id
+                // This ensures the document ID is always used, not any id in the data
+                final cleanData = Map<String, dynamic>.from(data);
+                cleanData.remove('id'); // Remove any existing id field
+                cleanData['id'] = doc.id; // Set the document ID
+                
+                final product = ProductModel.fromJson(cleanData);
+                
+                // Double-check that product has valid ID after parsing
+                if (product.id.isEmpty) {
+                  AppLogger.logWarning('Skipping product with empty ID after parsing: ${doc.id}');
+                  return null;
+                }
+                
+                return product;
+              } catch (e) {
+                AppLogger.logError('Error parsing product ${doc.id}', error: e);
+                return null;
+              }
+            })
+            .where((product) => product != null && product.id.isNotEmpty)
+            .cast<ProductEntity>()
             .toList();
 
+        AppLogger.logSuccess('Successfully loaded ${products.length} available products');
         return Right(products);
       } on ServerException catch (e) {
+        AppLogger.logError('Server exception loading products', error: e.message);
         return Left(ServerFailure(e.message));
       } catch (e) {
-        return Left(ServerFailure('Failed to load products'));
+        AppLogger.logError('Failed to load products', error: e);
+        return Left(ServerFailure('Failed to load products: ${e.toString()}'));
       }
     } else {
+      AppLogger.logError('No internet connection when loading products');
       return const Left(NetworkFailure('No internet connection'));
     }
   }

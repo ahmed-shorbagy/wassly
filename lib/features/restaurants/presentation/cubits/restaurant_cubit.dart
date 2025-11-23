@@ -7,6 +7,7 @@ import '../../domain/usecases/get_restaurant_by_id_usecase.dart';
 import '../../domain/usecases/get_restaurant_products_usecase.dart';
 import '../../domain/repositories/restaurant_owner_repository.dart';
 import '../../../../core/utils/use_case.dart';
+import '../../../../core/utils/logger.dart';
 
 part 'restaurant_state.dart';
 
@@ -46,17 +47,22 @@ class RestaurantCubit extends Cubit<RestaurantState> {
   }
 
   Future<void> getRestaurantProducts(String restaurantId) async {
+    AppLogger.logInfo('Fetching products for restaurant: $restaurantId');
     // Don't emit loading state to avoid overwriting restaurant state
     // Just fetch products and emit ProductsLoaded
     final result = await getRestaurantProductsUseCase(restaurantId);
 
     result.fold(
       (failure) {
+        AppLogger.logError('Failed to fetch products for restaurant: $restaurantId', error: failure.message);
         // If there's an error, still emit ProductsLoaded with empty list
         // to avoid breaking the UI
         emit(ProductsLoaded([]));
       },
-      (products) => emit(ProductsLoaded(products)),
+      (products) {
+        AppLogger.logSuccess('Products fetched: ${products.length} for restaurant: $restaurantId');
+        emit(ProductsLoaded(products));
+      },
     );
   }
 

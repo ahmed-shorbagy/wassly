@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/constants/app_colors.dart';
-import '../../l10n/app_localizations.dart';
 import '../../features/ads/domain/entities/startup_ad_entity.dart';
 
 /// Popup dialog widget for displaying startup ads
@@ -44,8 +43,6 @@ class StartupAdPopup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 40),
@@ -138,21 +135,17 @@ class StartupAdPopup extends StatelessWidget {
                   onTap: () => _handleAdTap(context),
                   child: ClipRRect(
                     borderRadius: BorderRadius.only(
-                      bottomLeft: ad.title != null || ad.description != null
-                          ? Radius.zero
-                          : const Radius.circular(28),
-                      bottomRight: ad.title != null || ad.description != null
-                          ? Radius.zero
-                          : const Radius.circular(28),
+                      bottomLeft: const Radius.circular(28),
+                      bottomRight: const Radius.circular(28),
                     ),
                     child: CachedNetworkImage(
                       imageUrl: ad.imageUrl,
                       width: double.infinity,
-                      height: 280,
+                      height: 450,
                       fit: BoxFit.cover,
                       placeholder: (context, url) => Container(
                         width: double.infinity,
-                        height: 280,
+                        height: 450,
                         color: AppColors.surface,
                         child: const Center(
                           child: CircularProgressIndicator(),
@@ -160,44 +153,12 @@ class StartupAdPopup extends StatelessWidget {
                       ),
                       errorWidget: (context, url, error) => Container(
                         width: double.infinity,
-                        height: 280,
+                        height: 450,
                         color: AppColors.surface,
                         child: const Icon(
                           Icons.image_not_supported,
                           size: 48,
                           color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                
-                // Action Button - Rounded white button with colored text
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () => _handleAdTap(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: AppColors.primary,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          side: BorderSide(
-                            color: AppColors.primary.withValues(alpha: 0.3),
-                            width: 1,
-                          ),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: Text(
-                        l10n?.placeOrder ?? 'اطلب دلوقتي',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
                         ),
                       ),
                     ),

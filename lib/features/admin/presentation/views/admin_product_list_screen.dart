@@ -87,10 +87,7 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return BlocProvider(
-      create: (context) => context.read<FoodCategoryCubit>()
-        ..loadRestaurantCategories(widget.restaurantId),
-      child: Scaffold(
+    return Scaffold(
         appBar: AppBar(
           title: Text('${l10n.restaurantProducts} - ${widget.restaurantName}'),
           backgroundColor: Colors.purple,
@@ -245,7 +242,6 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
         icon: const Icon(Icons.add),
         label: Text(l10n.addProduct),
         backgroundColor: Colors.purple,
-      ),
       ),
     );
   }

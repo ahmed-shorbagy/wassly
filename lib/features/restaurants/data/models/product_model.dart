@@ -16,8 +16,14 @@ class ProductModel extends ProductEntity {
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
+    // Ensure ID is never empty - use provided id or throw error
+    final id = json['id'];
+    if (id == null || (id is String && id.isEmpty)) {
+      throw FormatException('Product ID is required and cannot be empty');
+    }
+    
     return ProductModel(
-      id: json['id'] ?? '',
+      id: id as String,
       restaurantId: json['restaurantId'] ?? '',
       name: json['name'] ?? '',
       description: json['description'] ?? '',

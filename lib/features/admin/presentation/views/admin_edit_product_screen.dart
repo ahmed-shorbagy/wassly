@@ -287,8 +287,8 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
                   // Category
                   _buildSectionTitle(l10n.productCategory),
                   const SizedBox(height: 12),
-                  BlocProvider(
-                    create: (context) => context.read<FoodCategoryCubit>()
+                  BlocProvider.value(
+                    value: context.read<FoodCategoryCubit>()
                       ..loadRestaurantCategories(widget.restaurantId),
                     child: BlocBuilder<FoodCategoryCubit, FoodCategoryState>(
                       builder: (context, state) {

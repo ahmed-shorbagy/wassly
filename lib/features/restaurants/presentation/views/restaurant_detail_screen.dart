@@ -4,7 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/utils/extensions.dart';
+import '../../../../core/services/toast_service.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../../../../shared/widgets/error_widget.dart';
 import '../../../../shared/widgets/product_card.dart';
@@ -50,15 +50,16 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
       }
     });
     _searchController.addListener(_filterProducts);
-    
+
     // Load data when screen first loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         context.read<RestaurantCubit>()
           ..getRestaurantById(widget.restaurantId)
           ..getRestaurantProducts(widget.restaurantId);
-        context.read<FoodCategoryCubit>()
-          ..loadRestaurantCategories(widget.restaurantId);
+        context.read<FoodCategoryCubit>().loadRestaurantCategories(
+          widget.restaurantId,
+        );
       }
     });
   }
@@ -114,80 +115,74 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-        body: BlocListener<FoodCategoryCubit, FoodCategoryState>(
-            listener: (context, state) {
-              if (state is FoodCategoryLoaded) {
-                setState(() {
-                  _categories = state.categories;
-                  final newLength = _categories.length + 1; // +1 for 'all'
+      body: BlocListener<FoodCategoryCubit, FoodCategoryState>(
+        listener: (context, state) {
+          if (state is FoodCategoryLoaded) {
+            setState(() {
+              _categories = state.categories;
+              final newLength = _categories.length + 1; // +1 for 'all'
 
-                  if (_tabController.length != newLength) {
-                    _tabController.dispose();
-                    _tabController = TabController(
-                      length: newLength,
-                      vsync: this,
-                    );
-                    _tabController.addListener(() {
-                      if (_tabController.indexIsChanging) {
-                        setState(() {
-                          if (_tabController.index == 0) {
-                            _selectedCategoryId = null; // 'all'
-                          } else {
-                            _selectedCategoryId =
-                                _categories[_tabController.index - 1].id;
-                          }
-                        });
+              if (_tabController.length != newLength) {
+                _tabController.dispose();
+                _tabController = TabController(length: newLength, vsync: this);
+                _tabController.addListener(() {
+                  if (_tabController.indexIsChanging) {
+                    setState(() {
+                      if (_tabController.index == 0) {
+                        _selectedCategoryId = null; // 'all'
+                      } else {
+                        _selectedCategoryId =
+                            _categories[_tabController.index - 1].id;
                       }
                     });
                   }
                 });
               }
-            },
-            child: BlocConsumer<RestaurantCubit, RestaurantState>(
-              listener: (context, state) {
-                if (state is RestaurantLoaded) {
-                  setState(() {
-                    _restaurant = state.restaurant;
-                  });
-                } else if (state is ProductsLoaded) {
-                  setState(() {
-                    _products = state.products;
-                  });
-                }
-              },
-              builder: (context, state) {
-                if (state is RestaurantLoading && _restaurant == null) {
-                  return const LoadingWidget();
-                }
+            });
+          }
+        },
+        child: BlocConsumer<RestaurantCubit, RestaurantState>(
+          listener: (context, state) {
+            if (state is RestaurantLoaded) {
+              setState(() {
+                _restaurant = state.restaurant;
+              });
+            }
+            if (state is ProductsLoaded) {
+              setState(() {
+                _products = state.products;
+              });
+            }
+          },
+          builder: (context, state) {
+            if (state is RestaurantLoading && _restaurant == null) {
+              return const LoadingWidget();
+            }
 
-                if (state is RestaurantError && _restaurant == null) {
-                  return ErrorDisplayWidget(
-                    message: state.message,
-                    onRetry: () {
-                      context.read<RestaurantCubit>().getRestaurantById(
-                        widget.restaurantId,
-                      );
-                      context.read<RestaurantCubit>().getRestaurantProducts(
-                        widget.restaurantId,
-                      );
-                    },
+            if (state is RestaurantError && _restaurant == null) {
+              return ErrorDisplayWidget(
+                message: state.message,
+                onRetry: () {
+                  context.read<RestaurantCubit>().getRestaurantById(
+                    widget.restaurantId,
                   );
-                }
-
-                if (_restaurant != null) {
-                  return _buildRestaurantDetail(
-                    context,
-                    _restaurant!,
-                    _products,
+                  context.read<RestaurantCubit>().getRestaurantProducts(
+                    widget.restaurantId,
                   );
-                }
+                },
+              );
+            }
 
-                return const LoadingWidget();
-              },
-            ),
-          ),
-          bottomNavigationBar: _buildBottomBar(context),
-        );
+            if (_restaurant != null) {
+              return _buildRestaurantDetail(context, _restaurant!, _products);
+            }
+
+            return const LoadingWidget();
+          },
+        ),
+      ),
+      bottomNavigationBar: _buildBottomBar(context),
+    );
   }
 
   Widget _buildRestaurantDetail(
@@ -592,7 +587,6 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
   }
 
   Widget _buildProductCard(BuildContext context, ProductEntity product) {
-    final l10n = AppLocalizations.of(context)!;
     final restaurant = _restaurant;
 
     return ProductCard(
@@ -605,12 +599,9 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
       restaurantId: restaurant?.id,
       onTap: () async {
         if (product.isAvailable) {
-          await context.read<CartCubit>().addItem(product);
-          if (context.mounted) {
-            context.showSuccessSnackBar(
-              l10n.itemAddedToCart(product.name),
-            );
-          }
+          await context.read<CartCubit>().addItem(product, context: context);
+        } else {
+          ToastService.showInfo('Product is not available');
         }
       },
     );
