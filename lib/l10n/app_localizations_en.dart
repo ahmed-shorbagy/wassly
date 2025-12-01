@@ -1126,16 +1126,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get displayOrder => 'Display Order';
 
   @override
-  String get currency => 'SAR';
+  String get currency => 'EGP';
 
   @override
-  String get currencySymbol => 'ر.س';
+  String get currencySymbol => 'ج.م';
 
   @override
   String get open => 'Open';
 
   @override
   String get closed => 'Closed';
+
+  @override
+  String get groceries => 'Groceries';
+
+  @override
+  String get healthAndBeauty => 'Health & Beauty';
+
+  @override
+  String get pickup => 'Pickup';
+
+  @override
+  String get freeDelivery => 'Free Delivery';
+
+  @override
+  String get sortBy => 'Sort By';
+
+  @override
+  String get relevance => 'Most Relevant';
+
+  @override
+  String get highestRating => 'Highest Rating';
+
+  @override
+  String get fastestDelivery => 'Fastest Delivery';
+
+  @override
+  String get lowestPrice => 'Lowest Price';
 
   @override
   String get selectDeliveryAddress => 'Select Delivery Address';

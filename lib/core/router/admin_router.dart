@@ -24,7 +24,6 @@ import '../../features/admin/presentation/views/order_management_screen.dart';
 import '../../features/admin/presentation/views/user_management_screen.dart';
 import '../../features/admin/presentation/views/analytics_screen.dart';
 import '../../features/admin/presentation/views/admin_settings_screen.dart';
-import '../../features/orders/presentation/views/order_detail_screen.dart';
 import '../../features/admin/presentation/views/driver_management_screen.dart';
 import '../../features/admin/presentation/views/create_driver_screen.dart';
 import '../../features/admin/presentation/views/edit_driver_screen.dart';

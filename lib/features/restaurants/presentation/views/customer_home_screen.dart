@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/market_product_categories.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -26,9 +27,6 @@ class CustomerHomeScreen extends StatefulWidget {
 }
 
 class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
-  final PageController _bannerController = PageController(
-    viewportFraction: 0.92,
-  );
   final PageController _discountRestaurantsController = PageController(
     viewportFraction: 0.92,
   );
@@ -54,7 +52,6 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
 
   @override
   void dispose() {
-    _bannerController.dispose();
     _discountRestaurantsController.dispose();
     _searchController.removeListener(_filterRestaurants);
     _searchController.dispose();
@@ -244,6 +241,13 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             flexibleSpace: _CombinedAppBar(
               searchController: _searchController,
               onSearchChanged: _filterRestaurants,
+              onSearchTap: () {
+                context.push(
+                  '/search?q=${Uri.encodeComponent(_searchController.text)}',
+                  extra: _allRestaurants,
+                );
+              },
+              restaurants: _allRestaurants,
             ),
           ),
 
@@ -256,7 +260,6 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               return SliverToBoxAdapter(
                 child: _BannerCarousel(
                   banners: banners,
-                  controller: _bannerController,
                   onPageChanged: (index) {
                     setState(() {
                       _currentBannerIndex = index;
@@ -435,13 +438,11 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
 
 class _BannerCarousel extends StatelessWidget {
   final List<BannerEntity> banners;
-  final PageController controller;
   final Function(int) onPageChanged;
   final int currentIndex;
 
   const _BannerCarousel({
     required this.banners,
-    required this.controller,
     required this.onPageChanged,
     required this.currentIndex,
   });
@@ -460,18 +461,28 @@ class _BannerCarousel extends StatelessWidget {
           ]
         : banners;
 
-    return Column(
-      children: [
-        SizedBox(
-          height: 180,
-          child: PageView.builder(
-            controller: controller,
-            onPageChanged: onPageChanged,
-            itemCount: effective.length,
-            itemBuilder: (context, index) {
-              final b = effective[index];
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      child: CarouselSlider(
+        options: CarouselOptions(
+          height: 160,
+          viewportFraction: 0.95,
+          enlargeCenterPage: false,
+          enableInfiniteScroll: effective.length > 1,
+          autoPlay: effective.length > 1,
+          autoPlayInterval: const Duration(seconds: 4),
+          autoPlayAnimationDuration: const Duration(milliseconds: 800),
+          autoPlayCurve: Curves.fastOutSlowIn,
+          onPageChanged: (index, reason) {
+            onPageChanged(index);
+          },
+        ),
+        items: effective.map((b) {
+          return Builder(
+            builder: (BuildContext context) {
+              return Container(
+                width: MediaQuery.of(context).size.width,
+                margin: const EdgeInsets.symmetric(horizontal: 4),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(20),
                   child: Stack(
@@ -542,29 +553,9 @@ class _BannerCarousel extends StatelessWidget {
                 ),
               );
             },
-          ),
-        ),
-        if (effective.length > 1) ...[
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(
-              effective.length,
-              (index) => Container(
-                width: currentIndex == index ? 24 : 8,
-                height: 8,
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                decoration: BoxDecoration(
-                  color: currentIndex == index
-                      ? AppColors.primary
-                      : AppColors.textHint,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ],
+          );
+        }).toList(),
+      ),
     );
   }
 }
@@ -649,45 +640,41 @@ class _RestaurantCard extends StatelessWidget {
                             ),
                           ),
                   ),
-                  // Favorite Button
+                  // Favorite Button - Smaller
                   Positioned(
-                    top: 8,
-                    right: 8,
+                    top: 6,
+                    right: 6,
                     child: BlocBuilder<FavoritesCubit, FavoritesState>(
                       builder: (context, favState) {
                         final isFav = favState.favoriteRestaurantIds.contains(
                           restaurant.id,
                         );
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.1),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: IconButton(
-                            icon: Icon(
+                        return GestureDetector(
+                          onTap: () {
+                            context.read<FavoritesCubit>().toggleRestaurant(
+                              restaurant.id,
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.1),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
                               isFav ? Icons.favorite : Icons.favorite_border,
                               color: isFav
                                   ? Colors.red
                                   : AppColors.textSecondary,
-                              size: 20,
+                              size: 16,
                             ),
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(
-                              minWidth: 36,
-                              minHeight: 36,
-                            ),
-                            onPressed: () {
-                              context.read<FavoritesCubit>().toggleRestaurant(
-                                restaurant.id,
-                              );
-                            },
                           ),
                         );
                       },
@@ -738,25 +725,25 @@ class _RestaurantCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                  // Status Badge
+                  // Status Badge - Smaller (only dot indicator)
                   Positioned(
                     bottom: 8,
                     left: 8,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
+                        horizontal: 8,
+                        vertical: 4,
                       ),
                       decoration: BoxDecoration(
                         color: restaurant.isOpen
                             ? AppColors.success
                             : AppColors.error,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
+                            color: Colors.black.withValues(alpha: 0.15),
+                            blurRadius: 3,
+                            offset: const Offset(0, 1),
                           ),
                         ],
                       ),
@@ -764,14 +751,14 @@ class _RestaurantCard extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Container(
-                            width: 6,
-                            height: 6,
+                            width: 5,
+                            height: 5,
                             decoration: const BoxDecoration(
                               color: Colors.white,
                               shape: BoxShape.circle,
                             ),
                           ),
-                          const SizedBox(width: 6),
+                          const SizedBox(width: 4),
                           Builder(
                             builder: (context) {
                               final l10n = AppLocalizations.of(context)!;
@@ -779,8 +766,9 @@ class _RestaurantCard extends StatelessWidget {
                                 restaurant.isOpen ? l10n.open : l10n.closed,
                                 style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w600,
+                                  height: 1.0,
                                 ),
                               );
                             },
@@ -906,9 +894,6 @@ class _MarketProductCategoriesSection extends StatelessWidget {
     Function(String) onTap,
   ) {
     final icon = MarketProductCategories.getCategoryIcon(category, l10n);
-    final bgColor = Color(
-      MarketProductCategories.getCategoryColor(category, l10n),
-    );
 
     return GestureDetector(
       onTap: () => onTap(category),
@@ -916,33 +901,33 @@ class _MarketProductCategoriesSection extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 80,
-            height: 80,
+            width: 100,
+            height: 100,
             decoration: BoxDecoration(
-              color: bgColor,
-              shape: BoxShape.circle,
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: bgColor.withValues(alpha: 0.3),
+                  color: Colors.black.withValues(alpha: 0.08),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
               ],
             ),
             child: Center(
-              child: Text(icon, style: const TextStyle(fontSize: 36)),
+              child: Text(icon, style: const TextStyle(fontSize: 48)),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           SizedBox(
-            width: 80,
+            width: 100,
             child: Text(
               category,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 13,
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
                 height: 1.2,
@@ -990,8 +975,7 @@ class _MarketProductCategoriesSection extends StatelessWidget {
         // Categories - Horizontal scrollable with 3 items per row (2 rows visible)
         SizedBox(
           height:
-              MediaQuery.of(context).size.height *
-              0.3, // Height for 2 rows of categories
+              280, // Height for 2 rows: (100 card + 8 spacing + ~28 text) * 2 + 16 row spacing
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
@@ -1006,6 +990,7 @@ class _MarketProductCategoriesSection extends StatelessWidget {
                     MediaQuery.of(context).size.width -
                     32, // Full width minus padding
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     // First row
                     Row(
@@ -1013,7 +998,7 @@ class _MarketProductCategoriesSection extends StatelessWidget {
                       children: List.generate(3, (colIndex) {
                         final index = startIndex + colIndex;
                         if (index >= categories.length) {
-                          return const SizedBox(width: 80);
+                          return const SizedBox(width: 100);
                         }
                         return _buildCategoryItem(
                           categories[index],
@@ -1029,7 +1014,7 @@ class _MarketProductCategoriesSection extends StatelessWidget {
                       children: List.generate(3, (colIndex) {
                         final index = startIndex + 3 + colIndex;
                         if (index >= categories.length) {
-                          return const SizedBox(width: 80);
+                          return const SizedBox(width: 100);
                         }
                         return _buildCategoryItem(
                           categories[index],
@@ -1424,10 +1409,14 @@ class _EmptyStateWidget extends StatelessWidget {
 class _CombinedAppBar extends StatelessWidget {
   final TextEditingController searchController;
   final VoidCallback onSearchChanged;
+  final VoidCallback? onSearchTap;
+  final List<RestaurantEntity> restaurants;
 
   const _CombinedAppBar({
     required this.searchController,
     required this.onSearchChanged,
+    this.onSearchTap,
+    this.restaurants = const [],
   });
 
   @override
@@ -1525,9 +1514,26 @@ class _CombinedAppBar extends StatelessWidget {
                       child: StatefulBuilder(
                         builder: (context, setState) => TextField(
                           controller: searchController,
+                          onTap: () {
+                            if (onSearchTap != null) {
+                              onSearchTap!();
+                            }
+                          },
                           onChanged: (_) {
                             setState(() {});
                             onSearchChanged();
+                            // Navigate to search results if there's text
+                            if (searchController.text.isNotEmpty &&
+                                onSearchTap != null) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (context.mounted) {
+                                  context.push(
+                                    '/search?q=${Uri.encodeComponent(searchController.text)}',
+                                    extra: restaurants,
+                                  );
+                                }
+                              });
+                            }
                           },
                           decoration: InputDecoration(
                             hintText: l10n.searchRestaurants,

@@ -328,7 +328,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen>
                           ),
                         ),
                         Text(
-                          '${item.totalPrice.toStringAsFixed(2)} ر.س',
+                          '${item.totalPrice.toStringAsFixed(2)} ${AppLocalizations.of(context)?.currencySymbol ?? 'ج.م'}',
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -356,7 +356,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '${l10n.total}: ${order.totalAmount.toStringAsFixed(2)} ر.س',
+                    '${l10n.total}: ${order.totalAmount.toStringAsFixed(2)} ${l10n.currencySymbol}',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

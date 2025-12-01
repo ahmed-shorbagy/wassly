@@ -4,10 +4,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/services/toast_service.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../../../../shared/widgets/error_widget.dart';
-import '../../../../shared/widgets/product_card.dart';
 import '../cubits/restaurant_cubit.dart';
 import '../../../orders/presentation/cubits/cart_cubit.dart';
 import '../../domain/entities/product_entity.dart';
@@ -647,7 +645,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
           ),
         ),
 
-        // Products Grid
+        // Products List
         if (_filteredProducts.isEmpty)
           SliverFillRemaining(
             child: Center(
@@ -672,19 +670,18 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
             ),
           )
         else
-          SliverPadding(
-            padding: const EdgeInsets.all(16),
-            sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                childAspectRatio: 0.65,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-              ),
-              delegate: SliverChildBuilderDelegate((context, index) {
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
                 final product = _filteredProducts[index];
-                return _buildProductCard(context, product);
-              }, childCount: _filteredProducts.length),
+                final isLast = index == _filteredProducts.length - 1;
+                return _ProductListTile(
+                  product: product,
+                  restaurant: restaurant,
+                  isLast: isLast,
+                );
+              },
+              childCount: _filteredProducts.length,
             ),
           ),
       ],
@@ -717,26 +714,6 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
     );
   }
 
-  Widget _buildProductCard(BuildContext context, ProductEntity product) {
-    final restaurant = _restaurant;
-
-    return ProductCard(
-      productId: product.id,
-      productName: product.name,
-      description: product.description,
-      price: product.price,
-      imageUrl: product.imageUrl,
-      isAvailable: product.isAvailable,
-      restaurantId: restaurant?.id,
-      onTap: () async {
-        if (product.isAvailable) {
-          await context.read<CartCubit>().addItem(product, context: context);
-        } else {
-          ToastService.showInfo('Product is not available');
-        }
-      },
-    );
-  }
 
   Widget _buildBottomBar(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -753,7 +730,30 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
         final itemCount = state is CartLoaded ? state.itemCount : 0;
 
         if (itemCount == 0) {
-          return Container(
+          return SafeArea(
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, -5),
+                  ),
+                ],
+              ),
+              child: Text(
+                l10n.addProductsWorth(minOrder.toStringAsFixed(2)),
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+              ),
+            ),
+          );
+        }
+
+        return SafeArea(
+          child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.white,
@@ -765,27 +765,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
                 ),
               ],
             ),
-            child: Text(
-              l10n.addProductsWorth(minOrder.toStringAsFixed(2)),
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
-            ),
-          );
-        }
-
-        return Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 10,
-                offset: const Offset(0, -5),
-              ),
-            ],
-          ),
-          child: Row(
+            child: Row(
             children: [
               Expanded(
                 child: Column(
@@ -831,9 +811,185 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
                 child: Text(l10n.viewCart),
               ),
             ],
+            ),
           ),
         );
       },
+    );
+  }
+}
+
+class _ProductListTile extends StatelessWidget {
+  final ProductEntity product;
+  final RestaurantEntity restaurant;
+  final bool isLast;
+
+  const _ProductListTile({
+    required this.product,
+    required this.restaurant,
+    required this.isLast,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return InkWell(
+      onTap: product.isAvailable
+          ? () async {
+              await context.read<CartCubit>().addItem(product, context: context);
+            }
+          : null,
+      child: Column(
+        children: [
+          Container(
+            color: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Product Image with Add Button Overlay
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: AppColors.border,
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: product.imageUrl != null && product.imageUrl!.isNotEmpty
+                            ? CachedNetworkImage(
+                                imageUrl: product.imageUrl!,
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => Container(
+                                  color: AppColors.border,
+                                  child: const Center(
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  ),
+                                ),
+                                errorWidget: (context, url, error) => Container(
+                                  color: AppColors.border,
+                                  child: const Icon(
+                                    Icons.fastfood,
+                                    size: 40,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              )
+                            : Container(
+                                color: AppColors.border,
+                                child: const Icon(
+                                  Icons.fastfood,
+                                  size: 40,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                      ),
+                    ),
+                // Add Button Overlay (Bottom Left)
+                Positioned(
+                  bottom: 8,
+                  left: 8,
+                  child: GestureDetector(
+                    onTap: product.isAvailable
+                        ? () async {
+                            await context.read<CartCubit>().addItem(
+                                  product,
+                                  context: context,
+                                );
+                          }
+                        : null,
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: product.isAvailable
+                            ? AppColors.warning
+                            : AppColors.textSecondary,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.15),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                            spreadRadius: 0,
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.add,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                    ),
+                  ),
+                ),
+                  ],
+                ),
+                const SizedBox(width: 16),
+                // Product Info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      // Product Title
+                      Text(
+                        product.name,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                          height: 1.2,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 6),
+                      // Product Description
+                      Text(
+                        product.description,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                          height: 1.4,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 10),
+                      // Price
+                      Text(
+                        '${product.price.toStringAsFixed(2)} ${l10n.currencySymbol}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.success,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Separator
+          if (!isLast)
+            Divider(
+              height: 1,
+              thickness: 1,
+              color: AppColors.border,
+              indent: 16,
+              endIndent: 16,
+            ),
+        ],
+      ),
     );
   }
 }

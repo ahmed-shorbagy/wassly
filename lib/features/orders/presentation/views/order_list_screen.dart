@@ -303,7 +303,7 @@ class _OrderListScreenState extends State<OrderListScreen>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '${AppLocalizations.of(context)?.total ?? 'Total'}: ${order.totalAmount.toStringAsFixed(2)} ر.س',
+                    '${AppLocalizations.of(context)?.total ?? 'Total'}: ${order.totalAmount.toStringAsFixed(2)} ${AppLocalizations.of(context)?.currencySymbol ?? 'ج.م'}',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,

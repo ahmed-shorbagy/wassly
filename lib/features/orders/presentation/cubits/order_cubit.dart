@@ -321,5 +321,97 @@ class OrderCubit extends Cubit<OrderState> {
       emit(const OrderError('Failed to assign driver'));
     }
   }
+
+  /// Get orders for a driver
+  Future<void> getDriverOrders(String driverId) async {
+    try {
+      emit(OrderLoading());
+      AppLogger.logInfo('Fetching orders for driver: $driverId');
+
+      final result = await repository.getDriverOrders(driverId);
+
+      result.fold(
+        (failure) {
+          AppLogger.logError('Failed to fetch driver orders', error: failure.message);
+          emit(OrderError(failure.message));
+        },
+        (orders) {
+          AppLogger.logSuccess('Fetched ${orders.length} driver orders');
+          emit(OrdersLoaded(orders));
+        },
+      );
+    } catch (e) {
+      AppLogger.logError('Error fetching driver orders', error: e);
+      emit(const OrderError('Failed to fetch driver orders'));
+    }
+  }
+
+  /// Get available orders for drivers
+  Future<void> getAvailableOrdersForDrivers() async {
+    try {
+      emit(OrderLoading());
+      AppLogger.logInfo('Fetching available orders for drivers');
+
+      final result = await repository.getAvailableOrdersForDrivers();
+
+      result.fold(
+        (failure) {
+          AppLogger.logError('Failed to fetch available orders', error: failure.message);
+          emit(OrderError(failure.message));
+        },
+        (orders) {
+          AppLogger.logSuccess('Fetched ${orders.length} available orders');
+          emit(OrdersLoaded(orders));
+        },
+      );
+    } catch (e) {
+      AppLogger.logError('Error fetching available orders', error: e);
+      emit(const OrderError('Failed to fetch available orders'));
+    }
+  }
+
+  /// Listen to driver orders in real-time
+  void listenToDriverOrders(String driverId) {
+    try {
+      AppLogger.logInfo('Setting up real-time listener for driver orders: $driverId');
+
+      _ordersListSubscription?.cancel();
+      _ordersListSubscription = repository.listenToDriverOrders(driverId).listen(
+        (orders) {
+          AppLogger.logInfo('Driver orders updated: ${orders.length} orders');
+          emit(OrdersLoaded(orders));
+        },
+        onError: (error) {
+          AppLogger.logError('Error in driver orders stream', error: error);
+          emit(const OrderError('Failed to get orders updates'));
+        },
+      );
+    } catch (e) {
+      AppLogger.logError('Error setting up driver orders listener', error: e);
+      emit(const OrderError('Failed to listen to orders updates'));
+    }
+  }
+
+  /// Listen to available orders in real-time (for drivers)
+  void listenToAvailableOrders() {
+    try {
+      AppLogger.logInfo('Setting up real-time listener for available orders');
+
+      _ordersListSubscription?.cancel();
+      _ordersListSubscription = repository.listenToAvailableOrders().listen(
+        (orders) {
+          AppLogger.logInfo('Available orders updated: ${orders.length} orders');
+          emit(OrdersLoaded(orders));
+        },
+        onError: (error) {
+          AppLogger.logError('Error in available orders stream', error: error);
+          emit(const OrderError('Failed to get orders updates'));
+        },
+      );
+    } catch (e) {
+      AppLogger.logError('Error setting up available orders listener', error: e);
+      emit(const OrderError('Failed to listen to orders updates'));
+    }
+  }
 }
 

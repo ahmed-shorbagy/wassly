@@ -71,5 +71,47 @@ class MarketProductCategories {
     if (category == l10n.personalCare) return 0xFFE91E63; // Pink
     return 0xFF757575; // Default gray
   }
+
+  /// Get category image URL
+  static String? getCategoryImageUrl(String category, AppLocalizations l10n) {
+    // Using Unsplash placeholder images for each category
+    if (category == l10n.vegetables) {
+      return 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=200&h=200&fit=crop';
+    }
+    if (category == l10n.fruits) {
+      return 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=200&h=200&fit=crop';
+    }
+    if (category == l10n.snacks) {
+      return 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=200&h=200&fit=crop';
+    }
+    if (category == l10n.dairy) {
+      return 'https://images.unsplash.com/photo-1628088062854-d1870b4553da?w=200&h=200&fit=crop';
+    }
+    if (category == l10n.meat) {
+      return 'https://images.unsplash.com/photo-1603048297172-c92544798d4e?w=200&h=200&fit=crop';
+    }
+    if (category == l10n.beverages) {
+      return 'https://images.unsplash.com/photo-1554866585-cd94860890b7?w=200&h=200&fit=crop';
+    }
+    if (category == l10n.bakery) {
+      return 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&h=200&fit=crop';
+    }
+    if (category == l10n.frozen) {
+      return 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=200&h=200&fit=crop';
+    }
+    if (category == l10n.canned) {
+      return 'https://images.unsplash.com/photo-1596797038530-2c107229654b?w=200&h=200&fit=crop';
+    }
+    if (category == l10n.spices) {
+      return 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=200&h=200&fit=crop';
+    }
+    if (category == l10n.cleaning) {
+      return 'https://images.unsplash.com/photo-1584622784357-1794e2c7af3f?w=200&h=200&fit=crop';
+    }
+    if (category == l10n.personalCare) {
+      return 'https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?w=200&h=200&fit=crop';
+    }
+    return 'https://images.unsplash.com/photo-1607082349566-187342175e2f?w=200&h=200&fit=crop'; // Default
+  }
 }
 

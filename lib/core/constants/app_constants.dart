@@ -7,6 +7,7 @@ class AppConstants {
   static const String userTypeCustomer = 'customer';
   static const String userTypeRestaurant = 'restaurant';
   static const String userTypeDriver = 'driver';
+  static const String userTypeAdmin = 'admin';
 
   // Order Status
   static const String orderStatusPending = 'pending';

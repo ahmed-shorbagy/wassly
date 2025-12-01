@@ -358,7 +358,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '${item.quantity}x ${item.price.toStringAsFixed(2)} ر.س',
+                            '${item.quantity}x ${item.price.toStringAsFixed(2)} ${AppLocalizations.of(context)?.currencySymbol ?? 'ج.م'}',
                             style: TextStyle(
                               fontSize: 14,
                               color: AppColors.textSecondary,
@@ -370,7 +370,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
                     // Item total
                     Text(
-                      '${item.totalPrice.toStringAsFixed(2)} ر.س',
+                      '${item.totalPrice.toStringAsFixed(2)} ${AppLocalizations.of(context)?.currencySymbol ?? 'ج.م'}',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -540,7 +540,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 ),
               ),
               Text(
-                '${order.totalAmount.toStringAsFixed(2)} ر.س',
+                '${order.totalAmount.toStringAsFixed(2)} ${AppLocalizations.of(context)?.currencySymbol ?? 'ج.م'}',
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,

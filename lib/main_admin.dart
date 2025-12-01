@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'l10n/app_localizations.dart';
 import 'config/flavor_config.dart';
@@ -27,6 +28,21 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
     AppLogger.logSuccess('Firebase initialized');
+
+    // Automatically sign in anonymously for admin app (no user login required)
+    AppLogger.logInfo('Signing in anonymously for admin access...');
+    try {
+      final auth = FirebaseAuth.instance;
+      if (auth.currentUser == null) {
+        await auth.signInAnonymously();
+        AppLogger.logSuccess('Admin app signed in anonymously - Full access enabled');
+      } else {
+        AppLogger.logInfo('Already signed in as anonymous user');
+      }
+    } catch (e) {
+      AppLogger.logError('Failed to sign in anonymously', error: e);
+      // Continue anyway - some operations might work without auth
+    }
 
     // Initialize Supabase
     AppLogger.logInfo('Initializing Supabase...');

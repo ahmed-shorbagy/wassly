@@ -1,6 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
-import '../../features/auth/presentation/views/splash_screen.dart';
+import '../../features/auth/presentation/views/partner_splash_screen.dart';
 import '../../features/auth/presentation/views/login_screen.dart';
 import '../../features/auth/presentation/views/signup_screen.dart';
 import '../../features/restaurants/presentation/views/restaurant_home_screen.dart';
@@ -20,7 +20,7 @@ class PartnerRouter {
       GoRoute(
         path: '/splash',
         name: 'splash',
-        builder: (context, state) => const SplashScreen(),
+        builder: (context, state) => const PartnerSplashScreen(),
       ),
 
       // Authentication Routes

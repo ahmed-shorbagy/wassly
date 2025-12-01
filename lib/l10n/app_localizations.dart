@@ -2261,13 +2261,13 @@ abstract class AppLocalizations {
   /// No description provided for @currency.
   ///
   /// In en, this message translates to:
-  /// **'SAR'**
+  /// **'EGP'**
   String get currency;
 
   /// No description provided for @currencySymbol.
   ///
   /// In en, this message translates to:
-  /// **'ر.س'**
+  /// **'ج.م'**
   String get currencySymbol;
 
   /// No description provided for @open.
@@ -2281,6 +2281,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Closed'**
   String get closed;
+
+  /// No description provided for @groceries.
+  ///
+  /// In en, this message translates to:
+  /// **'Groceries'**
+  String get groceries;
+
+  /// No description provided for @healthAndBeauty.
+  ///
+  /// In en, this message translates to:
+  /// **'Health & Beauty'**
+  String get healthAndBeauty;
+
+  /// No description provided for @pickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup'**
+  String get pickup;
+
+  /// No description provided for @freeDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Free Delivery'**
+  String get freeDelivery;
+
+  /// No description provided for @sortBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort By'**
+  String get sortBy;
+
+  /// No description provided for @relevance.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Relevant'**
+  String get relevance;
+
+  /// No description provided for @highestRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Highest Rating'**
+  String get highestRating;
+
+  /// No description provided for @fastestDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Fastest Delivery'**
+  String get fastestDelivery;
+
+  /// No description provided for @lowestPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Lowest Price'**
+  String get lowestPrice;
 
   /// No description provided for @selectDeliveryAddress.
   ///

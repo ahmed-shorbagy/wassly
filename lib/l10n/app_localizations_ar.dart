@@ -1119,16 +1119,43 @@ class AppLocalizationsAr extends AppLocalizations {
   String get displayOrder => 'ترتيب العرض';
 
   @override
-  String get currency => 'ريال سعودي';
+  String get currency => 'جنيه مصري';
 
   @override
-  String get currencySymbol => 'ر.س';
+  String get currencySymbol => 'ج.م';
 
   @override
   String get open => 'مفتوح';
 
   @override
   String get closed => 'مغلق';
+
+  @override
+  String get groceries => 'البقالة';
+
+  @override
+  String get healthAndBeauty => 'الصحة والجمال';
+
+  @override
+  String get pickup => 'الاستلام';
+
+  @override
+  String get freeDelivery => 'توصيل مجاني';
+
+  @override
+  String get sortBy => 'رتب حسب';
+
+  @override
+  String get relevance => 'الأكثر صلة';
+
+  @override
+  String get highestRating => 'الأعلى تقييماً';
+
+  @override
+  String get fastestDelivery => 'أسرع توصيل';
+
+  @override
+  String get lowestPrice => 'الأقل سعراً';
 
   @override
   String get selectDeliveryAddress => 'حدد عنوان التوصيل';

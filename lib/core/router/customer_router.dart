@@ -6,6 +6,7 @@ import '../../features/auth/presentation/views/signup_screen.dart';
 import '../../features/restaurants/presentation/views/customer_home_screen.dart';
 import '../../features/restaurants/presentation/views/favorites_screen.dart';
 import '../../features/restaurants/presentation/views/restaurant_detail_screen.dart';
+import '../../features/restaurants/presentation/views/search_results_screen.dart';
 import '../../features/orders/presentation/views/cart_screen.dart';
 import '../../features/orders/presentation/views/checkout_screen.dart';
 import '../../features/orders/presentation/views/order_list_screen.dart';
@@ -48,6 +49,18 @@ class CustomerRouter {
         path: '/home',
         name: 'home',
         builder: (context, state) => const CustomerHomeScreen(),
+      ),
+      GoRoute(
+        path: '/search',
+        name: 'search',
+        builder: (context, state) {
+          final query = state.uri.queryParameters['q'] ?? '';
+          final restaurants = state.extra as List?;
+          return SearchResultsScreen(
+            initialQuery: query,
+            initialRestaurants: restaurants?.cast(),
+          );
+        },
       ),
       GoRoute(
         path: '/restaurant/:id',

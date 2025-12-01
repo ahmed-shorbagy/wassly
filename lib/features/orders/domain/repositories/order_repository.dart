@@ -55,5 +55,17 @@ abstract class OrderRepository {
     String driverName,
     String driverPhone,
   );
+
+  /// Get orders for a driver
+  Future<Either<Failure, List<OrderEntity>>> getDriverOrders(String driverId);
+
+  /// Get available orders for drivers (ready to be picked up)
+  Future<Either<Failure, List<OrderEntity>>> getAvailableOrdersForDrivers();
+
+  /// Listen to driver orders (real-time)
+  Stream<List<OrderEntity>> listenToDriverOrders(String driverId);
+
+  /// Listen to available orders (real-time) - for drivers to pick up
+  Stream<List<OrderEntity>> listenToAvailableOrders();
 }
 

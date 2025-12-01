@@ -58,6 +58,7 @@ dependencies:
   
   # UI & Utils
   cached_network_image: ^3.3.0
+  carousel_slider: ^5.1.1
   image_picker: ^1.0.5
   intl: ^0.20.2
   intl_phone_field: ^3.2.0

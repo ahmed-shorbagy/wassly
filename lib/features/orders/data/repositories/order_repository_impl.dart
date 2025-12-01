@@ -349,5 +349,94 @@ class OrderRepositoryImpl implements OrderRepository {
       return Left(ServerFailure('Failed to assign driver'));
     }
   }
+
+  @override
+  Future<Either<Failure, List<OrderEntity>>> getDriverOrders(
+    String driverId,
+  ) async {
+    try {
+      AppLogger.logInfo('Fetching orders for driver: $driverId');
+
+      final snapshot = await firestore
+          .collection('orders')
+          .where('driverId', isEqualTo: driverId)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      final orders = snapshot.docs.map((doc) {
+        return OrderModel.fromFirestore(doc);
+      }).toList();
+
+      AppLogger.logSuccess('Fetched ${orders.length} orders for driver');
+      return Right(orders);
+    } on FirebaseException catch (e) {
+      AppLogger.logError('Firebase error fetching driver orders', error: e);
+      return Left(ServerFailure('Failed to fetch orders: ${e.message}'));
+    } catch (e) {
+      AppLogger.logError('Error fetching driver orders', error: e);
+      return Left(ServerFailure('Failed to fetch orders'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<OrderEntity>>> getAvailableOrdersForDrivers() async {
+    try {
+      AppLogger.logInfo('Fetching available orders for drivers');
+
+      final snapshot = await firestore
+          .collection('orders')
+          .where('status', isEqualTo: 'ready')
+          .where('driverId', isNull: true)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      final orders = snapshot.docs.map((doc) {
+        return OrderModel.fromFirestore(doc);
+      }).toList();
+
+      AppLogger.logSuccess('Fetched ${orders.length} available orders');
+      return Right(orders);
+    } on FirebaseException catch (e) {
+      AppLogger.logError('Firebase error fetching available orders', error: e);
+      return Left(ServerFailure('Failed to fetch available orders: ${e.message}'));
+    } catch (e) {
+      AppLogger.logError('Error fetching available orders', error: e);
+      return Left(ServerFailure('Failed to fetch available orders'));
+    }
+  }
+
+  @override
+  Stream<List<OrderEntity>> listenToDriverOrders(String driverId) {
+    AppLogger.logInfo('Setting up real-time listener for driver orders');
+
+    return firestore
+        .collection('orders')
+        .where('driverId', isEqualTo: driverId)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs.map((doc) {
+            return OrderModel.fromFirestore(doc);
+          }).toList();
+        });
+  }
+
+  @override
+  Stream<List<OrderEntity>> listenToAvailableOrders() {
+    AppLogger.logInfo('Setting up real-time listener for available orders');
+
+    return firestore
+        .collection('orders')
+        .where('status', isEqualTo: 'ready')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          // Filter out orders that already have a driver assigned
+          return snapshot.docs
+              .map((doc) => OrderModel.fromFirestore(doc))
+              .where((order) => order.driverId == null || order.driverId!.isEmpty)
+              .toList();
+        });
+  }
 }
 

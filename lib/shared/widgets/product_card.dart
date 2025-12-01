@@ -178,7 +178,7 @@ class ProductCard extends StatelessWidget {
                   children: [
                     // Price
                     Text(
-                      '${price.toStringAsFixed(2)} ر.س',
+                      '${price.toStringAsFixed(2)} ${AppLocalizations.of(context)?.currencySymbol ?? 'ج.م'}',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

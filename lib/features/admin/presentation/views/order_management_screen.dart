@@ -355,7 +355,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Total: ${order.totalAmount.toStringAsFixed(2)} ر.س',
+                    'Total: ${order.totalAmount.toStringAsFixed(2)} ${AppLocalizations.of(context)?.currencySymbol ?? 'ج.م'}',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,

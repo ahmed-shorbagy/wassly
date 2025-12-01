@@ -152,19 +152,21 @@ class CartScreen extends StatelessWidget {
         ),
 
         // Total and Checkout Section
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 10,
-                offset: const Offset(0, -5),
-              ),
-            ],
-          ),
-          child: Column(
+        SafeArea(
+          top: false,
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, -5),
+                ),
+              ],
+            ),
+            child: Column(
             children: [
               // Subtotal
               Row(
@@ -231,6 +233,7 @@ class CartScreen extends StatelessWidget {
                 ),
               ),
             ],
+          ),
           ),
         ),
       ],
