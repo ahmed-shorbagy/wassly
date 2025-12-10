@@ -326,6 +326,13 @@ class AdminDashboardScreen extends StatelessWidget {
         route: '/admin/ads/banners',
         gradient: [Colors.cyan.shade400, Colors.cyan.shade600],
       ),
+      _DashboardItem(
+        title: 'Articles',
+        icon: Icons.article,
+        color: Colors.pink,
+        route: '/admin/articles',
+        gradient: [Colors.pink.shade400, Colors.pink.shade600],
+      ),
     ];
   }
 

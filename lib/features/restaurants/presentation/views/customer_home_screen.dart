@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/market_product_categories.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/error_widget.dart';
 import '../../../home/presentation/cubits/home_cubit.dart';
@@ -888,23 +887,20 @@ class _MarketProductCategoriesSection extends StatelessWidget {
     required this.onViewAllTap,
   });
 
-  Widget _buildCategoryItem(
-    String category,
-    AppLocalizations l10n,
-    Function(String) onTap,
+  Widget _buildMarketCard(
+    BuildContext context,
+    String imagePath,
+    String title,
+    VoidCallback onTap,
   ) {
-    final icon = MarketProductCategories.getCategoryIcon(category, l10n);
-
     return GestureDetector(
-      onTap: () => onTap(category),
+      onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 100,
             height: 100,
             decoration: BoxDecoration(
-              color: Colors.white,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
@@ -914,24 +910,36 @@ class _MarketProductCategoriesSection extends StatelessWidget {
                 ),
               ],
             ),
-            child: Center(
-              child: Text(icon, style: const TextStyle(fontSize: 48)),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.asset(
+                imagePath,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: AppColors.surface,
+                    child: const Icon(
+                      Icons.image_not_supported,
+                      size: 48,
+                      color: AppColors.textSecondary,
+                    ),
+                  );
+                },
+              ),
             ),
           ),
           const SizedBox(height: 8),
-          SizedBox(
-            width: 100,
-            child: Text(
-              category,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-                height: 1.2,
-              ),
+          Text(
+            title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+              height: 1.2,
             ),
           ),
         ],
@@ -942,7 +950,6 @@ class _MarketProductCategoriesSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final categories = MarketProductCategories.getCategories(l10n);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -971,63 +978,37 @@ class _MarketProductCategoriesSection extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 20),
-        // Categories - Horizontal scrollable with 3 items per row (2 rows visible)
-        SizedBox(
-          height:
-              280, // Height for 2 rows: (100 card + 8 spacing + ~28 text) * 2 + 16 row spacing
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            itemCount: (categories.length / 6)
-                .ceil(), // Each page shows 6 items (2 rows x 3)
-            itemBuilder: (context, pageIndex) {
-              final startIndex = pageIndex * 6;
-
-              return SizedBox(
-                width:
-                    MediaQuery.of(context).size.width -
-                    32, // Full width minus padding
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // First row
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: List.generate(3, (colIndex) {
-                        final index = startIndex + colIndex;
-                        if (index >= categories.length) {
-                          return const SizedBox(width: 100);
-                        }
-                        return _buildCategoryItem(
-                          categories[index],
-                          l10n,
-                          onCategoryTap,
-                        );
-                      }),
-                    ),
-                    const SizedBox(height: 16),
-                    // Second row
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: List.generate(3, (colIndex) {
-                        final index = startIndex + 3 + colIndex;
-                        if (index >= categories.length) {
-                          return const SizedBox(width: 100);
-                        }
-                        return _buildCategoryItem(
-                          categories[index],
-                          l10n,
-                          onCategoryTap,
-                        );
-                      }),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+        const SizedBox(height: 16),
+        // Market Images - Grid layout (3 columns, 1 row)
+        Row(
+          children: [
+            Expanded(
+              child: _buildMarketCard(
+                context,
+                'assets/images/food.jpeg',
+                l10n.fastFood,
+                onViewAllTap,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildMarketCard(
+                context,
+                'assets/images/fruits.jpeg',
+                l10n.fruits,
+                onViewAllTap,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildMarketCard(
+                context,
+                'assets/images/market.jpeg',
+                l10n.market,
+                onViewAllTap,
+              ),
+            ),
+          ],
         ),
       ],
     );

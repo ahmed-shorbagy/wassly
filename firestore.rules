@@ -169,6 +169,14 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+
+    // Articles
+    match /articles/{articleId} {
+      // Everyone can read published articles
+      allow read: if resource.data.isPublished == true || isAdmin();
+      // Only admins can create, update, or delete articles
+      allow write: if isAdmin();
+    }
   }
 }
 

@@ -175,6 +175,10 @@
   "browseRestaurants": "تصفح المطاعم",
   "total": "المجموع",
   "proceedToCheckout": "إتمام الطلب",
+  "navHome": "الرئيسية",
+  "navOrders": "طلباتي",
+  "navProfile": "حسابي",
+  "navPay": "الدفع",
   "remove": "حذف",
   "quantity": "الكمية",
   "itemAddedToCart": "تم إضافة {productName} إلى السلة",
@@ -529,6 +533,7 @@
   "tapToUploadImage": "اضغط لرفع الصورة",
   
   "marketProductCategories": "فئات السوق",
+  "market": "السوق",
   "vegetables": "خضروات",
   "fruits": "فواكه",
   "snacks": "وجبات خفيفة",

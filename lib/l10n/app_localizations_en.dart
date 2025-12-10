@@ -506,6 +506,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get proceedToCheckout => 'Proceed to Checkout';
 
   @override
+  String get navHome => 'Home';
+
+  @override
+  String get navOrders => 'My Orders';
+
+  @override
+  String get navProfile => 'My Profile';
+
+  @override
+  String get navPay => 'Pay';
+
+  @override
   String get remove => 'Remove';
 
   @override
@@ -1354,6 +1366,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get marketProductCategories => 'Market Categories';
+
+  @override
+  String get market => 'Market';
 
   @override
   String get vegetables => 'Vegetables';

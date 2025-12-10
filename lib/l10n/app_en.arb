@@ -192,6 +192,10 @@
   "browseRestaurants": "Browse Restaurants",
   "total": "Total",
   "proceedToCheckout": "Proceed to Checkout",
+  "navHome": "Home",
+  "navOrders": "My Orders",
+  "navProfile": "My Profile",
+  "navPay": "Pay",
   "remove": "Remove",
   "quantity": "Quantity",
   "itemAddedToCart": "{productName} added to cart",
@@ -547,6 +551,7 @@
   "tapToUploadImage": "Tap to upload image",
   
   "marketProductCategories": "Market Categories",
+  "market": "Market",
   "vegetables": "Vegetables",
   "fruits": "Fruits",
   "snacks": "Snacks",

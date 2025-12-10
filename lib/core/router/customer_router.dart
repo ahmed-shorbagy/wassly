@@ -1,5 +1,5 @@
-import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/views/splash_screen.dart';
 import '../../features/auth/presentation/views/login_screen.dart';
 import '../../features/auth/presentation/views/signup_screen.dart';
@@ -13,9 +13,22 @@ import '../../features/orders/presentation/views/order_list_screen.dart';
 import '../../features/orders/presentation/views/order_detail_screen.dart';
 import '../../features/auth/presentation/views/customer_profile_screen.dart';
 import '../../features/market_products/presentation/views/market_products_screen.dart';
+import '../../features/navigation/presentation/views/customer_navigation_shell.dart';
 
 class CustomerRouter {
+  static final GlobalKey<NavigatorState> _rootNavigatorKey =
+      GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> _homeNavigatorKey =
+      GlobalKey<NavigatorState>(debugLabel: 'homeBranch');
+  static final GlobalKey<NavigatorState> _ordersNavigatorKey =
+      GlobalKey<NavigatorState>(debugLabel: 'ordersBranch');
+  static final GlobalKey<NavigatorState> _profileNavigatorKey =
+      GlobalKey<NavigatorState>(debugLabel: 'profileBranch');
+  static final GlobalKey<NavigatorState> _payNavigatorKey =
+      GlobalKey<NavigatorState>(debugLabel: 'payBranch');
+
   static final GoRouter router = GoRouter(
+    navigatorKey: _rootNavigatorKey,
     initialLocation: '/splash',
     redirect: (context, state) {
       // Redirect root path to home if authenticated, otherwise to splash
@@ -44,11 +57,53 @@ class CustomerRouter {
         builder: (context, state) => const SignupScreen(),
       ),
 
-      // Customer Routes
-      GoRoute(
-        path: '/home',
-        name: 'home',
-        builder: (context, state) => const CustomerHomeScreen(),
+      // Customer Shell with bottom navigation
+      StatefulShellRoute.indexedStack(
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state, navigationShell) =>
+            CustomerNavigationShell(navigationShell: navigationShell),
+        branches: [
+          StatefulShellBranch(
+            navigatorKey: _homeNavigatorKey,
+            routes: [
+              GoRoute(
+                path: '/home',
+                name: 'home',
+                builder: (context, state) => const CustomerHomeScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            navigatorKey: _ordersNavigatorKey,
+            routes: [
+              GoRoute(
+                path: '/orders',
+                name: 'orders',
+                builder: (context, state) => const OrderListScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            navigatorKey: _profileNavigatorKey,
+            routes: [
+              GoRoute(
+                path: '/profile',
+                name: 'profile',
+                builder: (context, state) => const CustomerProfileScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            navigatorKey: _payNavigatorKey,
+            routes: [
+              GoRoute(
+                path: '/cart',
+                name: 'cart',
+                builder: (context, state) => const CartScreen(),
+              ),
+            ],
+          ),
+        ],
       ),
       GoRoute(
         path: '/search',
@@ -71,11 +126,6 @@ class CustomerRouter {
         },
       ),
       GoRoute(
-        path: '/cart',
-        name: 'cart',
-        builder: (context, state) => const CartScreen(),
-      ),
-      GoRoute(
         path: '/favorites',
         name: 'favorites',
         builder: (context, state) => const FavoritesScreen(),
@@ -94,22 +144,12 @@ class CustomerRouter {
         },
       ),
       GoRoute(
-        path: '/orders',
-        name: 'orders',
-        builder: (context, state) => const OrderListScreen(),
-      ),
-      GoRoute(
         path: '/order/:id',
         name: 'order-detail',
         builder: (context, state) {
           final orderId = state.pathParameters['id'] ?? '';
           return OrderDetailScreen(orderId: orderId);
         },
-      ),
-      GoRoute(
-        path: '/profile',
-        name: 'profile',
-        builder: (context, state) => const CustomerProfileScreen(),
       ),
       GoRoute(
         path: '/market-products',

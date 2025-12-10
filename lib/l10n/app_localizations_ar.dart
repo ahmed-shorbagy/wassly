@@ -502,6 +502,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get proceedToCheckout => 'إتمام الطلب';
 
   @override
+  String get navHome => 'الرئيسية';
+
+  @override
+  String get navOrders => 'طلباتي';
+
+  @override
+  String get navProfile => 'حسابي';
+
+  @override
+  String get navPay => 'الدفع';
+
+  @override
   String get remove => 'حذف';
 
   @override
@@ -1345,6 +1357,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get marketProductCategories => 'فئات السوق';
+
+  @override
+  String get market => 'السوق';
 
   @override
   String get vegetables => 'خضروات';

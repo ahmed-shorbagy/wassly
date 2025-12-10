@@ -52,6 +52,9 @@ import '../../features/drivers/presentation/cubits/driver_cubit.dart';
 import '../../features/delivery_address/domain/repositories/delivery_address_repository.dart';
 import '../../features/delivery_address/data/repositories/delivery_address_repository_impl.dart';
 import '../../features/delivery_address/presentation/cubits/delivery_address_cubit.dart';
+import '../../features/articles/domain/repositories/article_repository.dart';
+import '../../features/articles/data/repositories/article_repository_impl.dart';
+import '../../features/articles/presentation/cubits/article_cubit.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import '../network/network_info.dart';
 import '../network/supabase_service.dart';
@@ -80,6 +83,7 @@ class InjectionContainer {
   late final FoodCategoryRepository _foodCategoryRepository;
   late final DriverRepository _driverRepository;
   late final DeliveryAddressRepository _deliveryAddressRepository;
+  late final ArticleRepository _articleRepository;
 
   Future<void> init() async {
     // External dependencies
@@ -144,6 +148,10 @@ class InjectionContainer {
     );
 
     _deliveryAddressRepository = DeliveryAddressRepositoryImpl(
+      firestore: _firestore,
+    );
+
+    _articleRepository = ArticleRepositoryImpl(
       firestore: _firestore,
     );
   }
@@ -258,6 +266,25 @@ class InjectionContainer {
         create: (context) => DeliveryAddressCubit(
           repository: _deliveryAddressRepository,
           authCubit: context.read<AuthCubit>(),
+        ),
+      ),
+      BlocProvider<ArticleCubit>(
+        create: (_) => ArticleCubit(
+          repository: _articleRepository,
+        ),
+      ),
+    ];
+  }
+
+  // Minimal providers for web app - only what's needed for landing page
+  List<BlocProvider> getWebBlocProviders() {
+    return [
+      BlocProvider<LocaleCubit>(
+        create: (_) => LocaleCubit()..load(),
+      ),
+      BlocProvider<ArticleCubit>(
+        create: (_) => ArticleCubit(
+          repository: _articleRepository,
         ),
       ),
     ];

@@ -31,6 +31,9 @@ import '../../features/restaurants/domain/entities/restaurant_entity.dart';
 import '../../features/market_products/domain/entities/market_product_entity.dart';
 import '../../features/ads/domain/entities/startup_ad_entity.dart';
 import '../../features/home/domain/entities/banner_entity.dart';
+import '../../features/admin/presentation/views/admin_article_list_screen.dart';
+import '../../features/admin/presentation/views/admin_add_article_screen.dart';
+import '../../features/admin/presentation/views/admin_edit_article_screen.dart';
 
 class AdminRouter {
   static final GoRouter router = GoRouter(
@@ -189,6 +192,27 @@ class AdminRouter {
             path: 'orders',
             name: 'orders',
             builder: (context, state) => const OrderManagementScreen(),
+          ),
+          // Articles Management
+          GoRoute(
+            path: 'articles',
+            name: 'articles',
+            builder: (context, state) => const AdminArticleListScreen(),
+            routes: [
+              GoRoute(
+                path: 'create',
+                name: 'create-article',
+                builder: (context, state) => const AdminAddArticleScreen(),
+              ),
+              GoRoute(
+                path: 'edit/:id',
+                name: 'edit-article',
+                builder: (context, state) {
+                  final articleId = state.pathParameters['id'] ?? '';
+                  return AdminEditArticleScreen(articleId: articleId);
+                },
+              ),
+            ],
           ),
           // Settings
           GoRoute(

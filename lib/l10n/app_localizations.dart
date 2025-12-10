@@ -1064,6 +1064,30 @@ abstract class AppLocalizations {
   /// **'Proceed to Checkout'**
   String get proceedToCheckout;
 
+  /// No description provided for @navHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get navHome;
+
+  /// No description provided for @navOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'My Orders'**
+  String get navOrders;
+
+  /// No description provided for @navProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'My Profile'**
+  String get navProfile;
+
+  /// No description provided for @navPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay'**
+  String get navPay;
+
   /// No description provided for @remove.
   ///
   /// In en, this message translates to:
@@ -2701,6 +2725,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Market Categories'**
   String get marketProductCategories;
+
+  /// No description provided for @market.
+  ///
+  /// In en, this message translates to:
+  /// **'Market'**
+  String get market;
 
   /// No description provided for @vegetables.
   ///
