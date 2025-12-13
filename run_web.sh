@@ -1,38 +1,34 @@
 #!/bin/bash
-# ROOT FIX: Ensures localization files exist and persist through build
-
-set -e
+# Ultimate solution: Ensures localization files are generated before compilation
 
 echo "🔧 Setting up web app..."
 
-# Step 1: Ensure files are generated (pub get auto-generates with generate: true)
-echo "📦 Getting dependencies (auto-generates localization files)..."
+# Step 1: Clean and get dependencies (this should trigger generation)
+echo "📦 Getting dependencies (triggers auto-generation)..."
 flutter pub get
 
-# Step 2: Verify files exist
-if [ ! -f "lib/l10n/app_localizations.dart" ]; then
-    echo "⚠️  Files not auto-generated, generating manually..."
-    flutter gen-l10n
-fi
+# Step 2: Explicitly generate localization files
+echo "🌐 Explicitly generating localization files..."
+flutter gen-l10n
 
-# Step 3: Wait and verify files persist
-sleep 1
+# Step 3: Verify files exist before proceeding
 if [ ! -f "lib/l10n/app_localizations.dart" ]; then
-    echo "❌ Files disappeared! Clean rebuild..."
-    flutter clean
+    echo "❌ ERROR: Localization files not generated!"
+    echo "Attempting manual generation..."
     flutter pub get
     flutter gen-l10n
     sleep 2
+    
+    if [ ! -f "lib/l10n/app_localizations.dart" ]; then
+        echo "❌ CRITICAL: Cannot generate localization files!"
+        echo "Checking l10n configuration..."
+        cat l10n.yaml
+        exit 1
+    fi
 fi
 
-# Final verification
-if [ ! -f "lib/l10n/app_localizations.dart" ]; then
-    echo "❌ CRITICAL: Cannot ensure localization files exist!"
-    exit 1
-fi
-
-echo "✅ Localization files confirmed"
+echo "✅ Localization files confirmed at lib/l10n/app_localizations.dart"
 echo "🚀 Starting web app..."
 
-# Let Flutter manage the build process (it will auto-generate if needed)
+# Run the app - Flutter build system should preserve generated files
 flutter run -d chrome --target=lib/main_web.dart

@@ -86,6 +86,28 @@ class AdminCubit extends Cubit<AdminState> {
     }
   }
 
+  Future<void> updateRestaurantDiscount(String restaurantId, bool hasDiscount) async {
+    try {
+      AppLogger.logInfo('Updating restaurant discount: $restaurantId to $hasDiscount');
+
+      final result = await repository.toggleRestaurantDiscount(restaurantId, hasDiscount);
+
+      result.fold(
+        (failure) {
+          AppLogger.logError('Failed to update discount', error: failure.message);
+          emit(AdminError(failure.message));
+        },
+        (_) {
+          AppLogger.logSuccess('Restaurant discount updated');
+          emit(RestaurantStatusUpdated());
+        },
+      );
+    } catch (e) {
+      AppLogger.logError('Error updating restaurant discount', error: e);
+      emit(const AdminError('Failed to update restaurant discount'));
+    }
+  }
+
   Future<void> updateRestaurant({
     required String restaurantId,
     required String name,

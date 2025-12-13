@@ -58,6 +58,12 @@ abstract class RestaurantOwnerRepository {
     bool isOpen,
   );
 
+  /// Toggle restaurant discount (enable/disable)
+  Future<Either<Failure, void>> toggleRestaurantDiscount(
+    String restaurantId,
+    bool hasDiscount,
+  );
+
   /// Delete restaurant
   Future<Either<Failure, void>> deleteRestaurant(String restaurantId);
 

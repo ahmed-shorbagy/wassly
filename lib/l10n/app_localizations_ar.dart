@@ -1155,6 +1155,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get freeDelivery => 'توصيل مجاني';
 
   @override
+  String get orderNowForDeliveryToday =>
+      'اطلب الآن ليصل طلبك اليوم عند الساعة ١٠:٠٠';
+
+  @override
+  String get schedule => 'جدولة';
+
+  @override
   String get sortBy => 'رتب حسب';
 
   @override
@@ -1390,4 +1397,37 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get personalCare => 'العناية الشخصية';
+
+  @override
+  String get fish => 'أسماك';
+
+  @override
+  String get dairyProducts => 'ألبان';
+
+  @override
+  String get cheese => 'جبن';
+
+  @override
+  String get eggs => 'بيض';
+
+  @override
+  String get softDrinks => 'مشروبات غازية';
+
+  @override
+  String get water => 'مياه';
+
+  @override
+  String get juices => 'عصائر';
+
+  @override
+  String get pastaAndRice => 'مكرونات و أرز';
+
+  @override
+  String get chipsAndSnacks => 'شيبسي';
+
+  @override
+  String get topCategories => 'الفئات الرئيسية';
+
+  @override
+  String get pleaseSelectCategory => 'الرجاء اختيار فئة';
 }

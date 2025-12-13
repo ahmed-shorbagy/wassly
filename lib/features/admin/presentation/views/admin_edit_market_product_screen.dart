@@ -150,12 +150,18 @@ class _AdminEditMarketProductScreenState
       return;
     }
 
+    // Validate category is selected
+    if (_selectedCategory == null || _selectedCategory!.isEmpty) {
+      context.showErrorSnackBar('Please select a category');
+      return;
+    }
+
     context.read<MarketProductCubit>().updateMarketProduct(
           productId: widget.productId,
           name: _nameController.text.trim(),
           description: _descriptionController.text.trim(),
           price: price,
-          category: _selectedCategory,
+          category: _selectedCategory!,
           imageFile: _selectedImage,
           isAvailable: _isAvailable,
         );
@@ -324,11 +330,12 @@ class _AdminEditMarketProductScreenState
                   ),
                   const SizedBox(height: 16),
 
-                  // Category
+                  // Category - Required
                   DropdownButtonFormField<String>(
                     value: _selectedCategory,
                     decoration: InputDecoration(
                       labelText: l10n.productCategory,
+                      hintText: l10n.pleaseSelectCategory,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -344,6 +351,12 @@ class _AdminEditMarketProductScreenState
                       setState(() {
                         _selectedCategory = value;
                       });
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return l10n.pleaseSelectCategory;
+                      }
+                      return null;
                     },
                   ),
                   const SizedBox(height: 16),

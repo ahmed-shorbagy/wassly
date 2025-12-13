@@ -42,7 +42,8 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
   }
 
   void _loadAllOrders() {
-    context.read<OrderCubit>().getAllOrders();
+    // Use real-time listener for automatic updates
+    context.read<OrderCubit>().listenToAllOrders();
   }
 
   void _filterOrders() {

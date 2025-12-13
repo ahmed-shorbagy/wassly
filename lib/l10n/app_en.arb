@@ -468,6 +468,8 @@
   "healthAndBeauty": "Health & Beauty",
   "pickup": "Pickup",
   "freeDelivery": "Free Delivery",
+  "orderNowForDeliveryToday": "Order now for your order to arrive today at 10:00",
+  "schedule": "Schedule",
   "sortBy": "Sort By",
   "relevance": "Most Relevant",
   "highestRating": "Highest Rating",
@@ -561,6 +563,17 @@
   "canned": "Canned",
   "spices": "Spices",
   "cleaning": "Cleaning",
-  "personalCare": "Personal Care"
+  "personalCare": "Personal Care",
+  "fish": "Fish",
+  "dairyProducts": "Dairy Products",
+  "cheese": "Cheese",
+  "eggs": "Eggs",
+  "softDrinks": "Soft Drinks",
+  "water": "Water",
+  "juices": "Juices",
+  "pastaAndRice": "Pasta and Rice",
+  "chipsAndSnacks": "Chips and Snacks",
+  "topCategories": "Top Categories",
+  "pleaseSelectCategory": "Please select a category"
 }
 

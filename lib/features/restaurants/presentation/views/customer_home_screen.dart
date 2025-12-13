@@ -9,7 +9,6 @@ import '../../../../shared/widgets/error_widget.dart';
 import '../../../home/presentation/cubits/home_cubit.dart';
 import '../../../home/domain/entities/banner_entity.dart';
 import '../cubits/restaurant_cubit.dart';
-import '../../../orders/presentation/cubits/cart_cubit.dart';
 import '../../domain/entities/restaurant_entity.dart';
 import '../cubits/favorites_cubit.dart';
 import '../../../market_products/presentation/cubits/market_product_customer_cubit.dart';
@@ -235,7 +234,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             pinned: true,
             elevation: 0,
             backgroundColor: AppColors.primaryDark,
-            toolbarHeight: 120,
+            toolbarHeight: 100,
             automaticallyImplyLeading: false,
             flexibleSpace: _CombinedAppBar(
               searchController: _searchController,
@@ -979,36 +978,69 @@ class _MarketProductCategoriesSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        // Market Images - Grid layout (3 columns, 1 row)
-        Row(
-          children: [
-            Expanded(
-              child: _buildMarketCard(
-                context,
-                'assets/images/food.jpeg',
-                l10n.fastFood,
-                onViewAllTap,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildMarketCard(
-                context,
-                'assets/images/fruits.jpeg',
-                l10n.fruits,
-                onViewAllTap,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildMarketCard(
-                context,
-                'assets/images/market.jpeg',
-                l10n.market,
-                onViewAllTap,
-              ),
-            ),
-          ],
+        // Market Images - Grid layout (scrollable horizontal)
+        SizedBox(
+          height: 120,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: 6,
+            itemBuilder: (context, index) {
+              final categories = [
+                {
+                  'image': 'assets/images/resturants.jpeg',
+                  'title': l10n.fastFood,
+                  'category': null,
+                },
+                {
+                  'image': 'assets/images/fruits&veg.jpeg',
+                  'title': l10n.fruits,
+                  'category': l10n.fruits,
+                },
+                {
+                  'image': 'assets/images/market.jpeg',
+                  'title': l10n.market,
+                  'category': null,
+                },
+                {
+                  'image': 'assets/images/fish.jpeg',
+                  'title': l10n.fish,
+                  'category': l10n.fish,
+                },
+                {
+                  'image': 'assets/images/meats.jpeg',
+                  'title': l10n.meat,
+                  'category': l10n.meat,
+                },
+                {
+                  'image': 'assets/images/cake&cofee.jpeg',
+                  'title': l10n.bakery,
+                  'category': l10n.bakery,
+                },
+              ];
+              
+              final item = categories[index];
+              return Padding(
+                padding: EdgeInsets.only(right: index == categories.length - 1 ? 0 : 12),
+                child: SizedBox(
+                  width: 110,
+                  child: _buildMarketCard(
+                    context,
+                    item['image'] as String,
+                    item['title'] as String,
+                    () {
+                      if (item['category'] != null) {
+                        context.push(
+                          '/market-products?category=${Uri.encodeComponent(item['category'] as String)}',
+                        );
+                      } else {
+                        onViewAllTap();
+                      }
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
         ),
       ],
     );
@@ -1060,7 +1092,7 @@ class _DiscountRestaurantsCarousel extends StatelessWidget {
         const SizedBox(height: 16),
         // Carousel
         SizedBox(
-          height: 200,
+          height: 240,
           child: PageView.builder(
             controller: controller,
             onPageChanged: onPageChanged,
@@ -1163,7 +1195,7 @@ class _DiscountRestaurantBanner extends StatelessWidget {
                       ),
                     ),
 
-              // Gradient Overlay
+              // Gradient Overlay (darker at bottom)
               Positioned.fill(
                 child: Container(
                   decoration: BoxDecoration(
@@ -1172,29 +1204,90 @@ class _DiscountRestaurantBanner extends StatelessWidget {
                       end: Alignment.bottomCenter,
                       colors: [
                         Colors.transparent,
-                        Colors.black.withValues(alpha: 0.7),
+                        Colors.black.withValues(alpha: 0.4),
+                        Colors.black.withValues(alpha: 0.85),
                       ],
+                      stops: const [0.0, 0.6, 1.0],
                     ),
                   ),
                 ),
               ),
 
-              // Discount Badge
+              // Brand Name (Upper Right)
               Positioned(
                 top: 12,
-                left: 12,
+                right: 12,
+                child: Text(
+                  restaurant.name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black54,
+                        offset: Offset(0, 2),
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Rating Badge (Bottom Left - Green)
+              if (restaurant.rating > 0)
+                Positioned(
+                  bottom: 80,
+                  left: 12,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.success,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.star,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${restaurant.rating.toStringAsFixed(1)} (${restaurant.totalReviews})',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+              // Free Delivery Button (Bottom Right - Purple)
+              Positioned(
+                bottom: 80,
+                right: 12,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        AppColors.warning,
-                        AppColors.warning.withValues(alpha: 0.8),
-                      ],
-                    ),
+                    color: Colors.purple,
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
@@ -1204,31 +1297,18 @@ class _DiscountRestaurantBanner extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.local_offer,
-                        color: Colors.white,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        restaurant.discountPercentage != null
-                            ? '${restaurant.discountPercentage!.toStringAsFixed(0)}% ${l10n.off}'
-                            : l10n.specialOffer,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    l10n.freeDelivery,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
 
-              // Restaurant Info at Bottom
+              // Bottom Section with Order Now, Schedule, and Restaurant Name
               Positioned(
                 bottom: 0,
                 left: 0,
@@ -1236,90 +1316,66 @@ class _DiscountRestaurantBanner extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withValues(alpha: 0.9),
-                      ],
+                    color: Colors.grey[200],
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(20),
+                      bottomRight: Radius.circular(20),
                     ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      // Order Now Text with Delivery Time
+                      Text(
+                        l10n.orderNowForDeliveryToday,
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 8),
+                      // Schedule Option
+                      Row(
+                        children: [
+                          Container(
+                            width: 20,
+                            height: 20,
+                            decoration: BoxDecoration(
+                              color: Colors.pink[300],
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Icon(
+                              Icons.calendar_today,
+                              color: Colors.white,
+                              size: 12,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            l10n.schedule,
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      // Restaurant Name
                       Text(
                         restaurant.name,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                      ),
-                      if (restaurant.discountDescription != null &&
-                          restaurant.discountDescription!.isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          restaurant.discountDescription!,
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.9),
-                            fontSize: 14,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          if (restaurant.rating > 0) ...[
-                            const Icon(
-                              Icons.star,
-                              color: Colors.amber,
-                              size: 16,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              restaurant.rating.toStringAsFixed(1),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                          ],
-                          Icon(
-                            Icons.access_time,
-                            color: Colors.white.withValues(alpha: 0.8),
-                            size: 16,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${restaurant.estimatedDeliveryTime} ${l10n.minutesAbbreviation}',
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.8),
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Icon(
-                            Icons.delivery_dining,
-                            color: Colors.white.withValues(alpha: 0.8),
-                            size: 16,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${restaurant.deliveryFee.toStringAsFixed(2)} ${l10n.currencySymbol}',
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.8),
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
                       ),
                     ],
                   ),
@@ -1474,204 +1530,82 @@ class _CombinedAppBar extends StatelessWidget {
                   );
                 },
               ),
-              // Search Field and Action Buttons Row
-              Row(
-                children: [
-                  // Search Field - White rounded container
-                  Expanded(
-                    child: Container(
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: StatefulBuilder(
-                        builder: (context, setState) => TextField(
-                          controller: searchController,
-                          onTap: () {
-                            if (onSearchTap != null) {
-                              onSearchTap!();
-                            }
-                          },
-                          onChanged: (_) {
-                            setState(() {});
-                            onSearchChanged();
-                            // Navigate to search results if there's text
-                            if (searchController.text.isNotEmpty &&
-                                onSearchTap != null) {
-                              WidgetsBinding.instance.addPostFrameCallback((_) {
-                                if (context.mounted) {
-                                  context.push(
-                                    '/search?q=${Uri.encodeComponent(searchController.text)}',
-                                    extra: restaurants,
-                                  );
-                                }
-                              });
-                            }
-                          },
-                          decoration: InputDecoration(
-                            hintText: l10n.searchRestaurants,
-                            hintStyle: TextStyle(
-                              color: AppColors.textHint,
-                              fontSize: 14,
-                            ),
-                            prefixIcon: Icon(
-                              Icons.search,
-                              color: AppColors.textSecondary,
-                              size: 20,
-                            ),
-                            suffixIcon: searchController.text.isNotEmpty
-                                ? IconButton(
-                                    icon: Icon(
-                                      Icons.clear,
-                                      color: AppColors.textSecondary,
-                                      size: 20,
-                                    ),
-                                    onPressed: () {
-                                      searchController.clear();
-                                      setState(() {});
-                                      onSearchChanged();
-                                    },
-                                  )
-                                : null,
-                            border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                            isDense: true,
-                          ),
-                          style: TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
+              // Search Field - Full Width
+              Container(
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  // Profile Button
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.person_outline,
-                        color: appBarColor,
-                        size: 22,
-                      ),
-                      padding: EdgeInsets.zero,
-                      onPressed: () => context.push('/profile'),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  // Favorites Button
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.favorite_border,
-                        color: appBarColor,
-                        size: 22,
-                      ),
-                      padding: EdgeInsets.zero,
-                      onPressed: () => context.push('/favorites'),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  // Cart Button with Badge
-                  BlocBuilder<CartCubit, CartState>(
-                    builder: (context, state) {
-                      final itemCount = state is CartLoaded
-                          ? state.itemCount
-                          : 0;
-                      return Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.1),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: IconButton(
-                              icon: Icon(
-                                Icons.shopping_cart_outlined,
-                                color: appBarColor,
-                                size: 22,
-                              ),
-                              padding: EdgeInsets.zero,
-                              onPressed: () => context.push('/cart'),
-                            ),
-                          ),
-                          if (itemCount > 0)
-                            Positioned(
-                              right: -2,
-                              top: -2,
-                              child: Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: const BoxDecoration(
-                                  color: AppColors.error,
-                                  shape: BoxShape.circle,
-                                ),
-                                constraints: const BoxConstraints(
-                                  minWidth: 18,
-                                  minHeight: 18,
-                                ),
-                                child: Text(
-                                  itemCount > 99 ? '99+' : '$itemCount',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
-                        ],
-                      );
+                  ],
+                ),
+                child: StatefulBuilder(
+                  builder: (context, setState) => TextField(
+                    controller: searchController,
+                    onTap: () {
+                      if (onSearchTap != null) {
+                        onSearchTap!();
+                      }
                     },
+                    onChanged: (_) {
+                      setState(() {});
+                      onSearchChanged();
+                      // Navigate to search results if there's text
+                      if (searchController.text.isNotEmpty &&
+                          onSearchTap != null) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (context.mounted) {
+                            context.push(
+                              '/search?q=${Uri.encodeComponent(searchController.text)}',
+                              extra: restaurants,
+                            );
+                          }
+                        });
+                      }
+                    },
+                    decoration: InputDecoration(
+                      hintText: l10n.searchRestaurants,
+                      hintStyle: TextStyle(
+                        color: AppColors.textHint,
+                        fontSize: 14,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: AppColors.textSecondary,
+                        size: 20,
+                      ),
+                      suffixIcon: searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: Icon(
+                                Icons.clear,
+                                color: AppColors.textSecondary,
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                searchController.clear();
+                                setState(() {});
+                                onSearchChanged();
+                              },
+                            )
+                          : null,
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
+                      isDense: true,
+                    ),
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 14,
+                    ),
                   ),
-                ],
+                ),
               ),
             ],
           ),

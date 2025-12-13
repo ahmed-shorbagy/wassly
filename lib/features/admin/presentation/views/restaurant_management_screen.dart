@@ -375,51 +375,84 @@ class _RestaurantManagementScreenState
                 bottomRight: Radius.circular(12),
               ),
             ),
-            child: Row(
+            child: Column(
               children: [
-                // Status Toggle
-                Expanded(
-                  child: Row(
-                    children: [
-                      Switch(
-                        value: restaurant.isOpen,
-                        onChanged: (value) =>
-                            _toggleRestaurantStatus(restaurant.id, value),
-                        activeThumbColor: Colors.green,
+                Row(
+                  children: [
+                    // Status Toggle
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Switch(
+                            value: restaurant.isOpen,
+                            onChanged: (value) =>
+                                _toggleRestaurantStatus(restaurant.id, value),
+                            activeThumbColor: Colors.green,
+                          ),
+                          Text(
+                            restaurant.isOpen ? 'Open' : 'Closed',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: restaurant.isOpen
+                                  ? Colors.green
+                                  : AppColors.error,
+                            ),
+                          ),
+                        ],
                       ),
-                      Text(
-                        restaurant.isOpen ? 'Open' : 'Closed',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: restaurant.isOpen
-                              ? Colors.green
-                              : AppColors.error,
-                        ),
+                    ),
+
+                    // Discount Toggle
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Switch(
+                            value: restaurant.hasDiscount,
+                            onChanged: (value) =>
+                                _toggleRestaurantDiscount(restaurant.id, value),
+                            activeThumbColor: AppColors.warning,
+                          ),
+                          Text(
+                            restaurant.hasDiscount ? 'Discount ON' : 'Discount OFF',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: restaurant.hasDiscount
+                                  ? AppColors.warning
+                                  : AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    // Products Button
+                    IconButton(
+                      icon: const Icon(Icons.fastfood, color: Colors.orange),
+                      onPressed: () => _navigateToProducts(restaurant),
+                      tooltip: 'Products',
+                    ),
 
-                // Products Button
-                IconButton(
-                  icon: const Icon(Icons.fastfood, color: Colors.orange),
-                  onPressed: () => _navigateToProducts(restaurant),
-                  tooltip: 'Products',
-                ),
+                    // Edit Button
+                    IconButton(
+                      icon: const Icon(Icons.edit, color: Colors.blue),
+                      onPressed: () => _navigateToEdit(restaurant),
+                      tooltip: 'Edit',
+                    ),
 
-                // Edit Button
-                IconButton(
-                  icon: const Icon(Icons.edit, color: Colors.blue),
-                  onPressed: () => _navigateToEdit(restaurant),
-                  tooltip: 'Edit',
-                ),
-
-                // Delete Button
-                IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () => _showDeleteDialog(restaurant),
-                  tooltip: 'Delete',
+                    // Delete Button
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () => _showDeleteDialog(restaurant),
+                      tooltip: 'Delete',
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -473,6 +506,10 @@ class _RestaurantManagementScreenState
 
   void _toggleRestaurantStatus(String restaurantId, bool isOpen) {
     context.read<AdminCubit>().updateRestaurantStatus(restaurantId, isOpen);
+  }
+
+  void _toggleRestaurantDiscount(String restaurantId, bool hasDiscount) {
+    context.read<AdminCubit>().updateRestaurantDiscount(restaurantId, hasDiscount);
   }
 
   void _navigateToProducts(RestaurantEntity restaurant) {

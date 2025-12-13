@@ -254,6 +254,21 @@ class OrderRepositoryImpl implements OrderRepository {
   }
 
   @override
+  Stream<List<OrderEntity>> listenToAllOrders() {
+    AppLogger.logInfo('Setting up real-time listener for all orders (admin)');
+
+    return firestore
+        .collection('orders')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs.map((doc) {
+            return OrderModel.fromFirestore(doc);
+          }).toList();
+        });
+  }
+
+  @override
   Future<Either<Failure, List<OrderEntity>>> getRestaurantOrders(
     String restaurantId,
   ) async {

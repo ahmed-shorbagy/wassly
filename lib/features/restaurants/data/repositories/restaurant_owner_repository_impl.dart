@@ -375,6 +375,29 @@ class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
   }
 
   @override
+  Future<Either<Failure, void>> toggleRestaurantDiscount(
+    String restaurantId,
+    bool hasDiscount,
+  ) async {
+    try {
+      AppLogger.logInfo('Toggling restaurant discount: $restaurantId to $hasDiscount');
+
+      await firestore.collection('restaurants').doc(restaurantId).update({
+        'hasDiscount': hasDiscount,
+      });
+
+      AppLogger.logSuccess('Restaurant discount updated');
+      return const Right(null);
+    } on FirebaseException catch (e) {
+      AppLogger.logError('Firebase error updating restaurant discount', error: e);
+      return Left(ServerFailure('Failed to update discount: ${e.message}'));
+    } catch (e) {
+      AppLogger.logError('Error updating restaurant discount', error: e);
+      return Left(ServerFailure('Failed to update restaurant discount'));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> deleteRestaurant(String restaurantId) async {
     try {
       AppLogger.logInfo('Deleting restaurant: $restaurantId');

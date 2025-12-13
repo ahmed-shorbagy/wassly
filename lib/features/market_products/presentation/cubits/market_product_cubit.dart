@@ -40,7 +40,7 @@ class MarketProductCubit extends Cubit<MarketProductState> {
     required String name,
     required String description,
     required double price,
-    required String? category,
+    required String category,
     required File? imageFile,
     bool isAvailable = true,
   }) async {
@@ -102,7 +102,7 @@ class MarketProductCubit extends Cubit<MarketProductState> {
     required String name,
     required String description,
     required double price,
-    required String? category,
+    required String category,
     File? imageFile,
     bool? isAvailable,
   }) async {

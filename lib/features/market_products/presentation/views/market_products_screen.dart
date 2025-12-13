@@ -20,6 +20,7 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
   final TextEditingController _searchController = TextEditingController();
   List<String> _categories = [];
   String? _selectedCategory;
+  String? _selectedSubCategory;
   List<dynamic> _allProducts = [];
   List<dynamic> _filteredProducts = [];
 
@@ -79,6 +80,16 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
           .toList();
     }
 
+    // Filter by subcategory if selected
+    if (_selectedSubCategory != null) {
+      filtered = filtered.where((product) {
+        final nameMatch = product.name.toLowerCase().contains(_selectedSubCategory!.toLowerCase());
+        final descMatch = product.description.toLowerCase().contains(_selectedSubCategory!.toLowerCase());
+        final categoryMatch = product.category?.toLowerCase().contains(_selectedSubCategory!.toLowerCase()) ?? false;
+        return nameMatch || descMatch || categoryMatch;
+      }).toList();
+    }
+
     // Filter by search query
     final searchQuery = _searchController.text.toLowerCase().trim();
     if (searchQuery.isNotEmpty) {
@@ -90,6 +101,23 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
     }
 
     _filteredProducts = filtered;
+  }
+
+  List<String> _getSubCategories(AppLocalizations l10n) {
+    // Return subcategories based on selected main category
+    if (_selectedCategory == null) return [];
+    
+    // Return all subcategories for market products
+    return [
+      l10n.dairyProducts,
+      l10n.cheese,
+      l10n.eggs,
+      l10n.softDrinks,
+      l10n.water,
+      l10n.juices,
+      l10n.pastaAndRice,
+      l10n.chipsAndSnacks,
+    ];
   }
 
   @override
@@ -194,6 +222,7 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
                         onSelected: (selected) {
                           setState(() {
                             _selectedCategory = isAll ? null : category;
+                            _selectedSubCategory = null; // Reset subcategory when main category changes
                             _applyFilters();
                           });
                         },
@@ -216,6 +245,66 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
               ),
             ),
           ),
+
+          // Subcategories Filter - Show when a main category is selected
+          if (_selectedCategory != null)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.topCategories,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      height: 50,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _getSubCategories(l10n).length,
+                        itemBuilder: (context, index) {
+                          final subCategory = _getSubCategories(l10n)[index];
+                          final isSelected = _selectedSubCategory == subCategory;
+
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 12),
+                            child: FilterChip(
+                              label: Text(subCategory),
+                              selected: isSelected,
+                              onSelected: (selected) {
+                                setState(() {
+                                  _selectedSubCategory = selected ? subCategory : null;
+                                  _applyFilters();
+                                });
+                              },
+                              selectedColor: AppColors.success,
+                              checkmarkColor: Colors.white,
+                              labelStyle: TextStyle(
+                                color: isSelected
+                                    ? Colors.white
+                                    : AppColors.textPrimary,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 8,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
 
           const SliverToBoxAdapter(child: SizedBox(height: 8)),
 

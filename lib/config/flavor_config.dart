@@ -40,7 +40,7 @@ class FlavorConfig {
       case Flavor.customer:
         _instance = FlavorConfig._internal(
           flavor: Flavor.customer,
-          appName: 'Wassly',
+          appName: 'To Order',
           packageName: 'com.wassly.customer',
           theme: AppThemeConfig(
             primaryColor: 0xFFFF6B35, // Orange
@@ -54,7 +54,7 @@ class FlavorConfig {
       case Flavor.partner:
         _instance = FlavorConfig._internal(
           flavor: Flavor.partner,
-          appName: 'Wassly Partner',
+          appName: 'To Order Partner',
           packageName: 'com.wassly.partner',
           theme: AppThemeConfig(
             primaryColor: 0xFF2E7D32, // Green
@@ -68,7 +68,7 @@ class FlavorConfig {
       case Flavor.admin:
         _instance = FlavorConfig._internal(
           flavor: Flavor.admin,
-          appName: 'Wassly Admin',
+          appName: 'To Order Admin',
           packageName: 'com.wassly.admin',
           theme: AppThemeConfig(
             primaryColor: 0xFF6A1B9A, // Purple

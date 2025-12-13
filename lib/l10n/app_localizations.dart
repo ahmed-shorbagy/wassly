@@ -2330,6 +2330,18 @@ abstract class AppLocalizations {
   /// **'Free Delivery'**
   String get freeDelivery;
 
+  /// No description provided for @orderNowForDeliveryToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Order now for your order to arrive today at 10:00'**
+  String get orderNowForDeliveryToday;
+
+  /// No description provided for @schedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule'**
+  String get schedule;
+
   /// No description provided for @sortBy.
   ///
   /// In en, this message translates to:
@@ -2791,6 +2803,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Personal Care'**
   String get personalCare;
+
+  /// No description provided for @fish.
+  ///
+  /// In en, this message translates to:
+  /// **'Fish'**
+  String get fish;
+
+  /// No description provided for @dairyProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Dairy Products'**
+  String get dairyProducts;
+
+  /// No description provided for @cheese.
+  ///
+  /// In en, this message translates to:
+  /// **'Cheese'**
+  String get cheese;
+
+  /// No description provided for @eggs.
+  ///
+  /// In en, this message translates to:
+  /// **'Eggs'**
+  String get eggs;
+
+  /// No description provided for @softDrinks.
+  ///
+  /// In en, this message translates to:
+  /// **'Soft Drinks'**
+  String get softDrinks;
+
+  /// No description provided for @water.
+  ///
+  /// In en, this message translates to:
+  /// **'Water'**
+  String get water;
+
+  /// No description provided for @juices.
+  ///
+  /// In en, this message translates to:
+  /// **'Juices'**
+  String get juices;
+
+  /// No description provided for @pastaAndRice.
+  ///
+  /// In en, this message translates to:
+  /// **'Pasta and Rice'**
+  String get pastaAndRice;
+
+  /// No description provided for @chipsAndSnacks.
+  ///
+  /// In en, this message translates to:
+  /// **'Chips and Snacks'**
+  String get chipsAndSnacks;
+
+  /// No description provided for @topCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Categories'**
+  String get topCategories;
+
+  /// No description provided for @pleaseSelectCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a category'**
+  String get pleaseSelectCategory;
 }
 
 class _AppLocalizationsDelegate

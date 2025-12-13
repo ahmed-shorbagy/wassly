@@ -233,6 +233,28 @@ class OrderCubit extends Cubit<OrderState> {
     }
   }
 
+  /// Listen to all orders in real-time (admin only)
+  void listenToAllOrders() {
+    try {
+      AppLogger.logInfo('Setting up real-time listener for all orders (admin)');
+
+      _ordersListSubscription?.cancel();
+      _ordersListSubscription = repository.listenToAllOrders().listen(
+        (orders) {
+          AppLogger.logInfo('All orders updated: ${orders.length} orders');
+          emit(OrdersLoaded(orders));
+        },
+        onError: (error) {
+          AppLogger.logError('Error in all orders stream', error: error);
+          emit(const OrderError('Failed to get orders updates'));
+        },
+      );
+    } catch (e) {
+      AppLogger.logError('Error setting up all orders listener', error: e);
+      emit(const OrderError('Failed to listen to orders updates'));
+    }
+  }
+
   /// Listen to restaurant orders in real-time
   void listenToRestaurantOrders(String restaurantId) {
     try {

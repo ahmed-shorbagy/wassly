@@ -39,6 +39,9 @@ abstract class OrderRepository {
   /// Get all orders (admin only)
   Future<Either<Failure, List<OrderEntity>>> getAllOrders();
 
+  /// Listen to all orders in real-time (admin only)
+  Stream<List<OrderEntity>> listenToAllOrders();
+
   /// Listen to restaurant orders (real-time)
   Stream<List<OrderEntity>> listenToRestaurantOrders(String restaurantId);
 

@@ -1162,6 +1162,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get freeDelivery => 'Free Delivery';
 
   @override
+  String get orderNowForDeliveryToday =>
+      'Order now for your order to arrive today at 10:00';
+
+  @override
+  String get schedule => 'Schedule';
+
+  @override
   String get sortBy => 'Sort By';
 
   @override
@@ -1399,4 +1406,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get personalCare => 'Personal Care';
+
+  @override
+  String get fish => 'Fish';
+
+  @override
+  String get dairyProducts => 'Dairy Products';
+
+  @override
+  String get cheese => 'Cheese';
+
+  @override
+  String get eggs => 'Eggs';
+
+  @override
+  String get softDrinks => 'Soft Drinks';
+
+  @override
+  String get water => 'Water';
+
+  @override
+  String get juices => 'Juices';
+
+  @override
+  String get pastaAndRice => 'Pasta and Rice';
+
+  @override
+  String get chipsAndSnacks => 'Chips and Snacks';
+
+  @override
+  String get topCategories => 'Top Categories';
+
+  @override
+  String get pleaseSelectCategory => 'Please select a category';
 }

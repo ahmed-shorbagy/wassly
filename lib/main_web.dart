@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'firebase_options.dart';
 import 'core/di/injection_container.dart';
 import 'core/utils/logger.dart';
 import 'core/theme/app_theme.dart';
+import 'core/constants/supabase_constants.dart';
 import 'features/articles/presentation/views/web_landing_page.dart';
 
 void main() async {
-  AppLogger.logInfo('=== Starting Wassly Web App ===');
+  AppLogger.logInfo('=== Starting To Order Web App ===');
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
@@ -18,6 +20,14 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
     AppLogger.logSuccess('Firebase initialized');
+
+    // Initialize Supabase
+    AppLogger.logInfo('Initializing Supabase...');
+    await Supabase.initialize(
+      url: SupabaseConstants.projectUrl,
+      anonKey: SupabaseConstants.anonKey,
+    );
+    AppLogger.logSuccess('Supabase initialized');
 
     // Initialize dependency injection
     AppLogger.logInfo('Initializing dependency injection...');
@@ -52,7 +62,7 @@ class WasslyWebApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: InjectionContainer().getWebBlocProviders(),
       child: MaterialApp(
-        title: 'Wassly',
+        title: 'To Order',
         theme: AppTheme.lightTheme,
         debugShowCheckedModeBanner: false,
         home: const WebLandingPage(),

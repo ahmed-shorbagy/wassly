@@ -34,7 +34,7 @@ class _WebLandingPageState extends State<WebLandingPage> {
             backgroundColor: Colors.white,
             elevation: 0,
             title: const Text(
-              'Wassly',
+              'To Order',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -62,7 +62,7 @@ class _WebLandingPageState extends State<WebLandingPage> {
               child: Column(
                 children: [
                   const Text(
-                    'Welcome to Wassly',
+                    'Welcome to To Order',
                     style: TextStyle(
                       fontSize: 48,
                       fontWeight: FontWeight.bold,
@@ -102,7 +102,7 @@ class _WebLandingPageState extends State<WebLandingPage> {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'Wassly is a comprehensive food delivery platform designed to revolutionize how people order food, '
+                    'To Order is a comprehensive food delivery platform designed to revolutionize how people order food, '
                     'how restaurants manage their operations, and how drivers connect with opportunities. We bring together '
                     'three powerful applications under one ecosystem.',
                     style: TextStyle(
@@ -114,7 +114,7 @@ class _WebLandingPageState extends State<WebLandingPage> {
                   const SizedBox(height: 16),
                   Text(
                     'Whether you\'re a customer craving your favorite meal, a restaurant owner looking to expand your reach, '
-                    'or a driver seeking flexible earning opportunities, Wassly provides the tools and infrastructure you need to succeed.',
+                    'or a driver seeking flexible earning opportunities, To Order provides the tools and infrastructure you need to succeed.',
                     style: TextStyle(
                       fontSize: 16,
                       color: AppColors.textLight,
@@ -202,7 +202,7 @@ class _WebLandingPageState extends State<WebLandingPage> {
               child: Column(
                 children: [
                   Text(
-                    'Wassly',
+                    'To Order',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -219,7 +219,7 @@ class _WebLandingPageState extends State<WebLandingPage> {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    '© 2025 Wassly. All rights reserved.',
+                    '© 2025 To Order. All rights reserved.',
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.white60,
