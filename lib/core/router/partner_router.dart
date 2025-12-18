@@ -8,6 +8,9 @@ import '../../features/restaurants/presentation/views/driver_home_screen.dart';
 import '../../features/partner/presentation/views/restaurant_orders_screen.dart';
 import '../../features/partner/presentation/views/restaurant_settings_screen.dart';
 import '../../features/partner/presentation/views/product_management_screen.dart';
+import '../../features/partner/presentation/views/category_list_screen.dart';
+import '../../features/partner/presentation/views/add_category_screen.dart';
+import '../../features/partner/presentation/views/edit_category_screen.dart';
 import '../../features/orders/presentation/views/order_detail_screen.dart';
 import '../../features/drivers/presentation/views/driver_orders_screen.dart';
 import '../../features/auth/presentation/views/customer_profile_screen.dart';
@@ -66,6 +69,58 @@ class PartnerRouter {
             path: 'settings',
             name: 'restaurant-settings',
             builder: (context, state) => const RestaurantSettingsScreen(),
+          ),
+          GoRoute(
+            path: 'categories',
+            name: 'restaurant-categories',
+            builder: (context, state) {
+              // Get restaurantId from extra or path parameters
+              String? restaurantId;
+              if (state.extra is Map<String, dynamic>) {
+                restaurantId = (state.extra as Map<String, dynamic>)['restaurantId'] as String?;
+              }
+              // If not in extra, try to get from parent route's extra
+              if (restaurantId == null) {
+                // Try to get from auth/restaurant cubit as fallback
+                // For now, return error - restaurants should pass restaurantId
+                return const ErrorScreen();
+              }
+              return PartnerCategoryListScreen(restaurantId: restaurantId);
+            },
+            routes: [
+              GoRoute(
+                path: 'add',
+                name: 'restaurant-add-category',
+                builder: (context, state) {
+                  String? restaurantId;
+                  if (state.extra is Map<String, dynamic>) {
+                    restaurantId = (state.extra as Map<String, dynamic>)['restaurantId'] as String?;
+                  }
+                  if (restaurantId == null) {
+                    return const ErrorScreen();
+                  }
+                  return PartnerAddCategoryScreen(restaurantId: restaurantId);
+                },
+              ),
+              GoRoute(
+                path: ':categoryId/edit',
+                name: 'restaurant-edit-category',
+                builder: (context, state) {
+                  String? restaurantId;
+                  if (state.extra is Map<String, dynamic>) {
+                    restaurantId = (state.extra as Map<String, dynamic>)['restaurantId'] as String?;
+                  }
+                  final categoryId = state.pathParameters['categoryId'] ?? '';
+                  if (restaurantId == null || categoryId.isEmpty) {
+                    return const ErrorScreen();
+                  }
+                  return PartnerEditCategoryScreen(
+                    restaurantId: restaurantId,
+                    categoryId: categoryId,
+                  );
+                },
+              ),
+            ],
           ),
         ],
       ),

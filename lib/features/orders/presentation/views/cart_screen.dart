@@ -137,8 +137,47 @@ class CartScreen extends StatelessWidget {
     CartLoaded state,
     AppLocalizations l10n,
   ) {
+    // Check for unavailable products
+    final unavailableItems = state.items.where(
+      (item) => !item.product.isAvailable
+    ).toList();
+    
+    // Auto-remove unavailable items
+    if (unavailableItems.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        for (final item in unavailableItems) {
+          context.read<CartCubit>().removeItem(item.product.id);
+        }
+      });
+    }
+    
     return Column(
       children: [
+        // Warning banner if any items are unavailable
+        if (unavailableItems.isNotEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            margin: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.warning.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.warning),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.warning_amber_rounded, color: AppColors.warning),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    '${unavailableItems.length} item(s) are no longer available and will be removed.',
+                    style: TextStyle(color: AppColors.warning, fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        
         // Cart Items List
         Expanded(
           child: ListView.builder(
@@ -312,12 +351,20 @@ class _CartItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isUnavailable = !item.product.isAvailable;
+    
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
+        side: isUnavailable 
+            ? BorderSide(color: AppColors.error, width: 1)
+            : BorderSide.none,
       ),
+      color: isUnavailable 
+          ? AppColors.error.withValues(alpha: 0.05)
+          : Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Row(
@@ -361,21 +408,54 @@ class _CartItemCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    item.product.name,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          item.product.name,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: isUnavailable 
+                                ? AppColors.textSecondary
+                                : AppColors.textPrimary,
+                            decoration: isUnavailable 
+                                ? TextDecoration.lineThrough
+                                : TextDecoration.none,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (isUnavailable)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.error,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            'Unavailable',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                   const SizedBox(height: 4),
                   Text(
                     '${item.product.price.toStringAsFixed(2)} ${l10n.currencySymbol}',
                     style: TextStyle(
                       fontSize: 14,
-                      color: AppColors.primary,
+                      color: isUnavailable 
+                          ? AppColors.textSecondary
+                          : AppColors.primary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -394,43 +474,44 @@ class _CartItemCard extends StatelessWidget {
             // Quantity Controls
             Column(
               children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.remove_circle_outline),
-                      onPressed: () {
-                        context.read<CartCubit>().updateQuantity(
-                              item.product.id,
-                              item.quantity - 1,
-                            );
-                      },
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Text(
-                        '${item.quantity}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                if (!isUnavailable)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.remove_circle_outline),
+                        onPressed: () {
+                          context.read<CartCubit>().updateQuantity(
+                                item.product.id,
+                                item.quantity - 1,
+                              );
+                        },
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Text(
+                          '${item.quantity}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.add_circle_outline),
-                      onPressed: () {
-                        context.read<CartCubit>().updateQuantity(
-                              item.product.id,
-                              item.quantity + 1,
-                            );
-                      },
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                  ],
-                ),
+                      IconButton(
+                        icon: const Icon(Icons.add_circle_outline),
+                        onPressed: () {
+                          context.read<CartCubit>().updateQuantity(
+                                item.product.id,
+                                item.quantity + 1,
+                              );
+                        },
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    ],
+                  ),
                 TextButton(
                   onPressed: () {
                     context.read<CartCubit>().removeItem(item.product.id);

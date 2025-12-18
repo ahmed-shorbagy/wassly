@@ -14,6 +14,7 @@ import '../../features/orders/presentation/views/order_detail_screen.dart';
 import '../../features/auth/presentation/views/customer_profile_screen.dart';
 import '../../features/market_products/presentation/views/market_products_screen.dart';
 import '../../features/navigation/presentation/views/customer_navigation_shell.dart';
+import '../../features/delivery_address/presentation/views/address_book_screen.dart';
 
 class CustomerRouter {
   static final GlobalKey<NavigatorState> _rootNavigatorKey =
@@ -158,6 +159,11 @@ class CustomerRouter {
           // Pass extra data (like category) to the screen
           return MarketProductsScreen();
         },
+      ),
+      GoRoute(
+        path: '/address-book',
+        name: 'address-book',
+        builder: (context, state) => const AddressBookScreen(),
       ),
     ],
     errorBuilder: (context, state) => const ErrorScreen(),

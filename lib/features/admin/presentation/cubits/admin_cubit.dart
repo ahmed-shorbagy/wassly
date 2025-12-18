@@ -50,7 +50,10 @@ class AdminCubit extends Cubit<AdminState> {
 
       result.fold(
         (failure) {
-          AppLogger.logError('Failed to create restaurant', error: failure.message);
+          AppLogger.logError(
+            'Failed to create restaurant',
+            error: failure.message,
+          );
           emit(AdminError(failure.message));
         },
         (restaurantId) {
@@ -68,7 +71,10 @@ class AdminCubit extends Cubit<AdminState> {
     try {
       AppLogger.logInfo('Updating restaurant status: $restaurantId to $isOpen');
 
-      final result = await repository.toggleRestaurantStatus(restaurantId, isOpen);
+      final result = await repository.toggleRestaurantStatus(
+        restaurantId,
+        isOpen,
+      );
 
       result.fold(
         (failure) {
@@ -86,15 +92,26 @@ class AdminCubit extends Cubit<AdminState> {
     }
   }
 
-  Future<void> updateRestaurantDiscount(String restaurantId, bool hasDiscount) async {
+  Future<void> updateRestaurantDiscount(
+    String restaurantId,
+    bool hasDiscount,
+  ) async {
     try {
-      AppLogger.logInfo('Updating restaurant discount: $restaurantId to $hasDiscount');
+      AppLogger.logInfo(
+        'Updating restaurant discount: $restaurantId to $hasDiscount',
+      );
 
-      final result = await repository.toggleRestaurantDiscount(restaurantId, hasDiscount);
+      final result = await repository.toggleRestaurantDiscount(
+        restaurantId,
+        hasDiscount,
+      );
 
       result.fold(
         (failure) {
-          AppLogger.logError('Failed to update discount', error: failure.message);
+          AppLogger.logError(
+            'Failed to update discount',
+            error: failure.message,
+          );
           emit(AdminError(failure.message));
         },
         (_) {
@@ -123,6 +140,11 @@ class AdminCubit extends Cubit<AdminState> {
     required double minOrderAmount,
     required int estimatedDeliveryTime,
     File? commercialRegistrationPhotoFile,
+    bool hasDiscount = false,
+    double? discountPercentage,
+    String? discountDescription,
+    DateTime? discountStartDate,
+    DateTime? discountEndDate,
   }) async {
     try {
       emit(AdminLoading());
@@ -130,7 +152,7 @@ class AdminCubit extends Cubit<AdminState> {
 
       // Get existing restaurant first to preserve data
       final getResult = await repository.getRestaurantById(restaurantId);
-      
+
       final existingRestaurant = getResult.fold(
         (failure) => null,
         (restaurant) => restaurant,
@@ -141,7 +163,7 @@ class AdminCubit extends Cubit<AdminState> {
         return;
       }
 
-      // Update restaurant entity with new data
+      // Update restaurant entity with new data, preserving discount fields
       final updatedRestaurant = RestaurantEntity(
         id: restaurantId,
         ownerId: existingRestaurant.ownerId,
@@ -151,14 +173,25 @@ class AdminCubit extends Cubit<AdminState> {
         phone: phone,
         email: email,
         categories: categories,
-        location: {'latitude': location.latitude, 'longitude': location.longitude},
+        location: {
+          'latitude': location.latitude,
+          'longitude': location.longitude,
+        },
         isOpen: existingRestaurant.isOpen, // Preserve existing status
         rating: existingRestaurant.rating, // Preserve rating
         totalReviews: existingRestaurant.totalReviews, // Preserve reviews
         deliveryFee: deliveryFee,
         minOrderAmount: minOrderAmount,
         estimatedDeliveryTime: estimatedDeliveryTime,
-        commercialRegistrationPhotoUrl: existingRestaurant.commercialRegistrationPhotoUrl,
+        imageUrl: existingRestaurant.imageUrl, // Preserve image URL
+        commercialRegistrationPhotoUrl:
+            existingRestaurant.commercialRegistrationPhotoUrl,
+        // Update discount fields from parameters
+        hasDiscount: hasDiscount,
+        discountPercentage: discountPercentage,
+        discountDescription: discountDescription,
+        discountStartDate: discountStartDate,
+        discountEndDate: discountEndDate,
         createdAt: existingRestaurant.createdAt, // Preserve creation date
       );
 
@@ -166,7 +199,10 @@ class AdminCubit extends Cubit<AdminState> {
 
       result.fold(
         (failure) {
-          AppLogger.logError('Failed to update restaurant', error: failure.message);
+          AppLogger.logError(
+            'Failed to update restaurant',
+            error: failure.message,
+          );
           emit(AdminError(failure.message));
         },
         (_) async {
@@ -176,15 +212,24 @@ class AdminCubit extends Cubit<AdminState> {
               restaurantId,
               newPassword,
             );
-            
+
             passwordResult.fold(
               (failure) {
-                AppLogger.logError('Failed to update password', error: failure.message);
-                emit(AdminError('Restaurant updated but password update failed: ${failure.message}'));
+                AppLogger.logError(
+                  'Failed to update password',
+                  error: failure.message,
+                );
+                emit(
+                  AdminError(
+                    'Restaurant updated but password update failed: ${failure.message}',
+                  ),
+                );
                 return;
               },
               (_) {
-                AppLogger.logSuccess('Restaurant and password updated successfully');
+                AppLogger.logSuccess(
+                  'Restaurant and password updated successfully',
+                );
                 emit(RestaurantUpdatedSuccess());
               },
             );
@@ -209,7 +254,10 @@ class AdminCubit extends Cubit<AdminState> {
 
       result.fold(
         (failure) {
-          AppLogger.logError('Failed to fetch restaurant', error: failure.message);
+          AppLogger.logError(
+            'Failed to fetch restaurant',
+            error: failure.message,
+          );
           emit(AdminError(failure.message));
         },
         (restaurant) {
@@ -232,7 +280,10 @@ class AdminCubit extends Cubit<AdminState> {
 
       result.fold(
         (failure) {
-          AppLogger.logError('Failed to delete restaurant', error: failure.message);
+          AppLogger.logError(
+            'Failed to delete restaurant',
+            error: failure.message,
+          );
           emit(AdminError(failure.message));
         },
         (_) {
@@ -246,4 +297,3 @@ class AdminCubit extends Cubit<AdminState> {
     }
   }
 }
-

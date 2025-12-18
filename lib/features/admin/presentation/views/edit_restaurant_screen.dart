@@ -47,6 +47,13 @@ class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
   bool _obscureConfirmPassword = true;
   bool _isLoadingRestaurant = true;
   RestaurantEntity? _currentRestaurant;
+  
+  // Discount fields
+  final _discountPercentageController = TextEditingController();
+  final _discountDescriptionController = TextEditingController();
+  bool _hasDiscount = false;
+  DateTime? _discountStartDate;
+  DateTime? _discountEndDate;
 
   @override
   void initState() {
@@ -94,6 +101,13 @@ class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
     _minOrderAmountController.text = restaurant.minOrderAmount.toStringAsFixed(2);
     _estimatedDeliveryController.text = restaurant.estimatedDeliveryTime.toString();
     _selectedCategories.addAll(restaurant.categories);
+    
+    // Populate discount fields
+    _hasDiscount = restaurant.hasDiscount;
+    _discountPercentageController.text = restaurant.discountPercentage?.toStringAsFixed(0) ?? '';
+    _discountDescriptionController.text = restaurant.discountDescription ?? '';
+    _discountStartDate = restaurant.discountStartDate;
+    _discountEndDate = restaurant.discountEndDate;
     
     // Set location
     if (restaurant.location.containsKey('latitude') && 
@@ -175,6 +189,8 @@ class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
     _deliveryFeeController.dispose();
     _minOrderAmountController.dispose();
     _estimatedDeliveryController.dispose();
+    _discountPercentageController.dispose();
+    _discountDescriptionController.dispose();
     super.dispose();
   }
 
@@ -309,6 +325,12 @@ class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
       newPassword = _passwordController.text.trim();
     }
 
+    // Validate discount if enabled
+    if (_hasDiscount && _discountPercentageController.text.isEmpty) {
+      context.showErrorSnackBar(l10n.discountPercentage);
+      return;
+    }
+
     context.read<AdminCubit>().updateRestaurant(
       restaurantId: widget.restaurantId,
       name: _nameController.text.trim(),
@@ -324,6 +346,15 @@ class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
       minOrderAmount: double.parse(_minOrderAmountController.text),
       estimatedDeliveryTime: int.parse(_estimatedDeliveryController.text),
       commercialRegistrationPhotoFile: _commercialRegistrationPhoto,
+      hasDiscount: _hasDiscount,
+      discountPercentage: _hasDiscount && _discountPercentageController.text.isNotEmpty
+          ? double.tryParse(_discountPercentageController.text)
+          : null,
+      discountDescription: _hasDiscount && _discountDescriptionController.text.isNotEmpty
+          ? _discountDescriptionController.text.trim()
+          : null,
+      discountStartDate: _hasDiscount ? _discountStartDate : null,
+      discountEndDate: _hasDiscount ? _discountEndDate : null,
     );
   }
 
@@ -600,6 +631,12 @@ class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
                     return null;
                   },
                 ),
+                const SizedBox(height: 24),
+
+                // Discount Management Section
+                _buildSectionTitle(l10n.discount),
+                const SizedBox(height: 12),
+                _buildDiscountSection(l10n),
                 const SizedBox(height: 32),
 
                 // Update Button
@@ -1019,6 +1056,144 @@ class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildDiscountSection(AppLocalizations l10n) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Enable Discount Switch
+          SwitchListTile(
+            title: Text(l10n.enableDiscount),
+            value: _hasDiscount,
+            onChanged: (value) {
+              setState(() {
+                _hasDiscount = value;
+              });
+            },
+          ),
+          const SizedBox(height: 16),
+
+          if (_hasDiscount) ...[
+            // Discount Percentage
+            _buildTextField(
+              controller: _discountPercentageController,
+              label: l10n.discountPercentage,
+              icon: Icons.percent,
+              keyboardType: TextInputType.number,
+              validator: (value) {
+                if (_hasDiscount && (value == null || value.isEmpty)) {
+                  return l10n.discountPercentage;
+                }
+                if (value != null && value.isNotEmpty) {
+                  final percentage = double.tryParse(value);
+                  if (percentage == null || percentage < 0 || percentage > 100) {
+                    return '${l10n.discountPercentage} (0-100)';
+                  }
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+
+            // Discount Description
+            _buildTextField(
+              controller: _discountDescriptionController,
+              label: l10n.discountDescription,
+              icon: Icons.description,
+              maxLines: 2,
+            ),
+            const SizedBox(height: 16),
+
+            // Start Date
+            ListTile(
+              leading: const Icon(Icons.calendar_today, color: AppColors.primary),
+              title: Text(l10n.discountStartDate),
+              subtitle: Text(
+                _discountStartDate != null
+                    ? '${_discountStartDate!.day}/${_discountStartDate!.month}/${_discountStartDate!.year}'
+                    : '${l10n.discountStartDate} (${l10n.optional})',
+              ),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: _discountStartDate ?? DateTime.now(),
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime.now().add(const Duration(days: 365)),
+                );
+                if (picked != null) {
+                  setState(() {
+                    _discountStartDate = picked;
+                  });
+                }
+              },
+            ),
+            const SizedBox(height: 8),
+
+            // End Date
+            ListTile(
+              leading: const Icon(Icons.event, color: AppColors.primary),
+              title: Text(l10n.discountEndDate),
+              subtitle: Text(
+                _discountEndDate != null
+                    ? '${_discountEndDate!.day}/${_discountEndDate!.month}/${_discountEndDate!.year}'
+                    : '${l10n.discountEndDate} (${l10n.optional})',
+              ),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: _discountEndDate ?? 
+                      (_discountStartDate ?? DateTime.now()).add(const Duration(days: 7)),
+                  firstDate: _discountStartDate ?? DateTime.now(),
+                  lastDate: DateTime.now().add(const Duration(days: 365)),
+                );
+                if (picked != null) {
+                  setState(() {
+                    _discountEndDate = picked;
+                  });
+                }
+              },
+            ),
+
+            // Current discount status
+            if (_currentRestaurant != null && _currentRestaurant!.isDiscountActive)
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.success.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.check_circle, color: AppColors.success),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '${l10n.discount} ${l10n.active}',
+                          style: const TextStyle(
+                            color: AppColors.success,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ],
       ),
     );
   }

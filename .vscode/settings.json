@@ -23,6 +23,7 @@
   },
   "editor.codeActionsOnSave": {
     "source.fixAll": "explicit"
-  }
+  },
+  "dart.flutterCustomEmulators": []
 }
 

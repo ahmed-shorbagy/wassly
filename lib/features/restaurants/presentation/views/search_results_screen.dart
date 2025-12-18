@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/error_widget.dart';
@@ -33,7 +34,6 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
   String _selectedCategory = 'all';
   String _sortBy = 'relevance';
   bool _freeDeliveryOnly = false;
-  bool _pickupOnly = false;
 
   final List<String> _categories = ['all', 'restaurants', 'groceries', 'health_beauty'];
 
@@ -142,42 +142,6 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
     });
   }
 
-  void _showSortDialog(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.sortBy),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildSortOption(context, 'relevance', l10n.relevance),
-            _buildSortOption(context, 'rating', l10n.highestRating),
-            _buildSortOption(context, 'delivery_time', l10n.fastestDelivery),
-            _buildSortOption(context, 'price', l10n.lowestPrice),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSortOption(BuildContext context, String value, String label) {
-    final isSelected = _sortBy == value;
-    return ListTile(
-      title: Text(label),
-      trailing: isSelected
-          ? const Icon(Icons.check, color: AppColors.primary)
-          : null,
-      onTap: () {
-        setState(() {
-          _sortBy = value;
-          _applyFilters();
-        });
-        Navigator.of(context).pop();
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -197,10 +161,6 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
           children: [
             // Search Bar Header
             _buildSearchBar(context, l10n),
-            // Category Tabs
-            _buildCategoryTabs(context, l10n),
-            // Filter Buttons
-            _buildFilterButtons(context, l10n),
             // Results List
             Expanded(
               child: BlocBuilder<RestaurantCubit, RestaurantState>(
@@ -305,177 +265,6 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
     );
   }
 
-  Widget _buildCategoryTabs(BuildContext context, AppLocalizations l10n) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          bottom: BorderSide(
-            color: AppColors.border,
-            width: 1,
-          ),
-        ),
-      ),
-      child: TabBar(
-        controller: _categoryTabController,
-        isScrollable: true,
-        labelColor: AppColors.primary,
-        unselectedLabelColor: AppColors.textSecondary,
-        indicatorColor: AppColors.primary,
-        indicatorWeight: 3,
-        labelStyle: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-        ),
-        unselectedLabelStyle: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-        ),
-        tabs: [
-          Tab(text: l10n.all),
-          Tab(text: l10n.restaurants),
-          Tab(text: l10n.groceries),
-          Tab(text: l10n.healthAndBeauty),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFilterButtons(BuildContext context, AppLocalizations l10n) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          bottom: BorderSide(
-            color: AppColors.border,
-            width: 1,
-          ),
-        ),
-      ),
-      child: Row(
-        children: [
-          // Sort By
-          GestureDetector(
-            onTap: () => _showSortDialog(context),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.swap_vert,
-                    size: 18,
-                    color: AppColors.textPrimary,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    l10n.sortBy,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.arrow_drop_down,
-                    size: 18,
-                    color: AppColors.textPrimary,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          // Free Delivery
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                _freeDeliveryOnly = !_freeDeliveryOnly;
-                _applyFilters();
-              });
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: _freeDeliveryOnly
-                    ? AppColors.primary.withValues(alpha: 0.1)
-                    : AppColors.surface,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: _freeDeliveryOnly
-                      ? AppColors.primary
-                      : AppColors.border,
-                ),
-              ),
-              child: Text(
-                l10n.freeDelivery,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: _freeDeliveryOnly
-                      ? AppColors.primary
-                      : AppColors.textPrimary,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          // Pickup
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                _pickupOnly = !_pickupOnly;
-                _applyFilters();
-              });
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: _pickupOnly
-                    ? AppColors.primary.withValues(alpha: 0.1)
-                    : AppColors.surface,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: _pickupOnly ? AppColors.primary : AppColors.border,
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.directions_walk,
-                    size: 18,
-                    color: _pickupOnly
-                        ? AppColors.primary
-                        : AppColors.textPrimary,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    l10n.pickup,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: _pickupOnly
-                          ? AppColors.primary
-                          : AppColors.textPrimary,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildEmptyState(BuildContext context, AppLocalizations l10n) {
     return Center(
       child: Padding(
@@ -560,76 +349,73 @@ class _SearchResultCard extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.symmetric(
                   vertical: 12,
-                  horizontal: MediaQuery.of(context).size.width * 0.02,
+                  horizontal: (MediaQuery.of(context).size.width * 0.02).clamp(4.0, 8.0),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Name
-                    Text(
+                    // Name - Constrained to prevent overflow
+                    AutoSizeText(
                       restaurant.name,
                       style: TextStyle(
                         fontSize: _getResponsiveFontSize(context, baseSize: 16),
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
                       ),
-                      maxLines: 1,
+                      maxLines: 2,
+                      minFontSize: 10,
+                      maxFontSize: _getResponsiveFontSize(context, baseSize: 16),
                       overflow: TextOverflow.ellipsis,
+                      wrapWords: false,
                     ),
-                        // Pro Badge (if applicable - you can add a pro flag to entity)
-                        // Container(
-                        //   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        //   decoration: BoxDecoration(
-                        //     color: Colors.purple,
-                        //     borderRadius: BorderRadius.circular(8),
-                        //   ),
-                        //   child: const Text(
-                        //     'Pro',
-                        //     style: TextStyle(
-                        //       color: Colors.white,
-                        //       fontSize: 10,
-                        //       fontWeight: FontWeight.bold,
-                        //     ),
-                        //   ),
-                        // ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.008),
+                    SizedBox(height: (MediaQuery.of(context).size.height * 0.008).clamp(6.0, 10.0)),
                     // Rating - More compact
                     Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
                           Icons.star,
                           size: 14,
                           color: AppColors.warning,
                         ),
-                        const SizedBox(width: 3),
-                        Text(
-                          restaurant.rating.toStringAsFixed(1),
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
+                        const SizedBox(width: 4),
+                        Flexible(
+                          fit: FlexFit.loose,
+                          child: AutoSizeText(
+                            restaurant.rating.toStringAsFixed(1),
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                            maxLines: 1,
+                            minFontSize: 10,
                           ),
                         ),
-                        const SizedBox(width: 3),
+                        const SizedBox(width: 4),
                         Flexible(
-                          child: Text(
+                          fit: FlexFit.loose,
+                          child: AutoSizeText(
                             '(${restaurant.totalReviews > 999 ? '+1000' : restaurant.totalReviews})',
                             style: TextStyle(
                               fontSize: 11,
                               color: AppColors.textSecondary,
                             ),
                             maxLines: 1,
+                            minFontSize: 8,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.008),
+                    SizedBox(height: (MediaQuery.of(context).size.height * 0.008).clamp(6.0, 10.0)),
                     // Delivery Time and Price - More compact
                     Wrap(
                       spacing: 8,
-                      runSpacing: 4,
+                      runSpacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Row(
                           mainAxisSize: MainAxisSize.min,
@@ -639,22 +425,34 @@ class _SearchResultCard extends StatelessWidget {
                               size: 12,
                               color: AppColors.textSecondary,
                             ),
-                            const SizedBox(width: 3),
-                            Text(
-                              '${restaurant.estimatedDeliveryTime} ${l10n.minutesAbbreviation}',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: AppColors.textSecondary,
+                            const SizedBox(width: 4),
+                            Flexible(
+                              fit: FlexFit.loose,
+                              child: AutoSizeText(
+                                '${restaurant.estimatedDeliveryTime} ${l10n.minutesAbbreviation}',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.textSecondary,
+                                ),
+                                maxLines: 1,
+                                minFontSize: 8,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
                         ),
-                        Text(
-                          '${restaurant.deliveryFee.toStringAsFixed(2)} ${l10n.currencySymbol}',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.success,
+                        Flexible(
+                          fit: FlexFit.loose,
+                          child: AutoSizeText(
+                            '${restaurant.deliveryFee.toStringAsFixed(2)} ${l10n.currencySymbol}',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.success,
+                            ),
+                            maxLines: 1,
+                            minFontSize: 10,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
@@ -662,25 +460,31 @@ class _SearchResultCard extends StatelessWidget {
                     // Special Offer - More compact
                     if (restaurant.isDiscountActive && restaurant.discountDescription != null)
                       Padding(
-                        padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.008),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
+                        padding: EdgeInsets.only(top: (MediaQuery.of(context).size.height * 0.008).clamp(6.0, 10.0)),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width * 0.6,
                           ),
-                          decoration: BoxDecoration(
-                            color: AppColors.warning.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            restaurant.discountDescription!,
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: AppColors.warning,
-                              fontWeight: FontWeight.w500,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                            decoration: BoxDecoration(
+                              color: AppColors.warning.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: AutoSizeText(
+                              restaurant.discountDescription!,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: AppColors.warning,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              maxLines: 1,
+                              minFontSize: 8,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ),
                       ),

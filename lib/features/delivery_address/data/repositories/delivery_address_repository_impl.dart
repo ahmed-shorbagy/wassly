@@ -154,5 +154,268 @@ class DeliveryAddressRepositoryImpl implements DeliveryAddressRepository {
       return Left(ServerFailure('Failed to clear address'));
     }
   }
+
+  @override
+  Future<Either<Failure, List<DeliveryAddressEntity>>> getAllDeliveryAddresses(
+    String userId,
+  ) async {
+    try {
+      AppLogger.logInfo('Fetching all delivery addresses for user: $userId');
+
+      final snapshot = await _userAddressesCol(userId)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      final addresses = snapshot.docs
+          .map((doc) => DeliveryAddressModel.fromFirestore(doc))
+          .toList();
+
+      AppLogger.logSuccess(
+        'Fetched ${addresses.length} delivery addresses',
+      );
+      return Right(addresses);
+    } on FirebaseException catch (e) {
+      AppLogger.logError(
+        'Firebase error fetching all delivery addresses',
+        error: e,
+      );
+      return Left(
+        ServerFailure('Failed to fetch addresses: ${e.message}'),
+      );
+    } catch (e) {
+      AppLogger.logError('Error fetching all delivery addresses', error: e);
+      return Left(ServerFailure('Failed to fetch addresses'));
+    }
+  }
+
+  @override
+  Stream<List<DeliveryAddressEntity>> streamAllDeliveryAddresses(
+    String userId,
+  ) {
+    try {
+      return _userAddressesCol(userId)
+          .orderBy('createdAt', descending: true)
+          .snapshots()
+          .map((snapshot) {
+        return snapshot.docs
+            .map((doc) => DeliveryAddressModel.fromFirestore(doc))
+            .toList();
+      });
+    } catch (e) {
+      AppLogger.logError(
+        'Error streaming all delivery addresses',
+        error: e,
+      );
+      throw ServerException(
+        'Failed to stream addresses: ${e.toString()}',
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, DeliveryAddressEntity>> addDeliveryAddress(
+    String userId,
+    DeliveryAddressEntity address,
+  ) async {
+    try {
+      AppLogger.logInfo('Adding delivery address for user: $userId');
+
+      final model = DeliveryAddressModel.fromEntity(address);
+      final now = DateTime.now();
+      
+      // If this is the first address or marked as default, make it default
+      final allAddresses = await getAllDeliveryAddresses(userId);
+      bool shouldBeDefault = address.isDefault;
+      
+      allAddresses.fold(
+        (_) => shouldBeDefault = false, // On error, don't set as default
+        (addresses) {
+          if (addresses.isEmpty) {
+            shouldBeDefault = true; // First address should be default
+          } else if (address.isDefault) {
+            // Unmark all other addresses as default
+            for (final addr in addresses) {
+              if (addr.isDefault) {
+                _userAddressesCol(userId)
+                    .doc(addr.id)
+                    .update({'isDefault': false});
+              }
+            }
+          }
+        },
+      );
+
+      final addressData = model.copyWith(
+        userId: userId,
+        isDefault: shouldBeDefault,
+        createdAt: now,
+        updatedAt: now,
+      ).toFirestore();
+
+      final docRef = await _userAddressesCol(userId).add(addressData);
+      final createdAddress = DeliveryAddressModel.fromFirestore(
+        await docRef.get(),
+      );
+
+      AppLogger.logSuccess('Delivery address added: ${createdAddress.id}');
+      return Right(createdAddress);
+    } on FirebaseException catch (e) {
+      AppLogger.logError(
+        'Firebase error adding delivery address',
+        error: e,
+      );
+      return Left(ServerFailure('Failed to add address: ${e.message}'));
+    } catch (e) {
+      AppLogger.logError('Error adding delivery address', error: e);
+      return Left(ServerFailure('Failed to add address'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> updateDeliveryAddress(
+    String userId,
+    DeliveryAddressEntity address,
+  ) async {
+    try {
+      AppLogger.logInfo('Updating delivery address: ${address.id}');
+
+      final model = DeliveryAddressModel.fromEntity(address);
+      final updatedData = model.copyWith(
+        updatedAt: DateTime.now(),
+      ).toFirestore();
+
+      // If setting as default, unmark others
+      if (address.isDefault) {
+        final allAddresses = await getAllDeliveryAddresses(userId);
+        allAddresses.fold(
+          (_) => null,
+          (addresses) {
+            for (final addr in addresses) {
+              if (addr.isDefault && addr.id != address.id) {
+                _userAddressesCol(userId)
+                    .doc(addr.id)
+                    .update({'isDefault': false});
+              }
+            }
+          },
+        );
+      }
+
+      await _userAddressesCol(userId).doc(address.id).update(updatedData);
+
+      AppLogger.logSuccess('Delivery address updated: ${address.id}');
+      return const Right(null);
+    } on FirebaseException catch (e) {
+      AppLogger.logError(
+        'Firebase error updating delivery address',
+        error: e,
+      );
+      return Left(ServerFailure('Failed to update address: ${e.message}'));
+    } catch (e) {
+      AppLogger.logError('Error updating delivery address', error: e);
+      return Left(ServerFailure('Failed to update address'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> setDefaultAddress(
+    String userId,
+    String addressId,
+  ) async {
+    try {
+      AppLogger.logInfo('Setting default address: $addressId for user: $userId');
+
+      // Unmark all addresses as default
+      final allAddressesResult = await getAllDeliveryAddresses(userId);
+      
+      return await allAddressesResult.fold(
+        (failure) async => Left(failure),
+        (addresses) async {
+          // Unmark all as default
+          final batch = firestore.batch();
+          for (final addr in addresses) {
+            if (addr.isDefault) {
+              batch.update(
+                _userAddressesCol(userId).doc(addr.id),
+                {'isDefault': false},
+              );
+            }
+          }
+          
+          // Mark the selected address as default
+          batch.update(
+            _userAddressesCol(userId).doc(addressId),
+            {
+              'isDefault': true,
+              'updatedAt': FieldValue.serverTimestamp(),
+            },
+          );
+          
+          await batch.commit();
+          
+          AppLogger.logSuccess('Default address set: $addressId');
+          return const Right(null);
+        },
+      );
+    } on FirebaseException catch (e) {
+      AppLogger.logError(
+        'Firebase error setting default address',
+        error: e,
+      );
+      return Left(ServerFailure('Failed to set default: ${e.message}'));
+    } catch (e) {
+      AppLogger.logError('Error setting default address', error: e);
+      return Left(ServerFailure('Failed to set default'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteDeliveryAddress(
+    String userId,
+    String addressId,
+  ) async {
+    try {
+      AppLogger.logInfo('Deleting delivery address: $addressId');
+
+      // Check if it's the default address
+      final addressDoc = await _userAddressesCol(userId).doc(addressId).get();
+      if (addressDoc.exists) {
+        final addressData = addressDoc.data();
+        final wasDefault = addressData?['isDefault'] == true;
+
+        // Delete the address
+        await _userAddressesCol(userId).doc(addressId).delete();
+
+        // If it was default, set the most recent address as default
+        if (wasDefault) {
+          final allAddresses = await getAllDeliveryAddresses(userId);
+          allAddresses.fold(
+            (_) => null,
+            (addresses) {
+              if (addresses.isNotEmpty) {
+                _userAddressesCol(userId)
+                    .doc(addresses.first.id)
+                    .update({'isDefault': true});
+              }
+            },
+          );
+        }
+
+        AppLogger.logSuccess('Delivery address deleted: $addressId');
+        return const Right(null);
+      } else {
+        return Left(ServerFailure('Address not found'));
+      }
+    } on FirebaseException catch (e) {
+      AppLogger.logError(
+        'Firebase error deleting delivery address',
+        error: e,
+      );
+      return Left(ServerFailure('Failed to delete address: ${e.message}'));
+    } catch (e) {
+      AppLogger.logError('Error deleting delivery address', error: e);
+      return Left(ServerFailure('Failed to delete address'));
+    }
+  }
 }
 

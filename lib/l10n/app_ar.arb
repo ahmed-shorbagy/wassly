@@ -263,9 +263,9 @@
   "orderRejected": "تم رفض الطلب",
   "orderStatusUpdated": "تم تحديث حالة الطلب",
   
-  "marketProducts": "منتجات السوق",
+  "marketProducts": "منتجات الماركت",
   "noMarketProducts": "لا توجد منتجات سوق",
-  "startByAddingYourFirstMarketProduct": "ابدأ بإضافة منتج السوق الأول",
+  "startByAddingYourFirstMarketProduct": "ابدأ بإضافة منتج الماركت الأول",
   "searchProducts": "ابحث عن المنتجات...",
   "searchRestaurants": "ابحث عن المطاعم...",
   "deleteProduct": "حذف المنتج",
@@ -387,7 +387,7 @@
     }
   },
   "failedToAddProductToCart": "فشل إضافة المنتج إلى السلة",
-  "marketProductsOrderingComingSoon": "طلب منتجات السوق قريباً",
+  "marketProductsOrderingComingSoon": "طلب منتجات الماركت قريباً",
   
   "myOrders": "طلباتي",
   "viewDetails": "عرض التفاصيل",
@@ -534,8 +534,8 @@
   "noteDriverCanChangePassword": "ملاحظة: يمكن للسائق تغيير كلمة المرور بعد أول تسجيل دخول.",
   "tapToUploadImage": "اضغط لرفع الصورة",
   
-  "marketProductCategories": "فئات السوق",
-  "market": "السوق",
+  "marketProductCategories": "فئات الماركت",
+  "market": "الماركت",
   "vegetables": "خضروات",
   "fruits": "فواكه",
   "snacks": "وجبات خفيفة",
@@ -556,6 +556,13 @@
   "pastaAndRice": "مكرونات و أرز",
   "chipsAndSnacks": "شيبسي",
   "topCategories": "الفئات الرئيسية",
-  "pleaseSelectCategory": "الرجاء اختيار فئة"
+  "pleaseSelectCategory": "الرجاء اختيار فئة",
+  
+  "addressBook": "سجل العناوين",
+  "addAddress": "إضافة عنوان",
+  "noAddressesFound": "لا توجد عناوين",
+  "addYourFirstAddress": "أضف عنوانك الأول للبدء",
+  "deleteAddress": "حذف العنوان",
+  "deleteAddressConfirm": "هل أنت متأكد من حذف هذا العنوان؟"
 }
 

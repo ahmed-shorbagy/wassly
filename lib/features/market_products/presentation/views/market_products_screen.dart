@@ -378,10 +378,9 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
                 return SliverPadding(
                   padding: const EdgeInsets.all(16),
                   sliver: SliverGrid(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      childAspectRatio: 0.7,
+                      childAspectRatio: 0.68, // Reduced to give more vertical space for content
                       crossAxisSpacing: 16,
                       mainAxisSpacing: 16,
                     ),

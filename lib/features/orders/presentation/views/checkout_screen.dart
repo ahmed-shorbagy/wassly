@@ -460,8 +460,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   double _getDeliveryFee() {
-    // Fixed delivery fee for now
-    return 5.0;
+    // Use restaurant's delivery fee, fallback to 5.0 if not available
+    return widget.restaurant.deliveryFee > 0 
+        ? widget.restaurant.deliveryFee 
+        : 5.0;
   }
 
   double _getTotalAmount(double subtotal) {
@@ -469,14 +471,83 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   Future<void> _placeOrder(BuildContext context, CartLoaded cartState) async {
+    final l10n = AppLocalizations.of(context);
+    
+    // Validate form
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
+    // Validate cart
+    final cartValid = await context.read<CartCubit>().validateCartForCheckout();
+    if (!cartValid || cartState.items.isEmpty) {
+      context.showErrorSnackBar(
+        'Cart is invalid. Please refresh and try again.',
+      );
+      // Reload cart to sync state
+      context.read<CartCubit>().loadCart();
+      return;
+    }
+
+    // Validate cart items belong to the correct restaurant
+    final allItemsFromRestaurant = cartState.items.every(
+      (item) => item.product.restaurantId == widget.restaurant.id
+    );
+    
+    if (!allItemsFromRestaurant) {
+      context.showErrorSnackBar(
+        'Cart contains items from different restaurants. Please clear cart and try again.',
+      );
+      return;
+    }
+
+    // Validate minimum order amount
+    if (widget.restaurant.minOrderAmount > 0 && 
+        cartState.totalPrice < widget.restaurant.minOrderAmount) {
+      final minAmount = widget.restaurant.minOrderAmount.toStringAsFixed(2);
+      final currency = l10n?.currencySymbol ?? 'ج.م';
+      context.showErrorSnackBar(
+        'Minimum order amount is $minAmount $currency',
+      );
+      return;
+    }
+
+    // Validate all products are still available
+    final unavailableProducts = cartState.items.where(
+      (item) => !item.product.isAvailable
+    ).toList();
+    
+    if (unavailableProducts.isNotEmpty) {
+      final productNames = unavailableProducts
+          .map((item) => item.product.name)
+          .join(', ');
+      context.showErrorSnackBar(
+        'Some products are no longer available: $productNames. Please remove them and try again.',
+      );
+      return;
+    }
+
+    // Validate all items have valid prices
+    final invalidPriceItems = cartState.items.where(
+      (item) => item.product.price <= 0 || item.quantity <= 0
+    ).toList();
+    
+    if (invalidPriceItems.isNotEmpty) {
+      context.showErrorSnackBar(
+        'Some items have invalid prices or quantities. Please refresh and try again.',
+      );
+      // Reload cart to sync state
+      context.read<CartCubit>().loadCart();
+      return;
+    }
+
+    // Validate restaurant is open (if needed)
+    // Note: This is a business decision - you might want to allow orders even if restaurant is closed
+    // for scheduled orders. For now, we'll allow it but the restaurant can reject it.
+
     // Get current user
     final authState = context.read<AuthCubit>().state;
     if (authState is! AuthAuthenticated) {
-      final l10n = AppLocalizations.of(context);
       context.showErrorSnackBar(
         l10n?.pleaseLoginToPlaceOrder ?? 'يرجى تسجيل الدخول لتقديم الطلب',
       );

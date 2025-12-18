@@ -574,6 +574,13 @@
   "pastaAndRice": "Pasta and Rice",
   "chipsAndSnacks": "Chips and Snacks",
   "topCategories": "Top Categories",
-  "pleaseSelectCategory": "Please select a category"
+  "pleaseSelectCategory": "Please select a category",
+  
+  "addressBook": "Address Book",
+  "addAddress": "Add Address",
+  "noAddressesFound": "No addresses found",
+  "addYourFirstAddress": "Add your first address to get started",
+  "deleteAddress": "Delete Address",
+  "deleteAddressConfirm": "Are you sure you want to delete this address?"
 }
 

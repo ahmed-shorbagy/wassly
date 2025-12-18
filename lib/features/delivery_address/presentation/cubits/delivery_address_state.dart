@@ -16,10 +16,12 @@ class DeliveryAddressNotSet extends DeliveryAddressState {}
 class DeliveryAddressSelected extends DeliveryAddressState {
   final String address;
   final String? addressLabel;
+  final String? addressId;
 
   const DeliveryAddressSelected({
     required this.address,
     this.addressLabel,
+    this.addressId,
   });
 
   String get displayAddress {
@@ -30,7 +32,20 @@ class DeliveryAddressSelected extends DeliveryAddressState {
   }
 
   @override
-  List<Object?> get props => [address, addressLabel];
+  List<Object?> get props => [address, addressLabel, addressId];
+}
+
+class DeliveryAddressesLoaded extends DeliveryAddressState {
+  final List<DeliveryAddressEntity> addresses;
+  final DeliveryAddressEntity? selectedAddress;
+
+  const DeliveryAddressesLoaded({
+    required this.addresses,
+    this.selectedAddress,
+  });
+
+  @override
+  List<Object?> get props => [addresses, selectedAddress];
 }
 
 class DeliveryAddressError extends DeliveryAddressState {

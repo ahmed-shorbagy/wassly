@@ -716,14 +716,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get orderStatusUpdated => 'تم تحديث حالة الطلب';
 
   @override
-  String get marketProducts => 'منتجات السوق';
+  String get marketProducts => 'منتجات الماركت';
 
   @override
   String get noMarketProducts => 'لا توجد منتجات سوق';
 
   @override
   String get startByAddingYourFirstMarketProduct =>
-      'ابدأ بإضافة منتج السوق الأول';
+      'ابدأ بإضافة منتج الماركت الأول';
 
   @override
   String get searchProducts => 'ابحث عن المنتجات...';
@@ -1009,7 +1009,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get failedToAddProductToCart => 'فشل إضافة المنتج إلى السلة';
 
   @override
-  String get marketProductsOrderingComingSoon => 'طلب منتجات السوق قريباً';
+  String get marketProductsOrderingComingSoon => 'طلب منتجات الماركت قريباً';
 
   @override
   String get myOrders => 'طلباتي';
@@ -1363,10 +1363,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tapToUploadImage => 'اضغط لرفع الصورة';
 
   @override
-  String get marketProductCategories => 'فئات السوق';
+  String get marketProductCategories => 'فئات الماركت';
 
   @override
-  String get market => 'السوق';
+  String get market => 'الماركت';
 
   @override
   String get vegetables => 'خضروات';
@@ -1430,4 +1430,22 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get pleaseSelectCategory => 'الرجاء اختيار فئة';
+
+  @override
+  String get addressBook => 'سجل العناوين';
+
+  @override
+  String get addAddress => 'إضافة عنوان';
+
+  @override
+  String get noAddressesFound => 'لا توجد عناوين';
+
+  @override
+  String get addYourFirstAddress => 'أضف عنوانك الأول للبدء';
+
+  @override
+  String get deleteAddress => 'حذف العنوان';
+
+  @override
+  String get deleteAddressConfirm => 'هل أنت متأكد من حذف هذا العنوان؟';
 }

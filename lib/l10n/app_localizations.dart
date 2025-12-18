@@ -2869,6 +2869,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please select a category'**
   String get pleaseSelectCategory;
+
+  /// No description provided for @addressBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Address Book'**
+  String get addressBook;
+
+  /// No description provided for @addAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Address'**
+  String get addAddress;
+
+  /// No description provided for @noAddressesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No addresses found'**
+  String get noAddressesFound;
+
+  /// No description provided for @addYourFirstAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first address to get started'**
+  String get addYourFirstAddress;
+
+  /// No description provided for @deleteAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Address'**
+  String get deleteAddress;
+
+  /// No description provided for @deleteAddressConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this address?'**
+  String get deleteAddressConfirm;
 }
 
 class _AppLocalizationsDelegate

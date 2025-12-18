@@ -43,12 +43,39 @@ class CartCubit extends Cubit<CartState> {
         if (isClosed) return;
         
         // Filter out invalid items (products without IDs)
-        final validItems = items.where((item) => item.product.id.isNotEmpty).toList();
+        final validItems = items.where((item) => 
+          item.product.id.isNotEmpty && 
+          item.product.restaurantId.isNotEmpty &&
+          item.quantity > 0
+        ).toList();
         
-        // Determine restaurant ID from items
+        // Validate all items belong to the same restaurant
         String? restaurantId;
         if (validItems.isNotEmpty) {
           restaurantId = validItems.first.product.restaurantId;
+          
+          // Check if all items belong to the same restaurant
+          final allSameRestaurant = validItems.every(
+            (item) => item.product.restaurantId == restaurantId
+          );
+          
+          if (!allSameRestaurant) {
+            // If items from different restaurants, keep only items from first restaurant
+            final filteredItems = validItems.where(
+              (item) => item.product.restaurantId == restaurantId
+            ).toList();
+            
+              if (filteredItems.isNotEmpty) {
+              // Remove items from other restaurants automatically
+              _removeItemsFromOtherRestaurants(userId, restaurantId, validItems);
+              emit(CartLoaded(filteredItems, restaurantId: restaurantId));
+              return;
+            } else {
+              // No valid items from first restaurant, clear cart
+              clearCart();
+              return;
+            }
+          }
         }
 
         emit(CartLoaded(validItems, restaurantId: restaurantId));
@@ -249,5 +276,50 @@ class CartCubit extends Cubit<CartState> {
       return (state as CartLoaded).totalPrice;
     }
     return 0.0;
+  }
+
+  /// Remove items from other restaurants (helper method)
+  Future<void> _removeItemsFromOtherRestaurants(
+    String userId,
+    String targetRestaurantId,
+    List<CartItemEntity> allItems,
+  ) async {
+    // Remove items that don't belong to target restaurant
+    for (final item in allItems) {
+      if (item.product.restaurantId != targetRestaurantId) {
+        await repository.removeItem(userId, item.product.id);
+      }
+    }
+  }
+
+  /// Validate cart before checkout
+  Future<bool> validateCartForCheckout() async {
+    final userId = _userId;
+    if (userId == null) return false;
+
+    if (state is! CartLoaded) return false;
+    
+    final cartState = state as CartLoaded;
+    
+    // Check if cart is empty
+    if (cartState.items.isEmpty) return false;
+    
+    // Validate all items have same restaurant
+    if (cartState.restaurantId == null) return false;
+    
+    final allSameRestaurant = cartState.items.every(
+      (item) => item.product.restaurantId == cartState.restaurantId
+    );
+    
+    if (!allSameRestaurant) return false;
+    
+    // Validate all items have valid quantities
+    final allValidQuantities = cartState.items.every(
+      (item) => item.quantity > 0 && item.product.price > 0
+    );
+    
+    if (!allValidQuantities) return false;
+    
+    return true;
   }
 }

@@ -1439,4 +1439,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pleaseSelectCategory => 'Please select a category';
+
+  @override
+  String get addressBook => 'Address Book';
+
+  @override
+  String get addAddress => 'Add Address';
+
+  @override
+  String get noAddressesFound => 'No addresses found';
+
+  @override
+  String get addYourFirstAddress => 'Add your first address to get started';
+
+  @override
+  String get deleteAddress => 'Delete Address';
+
+  @override
+  String get deleteAddressConfirm =>
+      'Are you sure you want to delete this address?';
 }

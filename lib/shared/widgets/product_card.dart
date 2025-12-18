@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import '../../core/constants/app_colors.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/utils/extensions.dart';
@@ -49,7 +50,7 @@ class ProductCard extends StatelessWidget {
         elevation: 0,
         color: Colors.white,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular((MediaQuery.of(context).size.width * 0.04).clamp(12.0, 18.0)),
           side: BorderSide(
             color: AppColors.border,
             width: 1,
@@ -57,16 +58,17 @@ class ProductCard extends StatelessWidget {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             // Product Image Section with Heart and Add Button
-            Expanded(
-              flex: 3,
+            AspectRatio(
+              aspectRatio: 1.0,
               child: Stack(
                 children: [
                   // Product Image
                   ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(16),
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular((MediaQuery.of(context).size.width * 0.04).clamp(12.0, 18.0)),
                     ),
                     child: imageUrl != null && imageUrl!.isNotEmpty
                         ? CachedNetworkImage(
@@ -111,8 +113,8 @@ class ProductCard extends StatelessWidget {
                               context.read<FavoritesCubit>().toggleRestaurant(restaurantId!);
                             },
                             child: Container(
-                              width: 32,
-                              height: 32,
+                              width: (MediaQuery.of(context).size.width * 0.08).clamp(28.0, 36.0),
+                              height: (MediaQuery.of(context).size.width * 0.08).clamp(28.0, 36.0),
                               decoration: BoxDecoration(
                                 color: Colors.white.withValues(alpha: 0.9),
                                 shape: BoxShape.circle,
@@ -126,7 +128,7 @@ class ProductCard extends StatelessWidget {
                               ),
                               child: Icon(
                                 isFav ? Icons.favorite : Icons.favorite_border,
-                                size: 18,
+                                size: (MediaQuery.of(context).size.width * 0.045).clamp(16.0, 20.0),
                                 color: isFav ? Colors.red : AppColors.textSecondary,
                               ),
                             ),
@@ -142,8 +144,8 @@ class ProductCard extends StatelessWidget {
                     child: GestureDetector(
                       onTap: isAvailable ? () => _handleAddToCart(context) : null,
                       child: Container(
-                        width: 36,
-                        height: 36,
+                        width: (MediaQuery.of(context).size.width * 0.09).clamp(32.0, 40.0),
+                        height: (MediaQuery.of(context).size.width * 0.09).clamp(32.0, 40.0),
                         decoration: BoxDecoration(
                           color: isAvailable ? AppColors.primary : AppColors.textSecondary,
                           shape: BoxShape.circle,
@@ -157,7 +159,7 @@ class ProductCard extends StatelessWidget {
                         ),
                         child: Icon(
                           Icons.add,
-                          size: 20,
+                          size: (MediaQuery.of(context).size.width * 0.05).clamp(18.0, 22.0),
                           color: Colors.white,
                         ),
                       ),
@@ -167,43 +169,49 @@ class ProductCard extends StatelessWidget {
               ),
             ),
             
-            // Product Info Section
-            Expanded(
-              flex: 2,
+            // Product Info Section - Constrained to prevent overflow
+            Flexible(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+                padding: EdgeInsets.all((MediaQuery.of(context).size.width * 0.025).clamp(6.0, 12.0)),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Price
-                    Text(
+                    // Price - Takes only what it needs
+                    AutoSizeText(
                       '${price.toStringAsFixed(2)} ${AppLocalizations.of(context)?.currencySymbol ?? 'ج.م'}',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: (MediaQuery.of(context).size.width * 0.038).clamp(13.0, 17.0),
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
                       ),
+                      maxLines: 1,
+                      minFontSize: 10,
+                      maxFontSize: (MediaQuery.of(context).size.width * 0.038).clamp(13.0, 17.0).roundToDouble(),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
-                    // Product Description
-                    Expanded(
-                      child: Text(
-                        description.isNotEmpty ? description : productName,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
-                          height: 1.3,
-                        ),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
+                    SizedBox(height: (MediaQuery.of(context).size.height * 0.006).clamp(4.0, 8.0)),
+                    // Product Name/Description - Optimized for Arabic text with flexible height
+                    AutoSizeText(
+                      description.isNotEmpty ? description : productName,
+                      style: TextStyle(
+                        fontSize: (MediaQuery.of(context).size.width * 0.028).clamp(9.0, 13.0),
+                        color: AppColors.textSecondary,
+                        height: 1.4,
                       ),
+                      maxLines: 2,
+                      minFontSize: 8,
+                      maxFontSize: (MediaQuery.of(context).size.width * 0.028).clamp(9.0, 13.0).roundToDouble(),
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.start,
+                      wrapWords: false,
                     ),
                   ],
                 ),
               ),
             ),
-          ],
+            ],
         ),
       ),
     );
@@ -213,7 +221,7 @@ class ProductCard extends StatelessWidget {
     if (isMarketProduct) {
       final l10n = AppLocalizations.of(context);
       context.showInfoSnackBar(
-        l10n?.marketProductsOrderingComingSoon ?? 'طلب منتجات السوق قريباً',
+        l10n?.marketProductsOrderingComingSoon ?? 'طلب منتجات الماركت قريباً',
       );
       return;
     }

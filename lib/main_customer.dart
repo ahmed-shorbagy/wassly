@@ -16,7 +16,7 @@ import 'shared/widgets/back_button_handler.dart';
 void main() async {
   // Initialize flavor configuration
   FlavorConfig.initialize(flavor: Flavor.customer);
-  
+
   AppLogger.logInfo('=== Starting ${FlavorConfig.instance.appName} ===');
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -51,11 +51,7 @@ void main() async {
     );
     runApp(
       MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: Text('Error initializing app: $e'),
-          ),
-        ),
+        home: Scaffold(body: Center(child: Text('Error initializing app: $e'))),
       ),
     );
   }
@@ -86,4 +82,3 @@ class WasslyCustomerApp extends StatelessWidget {
     );
   }
 }
-
