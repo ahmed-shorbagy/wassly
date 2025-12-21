@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/responsive_helper.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/error_widget.dart';
 import '../../../home/presentation/cubits/home_cubit.dart';
@@ -16,7 +18,6 @@ import '../../../market_products/presentation/cubits/market_product_customer_cub
 import '../../../ads/presentation/cubits/startup_ad_customer_cubit.dart';
 import '../../../../shared/widgets/startup_ad_popup.dart';
 import '../../../delivery_address/presentation/cubits/delivery_address_cubit.dart';
-import '../../../delivery_address/presentation/widgets/delivery_address_dialog.dart';
 
 class CustomerHomeScreen extends StatefulWidget {
   const CustomerHomeScreen({super.key});
@@ -207,23 +208,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
 
   // Reduced aspect ratios to prevent overflow - lower values = more vertical space
   double _getResponsiveAspectRatio(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    
-    // Calculate aspect ratio based on screen size - optimized to prevent overflow
-    if (screenWidth < 350) {
-      // Very small screens - maximum vertical space
-      return 0.60;
-    } else if (screenWidth < 400) {
-      // Small screens
-      return 0.62;
-    } else if (screenHeight < 700) {
-      // Short screens
-      return 0.65;
-    } else {
-      // Normal and large screens
-      return 0.63;
-    }
+    return ResponsiveHelper.getGridAspectRatio(context);
   }
 
   Widget _buildHome(
@@ -256,7 +241,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             pinned: true,
             elevation: 0,
             backgroundColor: AppColors.primaryDark,
-            toolbarHeight: (MediaQuery.of(context).size.height * 0.12).clamp(90.0, 110.0),
+            toolbarHeight: ResponsiveHelper.getAppBarHeight(context),
             automaticallyImplyLeading: false,
             flexibleSpace: _CombinedAppBar(
               searchController: _searchController,
@@ -294,7 +279,11 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           // Market Products Categories Section
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+              padding: ResponsiveHelper.padding(
+                horizontal: 16,
+                top: 24,
+                bottom: 8,
+              ),
               child: _MarketProductCategoriesSection(
                 onCategoryTap: (category, isMarket) {
                   if (isMarket) {
@@ -313,11 +302,10 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           if (discountedRestaurants.isNotEmpty)
             SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  MediaQuery.of(context).size.width * 0.04,
-                  24,
-                  MediaQuery.of(context).size.width * 0.04,
-                  8,
+                padding: ResponsiveHelper.padding(
+                  horizontal: 16,
+                  top: 24,
+                  bottom: 8,
                 ),
                 child: _DiscountRestaurantsBannerCarousel(
                   restaurants: discountedRestaurants,
@@ -334,7 +322,10 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           // Restaurants Section Header
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: ResponsiveHelper.padding(
+                horizontal: 16,
+                vertical: 8,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -343,6 +334,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
+                      fontSize: ResponsiveHelper.fontSize(18),
                     ),
                   ),
                   TextButton(
@@ -352,6 +344,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       style: TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
+                        fontSize: ResponsiveHelper.fontSize(14),
                       ),
                     ),
                   ),
@@ -377,13 +370,13 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             )
           else if (regularRestaurants.isNotEmpty)
             SliverPadding(
-              padding: EdgeInsets.all((MediaQuery.of(context).size.width * 0.04).clamp(12.0, 16.0)),
+              padding: ResponsiveHelper.padding(all: 16),
               sliver: SliverGrid(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   childAspectRatio: _getResponsiveAspectRatio(context),
-                  crossAxisSpacing: (MediaQuery.of(context).size.width * 0.04).clamp(12.0, 16.0),
-                  mainAxisSpacing: (MediaQuery.of(context).size.width * 0.04).clamp(12.0, 16.0),
+                  crossAxisSpacing: 16.w,
+                  mainAxisSpacing: 16.h,
                 ),
                 delegate: SliverChildBuilderDelegate((context, index) {
                   final restaurant = regularRestaurants[index];
@@ -403,15 +396,19 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           expandedHeight: 0,
           floating: true,
           pinned: true,
-          toolbarHeight: 100,
+          toolbarHeight: ResponsiveHelper.getAppBarHeight(context),
           backgroundColor: AppColors.surface,
           flexibleSpace: Container(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+            padding: ResponsiveHelper.padding(
+              horizontal: 16,
+              top: 16,
+              bottom: 12,
+            ),
             child: Container(
-              height: 48,
+              height: 48.h,
               decoration: BoxDecoration(
                 color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(24.r),
               ),
             ),
           ),
@@ -486,11 +483,16 @@ class _BannerCarousel extends StatelessWidget {
           ]
         : banners;
     
-    // Fixed banner height - consistent across all screen sizes
-    const double bannerHeight = 160.0;
+    // Responsive banner height
+    final double bannerHeight = 160.h;
     
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 8, 0),
+      padding: ResponsiveHelper.padding(
+        left: 16,
+        top: 16,
+        right: 8,
+        bottom: 0,
+      ),
       child: CarouselSlider(
         options: CarouselOptions(
           height: bannerHeight,
@@ -515,16 +517,16 @@ class _BannerCarousel extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      // Fixed banner dimensions: 342px width × 160px height
+                      // Responsive banner dimensions
                       return SizedBox(
-                        width: 342.0,
+                        width: double.infinity,
                         height: bannerHeight,
                         child: Stack(
                           fit: StackFit.expand,
                           children: [
                             CachedNetworkImage(
                               imageUrl: b.imageUrl,
-                              width: 342.0,
+                              width: double.infinity,
                               height: bannerHeight,
                               fit: BoxFit.cover,
                             placeholder: (c, u) => Container(
@@ -565,23 +567,26 @@ class _BannerCarousel extends StatelessWidget {
                           // Title overlay
                           if (b.title != null && b.title!.isNotEmpty)
                             Positioned(
-                              bottom: 16,
-                              left: 16,
-                              right: 16,
-                              child: Text(
+                              bottom: 16.h,
+                              left: 16.w,
+                              right: 16.w,
+                              child: AutoSizeText(
                                 b.title!,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 18,
+                                  fontSize: ResponsiveHelper.fontSize(18),
                                   fontWeight: FontWeight.bold,
                                   shadows: [
                                     Shadow(
                                       color: Colors.black54,
-                                      offset: Offset(0, 2),
-                                      blurRadius: 4,
+                                      offset: Offset(0, 2.h),
+                                      blurRadius: 4.r,
                                     ),
                                   ],
                                 ),
+                                maxLines: 2,
+                                minFontSize: 12,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
@@ -682,8 +687,8 @@ class _RestaurantCard extends StatelessWidget {
                   ),
                   // Favorite Button - Smaller
                   Positioned(
-                    top: 6,
-                    right: 6,
+                    top: 6.h,
+                    right: 6.w,
                     child: BlocBuilder<FavoritesCubit, FavoritesState>(
                       builder: (context, favState) {
                         final isFav = favState.favoriteRestaurantIds.contains(
@@ -696,15 +701,15 @@ class _RestaurantCard extends StatelessWidget {
                             );
                           },
                           child: Container(
-                            padding: const EdgeInsets.all(4),
+                            padding: ResponsiveHelper.padding(all: 4),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withValues(alpha: 0.1),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
+                                  blurRadius: 4.r,
+                                  offset: Offset(0, 2.h),
                                 ),
                               ],
                             ),
@@ -713,7 +718,7 @@ class _RestaurantCard extends StatelessWidget {
                               color: isFav
                                   ? Colors.red
                                   : AppColors.textSecondary,
-                              size: 16,
+                              size: ResponsiveHelper.iconSize(16),
                             ),
                           ),
                         );
@@ -723,43 +728,45 @@ class _RestaurantCard extends StatelessWidget {
                   // Discount Badge (Top Left)
                   if (restaurant.isDiscountActive)
                     Positioned(
-                      top: 8,
-                      left: 8,
+                      top: 8.h,
+                      left: 8.w,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
+                        padding: ResponsiveHelper.padding(
                           horizontal: 10,
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
                           color:
                               AppColors.warning, // Orange/Yellow for discount
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(20.r),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withValues(alpha: 0.3),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
+                              blurRadius: 8.r,
+                              offset: Offset(0, 2.h),
                             ),
                           ],
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.local_offer,
                               color: Colors.white,
-                              size: 14,
+                              size: ResponsiveHelper.iconSize(14),
                             ),
-                            const SizedBox(width: 4),
-                            Text(
+                            ResponsiveHelper.spacing(width: 4),
+                            AutoSizeText(
                               restaurant.discountPercentage != null
                                   ? '${restaurant.discountPercentage!.toStringAsFixed(0)}%'
                                   : 'OFF',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 12,
+                                fontSize: ResponsiveHelper.fontSize(12),
                                 fontWeight: FontWeight.bold,
                               ),
+                              maxLines: 1,
+                              minFontSize: 8,
                             ),
                           ],
                         ),
@@ -767,10 +774,10 @@ class _RestaurantCard extends StatelessWidget {
                     ),
                   // Status Badge - Smaller (only dot indicator)
                   Positioned(
-                    bottom: 8,
-                    left: 8,
+                    bottom: 8.h,
+                    left: 8.w,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
+                      padding: ResponsiveHelper.padding(
                         horizontal: 8,
                         vertical: 4,
                       ),
@@ -778,12 +785,12 @@ class _RestaurantCard extends StatelessWidget {
                         color: restaurant.isOpen
                             ? AppColors.success
                             : AppColors.error,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12.r),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withValues(alpha: 0.15),
-                            blurRadius: 3,
-                            offset: const Offset(0, 1),
+                            blurRadius: 3.r,
+                            offset: Offset(0, 1.h),
                           ),
                         ],
                       ),
@@ -791,25 +798,27 @@ class _RestaurantCard extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Container(
-                            width: 5,
-                            height: 5,
+                            width: 5.w,
+                            height: 5.h,
                             decoration: const BoxDecoration(
                               color: Colors.white,
                               shape: BoxShape.circle,
                             ),
                           ),
-                          const SizedBox(width: 4),
+                          ResponsiveHelper.spacing(width: 4),
                           Builder(
                             builder: (context) {
                               final l10n = AppLocalizations.of(context)!;
-                              return Text(
+                              return AutoSizeText(
                                 restaurant.isOpen ? l10n.open : l10n.closed,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 9,
+                                  fontSize: ResponsiveHelper.fontSize(9),
                                   fontWeight: FontWeight.w600,
                                   height: 1.0,
                                 ),
+                                maxLines: 1,
+                                minFontSize: 7,
                               );
                             },
                           ),
@@ -823,7 +832,7 @@ class _RestaurantCard extends StatelessWidget {
 
             // Restaurant Info - Optimized for Arabic text with overflow protection
             Padding(
-              padding: EdgeInsets.all((MediaQuery.of(context).size.width * 0.025).clamp(6.0, 10.0)),
+              padding: ResponsiveHelper.padding(all: 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -833,30 +842,30 @@ class _RestaurantCard extends StatelessWidget {
                   AutoSizeText(
                     restaurant.name,
                     style: TextStyle(
-                      fontSize: (MediaQuery.of(context).size.width * 0.038).clamp(13.0, 15.0),
+                      fontSize: ResponsiveHelper.fontSize(15),
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
                       height: 1.3,
                     ),
                     maxLines: 2,
                     minFontSize: 10,
-                    maxFontSize: (MediaQuery.of(context).size.width * 0.038).clamp(13.0, 15.0).roundToDouble(),
+                    maxFontSize: 15,
                     overflow: TextOverflow.ellipsis,
                     wrapWords: false,
                   ),
-                  SizedBox(height: (MediaQuery.of(context).size.height * 0.005).clamp(3.0, 6.0)),
+                  ResponsiveHelper.spacing(height: 4),
                   // Category or Description - 2 lines for Arabic support
                   if (restaurant.categories.isNotEmpty)
                     AutoSizeText(
                       restaurant.categories.first,
                       style: TextStyle(
-                        fontSize: (MediaQuery.of(context).size.width * 0.028).clamp(9.0, 11.0),
+                        fontSize: ResponsiveHelper.fontSize(11),
                         color: AppColors.textSecondary,
                         height: 1.3,
                       ),
                       maxLines: 2,
                       minFontSize: 8,
-                      maxFontSize: (MediaQuery.of(context).size.width * 0.028).clamp(9.0, 11.0).roundToDouble(),
+                      maxFontSize: 11,
                       overflow: TextOverflow.ellipsis,
                       wrapWords: false,
                     )
@@ -864,25 +873,25 @@ class _RestaurantCard extends StatelessWidget {
                     AutoSizeText(
                       restaurant.description,
                       style: TextStyle(
-                        fontSize: (MediaQuery.of(context).size.width * 0.028).clamp(9.0, 11.0),
+                        fontSize: ResponsiveHelper.fontSize(11),
                         color: AppColors.textSecondary,
                         height: 1.3,
                       ),
                       maxLines: 2,
                       minFontSize: 8,
-                      maxFontSize: (MediaQuery.of(context).size.width * 0.028).clamp(9.0, 11.0).roundToDouble(),
+                      maxFontSize: 11,
                       overflow: TextOverflow.ellipsis,
                       wrapWords: false,
                     ),
-                  SizedBox(height: (MediaQuery.of(context).size.height * 0.005).clamp(3.0, 6.0)),
+                  ResponsiveHelper.spacing(height: 4),
                   // Delivery Info
                   Wrap(
-                    spacing: 4,
-                    runSpacing: 3,
+                    spacing: 4.w,
+                    runSpacing: 3.h,
                     children: [
                       Icon(
                         Icons.delivery_dining,
-                        size: (MediaQuery.of(context).size.width * 0.032).clamp(11.0, 13.0),
+                        size: ResponsiveHelper.iconSize(13),
                         color: AppColors.primary,
                       ),
                       Builder(
@@ -891,7 +900,7 @@ class _RestaurantCard extends StatelessWidget {
                           return AutoSizeText(
                             '${restaurant.deliveryFee.toStringAsFixed(0)} ${l10n.currencySymbol}',
                             style: TextStyle(
-                              fontSize: (MediaQuery.of(context).size.width * 0.026).clamp(8.0, 10.0),
+                              fontSize: ResponsiveHelper.fontSize(10),
                               color: AppColors.textSecondary,
                               fontWeight: FontWeight.w500,
                             ),
@@ -902,7 +911,7 @@ class _RestaurantCard extends StatelessWidget {
                       ),
                       Icon(
                         Icons.access_time,
-                        size: (MediaQuery.of(context).size.width * 0.032).clamp(11.0, 13.0),
+                        size: ResponsiveHelper.iconSize(13),
                         color: AppColors.textSecondary,
                       ),
                       Builder(
@@ -911,7 +920,7 @@ class _RestaurantCard extends StatelessWidget {
                           return AutoSizeText(
                             '${restaurant.estimatedDeliveryTime} ${l10n.minutesAbbreviation}',
                             style: TextStyle(
-                              fontSize: (MediaQuery.of(context).size.width * 0.026).clamp(8.0, 10.0),
+                              fontSize: ResponsiveHelper.fontSize(10),
                               color: AppColors.textSecondary,
                               fontWeight: FontWeight.w500,
                             ),
@@ -945,8 +954,7 @@ class _MarketProductCategoriesSection extends StatelessWidget {
     String title,
     VoidCallback onTap,
   ) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final cardHeight = (screenWidth * 0.25).clamp(90.0, 110.0);
+    final cardHeight = 110.h;
     
     return GestureDetector(
       onTap: onTap,
@@ -957,17 +965,17 @@ class _MarketProductCategoriesSection extends StatelessWidget {
           Container(
             height: cardHeight,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(16.r),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.08),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+                  blurRadius: 8.r,
+                  offset: Offset(0, 2.h),
                 ),
               ],
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(16.r),
               child: Image.asset(
                 imagePath,
                 fit: BoxFit.cover,
@@ -977,7 +985,7 @@ class _MarketProductCategoriesSection extends StatelessWidget {
                     color: AppColors.surface,
                     child: Icon(
                       Icons.image_not_supported,
-                      size: (screenWidth * 0.12).clamp(36.0, 48.0),
+                      size: ResponsiveHelper.iconSize(48),
                       color: AppColors.textSecondary,
                     ),
                   );
@@ -985,19 +993,20 @@ class _MarketProductCategoriesSection extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: (screenWidth * 0.02).clamp(6.0, 8.0)),
+          ResponsiveHelper.spacing(height: 8),
           Flexible(
-            child: Text(
+            child: AutoSizeText(
               title,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: (screenWidth * 0.03).clamp(10.0, 12.0),
+                fontSize: ResponsiveHelper.fontSize(12),
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
                 height: 1.2,
               ),
+              minFontSize: 10,
             ),
           ),
         ],
@@ -1018,12 +1027,13 @@ class _MarketProductCategoriesSection extends StatelessWidget {
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
+            fontSize: ResponsiveHelper.fontSize(18),
           ),
         ),
-        SizedBox(height: (MediaQuery.of(context).size.height * 0.02).clamp(12.0, 16.0)),
+        ResponsiveHelper.spacing(height: 16),
         // Market Images - Grid layout (scrollable horizontal)
         SizedBox(
-          height: (MediaQuery.of(context).size.width * 0.3).clamp(110.0, 140.0),
+          height: 140.h,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: 6,
@@ -1062,14 +1072,13 @@ class _MarketProductCategoriesSection extends StatelessWidget {
               ];
               
               final item = categories[index];
-              final screenWidth = MediaQuery.of(context).size.width;
-              final cardWidth = (screenWidth * 0.28).clamp(100.0, 120.0);
+              final cardWidth = 120.w;
               
               return Padding(
                 padding: EdgeInsets.only(
                   right: index == categories.length - 1 
                       ? 0 
-                      : ((screenWidth * 0.03).clamp(10.0, 12.0)),
+                      : 12.w,
                 ),
                 child: SizedBox(
                   width: cardWidth,
@@ -1116,8 +1125,8 @@ class _DiscountRestaurantsBannerCarousel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    // Fixed banner height - consistent across all screen sizes
-    const double bannerHeight = 160.0;
+    // Responsive banner height
+    final double bannerHeight = 160.h;
 
     if (restaurants.isEmpty) {
       return const SizedBox.shrink();
@@ -1135,6 +1144,7 @@ class _DiscountRestaurantsBannerCarousel extends StatelessWidget {
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
+                fontSize: ResponsiveHelper.fontSize(18),
               ),
             ),
             if (restaurants.length > 1)
@@ -1147,13 +1157,13 @@ class _DiscountRestaurantsBannerCarousel extends StatelessWidget {
                   style: TextStyle(
                     color: AppColors.success,
                     fontWeight: FontWeight.w600,
-                    fontSize: 16,
+                    fontSize: ResponsiveHelper.fontSize(16),
                   ),
                 ),
               ),
           ],
         ),
-        SizedBox(height: (MediaQuery.of(context).size.height * 0.015).clamp(10.0, 12.0)),
+        ResponsiveHelper.spacing(height: 12),
         // Banner Carousel
         CarouselSlider(
           options: CarouselOptions(
@@ -1180,9 +1190,9 @@ class _DiscountRestaurantsBannerCarousel extends StatelessWidget {
                       context.push('/restaurant/${restaurant.id}');
                     },
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(20.r),
                       child: SizedBox(
-                        width: 342.0,
+                        width: double.infinity,
                         height: bannerHeight,
                         child: Stack(
                           fit: StackFit.expand,
@@ -1192,7 +1202,7 @@ class _DiscountRestaurantsBannerCarousel extends StatelessWidget {
                                     restaurant.imageUrl!.isNotEmpty
                                 ? CachedNetworkImage(
                                     imageUrl: restaurant.imageUrl!,
-                                    width: 342.0,
+                                    width: double.infinity,
                                     height: bannerHeight,
                                     fit: BoxFit.cover,
                                     placeholder: (c, u) => Container(
@@ -1249,40 +1259,42 @@ class _DiscountRestaurantsBannerCarousel extends StatelessWidget {
                             if (restaurant.isDiscountActive &&
                                 restaurant.discountPercentage != null)
                               Positioned(
-                                top: 16,
-                                left: 16,
+                                top: 16.h,
+                                left: 16.w,
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(
+                                  padding: ResponsiveHelper.padding(
                                     horizontal: 12,
                                     vertical: 8,
                                   ),
                                   decoration: BoxDecoration(
                                     color: AppColors.warning,
-                                    borderRadius: BorderRadius.circular(20),
+                                    borderRadius: BorderRadius.circular(20.r),
                                     boxShadow: [
                                       BoxShadow(
                                         color: Colors.black.withValues(alpha: 0.3),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 2),
+                                        blurRadius: 8.r,
+                                        offset: Offset(0, 2.h),
                                       ),
                                     ],
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Icon(
+                                      Icon(
                                         Icons.local_offer,
                                         color: Colors.white,
-                                        size: 18,
+                                        size: ResponsiveHelper.iconSize(18),
                                       ),
-                                      const SizedBox(width: 6),
-                                      Text(
+                                      ResponsiveHelper.spacing(width: 6),
+                                      AutoSizeText(
                                         '${restaurant.discountPercentage!.toStringAsFixed(0)}% ${l10n.off}',
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           color: Colors.white,
-                                          fontSize: 14,
+                                          fontSize: ResponsiveHelper.fontSize(14),
                                           fontWeight: FontWeight.bold,
                                         ),
+                                        maxLines: 1,
+                                        minFontSize: 10,
                                       ),
                                     ],
                                   ),
@@ -1294,7 +1306,7 @@ class _DiscountRestaurantsBannerCarousel extends StatelessWidget {
                               left: 0,
                               right: 0,
                               child: Container(
-                                padding: const EdgeInsets.all(16),
+                                padding: ResponsiveHelper.padding(all: 16),
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     begin: Alignment.topCenter,
@@ -1309,39 +1321,41 @@ class _DiscountRestaurantsBannerCarousel extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Text(
+                                    AutoSizeText(
                                       restaurant.name,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         color: Colors.white,
-                                        fontSize: 20,
+                                        fontSize: ResponsiveHelper.fontSize(20),
                                         fontWeight: FontWeight.bold,
                                         shadows: [
                                           Shadow(
                                             color: Colors.black54,
-                                            offset: Offset(0, 2),
-                                            blurRadius: 4,
+                                            offset: Offset(0, 2.h),
+                                            blurRadius: 4.r,
                                           ),
                                         ],
                                       ),
                                       maxLines: 1,
+                                      minFontSize: 14,
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                    const SizedBox(height: 4),
+                                    ResponsiveHelper.spacing(height: 4),
                                     if (restaurant.description.isNotEmpty)
-                                      Text(
+                                      AutoSizeText(
                                         restaurant.description,
                                         style: TextStyle(
                                           color: Colors.white.withValues(alpha: 0.9),
-                                          fontSize: 14,
-                                          shadows: const [
+                                          fontSize: ResponsiveHelper.fontSize(14),
+                                          shadows: [
                                             Shadow(
                                               color: Colors.black54,
-                                              offset: Offset(0, 1),
-                                              blurRadius: 3,
+                                              offset: Offset(0, 1.h),
+                                              blurRadius: 3.r,
                                             ),
                                           ],
                                         ),
                                         maxLines: 2,
+                                        minFontSize: 10,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                   ],
@@ -1360,20 +1374,20 @@ class _DiscountRestaurantsBannerCarousel extends StatelessWidget {
         ),
       // Indicators
       if (restaurants.length > 1) ...[
-          SizedBox(height: (MediaQuery.of(context).size.height * 0.01).clamp(8.0, 12.0)),
+          ResponsiveHelper.spacing(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(
               restaurants.length,
               (index) => Container(
-                width: currentIndex == index ? 24 : 8,
-                height: 8,
-                margin: const EdgeInsets.symmetric(horizontal: 4),
+                width: currentIndex == index ? 24.w : 8.w,
+                height: 8.h,
+                margin: ResponsiveHelper.margin(horizontal: 4),
                 decoration: BoxDecoration(
                   color: currentIndex == index
                       ? AppColors.primary
                       : AppColors.textHint,
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(4.r),
                 ),
               ),
             ),
@@ -1397,44 +1411,48 @@ class _EmptyStateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                shape: BoxShape.circle,
+      return Center(
+        child: Padding(
+          padding: ResponsiveHelper.padding(all: 32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: ResponsiveHelper.padding(all: 24),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  icon,
+                  size: ResponsiveHelper.iconSize(64),
+                  color: AppColors.textSecondary.withValues(alpha: 0.5),
+                ),
               ),
-              child: Icon(
-                icon,
-                size: 64,
-                color: AppColors.textSecondary.withValues(alpha: 0.5),
+              ResponsiveHelper.spacing(height: 24),
+              Text(
+                title,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                  fontSize: ResponsiveHelper.fontSize(18),
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+              ResponsiveHelper.spacing(height: 8),
+              Text(
+                message,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSecondary,
+                  fontSize: ResponsiveHelper.fontSize(14),
+                ),
+                textAlign: TextAlign.center,
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
-              textAlign: TextAlign.center,
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
+      );
   }
 }
 
@@ -1468,11 +1486,10 @@ class _CombinedAppBar extends StatelessWidget {
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            (MediaQuery.of(context).size.width * 0.04).clamp(12.0, 16.0),
-            8,
-            (MediaQuery.of(context).size.width * 0.04).clamp(12.0, 16.0),
-            (MediaQuery.of(context).size.height * 0.015).clamp(10.0, 12.0),
+          padding: ResponsiveHelper.padding(
+            horizontal: 16,
+            top: 8,
+            bottom: 12,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -1493,29 +1510,27 @@ class _CombinedAppBar extends StatelessWidget {
                       context.push('/address-book');
                     },
                     child: Padding(
-                      padding: EdgeInsets.only(
-                        bottom: (MediaQuery.of(context).size.height * 0.015).clamp(10.0, 12.0),
-                      ),
+                      padding: ResponsiveHelper.padding(bottom: 12),
                       child: Row(
                         children: [
                           // Headphone Icon
                           Icon(
                             Icons.headset_mic,
                             color: Colors.white,
-                            size: (MediaQuery.of(context).size.width * 0.05).clamp(18.0, 20.0),
+                            size: ResponsiveHelper.iconSize(20),
                           ),
-                          SizedBox(width: (MediaQuery.of(context).size.width * 0.03).clamp(10.0, 12.0)),
+                          ResponsiveHelper.spacing(width: 12),
                           // Delivery Text
                           Expanded(
-                            child: Text(
+                            child: AutoSizeText(
                               displayText,
-                              style: Theme.of(context).textTheme.titleMedium
-                                  ?.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: (MediaQuery.of(context).size.width * 0.035).clamp(12.0, 14.0),
-                                  ),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                                fontSize: ResponsiveHelper.fontSize(14),
+                              ),
                               maxLines: 1,
+                              minFontSize: 12,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -1523,7 +1538,7 @@ class _CombinedAppBar extends StatelessWidget {
                           Icon(
                             Icons.keyboard_arrow_down,
                             color: Colors.white,
-                            size: (MediaQuery.of(context).size.width * 0.05).clamp(18.0, 20.0),
+                            size: ResponsiveHelper.iconSize(20),
                           ),
                         ],
                       ),
@@ -1533,15 +1548,15 @@ class _CombinedAppBar extends StatelessWidget {
               ),
               // Search Field - Full Width
               Container(
-                height: (MediaQuery.of(context).size.height * 0.05).clamp(38.0, 42.0),
+                height: 42.h,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(20.r),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+                      blurRadius: 8.r,
+                      offset: Offset(0, 2.h),
                     ),
                   ],
                 ),
@@ -1573,19 +1588,19 @@ class _CombinedAppBar extends StatelessWidget {
                       hintText: l10n.searchRestaurants,
                       hintStyle: TextStyle(
                         color: AppColors.textHint,
-                        fontSize: 14,
+                        fontSize: ResponsiveHelper.fontSize(14),
                       ),
                       prefixIcon: Icon(
                         Icons.search,
                         color: AppColors.textSecondary,
-                        size: 20,
+                        size: ResponsiveHelper.iconSize(20),
                       ),
                       suffixIcon: searchController.text.isNotEmpty
                           ? IconButton(
                               icon: Icon(
                                 Icons.clear,
                                 color: AppColors.textSecondary,
-                                size: 20,
+                                size: ResponsiveHelper.iconSize(20),
                               ),
                               onPressed: () {
                                 searchController.clear();
@@ -1595,7 +1610,7 @@ class _CombinedAppBar extends StatelessWidget {
                             )
                           : null,
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
+                      contentPadding: ResponsiveHelper.padding(
                         horizontal: 16,
                         vertical: 10,
                       ),
@@ -1603,7 +1618,7 @@ class _CombinedAppBar extends StatelessWidget {
                     ),
                     style: TextStyle(
                       color: AppColors.textPrimary,
-                      fontSize: 14,
+                      fontSize: ResponsiveHelper.fontSize(14),
                     ),
                   ),
                 ),

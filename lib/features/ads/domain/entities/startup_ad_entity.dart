@@ -6,6 +6,8 @@ class StartupAdEntity extends Equatable {
   final String? title;
   final String? description;
   final String? deepLink;
+  final String? restaurantId;
+  final String? restaurantName;
   final bool isActive;
   final int priority;
   final DateTime createdAt;
@@ -17,6 +19,8 @@ class StartupAdEntity extends Equatable {
     this.title,
     this.description,
     this.deepLink,
+    this.restaurantId,
+    this.restaurantName,
     required this.isActive,
     required this.priority,
     required this.createdAt,
@@ -30,6 +34,8 @@ class StartupAdEntity extends Equatable {
         title,
         description,
         deepLink,
+        restaurantId,
+        restaurantName,
         isActive,
         priority,
         createdAt,

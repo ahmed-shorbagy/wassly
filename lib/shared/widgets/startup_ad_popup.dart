@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/utils/responsive_helper.dart';
 import '../../features/ads/domain/entities/startup_ad_entity.dart';
 
 /// Popup dialog widget for displaying startup ads
@@ -28,7 +30,14 @@ class StartupAdPopup extends StatelessWidget {
 
   void _handleAdTap(BuildContext context) {
     Navigator.of(context).pop();
-    if (ad.deepLink != null && ad.deepLink!.isNotEmpty) {
+    // Navigate to restaurant page if restaurantId is available
+    if (ad.restaurantId != null && ad.restaurantId!.isNotEmpty) {
+      try {
+        context.push('/restaurant/${ad.restaurantId}');
+      } catch (e) {
+        // Handle error silently
+      }
+    } else if (ad.deepLink != null && ad.deepLink!.isNotEmpty) {
       try {
         context.push(ad.deepLink!);
       } catch (e) {
@@ -43,102 +52,59 @@ class StartupAdPopup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Fixed dimensions for startup ads - consistent across all screen sizes
-    // Dialog dimensions: 328px width × 600px height
-    const double dialogWidth = 328.0;
-    const double dialogHeight = 600.0;
+    // Responsive dimensions for startup ads
+    final double dialogWidth = 328.w;
+    final double dialogHeight = 600.h;
     
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 40),
+      insetPadding: ResponsiveHelper.padding(
+        horizontal: 16,
+        vertical: 40,
+      ),
       child: SizedBox(
         width: dialogWidth,
         height: dialogHeight,
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(28),
+            borderRadius: BorderRadius.circular(28.r),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.2),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
+                blurRadius: 20.r,
+                offset: Offset(0, 10.h),
               ),
             ],
           ),
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              // Content
+              // Content - Simple design: Image + Restaurant Name
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Header Section with Background Color (if title exists)
-                  if (ad.title != null || ad.description != null)
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.1),
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(28),
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (ad.title != null)
-                            Text(
-                              ad.title!,
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textPrimary,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          if (ad.description != null) ...[
-                            const SizedBox(height: 6),
-                            Text(
-                              ad.description!,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: AppColors.textSecondary,
-                              ),
-                              maxLines: 3,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  
-                  // Ad Image - Responsive with aspect ratio preservation
-                  Flexible(
+                  // Ad Image - Clickable, Clean Image Only (No Text Overlay)
+                  Expanded(
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
                         onTap: () => _handleAdTap(context),
-                        borderRadius: BorderRadius.only(
-                          bottomLeft: const Radius.circular(28),
-                          bottomRight: const Radius.circular(28),
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(28.r),
                         ),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.only(
-                            bottomLeft: const Radius.circular(28),
-                            bottomRight: const Radius.circular(28),
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(28.r),
                           ),
                           child: SizedBox(
                             width: dialogWidth,
-                            height: ad.title != null || ad.description != null 
-                                ? dialogHeight - 120 // Subtract header height
-                                : dialogHeight,
+                            height: dialogHeight - 80.h, // Reserve space for restaurant name
                             child: CachedNetworkImage(
                               imageUrl: ad.imageUrl,
                               width: dialogWidth,
                               fit: BoxFit.cover,
+                              // No overlays, gradients, or text - just the pure image
                               placeholder: (context, url) => Container(
                                 color: AppColors.surface,
                                 child: const Center(
@@ -159,36 +125,108 @@ class StartupAdPopup extends StatelessWidget {
                       ),
                     ),
                   ),
+                  
+                  // Restaurant Name - Below Image
+                  if (ad.restaurantName != null && ad.restaurantName!.isNotEmpty)
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () => _handleAdTap(context),
+                        borderRadius: BorderRadius.vertical(
+                          bottom: Radius.circular(28.r),
+                        ),
+                        child: Container(
+                          width: double.infinity,
+                          padding: ResponsiveHelper.padding(
+                            vertical: 16,
+                            horizontal: 20,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.vertical(
+                              bottom: Radius.circular(28.r),
+                            ),
+                          ),
+                          child: Text(
+                            ad.restaurantName!,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: ResponsiveHelper.fontSize(18),
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    // Fallback: show title if restaurant name not available
+                    if (ad.title != null && ad.title!.isNotEmpty)
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () => _handleAdTap(context),
+                          borderRadius: BorderRadius.vertical(
+                            bottom: Radius.circular(28.r),
+                          ),
+                          child: Container(
+                            width: double.infinity,
+                            padding: ResponsiveHelper.padding(
+                              vertical: 16,
+                              horizontal: 20,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.vertical(
+                                bottom: Radius.circular(28.r),
+                              ),
+                            ),
+                            child: Text(
+                              ad.title!,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: ResponsiveHelper.fontSize(18),
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textPrimary,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                      ),
                 ],
               ),
               
               // Close Button - White X in top right (placed last to be on top)
               Positioned(
-                top: 16,
-                right: 16,
+                top: 16.h,
+                right: 16.w,
                 child: Material(
                   color: Colors.transparent,
                   child: InkWell(
                     onTap: () => _handleClose(context),
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(14.r),
                     child: Container(
-                      width: 28,
-                      height: 28,
+                      width: 28.w,
+                      height: 28.h,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withValues(alpha: 0.1),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
+                            blurRadius: 4.r,
+                            offset: Offset(0, 2.h),
                           ),
                         ],
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.close,
                         color: Colors.black87,
-                        size: 16,
+                        size: ResponsiveHelper.iconSize(16),
                       ),
                     ),
                   ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'config/flavor_config.dart';
 import 'firebase_options.dart';
 import 'core/router/customer_router.dart';
@@ -66,16 +67,23 @@ class WasslyCustomerApp extends StatelessWidget {
       providers: InjectionContainer().getBlocProviders(),
       child: BlocBuilder<LocaleCubit, LocaleState>(
         builder: (context, localeState) {
-          return BackButtonHandler(
-            child: MaterialApp.router(
-              title: FlavorConfig.instance.appName,
-              theme: AppTheme.lightTheme,
-              routerConfig: CustomerRouter.router,
-              debugShowCheckedModeBanner: false,
-              locale: localeState.locale,
-              supportedLocales: AppLocalizations.supportedLocales,
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-            ),
+          return ScreenUtilInit(
+            designSize: const Size(375, 812), // iPhone X design size
+            minTextAdapt: true,
+            splitScreenMode: true,
+            builder: (context, child) {
+              return BackButtonHandler(
+                child: MaterialApp.router(
+                  title: FlavorConfig.instance.appName,
+                  theme: AppTheme.lightTheme,
+                  routerConfig: CustomerRouter.router,
+                  debugShowCheckedModeBanner: false,
+                  locale: localeState.locale,
+                  supportedLocales: AppLocalizations.supportedLocales,
+                  localizationsDelegates: AppLocalizations.localizationsDelegates,
+                ),
+              );
+            },
           );
         },
       ),

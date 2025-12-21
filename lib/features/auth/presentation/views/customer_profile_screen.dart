@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/extensions.dart';
+import '../../../../core/utils/responsive_helper.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../cubits/auth_cubit.dart';
@@ -16,10 +18,14 @@ class CustomerProfileScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.myProfile),
+        title: Text(
+          l10n.myProfile,
+          style: TextStyle(fontSize: ResponsiveHelper.fontSize(18)),
+        ),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
+        toolbarHeight: ResponsiveHelper.getAppBarHeight(context),
       ),
       body: BlocBuilder<AuthCubit, AuthState>(
         builder: (context, state) {
@@ -30,17 +36,17 @@ class CustomerProfileScreen extends StatelessWidget {
           if (state is AuthAuthenticated) {
             final user = state.user;
             return SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: ResponsiveHelper.padding(all: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Profile Header
                   _buildProfileHeader(context, user, l10n),
-                  const SizedBox(height: 24),
+                  ResponsiveHelper.spacing(height: 24),
 
                   // Account Information Section
                   _buildSectionTitle(l10n.accountInformation),
-                  const SizedBox(height: 12),
+                  ResponsiveHelper.spacing(height: 12),
                   _buildInfoCard(
                     context,
                     [
@@ -63,11 +69,11 @@ class CustomerProfileScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  ResponsiveHelper.spacing(height: 24),
 
                   // Actions Section
                   _buildSectionTitle(l10n.settings),
-                  const SizedBox(height: 12),
+                  ResponsiveHelper.spacing(height: 12),
                   _buildActionCard(
                     context,
                     [
@@ -86,26 +92,34 @@ class CustomerProfileScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  ResponsiveHelper.spacing(height: 24),
 
                   // Logout Button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: () => _showLogoutDialog(context, l10n),
-                      icon: const Icon(Icons.logout),
-                      label: Text(l10n.logout),
+                      icon: Icon(
+                        Icons.logout,
+                        size: ResponsiveHelper.iconSize(20),
+                      ),
+                      label: Text(
+                        l10n.logout,
+                        style: TextStyle(
+                          fontSize: ResponsiveHelper.fontSize(16),
+                        ),
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.error,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        padding: ResponsiveHelper.padding(vertical: 16),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(12.r),
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  ResponsiveHelper.spacing(height: 32),
                 ],
               ),
             );
@@ -116,23 +130,28 @@ class CustomerProfileScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
+                Icon(
                   Icons.person_outline,
-                  size: 64,
+                  size: ResponsiveHelper.iconSize(64),
                   color: AppColors.textSecondary,
                 ),
-                const SizedBox(height: 16),
+                ResponsiveHelper.spacing(height: 16),
                 Text(
                   l10n.pleaseLogIn,
-                  style: const TextStyle(
-                    fontSize: 16,
+                  style: TextStyle(
+                    fontSize: ResponsiveHelper.fontSize(16),
                     color: AppColors.textSecondary,
                   ),
                 ),
-                const SizedBox(height: 24),
+                ResponsiveHelper.spacing(height: 24),
                 ElevatedButton(
                   onPressed: () => context.push('/login'),
-                  child: Text(l10n.login),
+                  child: Text(
+                    l10n.login,
+                    style: TextStyle(
+                      fontSize: ResponsiveHelper.fontSize(16),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -148,7 +167,7 @@ class CustomerProfileScreen extends StatelessWidget {
     AppLocalizations l10n,
   ) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: ResponsiveHelper.padding(all: 24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -158,49 +177,53 @@ class CustomerProfileScreen extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
             color: AppColors.primary.withOpacity(0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            blurRadius: 12.r,
+            offset: Offset(0, 4.h),
           ),
         ],
       ),
       child: Row(
         children: [
           CircleAvatar(
-            radius: 40,
+            radius: 40.r,
             backgroundColor: Colors.white,
             child: Text(
               user.name.isNotEmpty ? user.name[0].toUpperCase() : 'U',
               style: TextStyle(
-                fontSize: 32,
+                fontSize: ResponsiveHelper.fontSize(32),
                 fontWeight: FontWeight.bold,
                 color: AppColors.primary,
               ),
             ),
           ),
-          const SizedBox(width: 16),
+          ResponsiveHelper.spacing(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   user.name,
-                  style: const TextStyle(
-                    fontSize: 24,
+                  style: TextStyle(
+                    fontSize: ResponsiveHelper.fontSize(24),
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
+                ResponsiveHelper.spacing(height: 4),
                 Text(
                   user.email,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: ResponsiveHelper.fontSize(14),
                     color: Colors.white.withOpacity(0.9),
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -213,8 +236,8 @@ class CustomerProfileScreen extends StatelessWidget {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: const TextStyle(
-        fontSize: 18,
+      style: TextStyle(
+        fontSize: ResponsiveHelper.fontSize(18),
         fontWeight: FontWeight.bold,
         color: AppColors.textPrimary,
       ),
@@ -225,12 +248,12 @@ class CustomerProfileScreen extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            blurRadius: 10.r,
+            offset: Offset(0, 2.h),
           ),
         ],
       ),
@@ -242,30 +265,39 @@ class CustomerProfileScreen extends StatelessWidget {
 
   Widget _buildInfoRow(IconData icon, String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: ResponsiveHelper.padding(
+        horizontal: 16,
+        vertical: 12,
+      ),
       child: Row(
         children: [
-          Icon(icon, color: AppColors.primary, size: 24),
-          const SizedBox(width: 16),
+          Icon(
+            icon,
+            color: AppColors.primary,
+            size: ResponsiveHelper.iconSize(24),
+          ),
+          ResponsiveHelper.spacing(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   label,
-                  style: const TextStyle(
-                    fontSize: 12,
+                  style: TextStyle(
+                    fontSize: ResponsiveHelper.fontSize(12),
                     color: AppColors.textSecondary,
                   ),
                 ),
-                const SizedBox(height: 4),
+                ResponsiveHelper.spacing(height: 4),
                 Text(
                   value,
-                  style: const TextStyle(
-                    fontSize: 16,
+                  style: TextStyle(
+                    fontSize: ResponsiveHelper.fontSize(16),
                     fontWeight: FontWeight.w500,
                     color: AppColors.textPrimary,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -279,12 +311,12 @@ class CustomerProfileScreen extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            blurRadius: 10.r,
+            offset: Offset(0, 2.h),
           ),
         ],
       ),
@@ -301,17 +333,22 @@ class CustomerProfileScreen extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     return ListTile(
-      leading: Icon(icon, color: AppColors.primary),
+      leading: Icon(
+        icon,
+        color: AppColors.primary,
+        size: ResponsiveHelper.iconSize(24),
+      ),
       title: Text(
         title,
-        style: const TextStyle(
-          fontSize: 16,
+        style: TextStyle(
+          fontSize: ResponsiveHelper.fontSize(16),
           fontWeight: FontWeight.w500,
         ),
       ),
-      trailing: const Icon(
+      trailing: Icon(
         Icons.chevron_right,
         color: AppColors.textSecondary,
+        size: ResponsiveHelper.iconSize(24),
       ),
       onTap: onTap,
     );
@@ -337,7 +374,10 @@ class CustomerProfileScreen extends StatelessWidget {
           }
         },
         child: AlertDialog(
-          title: Text(l10n.changePassword),
+          title: Text(
+            l10n.changePassword,
+            style: TextStyle(fontSize: ResponsiveHelper.fontSize(18)),
+          ),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -345,27 +385,39 @@ class CustomerProfileScreen extends StatelessWidget {
                 TextField(
                   controller: currentPasswordController,
                   obscureText: true,
+                  style: TextStyle(fontSize: ResponsiveHelper.fontSize(16)),
                   decoration: InputDecoration(
                     labelText: l10n.currentPassword,
-                    border: const OutlineInputBorder(),
+                    labelStyle: TextStyle(fontSize: ResponsiveHelper.fontSize(14)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                ResponsiveHelper.spacing(height: 16),
                 TextField(
                   controller: newPasswordController,
                   obscureText: true,
+                  style: TextStyle(fontSize: ResponsiveHelper.fontSize(16)),
                   decoration: InputDecoration(
                     labelText: l10n.newPassword,
-                    border: const OutlineInputBorder(),
+                    labelStyle: TextStyle(fontSize: ResponsiveHelper.fontSize(14)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                ResponsiveHelper.spacing(height: 16),
                 TextField(
                   controller: confirmPasswordController,
                   obscureText: true,
+                  style: TextStyle(fontSize: ResponsiveHelper.fontSize(16)),
                   decoration: InputDecoration(
                     labelText: l10n.confirmNewPassword,
-                    border: const OutlineInputBorder(),
+                    labelStyle: TextStyle(fontSize: ResponsiveHelper.fontSize(14)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
                   ),
                 ),
               ],
@@ -402,12 +454,15 @@ class CustomerProfileScreen extends StatelessWidget {
                               );
                         },
                   child: isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                      ? SizedBox(
+                          width: 20.w,
+                          height: 20.h,
+                          child: CircularProgressIndicator(strokeWidth: 2.w),
                         )
-                      : Text(l10n.updatePassword),
+                      : Text(
+                          l10n.updatePassword,
+                          style: TextStyle(fontSize: ResponsiveHelper.fontSize(16)),
+                        ),
                 );
               },
             ),
@@ -421,12 +476,21 @@ class CustomerProfileScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(l10n.logout),
-        content: Text(l10n.areYouSureLogout),
+        title: Text(
+          l10n.logout,
+          style: TextStyle(fontSize: ResponsiveHelper.fontSize(18)),
+        ),
+        content: Text(
+          l10n.areYouSureLogout,
+          style: TextStyle(fontSize: ResponsiveHelper.fontSize(16)),
+        ),
         actions: [
           TextButton(
             onPressed: () => context.pop(),
-            child: Text(l10n.cancel),
+            child: Text(
+              l10n.cancel,
+              style: TextStyle(fontSize: ResponsiveHelper.fontSize(16)),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
@@ -437,7 +501,10 @@ class CustomerProfileScreen extends StatelessWidget {
               backgroundColor: AppColors.error,
               foregroundColor: Colors.white,
             ),
-            child: Text(l10n.logout),
+            child: Text(
+              l10n.logout,
+              style: TextStyle(fontSize: ResponsiveHelper.fontSize(16)),
+            ),
           ),
         ],
       ),
