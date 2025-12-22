@@ -130,7 +130,7 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
         slivers: [
           // App Bar
           SliverAppBar(
-            expandedHeight: 120,
+            expandedHeight: 80,
             pinned: true,
             floating: false,
             backgroundColor: AppColors.primary,
@@ -145,7 +145,7 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  fontSize: 20,
+                  fontSize: 18,
                 ),
               ),
               centerTitle: true,

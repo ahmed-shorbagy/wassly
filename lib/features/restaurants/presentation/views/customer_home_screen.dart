@@ -13,7 +13,7 @@ import '../../../home/presentation/cubits/home_cubit.dart';
 import '../../../home/domain/entities/banner_entity.dart';
 import '../cubits/restaurant_cubit.dart';
 import '../../domain/entities/restaurant_entity.dart';
-import '../cubits/favorites_cubit.dart';
+// import '../cubits/favorites_cubit.dart'; // Favorites not used in new card design
 import '../../../market_products/presentation/cubits/market_product_customer_cubit.dart';
 import '../../../ads/presentation/cubits/startup_ad_customer_cubit.dart';
 import '../../../../shared/widgets/startup_ad_popup.dart';
@@ -120,9 +120,11 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                           // Show the first ad (list is already randomized and excludes last shown ad)
                           final adToShow = state.ads.first;
                           StartupAdPopup.show(context, adToShow);
-                          
+
                           // Save the shown ad ID to exclude it from next session
-                          context.read<StartupAdCustomerCubit>().saveShownAdId(adToShow.id);
+                          context.read<StartupAdCustomerCubit>().saveShownAdId(
+                            adToShow.id,
+                          );
                         }
                       });
                     }
@@ -206,10 +208,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     );
   }
 
-  // Reduced aspect ratios to prevent overflow - lower values = more vertical space
-  double _getResponsiveAspectRatio(BuildContext context) {
-    return ResponsiveHelper.getGridAspectRatio(context);
-  }
+  // _getResponsiveAspectRatio is no longer used (grid is now horizontal with fixed card height)
 
   Widget _buildHome(
     BuildContext context,
@@ -322,10 +321,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           // Restaurants Section Header
           SliverToBoxAdapter(
             child: Padding(
-              padding: ResponsiveHelper.padding(
-                horizontal: 16,
-                vertical: 8,
-              ),
+              padding: ResponsiveHelper.padding(horizontal: 16, vertical: 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -369,19 +365,13 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               ),
             )
           else if (regularRestaurants.isNotEmpty)
-            SliverPadding(
-              padding: ResponsiveHelper.padding(all: 16),
-              sliver: SliverGrid(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: _getResponsiveAspectRatio(context),
-                  crossAxisSpacing: 16.w,
-                  mainAxisSpacing: 16.h,
+            // Three independent horizontal rows, each scrolls separately
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: ResponsiveHelper.padding(all: 16),
+                child: _ThreeRowRestaurantScroller(
+                  restaurants: regularRestaurants,
                 ),
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  final restaurant = regularRestaurants[index];
-                  return _RestaurantCard(restaurant: restaurant);
-                }, childCount: regularRestaurants.length),
               ),
             ),
         ],
@@ -482,17 +472,12 @@ class _BannerCarousel extends StatelessWidget {
             ),
           ]
         : banners;
-    
+
     // Responsive banner height
     final double bannerHeight = 160.h;
-    
+
     return Padding(
-      padding: ResponsiveHelper.padding(
-        left: 16,
-        top: 16,
-        right: 8,
-        bottom: 0,
-      ),
+      padding: ResponsiveHelper.padding(left: 16, top: 16, right: 8, bottom: 0),
       child: CarouselSlider(
         options: CarouselOptions(
           height: bannerHeight,
@@ -529,66 +514,66 @@ class _BannerCarousel extends StatelessWidget {
                               width: double.infinity,
                               height: bannerHeight,
                               fit: BoxFit.cover,
-                            placeholder: (c, u) => Container(
-                              color: AppColors.surface,
-                              child: const Center(
-                                child: CircularProgressIndicator(),
+                              placeholder: (c, u) => Container(
+                                color: AppColors.surface,
+                                child: const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              ),
+                              errorWidget: (c, u, e) => Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      AppColors.primary,
+                                      AppColors.primaryDark,
+                                    ],
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.image_not_supported,
+                                  color: Colors.white,
+                                  size: 50,
+                                ),
                               ),
                             ),
-                            errorWidget: (c, u, e) => Container(
+                            // Gradient overlay
+                            Container(
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
                                   colors: [
-                                    AppColors.primary,
-                                    AppColors.primaryDark,
+                                    Colors.transparent,
+                                    Colors.black.withValues(alpha: 0.3),
                                   ],
                                 ),
                               ),
-                              child: const Icon(
-                                Icons.image_not_supported,
-                                color: Colors.white,
-                                size: 50,
-                              ),
                             ),
-                          ),
-                          // Gradient overlay
-                          Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  Colors.transparent,
-                                  Colors.black.withValues(alpha: 0.3),
-                                ],
-                              ),
-                            ),
-                          ),
-                          // Title overlay
-                          if (b.title != null && b.title!.isNotEmpty)
-                            Positioned(
-                              bottom: 16.h,
-                              left: 16.w,
-                              right: 16.w,
-                              child: AutoSizeText(
-                                b.title!,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: ResponsiveHelper.fontSize(18),
-                                  fontWeight: FontWeight.bold,
-                                  shadows: [
-                                    Shadow(
-                                      color: Colors.black54,
-                                      offset: Offset(0, 2.h),
-                                      blurRadius: 4.r,
-                                    ),
-                                  ],
+                            // Title overlay
+                            if (b.title != null && b.title!.isNotEmpty)
+                              Positioned(
+                                bottom: 16.h,
+                                left: 16.w,
+                                right: 16.w,
+                                child: AutoSizeText(
+                                  b.title!,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: ResponsiveHelper.fontSize(18),
+                                    fontWeight: FontWeight.bold,
+                                    shadows: [
+                                      Shadow(
+                                        color: Colors.black54,
+                                        offset: Offset(0, 2.h),
+                                        blurRadius: 4.r,
+                                      ),
+                                    ],
+                                  ),
+                                  maxLines: 2,
+                                  minFontSize: 12,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                maxLines: 2,
-                                minFontSize: 12,
-                                overflow: TextOverflow.ellipsis,
                               ),
-                            ),
                           ],
                         ),
                       );
@@ -612,320 +597,158 @@ class _RestaurantCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: restaurant.isDiscountActive ? 4 : 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(
-          color: restaurant.isDiscountActive
-              ? AppColors.warning
-              : AppColors.border,
-          width: restaurant.isDiscountActive ? 2 : 1,
-        ),
-      ),
+      elevation: 2,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
           context.push('/restaurant/${restaurant.id}');
         },
-        borderRadius: BorderRadius.circular(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
           children: [
-            // Restaurant Image with Favorite Button
-            AspectRatio(
-              aspectRatio: 1.0,
-              child: Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(20),
-                    ),
-                    child:
-                        restaurant.imageUrl != null &&
-                            restaurant.imageUrl!.isNotEmpty
-                        ? CachedNetworkImage(
-                            imageUrl: restaurant.imageUrl!,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            placeholder: (context, url) => Container(
-                              color: AppColors.border,
-                              child: const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                            ),
-                            errorWidget: (context, url, error) => Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    AppColors.primaryLight,
-                                    AppColors.primary,
-                                  ],
-                                ),
-                              ),
-                              child: const Icon(
-                                Icons.restaurant,
-                                size: 50,
-                                color: Colors.white,
-                              ),
-                            ),
-                          )
-                        : Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  AppColors.primaryLight,
-                                  AppColors.primary,
-                                ],
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.restaurant,
-                              size: 50,
-                              color: Colors.white,
-                            ),
-                          ),
-                  ),
-                  // Favorite Button - Smaller
-                  Positioned(
-                    top: 6.h,
-                    right: 6.w,
-                    child: BlocBuilder<FavoritesCubit, FavoritesState>(
-                      builder: (context, favState) {
-                        final isFav = favState.favoriteRestaurantIds.contains(
-                          restaurant.id,
-                        );
-                        return GestureDetector(
-                          onTap: () {
-                            context.read<FavoritesCubit>().toggleRestaurant(
-                              restaurant.id,
-                            );
-                          },
-                          child: Container(
-                            padding: ResponsiveHelper.padding(all: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.1),
-                                  blurRadius: 4.r,
-                                  offset: Offset(0, 2.h),
-                                ),
-                              ],
-                            ),
-                            child: Icon(
-                              isFav ? Icons.favorite : Icons.favorite_border,
-                              color: isFav
-                                  ? Colors.red
-                                  : AppColors.textSecondary,
-                              size: ResponsiveHelper.iconSize(16),
-                            ),
-                          ),
-                        );
-                      },
+            // Top image section
+            Expanded(
+              child: SizedBox(
+                width: double.infinity,
+                child: CachedNetworkImage(
+                  imageUrl:
+                      (restaurant.imageUrl != null &&
+                          restaurant.imageUrl!.isNotEmpty)
+                      ? restaurant.imageUrl!
+                      : '',
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    color: AppColors.surface,
+                    child: const Center(
+                      child: CircularProgressIndicator(strokeWidth: 2),
                     ),
                   ),
-                  // Discount Badge (Top Left)
-                  if (restaurant.isDiscountActive)
-                    Positioned(
-                      top: 8.h,
-                      left: 8.w,
-                      child: Container(
-                        padding: ResponsiveHelper.padding(
-                          horizontal: 10,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color:
-                              AppColors.warning, // Orange/Yellow for discount
-                          borderRadius: BorderRadius.circular(20.r),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.3),
-                              blurRadius: 8.r,
-                              offset: Offset(0, 2.h),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.local_offer,
-                              color: Colors.white,
-                              size: ResponsiveHelper.iconSize(14),
-                            ),
-                            ResponsiveHelper.spacing(width: 4),
-                            AutoSizeText(
-                              restaurant.discountPercentage != null
-                                  ? '${restaurant.discountPercentage!.toStringAsFixed(0)}%'
-                                  : 'OFF',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: ResponsiveHelper.fontSize(12),
-                                fontWeight: FontWeight.bold,
-                              ),
-                              maxLines: 1,
-                              minFontSize: 8,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  // Status Badge - Smaller (only dot indicator)
-                  Positioned(
-                    bottom: 8.h,
-                    left: 8.w,
-                    child: Container(
-                      padding: ResponsiveHelper.padding(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: restaurant.isOpen
-                            ? AppColors.success
-                            : AppColors.error,
-                        borderRadius: BorderRadius.circular(12.r),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.15),
-                            blurRadius: 3.r,
-                            offset: Offset(0, 1.h),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 5.w,
-                            height: 5.h,
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          ResponsiveHelper.spacing(width: 4),
-                          Builder(
-                            builder: (context) {
-                              final l10n = AppLocalizations.of(context)!;
-                              return AutoSizeText(
-                                restaurant.isOpen ? l10n.open : l10n.closed,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: ResponsiveHelper.fontSize(9),
-                                  fontWeight: FontWeight.w600,
-                                  height: 1.0,
-                                ),
-                                maxLines: 1,
-                                minFontSize: 7,
-                              );
-                            },
-                          ),
-                        ],
-                      ),
+                  errorWidget: (context, url, error) => Container(
+                    color: AppColors.surface,
+                    child: const Icon(
+                      Icons.restaurant,
+                      size: 40,
+                      color: AppColors.textSecondary,
                     ),
                   ),
-                ],
+                ),
               ),
             ),
 
-            // Restaurant Info - Optimized for Arabic text with overflow protection
+            // Bottom info section
             Padding(
-              padding: ResponsiveHelper.padding(all: 8),
+              padding: ResponsiveHelper.padding(horizontal: 12, vertical: 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Restaurant Name - 2 lines for Arabic support
-                  AutoSizeText(
-                    restaurant.name,
-                    style: TextStyle(
-                      fontSize: ResponsiveHelper.fontSize(15),
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                      height: 1.3,
-                    ),
-                    maxLines: 2,
-                    minFontSize: 10,
-                    maxFontSize: 15,
-                    overflow: TextOverflow.ellipsis,
-                    wrapWords: false,
-                  ),
-                  ResponsiveHelper.spacing(height: 4),
-                  // Category or Description - 2 lines for Arabic support
-                  if (restaurant.categories.isNotEmpty)
-                    AutoSizeText(
-                      restaurant.categories.first,
-                      style: TextStyle(
-                        fontSize: ResponsiveHelper.fontSize(11),
-                        color: AppColors.textSecondary,
-                        height: 1.3,
-                      ),
-                      maxLines: 2,
-                      minFontSize: 8,
-                      maxFontSize: 11,
-                      overflow: TextOverflow.ellipsis,
-                      wrapWords: false,
-                    )
-                  else if (restaurant.description.isNotEmpty)
-                    AutoSizeText(
-                      restaurant.description,
-                      style: TextStyle(
-                        fontSize: ResponsiveHelper.fontSize(11),
-                        color: AppColors.textSecondary,
-                        height: 1.3,
-                      ),
-                      maxLines: 2,
-                      minFontSize: 8,
-                      maxFontSize: 11,
-                      overflow: TextOverflow.ellipsis,
-                      wrapWords: false,
-                    ),
-                  ResponsiveHelper.spacing(height: 4),
-                  // Delivery Info
-                  Wrap(
-                    spacing: 4.w,
-                    runSpacing: 3.h,
+                  // Name row with optional "pro" badge for discounted restaurants
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.delivery_dining,
-                        size: ResponsiveHelper.iconSize(13),
-                        color: AppColors.primary,
+                      Expanded(
+                        child: AutoSizeText(
+                          restaurant.name,
+                          style: TextStyle(
+                            fontSize: ResponsiveHelper.fontSize(15),
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
+                          maxLines: 1,
+                          minFontSize: 10,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (restaurant.isDiscountActive)
+                        Container(
+                          margin: EdgeInsets.only(left: 6.w),
+                          padding: ResponsiveHelper.padding(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                          child: Text(
+                            'خصم',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: ResponsiveHelper.fontSize(9),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  ResponsiveHelper.spacing(height: 6),
+
+                  // Rating row
+                  Row(
+                    children: [
+                      Text(
+                        restaurant.totalReviews > 0
+                            ? '(+${restaurant.totalReviews})'
+                            : '(0)',
+                        style: TextStyle(
+                          fontSize: ResponsiveHelper.fontSize(10),
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      ResponsiveHelper.spacing(width: 4),
+                      Text(
+                        restaurant.rating.toStringAsFixed(1),
+                        style: TextStyle(
+                          fontSize: ResponsiveHelper.fontSize(12),
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      ResponsiveHelper.spacing(width: 2),
+                      const Icon(Icons.star, color: Colors.amber, size: 14),
+                    ],
+                  ),
+                  ResponsiveHelper.spacing(height: 6),
+
+                  // Delivery fee and time
+                  Row(
+                    children: [
+                      Text(
+                        '${restaurant.deliveryFee.toStringAsFixed(0)} ',
+                        style: TextStyle(
+                          fontSize: ResponsiveHelper.fontSize(11),
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                       Builder(
                         builder: (context) {
                           final l10n = AppLocalizations.of(context)!;
-                          return AutoSizeText(
-                            '${restaurant.deliveryFee.toStringAsFixed(0)} ${l10n.currencySymbol}',
+                          return Text(
+                            l10n.currencySymbol,
                             style: TextStyle(
-                              fontSize: ResponsiveHelper.fontSize(10),
+                              fontSize: ResponsiveHelper.fontSize(11),
                               color: AppColors.textSecondary,
-                              fontWeight: FontWeight.w500,
                             ),
-                            maxLines: 1,
-                            minFontSize: 7,
                           );
                         },
                       ),
-                      Icon(
-                        Icons.access_time,
-                        size: ResponsiveHelper.iconSize(13),
-                        color: AppColors.textSecondary,
+                      ResponsiveHelper.spacing(width: 8),
+                      const Text(
+                        '•',
+                        style: TextStyle(color: AppColors.textSecondary),
                       ),
+                      ResponsiveHelper.spacing(width: 8),
                       Builder(
                         builder: (context) {
                           final l10n = AppLocalizations.of(context)!;
-                          return AutoSizeText(
+                          return Text(
                             '${restaurant.estimatedDeliveryTime} ${l10n.minutesAbbreviation}',
                             style: TextStyle(
-                              fontSize: ResponsiveHelper.fontSize(10),
+                              fontSize: ResponsiveHelper.fontSize(11),
                               color: AppColors.textSecondary,
-                              fontWeight: FontWeight.w500,
                             ),
-                            maxLines: 1,
-                            minFontSize: 7,
                           );
                         },
                       ),
@@ -941,12 +764,59 @@ class _RestaurantCard extends StatelessWidget {
   }
 }
 
+// Three separate horizontal rows for restaurants; each row scrolls independently.
+class _ThreeRowRestaurantScroller extends StatelessWidget {
+  final List<RestaurantEntity> restaurants;
+
+  const _ThreeRowRestaurantScroller({required this.restaurants});
+
+  @override
+  Widget build(BuildContext context) {
+    // Distribute restaurants into three rows
+    final List<List<RestaurantEntity>> rows = [[], [], []];
+    for (var i = 0; i < restaurants.length; i++) {
+      rows[i % 3].add(restaurants[i]);
+    }
+
+    final double cardWidth = 240.w;
+    final double cardHeight = 240.h;
+
+    Widget buildRow(List<RestaurantEntity> rowItems) {
+      if (rowItems.isEmpty) return const SizedBox.shrink();
+      return SizedBox(
+        height: cardHeight,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          physics: const ClampingScrollPhysics(),
+          itemCount: rowItems.length,
+          separatorBuilder: (_, __) => SizedBox(width: 12.w),
+          itemBuilder: (context, index) {
+            final restaurant = rowItems[index];
+            return SizedBox(
+              width: cardWidth,
+              child: _RestaurantCard(restaurant: restaurant),
+            );
+          },
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        buildRow(rows[0]),
+        SizedBox(height: 12.h),
+        buildRow(rows[1]),
+        SizedBox(height: 12.h),
+        buildRow(rows[2]),
+      ],
+    );
+  }
+}
+
 class _MarketProductCategoriesSection extends StatelessWidget {
   final Function(String, bool) onCategoryTap; // category, isMarket
 
-  const _MarketProductCategoriesSection({
-    required this.onCategoryTap,
-  });
+  const _MarketProductCategoriesSection({required this.onCategoryTap});
 
   Widget _buildMarketCard(
     BuildContext context,
@@ -955,7 +825,7 @@ class _MarketProductCategoriesSection extends StatelessWidget {
     VoidCallback onTap,
   ) {
     final cardHeight = 110.h;
-    
+
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -1070,15 +940,13 @@ class _MarketProductCategoriesSection extends StatelessWidget {
                   'category': l10n.bakery,
                 },
               ];
-              
+
               final item = categories[index];
               final cardWidth = 120.w;
-              
+
               return Padding(
                 padding: EdgeInsets.only(
-                  right: index == categories.length - 1 
-                      ? 0 
-                      : 12.w,
+                  right: index == categories.length - 1 ? 0 : 12.w,
                 ),
                 child: SizedBox(
                   width: cardWidth,
@@ -1090,7 +958,7 @@ class _MarketProductCategoriesSection extends StatelessWidget {
                       final category = item['category'];
                       final title = item['title'] as String;
                       final isMarket = title == l10n.market;
-                      
+
                       if (isMarket) {
                         // Navigate to market products screen
                         onCategoryTap(title, true);
@@ -1194,176 +1062,52 @@ class _DiscountRestaurantsBannerCarousel extends StatelessWidget {
                       child: SizedBox(
                         width: double.infinity,
                         height: bannerHeight,
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            // Restaurant Image
+                        // Clean banner: ONLY the restaurant image, no text or overlays
+                        child:
                             restaurant.imageUrl != null &&
-                                    restaurant.imageUrl!.isNotEmpty
-                                ? CachedNetworkImage(
-                                    imageUrl: restaurant.imageUrl!,
-                                    width: double.infinity,
-                                    height: bannerHeight,
-                                    fit: BoxFit.cover,
-                                    placeholder: (c, u) => Container(
-                                      color: AppColors.surface,
-                                      child: const Center(
-                                        child: CircularProgressIndicator(),
-                                      ),
-                                    ),
-                                    errorWidget: (c, u, e) => Container(
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          colors: [
-                                            AppColors.primary,
-                                            AppColors.primaryDark,
-                                          ],
-                                        ),
-                                      ),
-                                      child: const Icon(
-                                        Icons.restaurant,
-                                        color: Colors.white,
-                                        size: 50,
-                                      ),
-                                    ),
-                                  )
-                                : Container(
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          AppColors.primary,
-                                          AppColors.primaryDark,
-                                        ],
-                                      ),
-                                    ),
-                                    child: const Icon(
-                                      Icons.restaurant,
-                                      color: Colors.white,
-                                      size: 50,
-                                    ),
+                                restaurant.imageUrl!.isNotEmpty
+                            ? CachedNetworkImage(
+                                imageUrl: restaurant.imageUrl!,
+                                width: double.infinity,
+                                height: bannerHeight,
+                                fit: BoxFit.cover,
+                                placeholder: (c, u) => Container(
+                                  color: AppColors.surface,
+                                  child: const Center(
+                                    child: CircularProgressIndicator(),
                                   ),
-                            // Gradient overlay
-                            Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [
-                                    Colors.transparent,
-                                    Colors.black.withValues(alpha: 0.5),
-                                  ],
                                 ),
-                              ),
-                            ),
-                            // Discount Badge
-                            if (restaurant.isDiscountActive &&
-                                restaurant.discountPercentage != null)
-                              Positioned(
-                                top: 16.h,
-                                left: 16.w,
-                                child: Container(
-                                  padding: ResponsiveHelper.padding(
-                                    horizontal: 12,
-                                    vertical: 8,
-                                  ),
+                                errorWidget: (c, u, e) => Container(
                                   decoration: BoxDecoration(
-                                    color: AppColors.warning,
-                                    borderRadius: BorderRadius.circular(20.r),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.3),
-                                        blurRadius: 8.r,
-                                        offset: Offset(0, 2.h),
-                                      ),
-                                    ],
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        AppColors.primary,
+                                        AppColors.primaryDark,
+                                      ],
+                                    ),
                                   ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.local_offer,
-                                        color: Colors.white,
-                                        size: ResponsiveHelper.iconSize(18),
-                                      ),
-                                      ResponsiveHelper.spacing(width: 6),
-                                      AutoSizeText(
-                                        '${restaurant.discountPercentage!.toStringAsFixed(0)}% ${l10n.off}',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: ResponsiveHelper.fontSize(14),
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        maxLines: 1,
-                                        minFontSize: 10,
-                                      ),
-                                    ],
+                                  child: const Icon(
+                                    Icons.restaurant,
+                                    color: Colors.white,
+                                    size: 50,
                                   ),
                                 ),
-                              ),
-                            // Restaurant Info at Bottom
-                            Positioned(
-                              bottom: 0,
-                              left: 0,
-                              right: 0,
-                              child: Container(
-                                padding: ResponsiveHelper.padding(all: 16),
+                              )
+                            : Container(
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
                                     colors: [
-                                      Colors.transparent,
-                                      Colors.black.withValues(alpha: 0.8),
+                                      AppColors.primary,
+                                      AppColors.primaryDark,
                                     ],
                                   ),
                                 ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    AutoSizeText(
-                                      restaurant.name,
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: ResponsiveHelper.fontSize(20),
-                                        fontWeight: FontWeight.bold,
-                                        shadows: [
-                                          Shadow(
-                                            color: Colors.black54,
-                                            offset: Offset(0, 2.h),
-                                            blurRadius: 4.r,
-                                          ),
-                                        ],
-                                      ),
-                                      maxLines: 1,
-                                      minFontSize: 14,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    ResponsiveHelper.spacing(height: 4),
-                                    if (restaurant.description.isNotEmpty)
-                                      AutoSizeText(
-                                        restaurant.description,
-                                        style: TextStyle(
-                                          color: Colors.white.withValues(alpha: 0.9),
-                                          fontSize: ResponsiveHelper.fontSize(14),
-                                          shadows: [
-                                            Shadow(
-                                              color: Colors.black54,
-                                              offset: Offset(0, 1.h),
-                                              blurRadius: 3.r,
-                                            ),
-                                          ],
-                                        ),
-                                        maxLines: 2,
-                                        minFontSize: 10,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                  ],
+                                child: const Icon(
+                                  Icons.restaurant,
+                                  color: Colors.white,
+                                  size: 50,
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
                       ),
                     ),
                   ),
@@ -1372,8 +1116,8 @@ class _DiscountRestaurantsBannerCarousel extends StatelessWidget {
             );
           }).toList(),
         ),
-      // Indicators
-      if (restaurants.length > 1) ...[
+        // Indicators
+        if (restaurants.length > 1) ...[
           ResponsiveHelper.spacing(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -1411,48 +1155,46 @@ class _EmptyStateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-      return Center(
-        child: Padding(
-          padding: ResponsiveHelper.padding(all: 32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: ResponsiveHelper.padding(all: 24),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  icon,
-                  size: ResponsiveHelper.iconSize(64),
-                  color: AppColors.textSecondary.withValues(alpha: 0.5),
-                ),
+    return Center(
+      child: Padding(
+        padding: ResponsiveHelper.padding(all: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: ResponsiveHelper.padding(all: 24),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                shape: BoxShape.circle,
               ),
-              ResponsiveHelper.spacing(height: 24),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                  fontSize: ResponsiveHelper.fontSize(18),
-                ),
+              child: Icon(
+                icon,
+                size: ResponsiveHelper.iconSize(64),
+                color: AppColors.textSecondary.withValues(alpha: 0.5),
               ),
-              ResponsiveHelper.spacing(height: 8),
-              Text(
-                message,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textSecondary,
-                  fontSize: ResponsiveHelper.fontSize(14),
-                ),
-                textAlign: TextAlign.center,
+            ),
+            ResponsiveHelper.spacing(height: 24),
+            Text(
+              title,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+                fontSize: ResponsiveHelper.fontSize(18),
               ),
-            ],
-          ),
+            ),
+            ResponsiveHelper.spacing(height: 8),
+            Text(
+              message,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.textSecondary,
+                fontSize: ResponsiveHelper.fontSize(14),
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
-      );
+      ),
+    );
   }
 }
 
@@ -1486,11 +1228,7 @@ class _CombinedAppBar extends StatelessWidget {
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: ResponsiveHelper.padding(
-            horizontal: 16,
-            top: 8,
-            bottom: 12,
-          ),
+          padding: ResponsiveHelper.padding(horizontal: 16, top: 8, bottom: 12),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
