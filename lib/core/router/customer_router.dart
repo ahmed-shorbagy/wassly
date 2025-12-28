@@ -11,6 +11,7 @@ import '../../features/orders/presentation/views/cart_screen.dart';
 import '../../features/orders/presentation/views/checkout_screen.dart';
 import '../../features/orders/presentation/views/order_list_screen.dart';
 import '../../features/orders/presentation/views/order_detail_screen.dart';
+import '../../features/orders/presentation/views/order_summary_screen.dart';
 import '../../features/auth/presentation/views/customer_profile_screen.dart';
 import '../../features/market_products/presentation/views/market_products_screen.dart';
 import '../../features/navigation/presentation/views/customer_navigation_shell.dart';
@@ -153,6 +154,14 @@ class CustomerRouter {
         },
       ),
       GoRoute(
+        path: '/order-summary/:id',
+        name: 'order-summary',
+        builder: (context, state) {
+          final orderId = state.pathParameters['id'] ?? '';
+          return OrderSummaryScreen(orderId: orderId);
+        },
+      ),
+      GoRoute(
         path: '/market-products',
         name: 'market-products',
         builder: (context, state) {
@@ -176,25 +185,16 @@ class ErrorScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Page Not Found'),
-      ),
+      appBar: AppBar(title: const Text('Page Not Found')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.grey,
-            ),
+            const Icon(Icons.error_outline, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
             const Text(
               'Page Not Found',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             const Text(
@@ -212,4 +212,3 @@ class ErrorScreen extends StatelessWidget {
     );
   }
 }
-

@@ -1448,4 +1448,67 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get deleteAddressConfirm => 'هل أنت متأكد من حذف هذا العنوان؟';
+
+  @override
+  String get offers => 'عروض';
+
+  @override
+  String get fruitsVegetables => 'الفواكه والخضروات';
+
+  @override
+  String get poultryMeatSeafood => 'دواجن، لحوم ومأكولات بحرية';
+
+  @override
+  String get freshFood => 'أطعمة طازجة';
+
+  @override
+  String get readyToEat => 'جاهز للأكل';
+
+  @override
+  String get frozenFood => 'الأطعمة المجمدة';
+
+  @override
+  String get dairyAndEggs => 'منتجات الألبان والبيض';
+
+  @override
+  String get iceCream => 'آيس كريم';
+
+  @override
+  String get milk => 'حليب';
+
+  @override
+  String get beauty => 'الجمال';
+
+  @override
+  String get cookingAndBaking => 'الطهي والخبز';
+
+  @override
+  String get coffeeAndTea => 'القهوة والشاي';
+
+  @override
+  String get pharmacy => 'الصيدليه';
+
+  @override
+  String get tissuesAndBags => 'مناديل و اكياس';
+
+  @override
+  String get cannedFood => 'معلبات';
+
+  @override
+  String get breakfastFood => 'طعام الإفطار';
+
+  @override
+  String get babyCorner => 'ركن الأطفال';
+
+  @override
+  String get cleaningAndLaundry => 'التنظيف والغسيل';
+
+  @override
+  String get specialDiet => 'نظام غذائي خاص';
+
+  @override
+  String get spicesAndSauces => 'التوابل والصلصات';
+
+  @override
+  String get shopByCategory => 'تسوق حسب الفئة';
 }

@@ -104,7 +104,8 @@ class _OrderListScreenState extends State<OrderListScreen>
       return _buildEmptyState(
         icon: Icons.receipt_long,
         title: l10n?.noActiveOrders ?? 'No Active Orders',
-        message: l10n?.noActiveOrdersMessage ?? 'You don\'t have any active orders',
+        message:
+            l10n?.noActiveOrdersMessage ?? 'You don\'t have any active orders',
       );
     }
 
@@ -147,7 +148,9 @@ class _OrderListScreenState extends State<OrderListScreen>
                     return _buildEmptyState(
                       icon: Icons.history,
                       title: l10n?.noOrderHistory ?? 'No Order History',
-                      message: l10n?.noOrderHistoryMessage ?? 'Your completed orders will appear here',
+                      message:
+                          l10n?.noOrderHistoryMessage ??
+                          'Your completed orders will appear here',
                     );
                   }
 
@@ -180,12 +183,17 @@ class _OrderListScreenState extends State<OrderListScreen>
   }
 
   Widget _buildOrderCard(OrderEntity order) {
+    // Use summary screen for active orders, detail screen for completed
+    final route = order.isActive
+        ? '/order-summary/${order.id}'
+        : '/order/${order.id}';
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
-        onTap: () => context.push('/order/${order.id}'),
+        onTap: () => context.push(route),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -287,7 +295,9 @@ class _OrderListScreenState extends State<OrderListScreen>
                 Padding(
                   padding: const EdgeInsets.only(top: 4),
                   child: Text(
-                    AppLocalizations.of(context)?.moreItems(order.items.length - 2) ??
+                    AppLocalizations.of(
+                          context,
+                        )?.moreItems(order.items.length - 2) ??
                         '+ ${order.items.length - 2} more items',
                     style: TextStyle(
                       fontSize: 12,
@@ -311,7 +321,7 @@ class _OrderListScreenState extends State<OrderListScreen>
                     ),
                   ),
                   TextButton(
-                    onPressed: () => context.push('/order/${order.id}'),
+                    onPressed: () => context.push(route),
                     child: Text(
                       AppLocalizations.of(context)?.viewDetails ??
                           'عرض التفاصيل',

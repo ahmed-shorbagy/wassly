@@ -1,15 +1,12 @@
 {
   "@@locale": "en",
-  
   "createRestaurant": "Create Restaurant",
   "restaurantSetup": "Restaurant Setup",
-  
   "basicInformation": "Basic Information",
   "restaurantName": "Restaurant Name",
   "description": "Description",
   "pleaseEnterRestaurantName": "Please enter restaurant name",
   "pleaseEnterDescription": "Please enter description",
-  
   "contactInformation": "Contact Information",
   "phoneNumber": "Phone Number",
   "email": "Email",
@@ -20,7 +17,6 @@
   "pleaseEnterValidPhoneNumber": "Please enter a valid phone number",
   "pleaseEnterEmail": "Please enter email",
   "pleaseEnterValidEmail": "Please enter a valid email",
-  
   "location": "Location",
   "address": "Address",
   "pleaseEnterAddress": "Please enter address",
@@ -37,27 +33,23 @@
     }
   },
   "locationSetToCairo": "Location set to Cairo, Egypt",
-  
   "categories": "Categories",
   "selectCategories": "Select Categories",
   "tapToSelectCategories": "Tap to select categories",
   "selectedCategories": "Selected Categories:",
   "done": "Done",
   "edit": "Edit",
-  
   "deliverySettings": "Delivery Settings",
   "deliveryFee": "Delivery Fee ($)",
   "minOrder": "Min Order ($)",
   "estimatedDeliveryTime": "Estimated Delivery Time (minutes)",
   "required": "Required",
   "invalidNumber": "Invalid number",
-  
   "tapToUploadRestaurantImage": "Tap to upload restaurant image",
   "change": "Change",
   "pleaseSelectImage": "Please select a restaurant image",
   "pleaseSelectLocation": "Please select a location",
   "pleaseSelectAtLeastOneCategory": "Please select at least one category",
-  
   "creatingRestaurant": "Creating your restaurant...",
   "restaurantCreatedSuccessfully": "Restaurant created successfully!",
   "provideCredentialsToRestaurant": "Please provide these credentials to the restaurant owner:",
@@ -70,7 +62,6 @@
       }
     }
   },
-  
   "fastFood": "Fast Food",
   "italian": "Italian",
   "chinese": "Chinese",
@@ -87,7 +78,6 @@
   "healthy": "Healthy",
   "bbq": "BBQ",
   "seafood": "Seafood",
-  
   "arabic": "Arabic",
   "egyptian": "Egyptian",
   "lebanese": "Lebanese",
@@ -128,12 +118,10 @@
   "biryani": "Biryani",
   "bakedGoods": "Baked Goods",
   "orientalSweets": "Oriental Sweets",
-  
   "commercialRegistrationPhoto": "Commercial Registration Photo",
   "takePhoto": "Take Photo",
   "openCamera": "Open Camera",
   "pleaseTakeCommercialRegistrationPhoto": "Please take commercial registration photo",
-  
   "productManagement": "Product Management",
   "products": "Products",
   "addProduct": "Add Product",
@@ -161,7 +149,6 @@
   "startByAddingYourFirstProduct": "Start by adding your first product",
   "selectRestaurantFirst": "Please select a restaurant first",
   "restaurantProducts": "Restaurant Products",
-  
   "password": "Password",
   "confirmPassword": "Confirm Password",
   "pleaseEnterPassword": "Please enter password",
@@ -186,7 +173,6 @@
   "back": "Back",
   "loading": "Loading...",
   "leavePasswordEmptyToKeepCurrent": "Leave password empty to keep current password",
-  
   "cart": "Cart",
   "cartEmpty": "Cart is empty",
   "browseRestaurants": "Browse Restaurants",
@@ -213,7 +199,6 @@
   "deliveryFee": "Delivery Fee",
   "tax": "Tax",
   "grandTotal": "Grand Total",
-  
   "restaurants": "Restaurants",
   "searchRestaurants": "Search for a restaurant...",
   "nearbyRestaurants": "Nearby Restaurants",
@@ -224,7 +209,6 @@
   "noRestaurantsAvailableMessage": "Check back later for new restaurants",
   "noRestaurantsFound": "No restaurants found",
   "tryDifferentSearchTerm": "Try a different search term",
-  
   "exitApp": "Exit App",
   "exitAppConfirmation": "Are you sure you want to exit the app?",
   "cancel": "Cancel",
@@ -232,7 +216,6 @@
   "unsavedChanges": "Unsaved Changes",
   "unsavedChangesWarning": "You have unsaved changes. Do you want to discard them and continue?",
   "discard": "Discard",
-  
   "restaurantOrders": "Restaurant Orders",
   "pendingOrders": "Pending Orders",
   "activeOrders": "Active Orders",
@@ -279,7 +262,6 @@
   "rejectOrderConfirmation": "Are you sure you want to reject this order?",
   "orderRejected": "Order rejected",
   "orderStatusUpdated": "Order status updated",
-  
   "marketProducts": "Market Products",
   "noMarketProducts": "No Market Products",
   "startByAddingYourFirstMarketProduct": "Start by adding your first market product",
@@ -287,7 +269,6 @@
   "searchRestaurants": "Search restaurants...",
   "deleteProduct": "Delete Product",
   "noProductsFound": "No products found",
-  
   "startupAds": "Startup Ads",
   "bannerAds": "Banner Ads",
   "addAd": "Add Ad",
@@ -319,7 +300,6 @@
   "ok": "OK",
   "startByAddingYourFirstStartupAd": "Start by adding your first startup ad",
   "startByAddingYourFirstBannerAd": "Start by adding your first banner ad",
-  
   "adminDashboard": "Admin Dashboard",
   "welcomeBack": "Welcome Back",
   "adminAccess": "Admin Access",
@@ -333,9 +313,7 @@
   "analytics": "Analytics",
   "orders": "Orders",
   "settings": "Settings",
-  "ok": "OK",
   "info": "Info",
-  
   "all": "All",
   "minutes": "minutes",
   "free": "Free",
@@ -348,13 +326,11 @@
       }
     }
   },
-  
   "forgotPassword": "Forgot Password?",
   "resetPassword": "Reset Password",
   "enterEmailForPasswordReset": "Enter your email to receive a password reset link",
   "passwordResetEmailSent": "Password reset link has been sent to your email",
   "send": "Send",
-  "cancel": "Cancel",
   "cannotOpenPhoneApp": "Cannot open phone app",
   "errorCalling": "Error occurred while calling",
   "calling": "Calling",
@@ -365,21 +341,14 @@
   "pleaseEnterValidPhoneNumber": "Please enter a valid phone number",
   "deliveryAddress": "Delivery Address",
   "enterDeliveryAddress": "Enter your delivery address",
-  "contactInformation": "Contact Information",
-  "phoneNumber": "Phone Number",
   "enterPhoneNumber": "Enter your phone number",
   "orderNotes": "Order Notes (Optional)",
   "notes": "Notes",
   "anySpecialInstructions": "Any special instructions?",
   "orderSummary": "Order Summary",
-  "subtotal": "Subtotal",
-  "deliveryFee": "Delivery Fee",
-  "total": "Total",
   "placeOrder": "Place Order",
-  "browseRestaurants": "Browse Restaurants",
   "cartIsEmpty": "Cart is empty",
   "startAddingProductsFromRestaurants": "Start adding products from restaurants",
-  "noOrdersYet": "No orders yet",
   "pleaseLogIn": "Please log in",
   "noOrdersFound": "No orders found",
   "loadingOrder": "Loading order...",
@@ -389,8 +358,6 @@
   "no": "No",
   "orderCancelledSuccessfully": "Order cancelled successfully",
   "restaurant": "Restaurant",
-  "orderItems": "Order Items",
-  "orderId": "Order ID",
   "orderTime": "Order Time",
   "totalAmount": "Total Amount",
   "driverInformation": "Driver Information",
@@ -406,27 +373,22 @@
   },
   "failedToAddProductToCart": "Failed to add product to cart",
   "marketProductsOrderingComingSoon": "Market products ordering coming soon",
-  
   "myOrders": "My Orders",
   "viewDetails": "View Details",
   "checkout": "Checkout",
   "placingOrder": "Placing your order...",
   "orderDetails": "Order Details",
   "deliveryInformation": "Delivery Information",
-  
   "favorites": "Favorites",
   "noFavoritesYet": "No favorites yet",
-  
   "profile": "Profile",
   "myProfile": "My Profile",
   "personalInformation": "Personal Information",
   "fullName": "Full Name",
-  "email": "Email",
   "phone": "Phone",
   "logout": "Logout",
   "areYouSureLogout": "Are you sure you want to logout?",
   "accountInformation": "Account Information",
-  "settings": "Settings",
   "changePassword": "Change Password",
   "updateProfile": "Update Profile",
   "login": "Login",
@@ -435,7 +397,6 @@
   "dontHaveAccount": "Don't have an account?",
   "signup": "Sign Up",
   "or": "or",
-  
   "foodCategories": "Food Categories",
   "addCategory": "Add Category",
   "editCategory": "Edit Category",
@@ -458,8 +419,6 @@
     }
   },
   "displayOrder": "Display Order",
-  "cancel": "Cancel",
-  
   "currency": "EGP",
   "currencySymbol": "ج.م",
   "open": "Open",
@@ -478,16 +437,12 @@
   "selectDeliveryAddress": "Select Delivery Address",
   "defaultAddress": "Default",
   "failedToLoadRestaurantData": "Failed to load restaurant data",
-  "vegetarian": "Vegetarian",
   "burger": "Burger",
   "pizza": "Pizza",
   "noodles": "Noodles",
   "meat": "Meat",
-  "desserts": "Desserts",
-  "beverages": "Beverages",
   "min": "min",
   "minutesAbbreviation": "min",
-  
   "pleaseLoginToContinue": "Please login to continue",
   "invalidProduct": "Invalid product. Please try again.",
   "quantityMustBeGreaterThanZero": "Quantity must be greater than zero",
@@ -504,11 +459,8 @@
   "items": "items",
   "nA": "N/A",
   "creatingDriver": "Creating driver...",
-  "personalInformation": "Personal Information",
   "personalPhoto": "Personal Photo",
-  "fullName": "Full Name",
   "pleaseEnterFullName": "Please enter full name",
-  
   "off": "OFF",
   "specialOffer": "Special Offer",
   "discount": "Discount",
@@ -525,7 +477,6 @@
   "pleaseEnterDeliveryFee": "Please enter delivery fee",
   "pleaseEnterMinimumOrderAmount": "Please enter minimum order amount",
   "pleaseEnterDeliveryTime": "Please enter delivery time",
-  
   "createDriver": "Create Driver",
   "pleaseSelectPersonalImage": "Please select personal image",
   "pleaseSelectDriverLicense": "Please select driver license",
@@ -551,7 +502,6 @@
   "pleaseProvideTheseCredentials": "Please provide these credentials to the driver:",
   "noteDriverCanChangePassword": "Note: Driver can change password after first login.",
   "tapToUploadImage": "Tap to upload image",
-  
   "marketProductCategories": "Market Categories",
   "market": "Market",
   "vegetables": "Vegetables",
@@ -575,12 +525,31 @@
   "chipsAndSnacks": "Chips and Snacks",
   "topCategories": "Top Categories",
   "pleaseSelectCategory": "Please select a category",
-  
   "addressBook": "Address Book",
   "addAddress": "Add Address",
   "noAddressesFound": "No addresses found",
   "addYourFirstAddress": "Add your first address to get started",
   "deleteAddress": "Delete Address",
-  "deleteAddressConfirm": "Are you sure you want to delete this address?"
+  "deleteAddressConfirm": "Are you sure you want to delete this address?",
+  "offers": "Offers",
+  "fruitsVegetables": "Fruits & Vegetables",
+  "poultryMeatSeafood": "Poultry, Meat & Seafood",
+  "freshFood": "Fresh Food",
+  "readyToEat": "Ready to Eat",
+  "frozenFood": "Frozen Food",
+  "dairyAndEggs": "Dairy & Eggs",
+  "iceCream": "Ice Cream",
+  "milk": "Milk",
+  "beauty": "Beauty",
+  "cookingAndBaking": "Cooking & Baking",
+  "coffeeAndTea": "Coffee & Tea",
+  "pharmacy": "Pharmacy",
+  "tissuesAndBags": "Tissues & Bags",
+  "cannedFood": "Canned Food",
+  "breakfastFood": "Breakfast Food",
+  "babyCorner": "Baby Corner",
+  "cleaningAndLaundry": "Cleaning & Laundry",
+  "specialDiet": "Special Diet",
+  "spicesAndSauces": "Spices & Sauces",
+  "shopByCategory": "Shop by Category"
 }
-

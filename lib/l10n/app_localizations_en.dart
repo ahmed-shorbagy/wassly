@@ -1458,4 +1458,67 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get deleteAddressConfirm =>
       'Are you sure you want to delete this address?';
+
+  @override
+  String get offers => 'Offers';
+
+  @override
+  String get fruitsVegetables => 'Fruits & Vegetables';
+
+  @override
+  String get poultryMeatSeafood => 'Poultry, Meat & Seafood';
+
+  @override
+  String get freshFood => 'Fresh Food';
+
+  @override
+  String get readyToEat => 'Ready to Eat';
+
+  @override
+  String get frozenFood => 'Frozen Food';
+
+  @override
+  String get dairyAndEggs => 'Dairy & Eggs';
+
+  @override
+  String get iceCream => 'Ice Cream';
+
+  @override
+  String get milk => 'Milk';
+
+  @override
+  String get beauty => 'Beauty';
+
+  @override
+  String get cookingAndBaking => 'Cooking & Baking';
+
+  @override
+  String get coffeeAndTea => 'Coffee & Tea';
+
+  @override
+  String get pharmacy => 'Pharmacy';
+
+  @override
+  String get tissuesAndBags => 'Tissues & Bags';
+
+  @override
+  String get cannedFood => 'Canned Food';
+
+  @override
+  String get breakfastFood => 'Breakfast Food';
+
+  @override
+  String get babyCorner => 'Baby Corner';
+
+  @override
+  String get cleaningAndLaundry => 'Cleaning & Laundry';
+
+  @override
+  String get specialDiet => 'Special Diet';
+
+  @override
+  String get spicesAndSauces => 'Spices & Sauces';
+
+  @override
+  String get shopByCategory => 'Shop by Category';
 }

@@ -76,15 +76,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           if (state is OrderCreated) {
             // Clear cart
             context.read<CartCubit>().clearCart();
-            
-            // Show success and navigate to order detail
+
+            // Show success and navigate to order summary
             final l10n = AppLocalizations.of(context);
             context.showSuccessSnackBar(
               l10n?.orderPlacedSuccessfully ?? 'تم تقديم الطلب بنجاح',
             );
-            // Use pushReplacement to replace checkout screen with order detail
-            // This prevents going back to empty checkout and maintains proper navigation stack
-            context.pushReplacement('/order/${state.order.id}');
+            // Navigate to the new order summary screen
+            context.pushReplacement('/order-summary/${state.order.id}');
           } else if (state is OrderError) {
             context.showErrorSnackBar(state.message);
           }
@@ -111,13 +110,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        AppLocalizations.of(context)?.cartIsEmpty ?? 'السلة فارغة',
+                        AppLocalizations.of(context)?.cartIsEmpty ??
+                            'السلة فارغة',
                       ),
                       const SizedBox(height: 24),
                       ElevatedButton(
                         onPressed: () => context.push('/home'),
                         child: Text(
-                          AppLocalizations.of(context)?.browseRestaurants ?? 'تصفح المطاعم',
+                          AppLocalizations.of(context)?.browseRestaurants ??
+                              'تصفح المطاعم',
                         ),
                       ),
                     ],
@@ -136,31 +137,43 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // Delivery Address
-                            BlocBuilder<DeliveryAddressCubit, DeliveryAddressState>(
+                            BlocBuilder<
+                              DeliveryAddressCubit,
+                              DeliveryAddressState
+                            >(
                               builder: (context, addressState) {
                                 final l10n = AppLocalizations.of(context);
                                 return Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         _buildSectionHeader(
-                                          l10n?.deliveryAddress ?? 'عنوان التوصيل',
+                                          l10n?.deliveryAddress ??
+                                              'عنوان التوصيل',
                                         ),
-                                        if (addressState is DeliveryAddressSelected)
+                                        if (addressState
+                                            is DeliveryAddressSelected)
                                           TextButton.icon(
                                             onPressed: () {
                                               // Show dialog to manage addresses
                                               showDialog(
                                                 context: context,
-                                                builder: (context) => const DeliveryAddressDialog(),
+                                                builder: (context) =>
+                                                    const DeliveryAddressDialog(),
                                               );
                                             },
-                                            icon: const Icon(Icons.edit, size: 16),
+                                            icon: const Icon(
+                                              Icons.edit,
+                                              size: 16,
+                                            ),
                                             label: Text(
                                               l10n?.edit ?? 'تعديل',
-                                              style: const TextStyle(fontSize: 12),
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                              ),
                                             ),
                                           ),
                                       ],
@@ -169,10 +182,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                     TextFormField(
                                       controller: _addressController,
                                       decoration: InputDecoration(
-                                        labelText: l10n?.deliveryAddress ?? 'عنوان التوصيل',
-                                        hintText: l10n?.enterDeliveryAddress ?? 'أدخل عنوان التوصيل',
-                                        prefixIcon: const Icon(Icons.location_on),
-                                        suffixIcon: addressState is DeliveryAddressSelected
+                                        labelText:
+                                            l10n?.deliveryAddress ??
+                                            'عنوان التوصيل',
+                                        hintText:
+                                            l10n?.enterDeliveryAddress ??
+                                            'أدخل عنوان التوصيل',
+                                        prefixIcon: const Icon(
+                                          Icons.location_on,
+                                        ),
+                                        suffixIcon:
+                                            addressState
+                                                is DeliveryAddressSelected
                                             ? Icon(
                                                 Icons.check_circle,
                                                 color: AppColors.success,
@@ -181,9 +202,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                             : null,
                                       ),
                                       validator: (value) {
-                                        final l10n = AppLocalizations.of(context);
-                                        if (value == null || value.trim().isEmpty) {
-                                          return l10n?.addressRequired ?? 'العنوان مطلوب';
+                                        final l10n = AppLocalizations.of(
+                                          context,
+                                        );
+                                        if (value == null ||
+                                            value.trim().isEmpty) {
+                                          return l10n?.addressRequired ??
+                                              'العنوان مطلوب';
                                         }
                                         return null;
                                       },
@@ -211,17 +236,23 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 return TextFormField(
                                   controller: _phoneController,
                                   decoration: InputDecoration(
-                                    labelText: l10n?.phoneNumber ?? 'رقم الهاتف',
-                                    hintText: l10n?.enterPhoneNumber ?? 'أدخل رقم الهاتف',
+                                    labelText:
+                                        l10n?.phoneNumber ?? 'رقم الهاتف',
+                                    hintText:
+                                        l10n?.enterPhoneNumber ??
+                                        'أدخل رقم الهاتف',
                                     prefixIcon: const Icon(Icons.phone),
                                   ),
                                   validator: (value) {
                                     final l10n = AppLocalizations.of(context);
                                     if (value == null || value.trim().isEmpty) {
-                                      return l10n?.phoneNumberRequired ?? 'رقم الهاتف مطلوب';
+                                      return l10n?.phoneNumberRequired ??
+                                          'رقم الهاتف مطلوب';
                                     }
                                     if (value.length < 10) {
-                                      return l10n?.pleaseEnterValidPhoneNumber ?? 'يرجى إدخال رقم هاتف صحيح';
+                                      return l10n
+                                              ?.pleaseEnterValidPhoneNumber ??
+                                          'يرجى إدخال رقم هاتف صحيح';
                                     }
                                     return null;
                                   },
@@ -248,7 +279,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                   controller: _notesController,
                                   decoration: InputDecoration(
                                     labelText: l10n?.notes ?? 'ملاحظات',
-                                    hintText: l10n?.anySpecialInstructions ?? 'أي تعليمات خاصة؟',
+                                    hintText:
+                                        l10n?.anySpecialInstructions ??
+                                        'أي تعليمات خاصة؟',
                                     prefixIcon: const Icon(Icons.note),
                                   ),
                                   maxLines: 3,
@@ -288,10 +321,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Widget _buildSectionHeader(String title) {
     return Text(
       title,
-      style: const TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-      ),
+      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
     );
   }
 
@@ -320,32 +350,34 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             const Divider(height: 24),
 
             // Items
-            ...cartState.items.map((item) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          '${item.quantity}x ${item.product.name}',
-                          style: const TextStyle(fontSize: 14),
-                        ),
+            ...cartState.items.map(
+              (item) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '${item.quantity}x ${item.product.name}',
+                        style: const TextStyle(fontSize: 14),
                       ),
-                      Builder(
-                        builder: (context) {
-                          final l10n = AppLocalizations.of(context);
-                          return Text(
-                            '${item.totalPrice.toStringAsFixed(2)} ${l10n?.currencySymbol ?? 'ج.م'}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                )),
+                    ),
+                    Builder(
+                      builder: (context) {
+                        final l10n = AppLocalizations.of(context);
+                        return Text(
+                          '${item.totalPrice.toStringAsFixed(2)} ${l10n?.currencySymbol ?? 'ج.م'}',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
 
             const Divider(height: 24),
 
@@ -405,13 +437,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                Text(
-                  '${_getTotalAmount(cartState.totalPrice).toStringAsFixed(2)} ${l10n?.currencySymbol ?? 'ج.م'}',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                  ),
+                    Text(
+                      '${_getTotalAmount(cartState.totalPrice).toStringAsFixed(2)} ${l10n?.currencySymbol ?? 'ج.م'}',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
                     ),
                   ],
                 );
@@ -449,7 +481,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 final l10n = AppLocalizations.of(context);
                 return Text(
                   '${l10n?.placeOrder ?? 'تقديم الطلب'} - ${_getTotalAmount(cartState.totalPrice).toStringAsFixed(2)} ${l10n?.currencySymbol ?? 'ج.م'}',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 );
               },
             ),
@@ -461,8 +496,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   double _getDeliveryFee() {
     // Use restaurant's delivery fee, fallback to 5.0 if not available
-    return widget.restaurant.deliveryFee > 0 
-        ? widget.restaurant.deliveryFee 
+    return widget.restaurant.deliveryFee > 0
+        ? widget.restaurant.deliveryFee
         : 5.0;
   }
 
@@ -472,7 +507,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   Future<void> _placeOrder(BuildContext context, CartLoaded cartState) async {
     final l10n = AppLocalizations.of(context);
-    
+
     // Validate form
     if (!_formKey.currentState!.validate()) {
       return;
@@ -491,9 +526,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     // Validate cart items belong to the correct restaurant
     final allItemsFromRestaurant = cartState.items.every(
-      (item) => item.product.restaurantId == widget.restaurant.id
+      (item) => item.product.restaurantId == widget.restaurant.id,
     );
-    
+
     if (!allItemsFromRestaurant) {
       context.showErrorSnackBar(
         'Cart contains items from different restaurants. Please clear cart and try again.',
@@ -502,21 +537,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
 
     // Validate minimum order amount
-    if (widget.restaurant.minOrderAmount > 0 && 
+    if (widget.restaurant.minOrderAmount > 0 &&
         cartState.totalPrice < widget.restaurant.minOrderAmount) {
       final minAmount = widget.restaurant.minOrderAmount.toStringAsFixed(2);
       final currency = l10n?.currencySymbol ?? 'ج.م';
-      context.showErrorSnackBar(
-        'Minimum order amount is $minAmount $currency',
-      );
+      context.showErrorSnackBar('Minimum order amount is $minAmount $currency');
       return;
     }
 
     // Validate all products are still available
-    final unavailableProducts = cartState.items.where(
-      (item) => !item.product.isAvailable
-    ).toList();
-    
+    final unavailableProducts = cartState.items
+        .where((item) => !item.product.isAvailable)
+        .toList();
+
     if (unavailableProducts.isNotEmpty) {
       final productNames = unavailableProducts
           .map((item) => item.product.name)
@@ -528,10 +561,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
 
     // Validate all items have valid prices
-    final invalidPriceItems = cartState.items.where(
-      (item) => item.product.price <= 0 || item.quantity <= 0
-    ).toList();
-    
+    final invalidPriceItems = cartState.items
+        .where((item) => item.product.price <= 0 || item.quantity <= 0)
+        .toList();
+
     if (invalidPriceItems.isNotEmpty) {
       context.showErrorSnackBar(
         'Some items have invalid prices or quantities. Please refresh and try again.',
@@ -609,7 +642,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   GeoPoint? _convertToGeoPoint(Map<String, dynamic> location) {
     try {
-      if (location.containsKey('latitude') && location.containsKey('longitude')) {
+      if (location.containsKey('latitude') &&
+          location.containsKey('longitude')) {
         return GeoPoint(
           location['latitude'] as double,
           location['longitude'] as double,
@@ -621,4 +655,3 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
   }
 }
-

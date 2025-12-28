@@ -1,15 +1,12 @@
 {
   "@@locale": "ar",
-  
   "createRestaurant": "إنشاء مطعم",
   "restaurantSetup": "إعداد المطعم",
-  
   "basicInformation": "المعلومات الأساسية",
   "restaurantName": "اسم المطعم",
   "description": "الوصف",
   "pleaseEnterRestaurantName": "الرجاء إدخال اسم المطعم",
   "pleaseEnterDescription": "الرجاء إدخال الوصف",
-  
   "contactInformation": "معلومات الاتصال",
   "phoneNumber": "رقم الهاتف",
   "email": "البريد الإلكتروني",
@@ -20,40 +17,34 @@
   "pleaseEnterValidPhoneNumber": "الرجاء إدخال رقم هاتف صحيح",
   "pleaseEnterEmail": "الرجاء إدخال البريد الإلكتروني",
   "pleaseEnterValidEmail": "الرجاء إدخال بريد إلكتروني صحيح",
-  
   "location": "الموقع",
   "address": "العنوان",
   "pleaseEnterAddress": "الرجاء إدخال العنوان",
   "tapToSelectLocationOnMap": "اضغط لاختيار الموقع على الخريطة",
   "locationSet": "الموقع: {latitude}, {longitude}",
   "locationSetToCairo": "تم تعيين الموقع إلى القاهرة، مصر",
-  
   "categories": "الفئات",
   "selectCategories": "اختر الفئات",
   "tapToSelectCategories": "اضغط لاختيار الفئات",
   "selectedCategories": "الفئات المختارة:",
   "done": "تم",
   "edit": "تعديل",
-  
   "deliverySettings": "إعدادات التوصيل",
   "deliveryFee": "رسوم التوصيل (ريال)",
   "minOrder": "الحد الأدنى للطلب (ريال)",
   "estimatedDeliveryTime": "وقت التوصيل المتوقع (دقيقة)",
   "required": "مطلوب",
   "invalidNumber": "رقم غير صحيح",
-  
   "tapToUploadRestaurantImage": "اضغط لتحميل صورة المطعم",
   "change": "تغيير",
   "pleaseSelectImage": "الرجاء اختيار صورة المطعم",
   "pleaseSelectLocation": "الرجاء اختيار الموقع",
   "pleaseSelectAtLeastOneCategory": "الرجاء اختيار فئة واحدة على الأقل",
-  
   "creatingRestaurant": "جاري إنشاء المطعم...",
   "restaurantCreatedSuccessfully": "تم إنشاء المطعم بنجاح!",
   "provideCredentialsToRestaurant": "يرجى توفير هذه البيانات للمالك:",
   "restaurantCanChangePasswordAfterLogin": "ملاحظة: يمكن للمالك تغيير كلمة المرور بعد أول تسجيل دخول.",
   "failedToPickImage": "فشل في اختيار الصورة: {error}",
-  
   "fastFood": "وجبات سريعة",
   "italian": "إيطالي",
   "chinese": "صيني",
@@ -70,7 +61,6 @@
   "healthy": "صحي",
   "bbq": "مشاوي",
   "seafood": "مأكولات بحرية",
-  
   "arabic": "عربي",
   "egyptian": "مصري",
   "lebanese": "لبناني",
@@ -111,12 +101,10 @@
   "biryani": "بيرياني",
   "bakedGoods": "مخبوزات",
   "orientalSweets": "حلويات شرقية",
-  
   "commercialRegistrationPhoto": "صورة السجل التجاري",
   "takePhoto": "التقاط صورة",
   "openCamera": "فتح الكاميرا",
   "pleaseTakeCommercialRegistrationPhoto": "الرجاء التقاط صورة السجل التجاري",
-  
   "productManagement": "إدارة المنتجات",
   "products": "المنتجات",
   "addProduct": "إضافة منتج",
@@ -144,7 +132,6 @@
   "startByAddingYourFirstProduct": "ابدأ بإضافة منتجك الأول",
   "selectRestaurantFirst": "الرجاء اختيار مطعم أولاً",
   "restaurantProducts": "منتجات المطعم",
-  
   "password": "كلمة المرور",
   "confirmPassword": "تأكيد كلمة المرور",
   "pleaseEnterPassword": "الرجاء إدخال كلمة المرور",
@@ -169,7 +156,6 @@
   "back": "رجوع",
   "loading": "جاري التحميل...",
   "leavePasswordEmptyToKeepCurrent": "اترك كلمة المرور فارغة للاحتفاظ بالكلمة الحالية",
-  
   "cart": "السلة",
   "cartEmpty": "السلة فارغة",
   "browseRestaurants": "تصفح المطاعم",
@@ -196,7 +182,6 @@
   "deliveryFee": "رسوم التوصيل",
   "tax": "الضريبة",
   "grandTotal": "المجموع الكلي",
-  
   "restaurants": "المطاعم",
   "searchRestaurants": "ابحث عن مطعم...",
   "nearbyRestaurants": "مطاعم قريبة منك",
@@ -207,7 +192,6 @@
   "noRestaurantsAvailableMessage": "تحقق لاحقاً للحصول على مطاعم جديدة",
   "noRestaurantsFound": "لم يتم العثور على مطاعم",
   "tryDifferentSearchTerm": "جرب مصطلح بحث مختلف",
-  
   "exitApp": "الخروج",
   "exitAppConfirmation": "هل أنت متأكد من الخروج من التطبيق؟",
   "cancel": "إلغاء",
@@ -215,7 +199,6 @@
   "unsavedChanges": "تغييرات غير محفوظة",
   "unsavedChangesWarning": "لديك تغييرات غير محفوظة. هل تريد تجاهلها والمتابعة؟",
   "discard": "تجاهل",
-  
   "restaurantOrders": "طلبات المطعم",
   "pendingOrders": "الطلبات المعلقة",
   "activeOrders": "الطلبات النشطة",
@@ -262,7 +245,6 @@
   "rejectOrderConfirmation": "هل أنت متأكد من رفض هذا الطلب؟",
   "orderRejected": "تم رفض الطلب",
   "orderStatusUpdated": "تم تحديث حالة الطلب",
-  
   "marketProducts": "منتجات الماركت",
   "noMarketProducts": "لا توجد منتجات سوق",
   "startByAddingYourFirstMarketProduct": "ابدأ بإضافة منتج الماركت الأول",
@@ -270,7 +252,6 @@
   "searchRestaurants": "ابحث عن المطاعم...",
   "deleteProduct": "حذف المنتج",
   "noProductsFound": "لم يتم العثور على منتجات",
-  
   "startupAds": "إعلانات البداية",
   "bannerAds": "إعلانات البانر",
   "addAd": "إضافة إعلان",
@@ -301,7 +282,6 @@
   "noBannerAds": "لا توجد إعلانات بانر",
   "startByAddingYourFirstStartupAd": "ابدأ بإضافة إعلان البداية الأول",
   "startByAddingYourFirstBannerAd": "ابدأ بإضافة إعلان البانر الأول",
-  
   "adminDashboard": "لوحة التحكم",
   "welcomeBack": "مرحباً بعودتك",
   "adminAccess": "وصول المدير",
@@ -317,7 +297,6 @@
   "settings": "الإعدادات",
   "ok": "موافق",
   "info": "معلومات",
-  
   "all": "الكل",
   "minutes": "دقيقة",
   "free": "مجاني",
@@ -330,13 +309,11 @@
       }
     }
   },
-  
   "forgotPassword": "نسيت كلمة المرور؟",
   "resetPassword": "إعادة تعيين كلمة المرور",
   "enterEmailForPasswordReset": "أدخل بريدك الإلكتروني لإرسال رابط إعادة تعيين كلمة المرور",
   "passwordResetEmailSent": "تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني",
   "send": "إرسال",
-  "cancel": "إلغاء",
   "cannotOpenPhoneApp": "لا يمكن فتح تطبيق الهاتف",
   "errorCalling": "حدث خطأ أثناء الاتصال",
   "calling": "جاري الاتصال",
@@ -347,21 +324,14 @@
   "pleaseEnterValidPhoneNumber": "يرجى إدخال رقم هاتف صحيح",
   "deliveryAddress": "عنوان التوصيل",
   "enterDeliveryAddress": "أدخل عنوان التوصيل",
-  "contactInformation": "معلومات الاتصال",
-  "phoneNumber": "رقم الهاتف",
   "enterPhoneNumber": "أدخل رقم الهاتف",
   "orderNotes": "ملاحظات الطلب (اختياري)",
   "notes": "ملاحظات",
   "anySpecialInstructions": "أي تعليمات خاصة؟",
   "orderSummary": "ملخص الطلب",
-  "subtotal": "المجموع الفرعي",
-  "deliveryFee": "رسوم التوصيل",
-  "total": "المجموع",
   "placeOrder": "تقديم الطلب",
-  "browseRestaurants": "تصفح المطاعم",
   "cartIsEmpty": "السلة فارغة",
   "startAddingProductsFromRestaurants": "ابدأ بإضافة منتجات من المطاعم",
-  "noOrdersYet": "لا توجد طلبات حتى الآن",
   "pleaseLogIn": "يرجى تسجيل الدخول",
   "noOrdersFound": "لم يتم العثور على طلبات",
   "loadingOrder": "جاري تحميل الطلب...",
@@ -371,8 +341,6 @@
   "no": "لا",
   "orderCancelledSuccessfully": "تم إلغاء الطلب بنجاح",
   "restaurant": "المطعم",
-  "orderItems": "عناصر الطلب",
-  "orderId": "رقم الطلب",
   "orderTime": "وقت الطلب",
   "totalAmount": "المجموع الكلي",
   "driverInformation": "معلومات السائق",
@@ -388,27 +356,22 @@
   },
   "failedToAddProductToCart": "فشل إضافة المنتج إلى السلة",
   "marketProductsOrderingComingSoon": "طلب منتجات الماركت قريباً",
-  
   "myOrders": "طلباتي",
   "viewDetails": "عرض التفاصيل",
   "checkout": "الدفع",
   "placingOrder": "جاري تقديم الطلب...",
   "orderDetails": "تفاصيل الطلب",
   "deliveryInformation": "معلومات التوصيل",
-  
   "favorites": "المفضلة",
   "noFavoritesYet": "لا توجد عناصر مفضلة بعد",
-  
   "profile": "الملف الشخصي",
   "myProfile": "ملفي الشخصي",
   "personalInformation": "المعلومات الشخصية",
   "fullName": "الاسم الكامل",
-  "email": "البريد الإلكتروني",
   "phone": "الهاتف",
   "logout": "تسجيل الخروج",
   "areYouSureLogout": "هل أنت متأكد من تسجيل الخروج؟",
   "accountInformation": "معلومات الحساب",
-  "settings": "الإعدادات",
   "changePassword": "تغيير كلمة المرور",
   "updateProfile": "تحديث الملف الشخصي",
   "login": "تسجيل الدخول",
@@ -417,7 +380,6 @@
   "dontHaveAccount": "ليس لديك حساب؟",
   "signup": "إنشاء حساب",
   "or": "أو",
-  
   "foodCategories": "فئات الطعام",
   "addCategory": "إضافة فئة",
   "editCategory": "تعديل فئة",
@@ -440,8 +402,6 @@
     }
   },
   "displayOrder": "ترتيب العرض",
-  "cancel": "إلغاء",
-  
   "currency": "جنيه مصري",
   "currencySymbol": "ج.م",
   "open": "مفتوح",
@@ -460,16 +420,12 @@
   "selectDeliveryAddress": "حدد عنوان التوصيل",
   "defaultAddress": "افتراضي",
   "failedToLoadRestaurantData": "فشل تحميل بيانات المطعم",
-  "vegetarian": "نباتي",
   "burger": "برجر",
   "pizza": "بيتزا",
   "noodles": "نودلز",
   "meat": "لحوم",
-  "desserts": "حلويات",
-  "beverages": "مشروبات",
   "min": "د",
   "minutesAbbreviation": "د",
-  
   "pleaseLoginToContinue": "يرجى تسجيل الدخول للمتابعة",
   "invalidProduct": "منتج غير صالح. يرجى المحاولة مرة أخرى.",
   "quantityMustBeGreaterThanZero": "يجب أن تكون الكمية أكبر من الصفر",
@@ -486,11 +442,8 @@
   "items": "عناصر",
   "nA": "غير متاح",
   "creatingDriver": "جاري إنشاء السائق...",
-  "personalInformation": "المعلومات الشخصية",
   "personalPhoto": "الصورة الشخصية",
-  "fullName": "الاسم الكامل",
   "pleaseEnterFullName": "يرجى إدخال الاسم الكامل",
-  
   "off": "خصم",
   "specialOffer": "عرض خاص",
   "discount": "الخصم",
@@ -507,7 +460,6 @@
   "pleaseEnterDeliveryFee": "يرجى إدخال رسوم التوصيل",
   "pleaseEnterMinimumOrderAmount": "يرجى إدخال الحد الأدنى لمبلغ الطلب",
   "pleaseEnterDeliveryTime": "يرجى إدخال وقت التوصيل",
-  
   "createDriver": "إنشاء سائق",
   "pleaseSelectPersonalImage": "يرجى اختيار الصورة الشخصية",
   "pleaseSelectDriverLicense": "يرجى اختيار رخصة القيادة",
@@ -533,7 +485,6 @@
   "pleaseProvideTheseCredentials": "يرجى توفير هذه البيانات للسائق:",
   "noteDriverCanChangePassword": "ملاحظة: يمكن للسائق تغيير كلمة المرور بعد أول تسجيل دخول.",
   "tapToUploadImage": "اضغط لرفع الصورة",
-  
   "marketProductCategories": "فئات الماركت",
   "market": "الماركت",
   "vegetables": "خضروات",
@@ -557,12 +508,31 @@
   "chipsAndSnacks": "شيبسي",
   "topCategories": "الفئات الرئيسية",
   "pleaseSelectCategory": "الرجاء اختيار فئة",
-  
   "addressBook": "سجل العناوين",
   "addAddress": "إضافة عنوان",
   "noAddressesFound": "لا توجد عناوين",
   "addYourFirstAddress": "أضف عنوانك الأول للبدء",
   "deleteAddress": "حذف العنوان",
-  "deleteAddressConfirm": "هل أنت متأكد من حذف هذا العنوان؟"
+  "deleteAddressConfirm": "هل أنت متأكد من حذف هذا العنوان؟",
+  "offers": "عروض",
+  "fruitsVegetables": "الفواكه والخضروات",
+  "poultryMeatSeafood": "دواجن، لحوم ومأكولات بحرية",
+  "freshFood": "أطعمة طازجة",
+  "readyToEat": "جاهز للأكل",
+  "frozenFood": "الأطعمة المجمدة",
+  "dairyAndEggs": "منتجات الألبان والبيض",
+  "iceCream": "آيس كريم",
+  "milk": "حليب",
+  "beauty": "الجمال",
+  "cookingAndBaking": "الطهي والخبز",
+  "coffeeAndTea": "القهوة والشاي",
+  "pharmacy": "الصيدليه",
+  "tissuesAndBags": "مناديل و اكياس",
+  "cannedFood": "معلبات",
+  "breakfastFood": "طعام الإفطار",
+  "babyCorner": "ركن الأطفال",
+  "cleaningAndLaundry": "التنظيف والغسيل",
+  "specialDiet": "نظام غذائي خاص",
+  "spicesAndSauces": "التوابل والصلصات",
+  "shopByCategory": "تسوق حسب الفئة"
 }
-

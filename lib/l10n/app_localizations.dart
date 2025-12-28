@@ -2905,6 +2905,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Are you sure you want to delete this address?'**
   String get deleteAddressConfirm;
+
+  /// No description provided for @offers.
+  ///
+  /// In en, this message translates to:
+  /// **'Offers'**
+  String get offers;
+
+  /// No description provided for @fruitsVegetables.
+  ///
+  /// In en, this message translates to:
+  /// **'Fruits & Vegetables'**
+  String get fruitsVegetables;
+
+  /// No description provided for @poultryMeatSeafood.
+  ///
+  /// In en, this message translates to:
+  /// **'Poultry, Meat & Seafood'**
+  String get poultryMeatSeafood;
+
+  /// No description provided for @freshFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Fresh Food'**
+  String get freshFood;
+
+  /// No description provided for @readyToEat.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to Eat'**
+  String get readyToEat;
+
+  /// No description provided for @frozenFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Frozen Food'**
+  String get frozenFood;
+
+  /// No description provided for @dairyAndEggs.
+  ///
+  /// In en, this message translates to:
+  /// **'Dairy & Eggs'**
+  String get dairyAndEggs;
+
+  /// No description provided for @iceCream.
+  ///
+  /// In en, this message translates to:
+  /// **'Ice Cream'**
+  String get iceCream;
+
+  /// No description provided for @milk.
+  ///
+  /// In en, this message translates to:
+  /// **'Milk'**
+  String get milk;
+
+  /// No description provided for @beauty.
+  ///
+  /// In en, this message translates to:
+  /// **'Beauty'**
+  String get beauty;
+
+  /// No description provided for @cookingAndBaking.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooking & Baking'**
+  String get cookingAndBaking;
+
+  /// No description provided for @coffeeAndTea.
+  ///
+  /// In en, this message translates to:
+  /// **'Coffee & Tea'**
+  String get coffeeAndTea;
+
+  /// No description provided for @pharmacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Pharmacy'**
+  String get pharmacy;
+
+  /// No description provided for @tissuesAndBags.
+  ///
+  /// In en, this message translates to:
+  /// **'Tissues & Bags'**
+  String get tissuesAndBags;
+
+  /// No description provided for @cannedFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Canned Food'**
+  String get cannedFood;
+
+  /// No description provided for @breakfastFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Breakfast Food'**
+  String get breakfastFood;
+
+  /// No description provided for @babyCorner.
+  ///
+  /// In en, this message translates to:
+  /// **'Baby Corner'**
+  String get babyCorner;
+
+  /// No description provided for @cleaningAndLaundry.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleaning & Laundry'**
+  String get cleaningAndLaundry;
+
+  /// No description provided for @specialDiet.
+  ///
+  /// In en, this message translates to:
+  /// **'Special Diet'**
+  String get specialDiet;
+
+  /// No description provided for @spicesAndSauces.
+  ///
+  /// In en, this message translates to:
+  /// **'Spices & Sauces'**
+  String get spicesAndSauces;
+
+  /// No description provided for @shopByCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop by Category'**
+  String get shopByCategory;
 }
 
 class _AppLocalizationsDelegate

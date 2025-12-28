@@ -279,7 +279,7 @@ class _AdminAddMarketProductScreenState
 
                     // Category - Required
                     DropdownButtonFormField<String>(
-                      initialValue: _selectedCategory,
+                      value: _selectedCategory,
                       decoration: InputDecoration(
                         labelText: l10n.productCategory,
                         hintText: l10n.pleaseSelectCategory,

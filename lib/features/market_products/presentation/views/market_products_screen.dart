@@ -18,9 +18,9 @@ class MarketProductsScreen extends StatefulWidget {
 
 class _MarketProductsScreenState extends State<MarketProductsScreen> {
   final TextEditingController _searchController = TextEditingController();
-  List<String> _categories = [];
+
   String? _selectedCategory;
-  String? _selectedSubCategory;
+
   List<dynamic> _allProducts = [];
   List<dynamic> _filteredProducts = [];
 
@@ -39,11 +39,13 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Check if category was passed from home page navigation via query parameter
+    // Check if category was passed from home page navigation (if applicable)
     final router = GoRouter.of(context);
     final location = router.routeInformationProvider.value.uri;
     final categoryParam = location.queryParameters['category'];
-    if (categoryParam != null && categoryParam.isNotEmpty && _selectedCategory != categoryParam) {
+    if (categoryParam != null &&
+        categoryParam.isNotEmpty &&
+        _selectedCategory != categoryParam) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           setState(() {
@@ -80,22 +82,14 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
           .toList();
     }
 
-    // Filter by subcategory if selected
-    if (_selectedSubCategory != null) {
-      filtered = filtered.where((product) {
-        final nameMatch = product.name.toLowerCase().contains(_selectedSubCategory!.toLowerCase());
-        final descMatch = product.description.toLowerCase().contains(_selectedSubCategory!.toLowerCase());
-        final categoryMatch = product.category?.toLowerCase().contains(_selectedSubCategory!.toLowerCase()) ?? false;
-        return nameMatch || descMatch || categoryMatch;
-      }).toList();
-    }
-
     // Filter by search query
     final searchQuery = _searchController.text.toLowerCase().trim();
     if (searchQuery.isNotEmpty) {
       filtered = filtered.where((product) {
         final nameMatch = product.name.toLowerCase().contains(searchQuery);
-        final descMatch = product.description.toLowerCase().contains(searchQuery);
+        final descMatch = product.description.toLowerCase().contains(
+          searchQuery,
+        );
         return nameMatch || descMatch;
       }).toList();
     }
@@ -103,26 +97,15 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
     _filteredProducts = filtered;
   }
 
-  List<String> _getSubCategories(AppLocalizations l10n) {
-    // Return subcategories based on selected main category
-    if (_selectedCategory == null) return [];
-    
-    // Return all subcategories for market products
-    return [
-      l10n.dairyProducts,
-      l10n.cheese,
-      l10n.eggs,
-      l10n.softDrinks,
-      l10n.water,
-      l10n.juices,
-      l10n.pastaAndRice,
-      l10n.chipsAndSnacks,
-    ];
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final categories = MarketProductCategories.getCategories(l10n);
+
+    // If typing in search, treat as "filtering products" regardless of category view?
+    // Let's stick to the requested design: Category Grid First.
+    final bool showProductList =
+        _selectedCategory != null || _searchController.text.isNotEmpty;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -137,11 +120,22 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
             elevation: 0,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-              onPressed: () => context.pop(),
+              onPressed: () {
+                if (_selectedCategory != null) {
+                  setState(() {
+                    _selectedCategory = null;
+
+                    _searchController.clear();
+                    _applyFilters();
+                  });
+                } else {
+                  context.pop();
+                }
+              },
             ),
             flexibleSpace: FlexibleSpaceBar(
               title: Text(
-                l10n.marketProducts,
+                _selectedCategory ?? l10n.marketProducts,
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -162,7 +156,7 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
+                      color: Colors.black.withOpacity(0.05),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -197,195 +191,157 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
             ),
           ),
 
-          // Categories Filter - Using predefined categories
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: SizedBox(
-                height: 50,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: MarketProductCategories.getCategories(l10n).length + 1, // +1 for "All"
-                  itemBuilder: (context, index) {
-                    final isAll = index == 0;
-                    final categories = MarketProductCategories.getCategories(l10n);
-                    final category = isAll ? null : categories[index - 1];
-                    final isSelected = isAll
-                        ? _selectedCategory == null
-                        : _selectedCategory == category;
-
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 12),
-                      child: FilterChip(
-                        label: Text(isAll ? l10n.all : category!),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          setState(() {
-                            _selectedCategory = isAll ? null : category;
-                            _selectedSubCategory = null; // Reset subcategory when main category changes
-                            _applyFilters();
-                          });
-                        },
-                        selectedColor: AppColors.primary,
-                        checkmarkColor: Colors.white,
-                        labelStyle: TextStyle(
-                          color: isSelected
-                              ? Colors.white
-                              : AppColors.textPrimary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-          ),
-
-          // Subcategories Filter - Show when a main category is selected
-          if (_selectedCategory != null)
+          // 1. If NO Category Selected and NO Search -> Show Categories Grid
+          if (!showProductList) ...[
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.topCategories,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      height: 50,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: _getSubCategories(l10n).length,
-                        itemBuilder: (context, index) {
-                          final subCategory = _getSubCategories(l10n)[index];
-                          final isSelected = _selectedSubCategory == subCategory;
-
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 12),
-                            child: FilterChip(
-                              label: Text(subCategory),
-                              selected: isSelected,
-                              onSelected: (selected) {
-                                setState(() {
-                                  _selectedSubCategory = selected ? subCategory : null;
-                                  _applyFilters();
-                                });
-                              },
-                              selectedColor: AppColors.success,
-                              checkmarkColor: Colors.white,
-                              labelStyle: TextStyle(
-                                color: isSelected
-                                    ? Colors.white
-                                    : AppColors.textPrimary,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 8,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: Text(
+                  l10n.shopByCategory,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
+            SliverPadding(
+              padding: const EdgeInsets.all(16),
+              sliver: SliverGrid(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount:
+                      4, // 4 items per row as in design reference? Or 3? Screenshot looks like 4.
+                  childAspectRatio: 0.75,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 16,
+                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final category = categories[index];
+                  final imagePath = MarketProductCategories.getCategoryImageUrl(
+                    category,
+                    l10n,
+                  );
 
-          const SliverToBoxAdapter(child: SizedBox(height: 8)),
-
-          // Products Grid
-          BlocConsumer<MarketProductCustomerCubit, MarketProductCustomerState>(
-            listener: (context, state) {
-              if (state is MarketProductCustomerLoaded) {
-                setState(() {
-                  _allProducts = state.products;
-                  _applyFilters();
-                  // Extract categories for filter
-                  _categories = state.products
-                      .where((p) =>
-                          p.category != null && p.category!.isNotEmpty)
-                      .map((p) => p.category!)
-                      .toSet()
-                      .toList();
-                  _categories.sort();
-                });
-              }
-            },
-            builder: (context, state) {
-              if (state is MarketProductCustomerLoading) {
-                return const SliverFillRemaining(
-                  child: LoadingWidget(),
-                );
-              }
-
-              if (state is MarketProductCustomerError) {
-                return SliverFillRemaining(
-                  child: ErrorDisplayWidget(
-                    message: state.message,
-                    onRetry: () {
-                      context
-                          .read<MarketProductCustomerCubit>()
-                          .loadMarketProducts();
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedCategory = category;
+                        _applyFilters();
+                      });
                     },
-                  ),
-                );
-              }
-
-              if (state is MarketProductCustomerLoaded) {
-                if (_filteredProducts.isEmpty) {
-                  return SliverFillRemaining(
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.shopping_bag_outlined,
-                            size: 80,
-                            color: AppColors.textSecondary.withValues(alpha: 0.5),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            _searchController.text.isNotEmpty ||
-                                    _selectedCategory != null
-                                ? l10n.noProductsFound
-                                : l10n.noMarketProducts,
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: AppColors.textSecondary,
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF5F5F5),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: imagePath != null
+                                  ? Image.asset(imagePath, fit: BoxFit.contain)
+                                  : const Icon(
+                                      Icons.category,
+                                      color: Colors.grey,
+                                      size: 40,
+                                    ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          category,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  );
+                }, childCount: categories.length),
+              ),
+            ),
+            // Optional: Banner or other sections below
+          ],
+
+          // 2. If Category Selected or Search -> Show Products Grid (Existing Design)
+          if (showProductList) ...[
+            BlocConsumer<
+              MarketProductCustomerCubit,
+              MarketProductCustomerState
+            >(
+              listener: (context, state) {
+                if (state is MarketProductCustomerLoaded) {
+                  setState(() {
+                    _allProducts = state.products;
+                    _applyFilters();
+                    // Extract categories logic if needed, but we use static categories now
+                  });
+                }
+              },
+              builder: (context, state) {
+                if (state is MarketProductCustomerLoading) {
+                  return const SliverFillRemaining(child: LoadingWidget());
+                }
+
+                if (state is MarketProductCustomerError) {
+                  return SliverFillRemaining(
+                    child: ErrorDisplayWidget(
+                      message: state.message,
+                      onRetry: () {
+                        context
+                            .read<MarketProductCustomerCubit>()
+                            .loadMarketProducts();
+                      },
                     ),
                   );
                 }
 
-                return SliverPadding(
-                  padding: const EdgeInsets.all(16),
-                  sliver: SliverGrid(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.68, // Reduced to give more vertical space for content
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
+                if (state is MarketProductCustomerLoaded) {
+                  if (_filteredProducts.isEmpty) {
+                    return SliverFillRemaining(
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.shopping_bag_outlined,
+                              size: 80,
+                              color: AppColors.textSecondary.withOpacity(0.5),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              l10n.noProductsFound,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+
+                  return SliverPadding(
+                    padding: const EdgeInsets.all(16),
+                    sliver: SliverGrid(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 0.68,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                          ),
+                      delegate: SliverChildBuilderDelegate((context, index) {
                         final product = _filteredProducts[index];
                         return ProductCard(
                           productId: product.id,
@@ -396,21 +352,17 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
                           isAvailable: product.isAvailable,
                           isMarketProduct: true,
                         );
-                      },
-                      childCount: _filteredProducts.length,
+                      }, childCount: _filteredProducts.length),
                     ),
-                  ),
-                );
-              }
+                  );
+                }
 
-              return const SliverFillRemaining(
-                child: LoadingWidget(),
-              );
-            },
-          ),
+                return const SliverFillRemaining(child: LoadingWidget());
+              },
+            ),
+          ],
         ],
       ),
     );
   }
 }
-
