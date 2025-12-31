@@ -12,7 +12,7 @@ import 'package:wassly/main.dart';
 void main() {
   testWidgets('App starts with splash screen', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const WasslyApp());
+    await tester.pumpWidget(const ToOrderApp());
 
     // Verify that our app starts with splash screen
     expect(find.text('Splash Screen'), findsOneWidget);

@@ -51,9 +51,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseEnterPhoneNumber => 'Please enter phone number';
 
   @override
-  String get pleaseEnterValidPhoneNumber => 'Please enter a valid phone number';
-
-  @override
   String get pleaseEnterEmail => 'Please enter email';
 
   @override
@@ -99,9 +96,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deliverySettings => 'Delivery Settings';
-
-  @override
-  String get deliveryFee => 'Delivery Fee';
 
   @override
   String get minOrder => 'Min Order (\$)';
@@ -529,10 +523,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get cannotAddDifferentRestaurant =>
-      'Cannot add products from different restaurants. Please clear cart first.';
-
-  @override
   String get clearCart => 'Clear Cart';
 
   @override
@@ -542,6 +532,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subtotal => 'Subtotal';
 
   @override
+  String get deliveryFee => 'Delivery Fee';
+
+  @override
   String get tax => 'Tax';
 
   @override
@@ -549,9 +542,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get restaurants => 'Restaurants';
-
-  @override
-  String get searchRestaurants => 'Search restaurants...';
 
   @override
   String get nearbyRestaurants => 'Nearby Restaurants';
@@ -734,6 +724,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchProducts => 'Search products...';
 
   @override
+  String get searchRestaurants => 'Search restaurants...';
+
+  @override
   String get deleteProduct => 'Delete Product';
 
   @override
@@ -759,6 +752,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get editBanner => 'Edit Banner';
+
+  @override
+  String get bannerLocation => 'Banner Location';
 
   @override
   String get updateAd => 'Update Ad';
@@ -931,6 +927,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get phoneNumberRequired => 'Phone number is required';
+
+  @override
+  String get pleaseEnterValidPhoneNumber => 'Please enter a valid phone number';
 
   @override
   String get deliveryAddress => 'Delivery Address';
@@ -1219,6 +1218,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get quantityMustBeGreaterThanZero =>
       'Quantity must be greater than zero';
+
+  @override
+  String get cannotAddDifferentRestaurant =>
+      'Cannot add products from different restaurants. Please clear cart first.';
 
   @override
   String get failedToAddItemToCart =>

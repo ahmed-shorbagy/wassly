@@ -43,7 +43,7 @@ void main() async {
     await DemoData.createDemoData();
 
     AppLogger.logInfo('Launching app...');
-    runApp(const WasslyApp());
+    runApp(const ToOrderApp());
   } catch (e, stackTrace) {
     // Handle initialization errors
     AppLogger.logError(
@@ -59,8 +59,8 @@ void main() async {
   }
 }
 
-class WasslyApp extends StatelessWidget {
-  const WasslyApp({super.key});
+class ToOrderApp extends StatelessWidget {
+  const ToOrderApp({super.key});
 
   @override
   Widget build(BuildContext context) {

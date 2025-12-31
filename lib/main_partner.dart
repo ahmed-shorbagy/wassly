@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'config/flavor_config.dart';
 import 'firebase_options.dart';
 import 'core/router/partner_router.dart';
@@ -16,9 +17,10 @@ import 'shared/widgets/back_button_handler.dart';
 void main() async {
   // Initialize flavor configuration
   FlavorConfig.initialize(flavor: Flavor.partner);
-  
+
   AppLogger.logInfo('=== Starting ${FlavorConfig.instance.appName} ===');
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   try {
     // Initialize Firebase
@@ -42,7 +44,8 @@ void main() async {
     AppLogger.logSuccess('Dependency injection initialized');
 
     AppLogger.logInfo('Launching Partner app...');
-    runApp(const WasslyPartnerApp());
+    runApp(const ToOrderPartnerApp());
+    FlutterNativeSplash.remove();
   } catch (e, stackTrace) {
     AppLogger.logError(
       'Error initializing Partner app',
@@ -51,18 +54,14 @@ void main() async {
     );
     runApp(
       MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: Text('Error initializing app: $e'),
-          ),
-        ),
+        home: Scaffold(body: Center(child: Text('Error initializing app: $e'))),
       ),
     );
   }
 }
 
-class WasslyPartnerApp extends StatelessWidget {
-  const WasslyPartnerApp({super.key});
+class ToOrderPartnerApp extends StatelessWidget {
+  const ToOrderPartnerApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -86,4 +85,3 @@ class WasslyPartnerApp extends StatelessWidget {
     );
   }
 }
-

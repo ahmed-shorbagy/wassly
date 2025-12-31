@@ -182,12 +182,6 @@ abstract class AppLocalizations {
   /// **'Please enter phone number'**
   String get pleaseEnterPhoneNumber;
 
-  /// No description provided for @pleaseEnterValidPhoneNumber.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter a valid phone number'**
-  String get pleaseEnterValidPhoneNumber;
-
   /// No description provided for @pleaseEnterEmail.
   ///
   /// In en, this message translates to:
@@ -277,12 +271,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delivery Settings'**
   String get deliverySettings;
-
-  /// No description provided for @deliveryFee.
-  ///
-  /// In en, this message translates to:
-  /// **'Delivery Fee'**
-  String get deliveryFee;
 
   /// No description provided for @minOrder.
   ///
@@ -1106,12 +1094,6 @@ abstract class AppLocalizations {
   /// **'{productName} added to cart'**
   String itemAddedToCart(String productName);
 
-  /// No description provided for @cannotAddDifferentRestaurant.
-  ///
-  /// In en, this message translates to:
-  /// **'Cannot add products from different restaurants. Please clear cart first.'**
-  String get cannotAddDifferentRestaurant;
-
   /// No description provided for @clearCart.
   ///
   /// In en, this message translates to:
@@ -1130,6 +1112,12 @@ abstract class AppLocalizations {
   /// **'Subtotal'**
   String get subtotal;
 
+  /// No description provided for @deliveryFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Fee'**
+  String get deliveryFee;
+
   /// No description provided for @tax.
   ///
   /// In en, this message translates to:
@@ -1147,12 +1135,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Restaurants'**
   String get restaurants;
-
-  /// No description provided for @searchRestaurants.
-  ///
-  /// In en, this message translates to:
-  /// **'Search restaurants...'**
-  String get searchRestaurants;
 
   /// No description provided for @nearbyRestaurants.
   ///
@@ -1502,6 +1484,12 @@ abstract class AppLocalizations {
   /// **'Search products...'**
   String get searchProducts;
 
+  /// No description provided for @searchRestaurants.
+  ///
+  /// In en, this message translates to:
+  /// **'Search restaurants...'**
+  String get searchRestaurants;
+
   /// No description provided for @deleteProduct.
   ///
   /// In en, this message translates to:
@@ -1555,6 +1543,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Edit Banner'**
   String get editBanner;
+
+  /// No description provided for @bannerLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Banner Location'**
+  String get bannerLocation;
 
   /// No description provided for @updateAd.
   ///
@@ -1885,6 +1879,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Phone number is required'**
   String get phoneNumberRequired;
+
+  /// No description provided for @pleaseEnterValidPhoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid phone number'**
+  String get pleaseEnterValidPhoneNumber;
 
   /// No description provided for @deliveryAddress.
   ///
@@ -2443,6 +2443,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Quantity must be greater than zero'**
   String get quantityMustBeGreaterThanZero;
+
+  /// No description provided for @cannotAddDifferentRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot add products from different restaurants. Please clear cart first.'**
+  String get cannotAddDifferentRestaurant;
 
   /// No description provided for @failedToAddItemToCart.
   ///

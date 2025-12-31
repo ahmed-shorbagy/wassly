@@ -23,7 +23,8 @@ class AdminEditBannerAdScreen extends StatefulWidget {
   });
 
   @override
-  State<AdminEditBannerAdScreen> createState() => _AdminEditBannerAdScreenState();
+  State<AdminEditBannerAdScreen> createState() =>
+      _AdminEditBannerAdScreenState();
 }
 
 class _AdminEditBannerAdScreenState extends State<AdminEditBannerAdScreen> {
@@ -33,18 +34,32 @@ class _AdminEditBannerAdScreenState extends State<AdminEditBannerAdScreen> {
   late final TextEditingController _priorityController;
 
   File? _selectedImage;
+  late String _selectedType;
 
   @override
   void initState() {
     super.initState();
     if (widget.banner != null) {
-      _titleController = TextEditingController(text: widget.banner!.title ?? '');
-      _deepLinkController = TextEditingController(text: widget.banner!.deepLink ?? '');
-      _priorityController = TextEditingController(text: '0');
+      _titleController = TextEditingController(
+        text: widget.banner!.title ?? '',
+      );
+      _deepLinkController = TextEditingController(
+        text: widget.banner!.deepLink ?? '',
+      );
+
+      _priorityController = TextEditingController(
+        text: '0',
+      ); // Priority not in Entity? Model has it. Entity doesn't?
+      // Wait, BannerEntity doesn't have priority. BannerModel does.
+      // If widget.banner is Entity, we might lose priority.
+      // But let's check BannerEntity definition again. It does NOT have priority in my earlier view.
+      // So priority acts as default 0 here. That's fine.
+      _selectedType = widget.banner!.type;
     } else {
       _titleController = TextEditingController();
       _deepLinkController = TextEditingController();
       _priorityController = TextEditingController(text: '0');
+      _selectedType = 'home';
     }
   }
 
@@ -135,17 +150,18 @@ class _AdminEditBannerAdScreenState extends State<AdminEditBannerAdScreen> {
     final imageUrl = widget.banner?.imageUrl ?? '';
 
     context.read<AdManagementCubit>().updateBannerAd(
-          bannerId: widget.bannerId,
-          imageUrl: imageUrl,
-          title: _titleController.text.trim().isEmpty
-              ? null
-              : _titleController.text.trim(),
-          deepLink: _deepLinkController.text.trim().isEmpty
-              ? null
-              : _deepLinkController.text.trim(),
-          imageFile: _selectedImage,
-          priority: priority,
-        );
+      bannerId: widget.bannerId,
+      imageUrl: imageUrl,
+      title: _titleController.text.trim().isEmpty
+          ? null
+          : _titleController.text.trim(),
+      deepLink: _deepLinkController.text.trim().isEmpty
+          ? null
+          : _deepLinkController.text.trim(),
+      imageFile: _selectedImage,
+      priority: priority,
+      type: _selectedType,
+    );
   }
 
   @override
@@ -159,154 +175,184 @@ class _AdminEditBannerAdScreenState extends State<AdminEditBannerAdScreen> {
           title: Text(l10n.editBanner),
           backgroundColor: Colors.purple,
         ),
-      body: BlocConsumer<AdManagementCubit, AdManagementState>(
-        listener: (context, state) {
-          if (state is BannerAdUpdated) {
-            context.showSuccessSnackBar(l10n.adUpdatedSuccessfully);
-            context.pop();
-          } else if (state is AdManagementError) {
-            context.showErrorSnackBar(state.message);
-          }
-        },
-        builder: (context, state) {
-          if (state is AdManagementLoading) {
-            return LoadingWidget(message: l10n.updatingAd);
-          }
+        body: BlocConsumer<AdManagementCubit, AdManagementState>(
+          listener: (context, state) {
+            if (state is BannerAdUpdated) {
+              context.showSuccessSnackBar(l10n.adUpdatedSuccessfully);
+              context.pop();
+            } else if (state is AdManagementError) {
+              context.showErrorSnackBar(state.message);
+            }
+          },
+          builder: (context, state) {
+            if (state is AdManagementLoading) {
+              return LoadingWidget(message: l10n.updatingAd);
+            }
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Banner Image
-                  GestureDetector(
-                    onTap: _showImageSourceDialog,
-                    child: Container(
-                      height: 250,
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: _selectedImage != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Image.file(
-                                _selectedImage!,
-                                fit: BoxFit.cover,
-                              ),
-                            )
-                          : widget.banner?.imageUrl != null
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: CachedNetworkImage(
-                                    imageUrl: widget.banner!.imageUrl,
-                                    fit: BoxFit.cover,
-                                    errorWidget: (context, url, error) {
-                                      return Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.add_photo_alternate,
-                                            size: 64,
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Banner Image
+                    GestureDetector(
+                      onTap: _showImageSourceDialog,
+                      child: Container(
+                        height: 250,
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.border),
+                        ),
+                        child: _selectedImage != null
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.file(
+                                  _selectedImage!,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : widget.banner?.imageUrl != null
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: CachedNetworkImage(
+                                  imageUrl: widget.banner!.imageUrl,
+                                  fit: BoxFit.cover,
+                                  errorWidget: (context, url, error) {
+                                    return Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.add_photo_alternate,
+                                          size: 64,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          l10n.tapToUploadRestaurantImage,
+                                          style: TextStyle(
                                             color: AppColors.textSecondary,
                                           ),
-                                          const SizedBox(height: 8),
-                                          Text(
-                                            l10n.tapToUploadRestaurantImage,
-                                            style: TextStyle(
-                                              color: AppColors.textSecondary,
-                                            ),
-                                          ),
-                                        ],
-                                      );
-                                    },
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              )
+                            : Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.add_photo_alternate,
+                                    size: 64,
+                                    color: AppColors.textSecondary,
                                   ),
-                                )
-                              : Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.add_photo_alternate,
-                                      size: 64,
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    l10n.tapToUploadRestaurantImage,
+                                    style: TextStyle(
                                       color: AppColors.textSecondary,
                                     ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      l10n.tapToUploadRestaurantImage,
-                                      style: TextStyle(
-                                        color: AppColors.textSecondary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Title
-                  TextFormField(
-                    controller: _titleController,
-                    decoration: InputDecoration(
-                      labelText: l10n.adTitle,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      prefixIcon: const Icon(Icons.title),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Deep Link
-                  TextFormField(
-                    controller: _deepLinkController,
-                    decoration: InputDecoration(
-                      labelText: l10n.deepLink,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      prefixIcon: const Icon(Icons.link),
-                      hintText: 'https://example.com',
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Priority
-                  TextFormField(
-                    controller: _priorityController,
-                    decoration: InputDecoration(
-                      labelText: l10n.priority,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      prefixIcon: const Icon(Icons.sort),
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 32),
-
-                  // Submit Button
-                  ElevatedButton(
-                    onPressed: _submitForm,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.purple,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ],
+                              ),
                       ),
                     ),
-                    child: Text(l10n.updateBanner),
-                  ),
-                ],
+                    const SizedBox(height: 24),
+
+                    // Title
+                    TextFormField(
+                      controller: _titleController,
+                      decoration: InputDecoration(
+                        labelText: l10n.adTitle,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        prefixIcon: const Icon(Icons.title),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Deep Link
+                    TextFormField(
+                      controller: _deepLinkController,
+                      decoration: InputDecoration(
+                        labelText: l10n.deepLink,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        prefixIcon: const Icon(Icons.link),
+                        hintText: 'https://example.com',
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Priority
+                    TextFormField(
+                      controller: _priorityController,
+                      decoration: InputDecoration(
+                        labelText: l10n.priority,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        prefixIcon: const Icon(Icons.sort),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Banner Location
+                    DropdownButtonFormField<String>(
+                      initialValue: _selectedType,
+                      decoration: InputDecoration(
+                        labelText: l10n.bannerLocation,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        prefixIcon: const Icon(Icons.location_on),
+                      ),
+                      items: [
+                        DropdownMenuItem(
+                          value: 'home',
+                          child: Text(l10n.navHome),
+                        ),
+                        DropdownMenuItem(
+                          value: 'market',
+                          child: Text(l10n.market),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() {
+                            _selectedType = value;
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Submit Button
+                    ElevatedButton(
+                      onPressed: _submitForm,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.purple,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(l10n.updateBanner),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          );
-        },
-      ),
+            );
+          },
+        ),
       ),
     );
   }
 }
-

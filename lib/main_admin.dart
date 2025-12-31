@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'l10n/app_localizations.dart';
 import 'config/flavor_config.dart';
 import 'firebase_options.dart';
@@ -17,9 +18,10 @@ import 'shared/widgets/back_button_handler.dart';
 void main() async {
   // Initialize flavor configuration
   FlavorConfig.initialize(flavor: Flavor.admin);
-  
+
   AppLogger.logInfo('=== Starting ${FlavorConfig.instance.appName} ===');
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   try {
     // Initialize Firebase
@@ -35,7 +37,9 @@ void main() async {
       final auth = FirebaseAuth.instance;
       if (auth.currentUser == null) {
         await auth.signInAnonymously();
-        AppLogger.logSuccess('Admin app signed in anonymously - Full access enabled');
+        AppLogger.logSuccess(
+          'Admin app signed in anonymously - Full access enabled',
+        );
       } else {
         AppLogger.logInfo('Already signed in as anonymous user');
       }
@@ -58,7 +62,8 @@ void main() async {
     AppLogger.logSuccess('Dependency injection initialized');
 
     AppLogger.logInfo('Launching Admin app...');
-    runApp(const WasslyAdminApp());
+    runApp(const ToOrderAdminApp());
+    FlutterNativeSplash.remove();
   } catch (e, stackTrace) {
     AppLogger.logError(
       'Error initializing Admin app',
@@ -67,18 +72,14 @@ void main() async {
     );
     runApp(
       MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: Text('Error initializing app: $e'),
-          ),
-        ),
+        home: Scaffold(body: Center(child: Text('Error initializing app: $e'))),
       ),
     );
   }
 }
 
-class WasslyAdminApp extends StatelessWidget {
-  const WasslyAdminApp({super.key});
+class ToOrderAdminApp extends StatelessWidget {
+  const ToOrderAdminApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -102,4 +103,3 @@ class WasslyAdminApp extends StatelessWidget {
     );
   }
 }
-

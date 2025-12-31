@@ -7,6 +7,7 @@ class BannerModel extends BannerEntity {
     required super.imageUrl,
     super.title,
     super.deepLink,
+    super.type = 'home',
     this.isActive,
     this.priority,
     this.createdAt,
@@ -24,6 +25,7 @@ class BannerModel extends BannerEntity {
       imageUrl: json['imageUrl'] ?? '',
       title: json['title'],
       deepLink: json['deepLink'],
+      type: json['type'] ?? 'home',
       isActive: json['isActive'],
       priority: json['priority'],
       createdAt: json['createdAt'] is Timestamp
@@ -41,6 +43,7 @@ class BannerModel extends BannerEntity {
       imageUrl: entity.imageUrl,
       title: entity.title,
       deepLink: entity.deepLink,
+      type: entity.type,
     );
   }
 
@@ -49,6 +52,7 @@ class BannerModel extends BannerEntity {
       'imageUrl': imageUrl,
       'title': title,
       'deepLink': deepLink,
+      'type': type,
       'isActive': isActive,
       'priority': priority,
       'createdAt': createdAt != null ? Timestamp.fromDate(createdAt!) : null,
@@ -61,10 +65,15 @@ class BannerModel extends BannerEntity {
       'imageUrl': imageUrl,
       'title': title,
       'deepLink': deepLink,
+      'type': type,
       'isActive': isActive ?? true,
       'priority': priority ?? 0,
-      'createdAt': createdAt != null ? Timestamp.fromDate(createdAt!) : FieldValue.serverTimestamp(),
-      'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : FieldValue.serverTimestamp(),
+      'createdAt': createdAt != null
+          ? Timestamp.fromDate(createdAt!)
+          : FieldValue.serverTimestamp(),
+      'updatedAt': updatedAt != null
+          ? Timestamp.fromDate(updatedAt!)
+          : FieldValue.serverTimestamp(),
     };
   }
 
@@ -78,6 +87,7 @@ class BannerModel extends BannerEntity {
     String? imageUrl,
     String? title,
     String? deepLink,
+    String? type,
     bool? isActive,
     int? priority,
     DateTime? createdAt,
@@ -88,6 +98,7 @@ class BannerModel extends BannerEntity {
       imageUrl: imageUrl ?? this.imageUrl,
       title: title ?? this.title,
       deepLink: deepLink ?? this.deepLink,
+      type: type ?? this.type,
       isActive: isActive ?? this.isActive,
       priority: priority ?? this.priority,
       createdAt: createdAt ?? this.createdAt,
@@ -95,4 +106,3 @@ class BannerModel extends BannerEntity {
     );
   }
 }
-

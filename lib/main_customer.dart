@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'config/flavor_config.dart';
 import 'firebase_options.dart';
 import 'core/router/customer_router.dart';
@@ -19,7 +20,8 @@ void main() async {
   FlavorConfig.initialize(flavor: Flavor.customer);
 
   AppLogger.logInfo('=== Starting ${FlavorConfig.instance.appName} ===');
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   try {
     // Initialize Firebase
@@ -43,7 +45,8 @@ void main() async {
     AppLogger.logSuccess('Dependency injection initialized');
 
     AppLogger.logInfo('Launching Customer app...');
-    runApp(const WasslyCustomerApp());
+    runApp(const ToOrderCustomerApp());
+    FlutterNativeSplash.remove();
   } catch (e, stackTrace) {
     AppLogger.logError(
       'Error initializing Customer app',
@@ -58,8 +61,8 @@ void main() async {
   }
 }
 
-class WasslyCustomerApp extends StatelessWidget {
-  const WasslyCustomerApp({super.key});
+class ToOrderCustomerApp extends StatelessWidget {
+  const ToOrderCustomerApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +83,8 @@ class WasslyCustomerApp extends StatelessWidget {
                   debugShowCheckedModeBanner: false,
                   locale: localeState.locale,
                   supportedLocales: AppLocalizations.supportedLocales,
-                  localizationsDelegates: AppLocalizations.localizationsDelegates,
+                  localizationsDelegates:
+                      AppLocalizations.localizationsDelegates,
                 ),
               );
             },

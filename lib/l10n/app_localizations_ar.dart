@@ -51,9 +51,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get pleaseEnterPhoneNumber => 'الرجاء إدخال رقم الهاتف';
 
   @override
-  String get pleaseEnterValidPhoneNumber => 'يرجى إدخال رقم هاتف صحيح';
-
-  @override
   String get pleaseEnterEmail => 'الرجاء إدخال البريد الإلكتروني';
 
   @override
@@ -99,9 +96,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get deliverySettings => 'إعدادات التوصيل';
-
-  @override
-  String get deliveryFee => 'رسوم التوصيل';
 
   @override
   String get minOrder => 'الحد الأدنى للطلب (ريال)';
@@ -525,10 +519,6 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get cannotAddDifferentRestaurant =>
-      'لا يمكن إضافة منتجات من مطاعم مختلفة. يرجى إفراغ السلة أولاً.';
-
-  @override
   String get clearCart => 'إفراغ السلة';
 
   @override
@@ -538,6 +528,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get subtotal => 'المجموع الفرعي';
 
   @override
+  String get deliveryFee => 'رسوم التوصيل';
+
+  @override
   String get tax => 'الضريبة';
 
   @override
@@ -545,9 +538,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get restaurants => 'المطاعم';
-
-  @override
-  String get searchRestaurants => 'ابحث عن المطاعم...';
 
   @override
   String get nearbyRestaurants => 'مطاعم قريبة منك';
@@ -729,6 +719,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get searchProducts => 'ابحث عن المنتجات...';
 
   @override
+  String get searchRestaurants => 'ابحث عن المطاعم...';
+
+  @override
   String get deleteProduct => 'حذف المنتج';
 
   @override
@@ -754,6 +747,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get editBanner => 'تعديل البانر';
+
+  @override
+  String get bannerLocation => 'Banner Location';
 
   @override
   String get updateAd => 'تحديث الإعلان';
@@ -925,6 +921,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get phoneNumberRequired => 'رقم الهاتف مطلوب';
+
+  @override
+  String get pleaseEnterValidPhoneNumber => 'يرجى إدخال رقم هاتف صحيح';
 
   @override
   String get deliveryAddress => 'عنوان التوصيل';
@@ -1212,6 +1211,10 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get quantityMustBeGreaterThanZero =>
       'يجب أن تكون الكمية أكبر من الصفر';
+
+  @override
+  String get cannotAddDifferentRestaurant =>
+      'لا يمكن إضافة منتجات من مطاعم مختلفة. يرجى إفراغ السلة أولاً.';
 
   @override
   String get failedToAddItemToCart =>

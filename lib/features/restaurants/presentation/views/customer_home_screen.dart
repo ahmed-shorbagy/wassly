@@ -18,6 +18,7 @@ import '../../../market_products/presentation/cubits/market_product_customer_cub
 import '../../../ads/presentation/cubits/startup_ad_customer_cubit.dart';
 import '../../../../shared/widgets/startup_ad_popup.dart';
 import '../../../delivery_address/presentation/cubits/delivery_address_cubit.dart';
+import 'package:lottie/lottie.dart';
 
 class CustomerHomeScreen extends StatefulWidget {
   const CustomerHomeScreen({super.key});
@@ -278,16 +279,15 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           // Market Products Categories Section
           SliverToBoxAdapter(
             child: Padding(
-              padding: ResponsiveHelper.padding(
-                horizontal: 16,
-                top: 24,
-                bottom: 8,
-              ),
+              padding: ResponsiveHelper.padding(horizontal: 16, top: 16),
               child: _MarketProductCategoriesSection(
                 onCategoryTap: (category, isMarket) {
                   if (isMarket) {
                     // Navigate to market products screen
                     context.push('/market-products');
+                  } else if (category == l10n.restaurants) {
+                    // Navigate to search results with all restaurants
+                    context.push('/search', extra: _allRestaurants);
                   } else {
                     // Navigate to search results with category filter for restaurants
                     context.push('/search?q=${Uri.encodeComponent(category)}');
@@ -330,17 +330,19 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
-                      fontSize: ResponsiveHelper.fontSize(18),
+                      fontSize: ResponsiveHelper.fontSize(16),
                     ),
                   ),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      context.push('/search?q=', extra: _allRestaurants);
+                    },
                     child: Text(
                       l10n.viewAll,
                       style: TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
-                        fontSize: ResponsiveHelper.fontSize(14),
+                        fontSize: ResponsiveHelper.fontSize(12),
                       ),
                     ),
                   ),
@@ -474,7 +476,7 @@ class _BannerCarousel extends StatelessWidget {
         : banners;
 
     // Responsive banner height
-    final double bannerHeight = 160.h;
+    final double bannerHeight = 130.h;
 
     return Padding(
       padding: ResponsiveHelper.padding(left: 16, top: 16, right: 8, bottom: 0),
@@ -651,7 +653,7 @@ class _RestaurantCard extends StatelessWidget {
                         child: AutoSizeText(
                           restaurant.name,
                           style: TextStyle(
-                            fontSize: ResponsiveHelper.fontSize(15),
+                            fontSize: ResponsiveHelper.fontSize(13),
                             fontWeight: FontWeight.w700,
                             color: AppColors.textPrimary,
                           ),
@@ -778,8 +780,8 @@ class _ThreeRowRestaurantScroller extends StatelessWidget {
       rows[i % 3].add(restaurants[i]);
     }
 
-    final double cardWidth = 240.w;
-    final double cardHeight = 240.h;
+    final double cardWidth = MediaQuery.of(context).size.width * 0.7;
+    final double cardHeight = 170.h;
 
     Widget buildRow(List<RestaurantEntity> rowItems) {
       if (rowItems.isEmpty) return const SizedBox.shrink();
@@ -787,6 +789,8 @@ class _ThreeRowRestaurantScroller extends StatelessWidget {
         height: cardHeight,
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
+          padding:
+              EdgeInsets.zero, // Remove internal padding as parent has padding
           physics: const ClampingScrollPhysics(),
           itemCount: rowItems.length,
           separatorBuilder: (_, __) => SizedBox(width: 12.w),
@@ -824,46 +828,43 @@ class _MarketProductCategoriesSection extends StatelessWidget {
     String title,
     VoidCallback onTap,
   ) {
-    final cardHeight = 110.h;
+    // Square size for the icon container
+    final double iconSize = 70.h;
 
     return GestureDetector(
       onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            height: cardHeight,
+            height: iconSize,
+            width: iconSize,
+            padding: EdgeInsets.all(10.r), // Internal padding for the image
             decoration: BoxDecoration(
+              color: Colors.white,
               borderRadius: BorderRadius.circular(16.r),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
-                  blurRadius: 8.r,
-                  offset: Offset(0, 2.h),
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10.r,
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16.r),
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: AppColors.surface,
-                    child: Icon(
-                      Icons.image_not_supported,
-                      size: ResponsiveHelper.iconSize(48),
-                      color: AppColors.textSecondary,
-                    ),
-                  );
-                },
-              ),
+            child: Image.asset(
+              imagePath,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return Icon(
+                  Icons.image_not_supported,
+                  size: iconSize * 0.5,
+                  color: AppColors.textSecondary,
+                );
+              },
             ),
           ),
-          ResponsiveHelper.spacing(height: 8),
+          ResponsiveHelper.spacing(height: 4),
           Flexible(
             child: AutoSizeText(
               title,
@@ -871,12 +872,12 @@ class _MarketProductCategoriesSection extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: ResponsiveHelper.fontSize(12),
+                fontSize: ResponsiveHelper.fontSize(11),
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
                 height: 1.2,
               ),
-              minFontSize: 10,
+              minFontSize: 9,
             ),
           ),
         ],
@@ -897,81 +898,99 @@ class _MarketProductCategoriesSection extends StatelessWidget {
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
-            fontSize: ResponsiveHelper.fontSize(18),
+            fontSize: ResponsiveHelper.fontSize(16),
           ),
         ),
-        ResponsiveHelper.spacing(height: 16),
-        // Market Images - Grid layout (scrollable horizontal)
-        SizedBox(
-          height: 140.h,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: 6,
-            itemBuilder: (context, index) {
-              final categories = [
-                {
-                  'image': 'assets/images/resturants.jpeg',
-                  'title': l10n.fastFood,
-                  'category': null,
-                },
-                {
-                  'image': 'assets/images/fruits&veg.jpeg',
-                  'title': l10n.fruits,
-                  'category': l10n.fruits,
-                },
-                {
-                  'image': 'assets/images/market.jpeg',
-                  'title': l10n.market,
-                  'category': null,
-                },
-                {
-                  'image': 'assets/images/fish.jpeg',
-                  'title': l10n.fish,
-                  'category': l10n.fish,
-                },
-                {
-                  'image': 'assets/images/meats.jpeg',
-                  'title': l10n.meat,
-                  'category': l10n.meat,
-                },
-                {
-                  'image': 'assets/images/cake&cofee.jpeg',
-                  'title': l10n.bakery,
-                  'category': l10n.bakery,
-                },
-              ];
+        ResponsiveHelper.spacing(height: 8),
+        // Market Images - Grid layout
+        // Market Images - Row Layout
+        Builder(
+          builder: (context) {
+            final categories = [
+              {
+                'image': 'assets/images/market.jpeg',
+                'title': l10n.market,
+                'category': null,
+              },
+              {
+                'image': 'assets/images/resturants.jpeg',
+                'title': l10n.restaurants,
+                'category': null,
+              },
+              {
+                'image': 'assets/images/fruits&veg.jpeg',
+                'title': l10n.fruitsVegetables,
+                'category': l10n.fruitsVegetables,
+              },
+              {
+                'image': 'assets/images/cake&cofee.jpeg',
+                'title': l10n.groceries,
+                'category': l10n.groceries,
+              },
+              {
+                'image': 'assets/images/meats.jpeg',
+                'title': l10n.meat,
+                'category': l10n.meat,
+              },
+              {
+                'image': 'assets/images/fish.jpeg',
+                'title': l10n.fish,
+                'category': l10n.fish,
+              },
+            ];
 
+            Widget buildCard(int index) {
+              if (index >= categories.length) return const SizedBox();
               final item = categories[index];
-              final cardWidth = 120.w;
+              return Expanded(
+                child: _buildMarketCard(
+                  context,
+                  item['image'] as String,
+                  item['title'] as String,
+                  () {
+                    final category = item['category'];
+                    final title = item['title'] as String;
+                    final isMarket = title == l10n.market;
+                    final isRestaurants = title == l10n.restaurants;
 
-              return Padding(
-                padding: EdgeInsets.only(
-                  right: index == categories.length - 1 ? 0 : 12.w,
-                ),
-                child: SizedBox(
-                  width: cardWidth,
-                  child: _buildMarketCard(
-                    context,
-                    item['image'] as String,
-                    item['title'] as String,
-                    () {
-                      final category = item['category'];
-                      final title = item['title'] as String;
-                      final isMarket = title == l10n.market;
-
-                      if (isMarket) {
-                        // Navigate to market products screen
-                        onCategoryTap(title, true);
-                      } else if (category != null) {
-                        // Navigate to search results with category filter for restaurants
-                        onCategoryTap(category, false);
-                      }
-                    },
-                  ),
+                    if (isMarket) {
+                      onCategoryTap(title, true);
+                    } else if (isRestaurants) {
+                      onCategoryTap(title, false); // title is l10n.restaurants
+                    } else if (category != null) {
+                      onCategoryTap(category, false);
+                    }
+                  },
                 ),
               );
-            },
-          ),
+            }
+
+            return Column(
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    buildCard(0),
+                    SizedBox(width: 8.w),
+                    buildCard(1),
+                    SizedBox(width: 8.w),
+                    buildCard(2),
+                  ],
+                ),
+                SizedBox(height: 8.h),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    buildCard(3),
+                    SizedBox(width: 8.w),
+                    buildCard(4),
+                    SizedBox(width: 8.w),
+                    buildCard(5),
+                  ],
+                ),
+              ],
+            );
+          },
         ),
       ],
     );
@@ -994,7 +1013,7 @@ class _DiscountRestaurantsBannerCarousel extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     // Responsive banner height
-    final double bannerHeight = 160.h;
+    final double bannerHeight = 130.h;
 
     if (restaurants.isEmpty) {
       return const SizedBox.shrink();
@@ -1012,7 +1031,7 @@ class _DiscountRestaurantsBannerCarousel extends StatelessWidget {
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
-                fontSize: ResponsiveHelper.fontSize(18),
+                fontSize: ResponsiveHelper.fontSize(16),
               ),
             ),
             if (restaurants.length > 1)
@@ -1025,7 +1044,7 @@ class _DiscountRestaurantsBannerCarousel extends StatelessWidget {
                   style: TextStyle(
                     color: AppColors.success,
                     fontWeight: FontWeight.w600,
-                    fontSize: ResponsiveHelper.fontSize(16),
+                    fontSize: ResponsiveHelper.fontSize(14),
                   ),
                 ),
               ),
@@ -1035,7 +1054,7 @@ class _DiscountRestaurantsBannerCarousel extends StatelessWidget {
         // Banner Carousel
         CarouselSlider(
           options: CarouselOptions(
-            height: bannerHeight,
+            height: bannerHeight + 50.h, // Add space for text below
             viewportFraction: 0.95,
             enlargeCenterPage: false,
             enableInfiniteScroll: restaurants.length > 1,
@@ -1057,58 +1076,137 @@ class _DiscountRestaurantsBannerCarousel extends StatelessWidget {
                     onTap: () {
                       context.push('/restaurant/${restaurant.id}');
                     },
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20.r),
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: bannerHeight,
-                        // Clean banner: ONLY the restaurant image, no text or overlays
-                        child:
-                            restaurant.imageUrl != null &&
-                                restaurant.imageUrl!.isNotEmpty
-                            ? CachedNetworkImage(
-                                imageUrl: restaurant.imageUrl!,
-                                width: double.infinity,
-                                height: bannerHeight,
-                                fit: BoxFit.cover,
-                                placeholder: (c, u) => Container(
-                                  color: AppColors.surface,
-                                  child: const Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                ),
-                                errorWidget: (c, u, e) => Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        AppColors.primary,
-                                        AppColors.primaryDark,
-                                      ],
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(20.r),
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: bannerHeight,
+                            // Clean banner: ONLY the restaurant image
+                            child:
+                                restaurant.imageUrl != null &&
+                                    restaurant.imageUrl!.isNotEmpty
+                                ? CachedNetworkImage(
+                                    imageUrl: restaurant.imageUrl!,
+                                    width: double.infinity,
+                                    height: bannerHeight,
+                                    fit: BoxFit.cover,
+                                    placeholder: (c, u) => Container(
+                                      color: AppColors.surface,
+                                      child: const Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    ),
+                                    errorWidget: (c, u, e) => Container(
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            AppColors.primary,
+                                            AppColors.primaryDark,
+                                          ],
+                                        ),
+                                      ),
+                                      child: const Icon(
+                                        Icons.restaurant,
+                                        color: Colors.white,
+                                        size: 50,
+                                      ),
+                                    ),
+                                  )
+                                : Container(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          AppColors.primary,
+                                          AppColors.primaryDark,
+                                        ],
+                                      ),
+                                    ),
+                                    child: const Icon(
+                                      Icons.restaurant,
+                                      color: Colors.white,
+                                      size: 50,
                                     ),
                                   ),
-                                  child: const Icon(
-                                    Icons.restaurant,
-                                    color: Colors.white,
-                                    size: 50,
+                          ),
+                        ),
+                        // Restaurant Info Below Banner
+                        Padding(
+                          padding: ResponsiveHelper.padding(
+                            horizontal: 4,
+                            top: 8,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      restaurant.name,
+                                      style: TextStyle(
+                                        fontSize: ResponsiveHelper.fontSize(14),
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.textPrimary,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
-                                ),
-                              )
-                            : Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      AppColors.primary,
-                                      AppColors.primaryDark,
-                                    ],
+                                  Icon(
+                                    Icons.star,
+                                    color: Colors.amber,
+                                    size: 14.sp,
                                   ),
-                                ),
-                                child: const Icon(
-                                  Icons.restaurant,
-                                  color: Colors.white,
-                                  size: 50,
-                                ),
+                                  SizedBox(width: 4.w),
+                                  Text(
+                                    restaurant.rating.toStringAsFixed(1),
+                                    style: TextStyle(
+                                      fontSize: ResponsiveHelper.fontSize(12),
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                ],
                               ),
-                      ),
+                              SizedBox(height: 4.h),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.local_shipping_outlined,
+                                    size: 14.sp,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                  SizedBox(width: 4.w),
+                                  Text(
+                                    '${restaurant.deliveryFee.toStringAsFixed(0)} ${l10n.currencySymbol}',
+                                    style: TextStyle(
+                                      fontSize: ResponsiveHelper.fontSize(12),
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                  SizedBox(width: 8.w),
+                                  Icon(
+                                    Icons.timer_outlined,
+                                    size: 14.sp,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                  SizedBox(width: 4.w),
+                                  Text(
+                                    '${restaurant.estimatedDeliveryTime} ${l10n.minutesAbbreviation}',
+                                    style: TextStyle(
+                                      fontSize: ResponsiveHelper.fontSize(12),
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 );
@@ -1179,7 +1277,7 @@ class _EmptyStateWidget extends StatelessWidget {
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
-                fontSize: ResponsiveHelper.fontSize(18),
+                fontSize: ResponsiveHelper.fontSize(16),
               ),
             ),
             ResponsiveHelper.spacing(height: 8),
@@ -1265,7 +1363,7 @@ class _CombinedAppBar extends StatelessWidget {
                               style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w500,
-                                fontSize: ResponsiveHelper.fontSize(14),
+                                fontSize: ResponsiveHelper.fontSize(12),
                               ),
                               maxLines: 1,
                               minFontSize: 12,
@@ -1278,6 +1376,25 @@ class _CombinedAppBar extends StatelessWidget {
                             color: Colors.white,
                             size: ResponsiveHelper.iconSize(20),
                           ),
+                          const Spacer(),
+                          // Ramadan Animated Decoration
+                          SizedBox(
+                            width: 30.w,
+                            height: 30.h,
+                            child: Lottie.network(
+                              'https://lottie.host/802ecbad-b977-4f10-994c-53538a167735/H3uC39C9C9.json',
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) {
+                                return const Center(
+                                  child: Text(
+                                    '🌙',
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          const Text('✨', style: TextStyle(fontSize: 16)),
                         ],
                       ),
                     ),
@@ -1286,7 +1403,7 @@ class _CombinedAppBar extends StatelessWidget {
               ),
               // Search Field - Full Width
               Container(
-                height: 42.h,
+                height: 36.h,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20.r),
@@ -1326,7 +1443,7 @@ class _CombinedAppBar extends StatelessWidget {
                       hintText: l10n.searchRestaurants,
                       hintStyle: TextStyle(
                         color: AppColors.textHint,
-                        fontSize: ResponsiveHelper.fontSize(14),
+                        fontSize: ResponsiveHelper.fontSize(12),
                       ),
                       prefixIcon: Icon(
                         Icons.search,
@@ -1356,7 +1473,7 @@ class _CombinedAppBar extends StatelessWidget {
                     ),
                     style: TextStyle(
                       color: AppColors.textPrimary,
-                      fontSize: ResponsiveHelper.fontSize(14),
+                      fontSize: ResponsiveHelper.fontSize(12),
                     ),
                   ),
                 ),
