@@ -15,7 +15,6 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-
   @override
   void initState() {
     super.initState();
@@ -40,50 +39,45 @@ class _SplashScreenState extends State<SplashScreen> {
         BlocListener<AuthCubit, AuthState>(
           listener: (context, state) {
             if (state is AuthAuthenticated) {
-                // Navigate based on user type
-                final userType = state.user.userType;
-                AppLogger.logAuth(
-                  'User authenticated: ${state.user.name} ($userType)',
-                );
-                // Start cloud favorites sync for this user
-                try {
-                  context.read<FavoritesCubit>().start();
-                } catch (_) {}
-                AppLogger.logNavigation('Navigating from splash to home');
-                // Customer app - only navigate to home for customers
-                // Other user types should use their respective apps
-                if (userType == AppConstants.userTypeCustomer) {
-                  context.pushReplacement('/home');
-                } else {
-                  // For non-customer users, show error or redirect to login
-                  context.pushReplacement('/login');
-                }
-              } else if (state is AuthUnauthenticated) {
-                AppLogger.logInfo(
-                  'User not authenticated, navigating to login',
-                );
-                context.pushReplacement('/login');
-              } else if (state is AuthError) {
-                AppLogger.logWarning(
-                  'Auth error in splash: ${state.message}, navigating to login',
-                );
+              // Navigate based on user type
+              final userType = state.user.userType;
+              AppLogger.logAuth(
+                'User authenticated: ${state.user.name} ($userType)',
+              );
+              // Start cloud favorites sync for this user
+              try {
+                context.read<FavoritesCubit>().start();
+              } catch (_) {}
+              AppLogger.logNavigation('Navigating from splash to home');
+              // Customer app - only navigate to home for customers
+              // Other user types should use their respective apps
+              if (userType == AppConstants.userTypeCustomer) {
+                context.pushReplacement('/home');
+              } else {
+                // For non-customer users, show error or redirect to login
                 context.pushReplacement('/login');
               }
-              // Note: AuthInitial and AuthLoading states are handled by showing the loading indicator
+            } else if (state is AuthUnauthenticated) {
+              AppLogger.logInfo('User not authenticated, navigating to login');
+              context.pushReplacement('/login');
+            } else if (state is AuthError) {
+              AppLogger.logWarning(
+                'Auth error in splash: ${state.message}, navigating to login',
+              );
+              context.pushReplacement('/login');
+            }
+            // Note: AuthInitial and AuthLoading states are handled by showing the loading indicator
           },
         ),
       ],
-      child: Scaffold(
-        body: _buildSplashView(),
-      ),
+      child: Scaffold(body: _buildSplashView()),
     );
   }
-
 
   Widget _buildSplashView() {
     return Container(
       decoration: const BoxDecoration(
-        color: AppColors.promoBackground, // Light pastel green background
+        color: AppColors.background, // Pure white background
       ),
       child: Center(
         child: Image.asset(
@@ -103,4 +97,3 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 }
-

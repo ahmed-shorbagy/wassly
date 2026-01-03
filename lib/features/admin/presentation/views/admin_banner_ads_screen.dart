@@ -32,65 +32,87 @@ class _AdminBannerAdsScreenState extends State<AdminBannerAdsScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.bannerAds),
-        backgroundColor: Colors.purple,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadBanners,
-            tooltip: l10n.edit,
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(l10n.bannerAds),
+          backgroundColor: Colors.purple,
+          bottom: TabBar(
+            tabs: [
+              Tab(text: l10n.navHome),
+              Tab(text: l10n.market),
+            ],
+            indicatorColor: Colors.white,
           ),
-        ],
-      ),
-      body: BlocConsumer<AdManagementCubit, AdManagementState>(
-        listener: (context, state) {
-          if (state is BannerAdAdded) {
-            context.showSuccessSnackBar(l10n.adAddedSuccessfully);
-            _loadBanners();
-          } else if (state is BannerAdUpdated) {
-            context.showSuccessSnackBar(l10n.adUpdatedSuccessfully);
-            _loadBanners();
-          } else if (state is BannerAdDeleted) {
-            context.showSuccessSnackBar(l10n.adDeletedSuccessfully);
-            _loadBanners();
-          } else if (state is AdManagementError) {
-            context.showErrorSnackBar(state.message);
-          }
-        },
-        builder: (context, state) {
-          if (state is AdManagementLoading) {
-            return LoadingWidget(message: l10n.loading);
-          }
-
-          if (state is AdManagementError) {
-            return ErrorDisplayWidget(
-              message: state.message,
-              onRetry: _loadBanners,
-            );
-          }
-
-          if (state is BannerAdsLoaded) {
-            if (state.banners.isEmpty) {
-              return _buildEmptyState(l10n);
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: _loadBanners,
+              tooltip: l10n.edit,
+            ),
+          ],
+        ),
+        body: BlocConsumer<AdManagementCubit, AdManagementState>(
+          listener: (context, state) {
+            if (state is BannerAdAdded) {
+              context.showSuccessSnackBar(l10n.adAddedSuccessfully);
+              _loadBanners();
+            } else if (state is BannerAdUpdated) {
+              context.showSuccessSnackBar(l10n.adUpdatedSuccessfully);
+              _loadBanners();
+            } else if (state is BannerAdDeleted) {
+              context.showSuccessSnackBar(l10n.adDeletedSuccessfully);
+              _loadBanners();
+            } else if (state is AdManagementError) {
+              context.showErrorSnackBar(state.message);
             }
-            return _buildBannersList(state.banners, l10n);
-          }
+          },
+          builder: (context, state) {
+            if (state is AdManagementLoading) {
+              return LoadingWidget(message: l10n.loading);
+            }
 
-          return _buildEmptyState(l10n);
-        },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/admin/ads/banners/add'),
-        icon: const Icon(Icons.add),
-        label: Text(l10n.addBanner),
-        backgroundColor: Colors.purple,
+            if (state is AdManagementError) {
+              return ErrorDisplayWidget(
+                message: state.message,
+                onRetry: _loadBanners,
+              );
+            }
+
+            if (state is BannerAdsLoaded) {
+              final homeBanners = state.banners
+                  .where((b) => b.type == 'home')
+                  .toList();
+              final marketBanners = state.banners
+                  .where((b) => b.type == 'market')
+                  .toList();
+
+              return TabBarView(
+                children: [
+                  _buildBannersList(homeBanners, l10n),
+                  _buildBannersList(marketBanners, l10n),
+                ],
+              );
+            }
+
+            return _buildEmptyState(l10n);
+          },
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () => context.push('/admin/ads/banners/add'),
+          icon: const Icon(Icons.add),
+          label: Text(l10n.addBanner),
+          backgroundColor: Colors.purple,
+        ),
       ),
     );
   }
 
   Widget _buildBannersList(List<BannerEntity> banners, AppLocalizations l10n) {
+    if (banners.isEmpty) {
+      return _buildEmptyState(l10n);
+    }
     return RefreshIndicator(
       onRefresh: () async => _loadBanners(),
       child: ListView.builder(
@@ -149,7 +171,11 @@ class _AdminBannerAdsScreenState extends State<AdminBannerAdsScreen> {
                 if (banner.deepLink != null) ...[
                   Row(
                     children: [
-                      Icon(Icons.link, size: 16, color: AppColors.textSecondary),
+                      Icon(
+                        Icons.link,
+                        size: 16,
+                        color: AppColors.textSecondary,
+                      ),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
@@ -245,7 +271,9 @@ class _AdminBannerAdsScreenState extends State<AdminBannerAdsScreen> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(l10n.deleteBanner),
-        content: Text('${l10n.areYouSureDeleteBanner} "${banner.title ?? l10n.banner}"?'),
+        content: Text(
+          '${l10n.areYouSureDeleteBanner} "${banner.title ?? l10n.banner}"?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
@@ -268,4 +296,3 @@ class _AdminBannerAdsScreenState extends State<AdminBannerAdsScreen> {
     context.push('/admin/ads/banners/edit/${banner.id}', extra: banner);
   }
 }
-

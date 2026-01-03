@@ -12,6 +12,8 @@ import 'package:carousel_slider/carousel_slider.dart';
 import '../../../../core/utils/responsive_helper.dart';
 import '../../../home/presentation/cubits/home_cubit.dart';
 
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../home/domain/entities/banner_entity.dart';
 import '../cubits/market_product_customer_cubit.dart';
 
 class MarketProductsScreen extends StatefulWidget {
@@ -208,24 +210,35 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
                           .where((b) => b.type == 'market')
                           .toList();
 
-                      if (marketBanners.isEmpty) return const SizedBox.shrink();
+                      // If no market banners, show a high-quality placeholder for testing
+                      final effectiveBanners = marketBanners.isEmpty
+                          ? [
+                              BannerEntity(
+                                id: 'placeholder_market',
+                                type: 'market',
+                                imageUrl:
+                                    'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1200', // Fresh Grocery Market image
+                                title: l10n.market,
+                              ),
+                            ]
+                          : marketBanners;
 
                       return Padding(
                         padding: ResponsiveHelper.padding(top: 16, bottom: 8),
                         child: CarouselSlider(
                           options: CarouselOptions(
-                            height: 150,
-                            viewportFraction: 0.92,
-                            enlargeCenterPage: false,
-                            enableInfiniteScroll: marketBanners.length > 1,
-                            autoPlay: marketBanners.length > 1,
+                            height: 200.h,
+                            viewportFraction: 0.95,
+                            enlargeCenterPage: true,
+                            enableInfiniteScroll: effectiveBanners.length > 1,
+                            autoPlay: effectiveBanners.length > 1,
                             autoPlayInterval: const Duration(seconds: 4),
                             autoPlayAnimationDuration: const Duration(
                               milliseconds: 800,
                             ),
                             autoPlayCurve: Curves.fastOutSlowIn,
                           ),
-                          items: marketBanners.map((banner) {
+                          items: effectiveBanners.map((banner) {
                             return Builder(
                               builder: (BuildContext context) {
                                 return Container(
@@ -234,11 +247,11 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
                                     horizontal: 4,
                                   ),
                                   child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(16),
+                                    borderRadius: BorderRadius.circular(16.r),
                                     child: CachedNetworkImage(
                                       imageUrl: banner.imageUrl,
                                       width: double.infinity,
-                                      height: 150,
+                                      height: 200.h,
                                       fit: BoxFit.cover,
                                       placeholder: (c, u) => Container(
                                         color: AppColors.surface,
@@ -295,12 +308,11 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
               SliverPadding(
                 padding: const EdgeInsets.all(16),
                 sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount:
-                        4, // 4 items per row as in design reference? Or 3? Screenshot looks like 4.
-                    childAspectRatio: 0.75,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 16,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    mainAxisExtent: 130.h,
+                    crossAxisSpacing: 12.w,
+                    mainAxisSpacing: 16.h,
                   ),
                   delegate: SliverChildBuilderDelegate((context, index) {
                     final category = categories[index];
@@ -321,35 +333,56 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
                         children: [
                           Expanded(
                             child: Container(
+                              width: double.infinity,
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF5F5F5),
-                                borderRadius: BorderRadius.circular(12),
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12.r),
+                                border: Border.all(
+                                  color: AppColors.border.withOpacity(0.5),
+                                  width: 1,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.02),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
                               child: Padding(
-                                padding: const EdgeInsets.all(8.0),
+                                padding: EdgeInsets.all(8.r),
                                 child: imagePath != null
                                     ? Image.asset(
                                         imagePath,
                                         fit: BoxFit.contain,
                                       )
-                                    : const Icon(
+                                    : Icon(
                                         Icons.category,
-                                        color: Colors.grey,
-                                        size: 40,
+                                        color: AppColors.primary.withOpacity(
+                                          0.5,
+                                        ),
+                                        size: 30.w,
                                       ),
                               ),
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            category,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
+                          SizedBox(height: 4.h),
+                          SizedBox(
+                            height: 36.h,
+                            child: Center(
+                              child: Text(
+                                category,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: ResponsiveHelper.fontSize(11),
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary,
+                                  height: 1.2,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),

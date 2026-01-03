@@ -260,7 +260,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           BlocBuilder<HomeCubit, HomeState>(
             builder: (context, state) {
               final banners = state is HomeLoaded
-                  ? state.banners
+                  ? state.banners.where((b) => b.type == 'home').toList()
                   : <BannerEntity>[];
               return SliverToBoxAdapter(
                 child: _BannerCarousel(
@@ -598,10 +598,18 @@ class _RestaurantCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 10.r,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
@@ -610,153 +618,161 @@ class _RestaurantCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top image section
+            // Top image section - Image First Optimization
             Expanded(
-              child: SizedBox(
-                width: double.infinity,
-                child: CachedNetworkImage(
-                  imageUrl:
-                      (restaurant.imageUrl != null &&
-                          restaurant.imageUrl!.isNotEmpty)
-                      ? restaurant.imageUrl!
-                      : '',
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(
-                    color: AppColors.surface,
-                    child: const Center(
-                      child: CircularProgressIndicator(strokeWidth: 2),
+              flex: 3,
+              child: Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(20.r),
+                      topRight: Radius.circular(20.r),
+                    ),
+                    child: Container(
+                      width: double.infinity,
+                      height: double.infinity,
+                      color: AppColors.surface,
+                      child: CachedNetworkImage(
+                        imageUrl:
+                            (restaurant.imageUrl != null &&
+                                restaurant.imageUrl!.isNotEmpty)
+                            ? restaurant.imageUrl!
+                            : '',
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                        placeholder: (context, url) => Container(
+                          color: AppColors.surface,
+                          child: const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          color: AppColors.surface,
+                          child: Icon(
+                            Icons.restaurant,
+                            size: 40.w,
+                            color: AppColors.textSecondary.withOpacity(0.5),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                  errorWidget: (context, url, error) => Container(
-                    color: AppColors.surface,
-                    child: const Icon(
-                      Icons.restaurant,
-                      size: 40,
-                      color: AppColors.textSecondary,
+                  // Optional discount badge on image
+                  if (restaurant.isDiscountActive)
+                    Positioned(
+                      top: 10,
+                      right: 10,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8.w,
+                          vertical: 4.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(10.r),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 4,
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          'خصم',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: ResponsiveHelper.fontSize(10),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
+                ],
               ),
             ),
 
-            // Bottom info section
-            Padding(
-              padding: ResponsiveHelper.padding(horizontal: 12, vertical: 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Name row with optional "pro" badge for discounted restaurants
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: AutoSizeText(
-                          restaurant.name,
+            // Bottom info section - More compact
+            Expanded(
+              flex: 2,
+              child: Padding(
+                padding: ResponsiveHelper.padding(horizontal: 12, vertical: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      restaurant.name,
+                      style: TextStyle(
+                        fontSize: ResponsiveHelper.fontSize(14),
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+
+                    Row(
+                      children: [
+                        const Icon(Icons.star, color: Colors.amber, size: 14),
+                        SizedBox(width: 4.w),
+                        Text(
+                          restaurant.rating.toStringAsFixed(1),
                           style: TextStyle(
-                            fontSize: ResponsiveHelper.fontSize(13),
-                            fontWeight: FontWeight.w700,
+                            fontSize: ResponsiveHelper.fontSize(12),
+                            fontWeight: FontWeight.bold,
                             color: AppColors.textPrimary,
                           ),
-                          maxLines: 1,
-                          minFontSize: 10,
-                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                      if (restaurant.isDiscountActive)
-                        Container(
-                          margin: EdgeInsets.only(left: 6.w),
-                          padding: ResponsiveHelper.padding(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary,
-                            borderRadius: BorderRadius.circular(8.r),
-                          ),
-                          child: Text(
-                            'خصم',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: ResponsiveHelper.fontSize(9),
-                              fontWeight: FontWeight.w600,
-                            ),
+                        SizedBox(width: 4.w),
+                        Text(
+                          '(${restaurant.totalReviews})',
+                          style: TextStyle(
+                            fontSize: ResponsiveHelper.fontSize(10),
+                            color: AppColors.textSecondary,
                           ),
                         ),
-                    ],
-                  ),
-                  ResponsiveHelper.spacing(height: 6),
+                      ],
+                    ),
 
-                  // Rating row
-                  Row(
-                    children: [
-                      Text(
-                        restaurant.totalReviews > 0
-                            ? '(+${restaurant.totalReviews})'
-                            : '(0)',
-                        style: TextStyle(
-                          fontSize: ResponsiveHelper.fontSize(10),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.access_time,
+                          size: 12.w,
                           color: AppColors.textSecondary,
                         ),
-                      ),
-                      ResponsiveHelper.spacing(width: 4),
-                      Text(
-                        restaurant.rating.toStringAsFixed(1),
-                        style: TextStyle(
-                          fontSize: ResponsiveHelper.fontSize(12),
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                        SizedBox(width: 4.w),
+                        Builder(
+                          builder: (context) {
+                            final l10n = AppLocalizations.of(context)!;
+                            return Text(
+                              '${restaurant.estimatedDeliveryTime} ${l10n.minutesAbbreviation}',
+                              style: TextStyle(
+                                fontSize: ResponsiveHelper.fontSize(11),
+                                color: AppColors.textSecondary,
+                              ),
+                            );
+                          },
                         ),
-                      ),
-                      ResponsiveHelper.spacing(width: 2),
-                      const Icon(Icons.star, color: Colors.amber, size: 14),
-                    ],
-                  ),
-                  ResponsiveHelper.spacing(height: 6),
-
-                  // Delivery fee and time
-                  Row(
-                    children: [
-                      Text(
-                        '${restaurant.deliveryFee.toStringAsFixed(0)} ',
-                        style: TextStyle(
-                          fontSize: ResponsiveHelper.fontSize(11),
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.w500,
+                        const Spacer(),
+                        Builder(
+                          builder: (context) {
+                            final l10n = AppLocalizations.of(context)!;
+                            return Text(
+                              '${restaurant.deliveryFee.toStringAsFixed(0)} ${l10n.currencySymbol}',
+                              style: TextStyle(
+                                fontSize: ResponsiveHelper.fontSize(12),
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.success,
+                              ),
+                            );
+                          },
                         ),
-                      ),
-                      Builder(
-                        builder: (context) {
-                          final l10n = AppLocalizations.of(context)!;
-                          return Text(
-                            l10n.currencySymbol,
-                            style: TextStyle(
-                              fontSize: ResponsiveHelper.fontSize(11),
-                              color: AppColors.textSecondary,
-                            ),
-                          );
-                        },
-                      ),
-                      ResponsiveHelper.spacing(width: 8),
-                      const Text(
-                        '•',
-                        style: TextStyle(color: AppColors.textSecondary),
-                      ),
-                      ResponsiveHelper.spacing(width: 8),
-                      Builder(
-                        builder: (context) {
-                          final l10n = AppLocalizations.of(context)!;
-                          return Text(
-                            '${restaurant.estimatedDeliveryTime} ${l10n.minutesAbbreviation}',
-                            style: TextStyle(
-                              fontSize: ResponsiveHelper.fontSize(11),
-                              color: AppColors.textSecondary,
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -781,7 +797,7 @@ class _ThreeRowRestaurantScroller extends StatelessWidget {
     }
 
     final double cardWidth = MediaQuery.of(context).size.width * 0.7;
-    final double cardHeight = 170.h;
+    final double cardHeight = 220.h;
 
     Widget buildRow(List<RestaurantEntity> rowItems) {
       if (rowItems.isEmpty) return const SizedBox.shrink();
@@ -822,65 +838,63 @@ class _MarketProductCategoriesSection extends StatelessWidget {
 
   const _MarketProductCategoriesSection({required this.onCategoryTap});
 
-  Widget _buildMarketCard(
+  Widget _buildCategoryCard(
     BuildContext context,
     String imagePath,
     String title,
     VoidCallback onTap,
   ) {
-    // Square size for the icon container
-    final double iconSize = 70.h;
-
     return GestureDetector(
       onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            height: iconSize,
-            width: iconSize,
-            padding: EdgeInsets.all(10.r), // Internal padding for the image
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16.r),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10.r,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 10.r,
+              offset: const Offset(0, 4),
             ),
-            child: Image.asset(
-              imagePath,
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) {
-                return Icon(
-                  Icons.image_not_supported,
-                  size: iconSize * 0.5,
-                  color: AppColors.textSecondary,
-                );
-              },
-            ),
-          ),
-          ResponsiveHelper.spacing(height: 4),
-          Flexible(
-            child: AutoSizeText(
-              title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: ResponsiveHelper.fontSize(11),
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-                height: 1.2,
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 50.w,
+              height: 50.w,
+              padding: EdgeInsets.all(6.r),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(12.r),
               ),
-              minFontSize: 9,
+              child: Image.asset(
+                imagePath,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) => Icon(
+                  Icons.category_rounded,
+                  size: 24.w,
+                  color: AppColors.textSecondary,
+                ),
+              ),
             ),
-          ),
-        ],
+            SizedBox(width: 10.w),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: ResponsiveHelper.fontSize(13),
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                  height: 1.1,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -888,107 +902,84 @@ class _MarketProductCategoriesSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Header
         Text(
-          'الفئات',
+          isArabic ? "اكتشف " : "Discover Wassly",
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
-            fontSize: ResponsiveHelper.fontSize(16),
+            fontSize: ResponsiveHelper.fontSize(18),
           ),
         ),
-        ResponsiveHelper.spacing(height: 8),
-        // Market Images - Grid layout
-        // Market Images - Row Layout
+        ResponsiveHelper.spacing(height: 12),
+        // Categories Grid
         Builder(
           builder: (context) {
             final categories = [
               {
                 'image': 'assets/images/market.jpeg',
                 'title': l10n.market,
+                'isMarket': true,
                 'category': null,
               },
               {
                 'image': 'assets/images/resturants.jpeg',
                 'title': l10n.restaurants,
+                'isMarket': false,
                 'category': null,
+              },
+              {
+                'image':
+                    'assets/images/cake&cofee.jpeg', // Using cake&coffee for groceries as it was before
+                'title': l10n.groceries,
+                'isMarket': false,
+                'category': l10n.groceries,
               },
               {
                 'image': 'assets/images/fruits&veg.jpeg',
                 'title': l10n.fruitsVegetables,
+                'isMarket': false,
                 'category': l10n.fruitsVegetables,
-              },
-              {
-                'image': 'assets/images/cake&cofee.jpeg',
-                'title': l10n.groceries,
-                'category': l10n.groceries,
-              },
-              {
-                'image': 'assets/images/meats.jpeg',
-                'title': l10n.meat,
-                'category': l10n.meat,
-              },
-              {
-                'image': 'assets/images/fish.jpeg',
-                'title': l10n.fish,
-                'category': l10n.fish,
               },
             ];
 
-            Widget buildCard(int index) {
-              if (index >= categories.length) return const SizedBox();
-              final item = categories[index];
-              return Expanded(
-                child: _buildMarketCard(
+            return GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.zero,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 12.w,
+                mainAxisSpacing: 12.h,
+                mainAxisExtent: 70.h,
+              ),
+              itemCount: categories.length,
+              itemBuilder: (context, index) {
+                final item = categories[index];
+                return _buildCategoryCard(
                   context,
                   item['image'] as String,
                   item['title'] as String,
                   () {
-                    final category = item['category'];
                     final title = item['title'] as String;
-                    final isMarket = title == l10n.market;
-                    final isRestaurants = title == l10n.restaurants;
+                    final isMarket = item['isMarket'] as bool;
+                    final category = item['category'] as String?;
 
                     if (isMarket) {
                       onCategoryTap(title, true);
-                    } else if (isRestaurants) {
-                      onCategoryTap(title, false); // title is l10n.restaurants
+                    } else if (title == l10n.restaurants) {
+                      onCategoryTap(title, false);
                     } else if (category != null) {
                       onCategoryTap(category, false);
                     }
                   },
-                ),
-              );
-            }
-
-            return Column(
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    buildCard(0),
-                    SizedBox(width: 8.w),
-                    buildCard(1),
-                    SizedBox(width: 8.w),
-                    buildCard(2),
-                  ],
-                ),
-                SizedBox(height: 8.h),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    buildCard(3),
-                    SizedBox(width: 8.w),
-                    buildCard(4),
-                    SizedBox(width: 8.w),
-                    buildCard(5),
-                  ],
-                ),
-              ],
+                );
+              },
             );
           },
         ),

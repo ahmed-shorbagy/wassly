@@ -14,10 +14,7 @@ class AdRepositoryImpl implements AdRepository {
   final FirebaseFirestore firestore;
   final ImageUploadHelper imageUploadHelper;
 
-  AdRepositoryImpl({
-    required this.firestore,
-    required this.imageUploadHelper,
-  });
+  AdRepositoryImpl({required this.firestore, required this.imageUploadHelper});
 
   @override
   Future<Either<Failure, String>> uploadImageFile(
@@ -32,13 +29,10 @@ class AdRepositoryImpl implements AdRepository {
         bucketName: bucketName,
         folder: folder,
       );
-      return result.fold(
-        (failure) => Left(failure),
-        (url) {
-          AppLogger.logSuccess('Image uploaded successfully');
-          return Right(url);
-        },
-      );
+      return result.fold((failure) => Left(failure), (url) {
+        AppLogger.logSuccess('Image uploaded successfully');
+        return Right(url);
+      });
     } catch (e) {
       AppLogger.logError('Error uploading image', error: e);
       return Left(ServerFailure('Failed to upload image: $e'));
@@ -58,16 +52,15 @@ class AdRepositoryImpl implements AdRepository {
             .get();
       } catch (e) {
         // Fallback if priority index doesn't exist
-        AppLogger.logWarning('Startup ads query with orderBy failed, using fallback: $e');
-        snapshot = await firestore
-            .collection('startup_ads')
-            .get();
+        AppLogger.logWarning(
+          'Startup ads query with orderBy failed, using fallback: $e',
+        );
+        snapshot = await firestore.collection('startup_ads').get();
       }
 
-      final ads = snapshot.docs
-          .map((doc) => StartupAdModel.fromFirestore(doc))
-          .toList()
-        ..sort((a, b) => a.priority.compareTo(b.priority));
+      final ads =
+          snapshot.docs.map((doc) => StartupAdModel.fromFirestore(doc)).toList()
+            ..sort((a, b) => a.priority.compareTo(b.priority));
 
       AppLogger.logSuccess('Fetched ${ads.length} startup ads');
       return Right(ads);
@@ -190,17 +183,17 @@ class AdRepositoryImpl implements AdRepository {
             .get();
       } catch (e) {
         // Fallback if priority index doesn't exist
-        AppLogger.logWarning('Banner ads query with orderBy failed, using fallback: $e');
-        snapshot = await firestore
-            .collection('banners')
-            .get();
+        AppLogger.logWarning(
+          'Banner ads query with orderBy failed, using fallback: $e',
+        );
+        snapshot = await firestore.collection('banners').get();
       }
 
       final banners = snapshot.docs
           .map((doc) => BannerModel.fromFirestore(doc))
           .where((b) => b.imageUrl.isNotEmpty)
           .toList();
-      
+
       // Sort by priority client-side
       banners.sort((a, b) {
         final aPriority = a.priority ?? 0;
@@ -251,6 +244,7 @@ class AdRepositoryImpl implements AdRepository {
         imageUrl: banner.imageUrl,
         title: banner.title,
         deepLink: banner.deepLink,
+        type: banner.type,
         isActive: true,
         priority: 0,
         createdAt: DateTime.now(),
@@ -269,14 +263,18 @@ class AdRepositoryImpl implements AdRepository {
   Future<Either<Failure, void>> updateBannerAd(BannerEntity banner) async {
     try {
       AppLogger.logInfo('Updating banner ad: ${banner.id}');
-      final existingDoc = await firestore.collection('banners').doc(banner.id).get();
+      final existingDoc = await firestore
+          .collection('banners')
+          .doc(banner.id)
+          .get();
       final existingData = existingDoc.data();
-      
+
       final model = BannerModel(
         id: banner.id,
         imageUrl: banner.imageUrl,
         title: banner.title,
         deepLink: banner.deepLink,
+        type: banner.type,
         isActive: existingData?['isActive'] ?? true,
         priority: existingData?['priority'] ?? 0,
         createdAt: existingData?['createdAt'] is Timestamp
@@ -284,8 +282,11 @@ class AdRepositoryImpl implements AdRepository {
             : DateTime.now(),
         updatedAt: DateTime.now(),
       );
-      
-      await firestore.collection('banners').doc(banner.id).update(model.toFirestore());
+
+      await firestore
+          .collection('banners')
+          .doc(banner.id)
+          .update(model.toFirestore());
 
       AppLogger.logSuccess('Banner ad updated: ${banner.id}');
       return const Right(null);
@@ -327,4 +328,3 @@ class AdRepositoryImpl implements AdRepository {
     }
   }
 }
-
