@@ -220,9 +220,6 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     final discountedRestaurants = restaurants
         .where((r) => r.isDiscountActive)
         .toList();
-    final regularRestaurants = restaurants
-        .where((r) => !r.isDiscountActive)
-        .toList();
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -351,8 +348,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             ),
           ),
 
-          // Enhanced Restaurants Grid (only regular restaurants, excluding discounted ones)
-          if (regularRestaurants.isEmpty && discountedRestaurants.isEmpty)
+          // Enhanced Restaurants Grid (shows all restaurants, including discounted ones)
+          if (restaurants.isEmpty)
             SliverFillRemaining(
               child: _EmptyStateWidget(
                 title: _searchController.text.isNotEmpty
@@ -366,14 +363,12 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     : Icons.restaurant_outlined,
               ),
             )
-          else if (regularRestaurants.isNotEmpty)
+          else
             // Three independent horizontal rows, each scrolls separately
             SliverToBoxAdapter(
               child: Padding(
                 padding: ResponsiveHelper.padding(all: 16),
-                child: _ThreeRowRestaurantScroller(
-                  restaurants: regularRestaurants,
-                ),
+                child: _ThreeRowRestaurantScroller(restaurants: restaurants),
               ),
             ),
         ],
@@ -934,11 +929,10 @@ class _MarketProductCategoriesSection extends StatelessWidget {
                 'category': null,
               },
               {
-                'image':
-                    'assets/images/cake&cofee.jpeg', // Using cake&coffee for groceries as it was before
-                'title': l10n.groceries,
+                'image': 'assets/images/meats.jpeg',
+                'title': l10n.meat,
                 'isMarket': false,
-                'category': l10n.groceries,
+                'category': l10n.meat,
               },
               {
                 'image': 'assets/images/fruits&veg.jpeg',
@@ -1065,7 +1059,26 @@ class _DiscountRestaurantsBannerCarousel extends StatelessWidget {
                   margin: const EdgeInsets.symmetric(horizontal: 4),
                   child: GestureDetector(
                     onTap: () {
-                      context.push('/restaurant/${restaurant.id}');
+                      if (restaurant.discountTargetProductId != null &&
+                          restaurant.discountTargetProductId!.isNotEmpty) {
+                        // Navigate to specific product within restaurant
+                        // Assuming route is /restaurant/:id/product/:productId
+                        // Or just /restaurant/:id and maybe pass extra to highlight/scroll to product
+                        // For now, let's assume we can navigate to product details directly or open restaurant with product highlighted
+                        // If route doesn't exist, we fallback to restaurant detail
+                        // Since I don't know if product detail route exists nested,
+                        // I will navigate to restaurant detail and pass productId as query param if needed,
+                        // or assuming clear requirement: "nav him to this product inside the resturant page"
+                        // I'll assume passing query parameter 'productId' to restaurant page is enough for now,
+                        // or find if there is a product detail route.
+                        // I'll push to restaurant details with extra product ID.
+                        context.push(
+                          '/restaurant/${restaurant.id}?productId=${restaurant.discountTargetProductId}',
+                          extra: restaurant.discountTargetProductId,
+                        );
+                      } else {
+                        context.push('/restaurant/${restaurant.id}');
+                      }
                     },
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1075,10 +1088,26 @@ class _DiscountRestaurantsBannerCarousel extends StatelessWidget {
                           child: SizedBox(
                             width: double.infinity,
                             height: bannerHeight,
-                            // Clean banner: ONLY the restaurant image
+                            // Clean banner: Use discount image if available, else restaurant image
                             child:
-                                restaurant.imageUrl != null &&
-                                    restaurant.imageUrl!.isNotEmpty
+                                (restaurant.discountImageUrl != null &&
+                                    restaurant.discountImageUrl!.isNotEmpty)
+                                ? CachedNetworkImage(
+                                    imageUrl: restaurant.discountImageUrl!,
+                                    width: double.infinity,
+                                    height: bannerHeight,
+                                    fit: BoxFit.cover,
+                                    placeholder: (c, u) => Container(
+                                      color: AppColors.surface,
+                                      child: const Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    ),
+                                    errorWidget: (c, u, e) =>
+                                        const Icon(Icons.error),
+                                  )
+                                : (restaurant.imageUrl != null &&
+                                      restaurant.imageUrl!.isNotEmpty)
                                 ? CachedNetworkImage(
                                     imageUrl: restaurant.imageUrl!,
                                     width: double.infinity,

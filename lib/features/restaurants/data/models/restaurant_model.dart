@@ -25,6 +25,8 @@ class RestaurantModel extends RestaurantEntity {
     super.discountDescription,
     super.discountStartDate,
     super.discountEndDate,
+    super.discountImageUrl,
+    super.discountTargetProductId,
     required super.createdAt,
   });
 
@@ -86,6 +88,8 @@ class RestaurantModel extends RestaurantEntity {
       discountDescription: json['discountDescription'],
       discountStartDate: discountStartDate,
       discountEndDate: discountEndDate,
+      discountImageUrl: json['discountImageUrl'],
+      discountTargetProductId: json['discountTargetProductId'],
       createdAt: json['createdAt'] != null
           ? (json['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
@@ -116,6 +120,8 @@ class RestaurantModel extends RestaurantEntity {
       discountDescription: entity.discountDescription,
       discountStartDate: entity.discountStartDate,
       discountEndDate: entity.discountEndDate,
+      discountImageUrl: entity.discountImageUrl,
+      discountTargetProductId: entity.discountTargetProductId,
       createdAt: entity.createdAt,
     );
   }
@@ -148,6 +154,8 @@ class RestaurantModel extends RestaurantEntity {
       'discountEndDate': discountEndDate != null
           ? Timestamp.fromDate(discountEndDate!)
           : null,
+      'discountImageUrl': discountImageUrl,
+      'discountTargetProductId': discountTargetProductId,
       'createdAt': Timestamp.fromDate(createdAt),
     };
   }
@@ -182,6 +190,8 @@ class RestaurantModel extends RestaurantEntity {
     String? discountDescription,
     DateTime? discountStartDate,
     DateTime? discountEndDate,
+    String? discountImageUrl,
+    String? discountTargetProductId,
     DateTime? createdAt,
   }) {
     return RestaurantModel(
@@ -200,13 +210,18 @@ class RestaurantModel extends RestaurantEntity {
       totalReviews: totalReviews ?? this.totalReviews,
       deliveryFee: deliveryFee ?? this.deliveryFee,
       minOrderAmount: minOrderAmount ?? this.minOrderAmount,
-      estimatedDeliveryTime: estimatedDeliveryTime ?? this.estimatedDeliveryTime,
-      commercialRegistrationPhotoUrl: commercialRegistrationPhotoUrl ?? this.commercialRegistrationPhotoUrl,
+      estimatedDeliveryTime:
+          estimatedDeliveryTime ?? this.estimatedDeliveryTime,
+      commercialRegistrationPhotoUrl:
+          commercialRegistrationPhotoUrl ?? this.commercialRegistrationPhotoUrl,
       hasDiscount: hasDiscount ?? this.hasDiscount,
       discountPercentage: discountPercentage ?? this.discountPercentage,
       discountDescription: discountDescription ?? this.discountDescription,
       discountStartDate: discountStartDate ?? this.discountStartDate,
       discountEndDate: discountEndDate ?? this.discountEndDate,
+      discountImageUrl: discountImageUrl ?? this.discountImageUrl,
+      discountTargetProductId:
+          discountTargetProductId ?? this.discountTargetProductId,
       createdAt: createdAt ?? this.createdAt,
     );
   }

@@ -35,6 +35,15 @@ class RestaurantLoaded extends AdminState {
   List<Object?> get props => [restaurant];
 }
 
+class AdminProductsLoaded extends AdminState {
+  final List<ProductEntity> products;
+
+  const AdminProductsLoaded(this.products);
+
+  @override
+  List<Object?> get props => [products];
+}
+
 class AdminError extends AdminState {
   final String message;
 
@@ -43,4 +52,3 @@ class AdminError extends AdminState {
   @override
   List<Object?> get props => [message];
 }
-

@@ -23,6 +23,8 @@ class RestaurantEntity extends Equatable {
   final String? discountDescription;
   final DateTime? discountStartDate;
   final DateTime? discountEndDate;
+  final String? discountImageUrl;
+  final String? discountTargetProductId;
   final DateTime createdAt;
 
   const RestaurantEntity({
@@ -48,6 +50,8 @@ class RestaurantEntity extends Equatable {
     this.discountDescription,
     this.discountStartDate,
     this.discountEndDate,
+    this.discountImageUrl,
+    this.discountTargetProductId,
     required this.createdAt,
   });
 
@@ -88,6 +92,8 @@ class RestaurantEntity extends Equatable {
     discountDescription,
     discountStartDate,
     discountEndDate,
+    discountImageUrl,
+    discountTargetProductId,
     createdAt,
   ];
 }

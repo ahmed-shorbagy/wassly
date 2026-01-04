@@ -5,6 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../restaurants/domain/entities/restaurant_entity.dart';
 import '../../../restaurants/domain/repositories/restaurant_owner_repository.dart';
+import '../../../restaurants/domain/entities/product_entity.dart';
 
 part 'admin_state.dart';
 
@@ -145,6 +146,8 @@ class AdminCubit extends Cubit<AdminState> {
     String? discountDescription,
     DateTime? discountStartDate,
     DateTime? discountEndDate,
+    File? discountImageFile,
+    String? discountTargetProductId,
   }) async {
     try {
       emit(AdminLoading());
@@ -161,6 +164,53 @@ class AdminCubit extends Cubit<AdminState> {
       if (existingRestaurant == null) {
         emit(const AdminError('Restaurant not found'));
         return;
+      }
+
+      // Handle Image Uploads
+      String? imageUrl = existingRestaurant.imageUrl;
+      if (imageFile != null) {
+        final uploadResult = await repository.uploadImageFile(
+          imageFile,
+          'restaurants',
+          'profile',
+        );
+        uploadResult.fold(
+          (failure) => AppLogger.logError(
+            'Failed to upload profile image: ${failure.message}',
+          ),
+          (url) => imageUrl = url,
+        );
+      }
+
+      String? commercialRegistrationPhotoUrl =
+          existingRestaurant.commercialRegistrationPhotoUrl;
+      if (commercialRegistrationPhotoFile != null) {
+        final uploadResult = await repository.uploadImageFile(
+          commercialRegistrationPhotoFile,
+          'restaurants',
+          'commercial_registration',
+        );
+        uploadResult.fold(
+          (failure) => AppLogger.logError(
+            'Failed to upload commercial registration: ${failure.message}',
+          ),
+          (url) => commercialRegistrationPhotoUrl = url,
+        );
+      }
+
+      String? discountImageUrl = existingRestaurant.discountImageUrl;
+      if (discountImageFile != null) {
+        final uploadResult = await repository.uploadImageFile(
+          discountImageFile,
+          'restaurants',
+          'discount',
+        );
+        uploadResult.fold(
+          (failure) => AppLogger.logError(
+            'Failed to upload discount image: ${failure.message}',
+          ),
+          (url) => discountImageUrl = url,
+        );
       }
 
       // Update restaurant entity with new data, preserving discount fields
@@ -183,15 +233,16 @@ class AdminCubit extends Cubit<AdminState> {
         deliveryFee: deliveryFee,
         minOrderAmount: minOrderAmount,
         estimatedDeliveryTime: estimatedDeliveryTime,
-        imageUrl: existingRestaurant.imageUrl, // Preserve image URL
-        commercialRegistrationPhotoUrl:
-            existingRestaurant.commercialRegistrationPhotoUrl,
+        imageUrl: imageUrl, // Update image URL
+        commercialRegistrationPhotoUrl: commercialRegistrationPhotoUrl,
         // Update discount fields from parameters
         hasDiscount: hasDiscount,
         discountPercentage: discountPercentage,
         discountDescription: discountDescription,
         discountStartDate: discountStartDate,
         discountEndDate: discountEndDate,
+        discountImageUrl: discountImageUrl,
+        discountTargetProductId: discountTargetProductId,
         createdAt: existingRestaurant.createdAt, // Preserve creation date
       );
 
@@ -242,6 +293,48 @@ class AdminCubit extends Cubit<AdminState> {
     } catch (e) {
       AppLogger.logError('Error updating restaurant', error: e);
       emit(AdminError('Failed to update restaurant: $e'));
+    }
+  }
+
+  Future<void> getRestaurantProducts(String restaurantId) async {
+    try {
+      // Don't emit loading here to avoid disrupting the UI if it's already loaded
+      // or if we want to load silently. But typically we want feedback.
+      // Since this is likely called in initState, emitting loading might replace the current state
+      // which might be RestaurantLoaded.
+      // We should be careful.
+      // If we emit AdminLoading, we lose RestaurantLoaded data in the UI (since UI checks state type).
+      // Ideally, AdminState should be a single state with optional fields, but it's a sealed class hierarchy.
+      // So we emit a separate AdminProductsLoaded state?
+      // If we emit AdminProductsLoaded, we lose RestaurantLoaded!
+      // This Cubit design is a bit limiting for multiple concurrent data types.
+      // However, EditRestaurantScreen listens to state.
+      // If we emit AdminProductsLoaded, the listener in EditRestaurantScreen handles it?
+      // EditRestaurantScreen listener (line 401) handles RestaurantLoaded, RestaurantUpdatedSuccess, AdminError.
+      // It DOES NOT handle AdminProductsLoaded yet.
+      // I will add handling in UI.
+
+      AppLogger.logInfo('Fetching products for restaurant: $restaurantId');
+
+      final result = await repository.getRestaurantProducts(restaurantId);
+
+      result.fold(
+        (failure) {
+          AppLogger.logError(
+            'Failed to fetch products',
+            error: failure.message,
+          );
+          // Don't emit error to avoid blocking the main UI if products fail
+        },
+        (products) {
+          AppLogger.logSuccess(
+            'Products fetched successfully: ${products.length}',
+          );
+          emit(AdminProductsLoaded(products));
+        },
+      );
+    } catch (e) {
+      AppLogger.logError('Error fetching products', error: e);
     }
   }
 
