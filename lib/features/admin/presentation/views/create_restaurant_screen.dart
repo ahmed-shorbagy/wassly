@@ -9,7 +9,9 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/extensions.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../../../../shared/widgets/back_button_handler.dart';
+import '../../../restaurants/domain/entities/restaurant_category_entity.dart';
 import '../cubits/admin_cubit.dart';
+import '../cubits/admin_restaurant_category_cubit.dart';
 
 class CreateRestaurantScreen extends StatefulWidget {
   const CreateRestaurantScreen({super.key});
@@ -34,66 +36,14 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
   File? _selectedImage;
   File? _commercialRegistrationPhoto;
   LatLng? _selectedLocation;
-  final List<String> _selectedCategories = [];
+  final List<String> _selectedCategoryIds = [];
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
-  List<String> _getAvailableCategories(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return [
-      // Arabian categories
-      l10n.arabic,
-      l10n.egyptian,
-      l10n.lebanese,
-      l10n.syrian,
-      l10n.palestinian,
-      l10n.jordanian,
-      l10n.saudi,
-      l10n.emirati,
-      l10n.gulf,
-      l10n.moroccan,
-      l10n.tunisian,
-      l10n.algerian,
-      l10n.yemeni,
-      l10n.iraqi,
-      // Specific Arabian dishes
-      l10n.kebabs,
-      l10n.shawarma,
-      l10n.falafel,
-      l10n.hummus,
-      l10n.mezze,
-      l10n.koshary,
-      l10n.mansaf,
-      l10n.mandi,
-      l10n.kabsa,
-      l10n.majboos,
-      l10n.maqluba,
-      l10n.musakhan,
-      l10n.waraqEnab,
-      l10n.mahshi,
-      l10n.kofta,
-      l10n.samosa,
-      l10n.grilledMeat,
-      l10n.bakedGoods,
-      l10n.orientalSweets,
-      // International categories
-      l10n.fastFood,
-      l10n.italian,
-      l10n.chinese,
-      l10n.indian,
-      l10n.mexican,
-      l10n.japanese,
-      l10n.thai,
-      l10n.mediterranean,
-      l10n.american,
-      l10n.vegetarian,
-      l10n.vegan,
-      l10n.desserts,
-      l10n.beverages,
-      l10n.healthy,
-      l10n.bbq,
-      l10n.seafood,
-    ];
+  @override
+  void initState() {
+    super.initState();
+    context.read<AdminRestaurantCategoryCubit>().loadCategories();
   }
 
   @override
@@ -171,44 +121,83 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
 
   void _showCategoryPicker() {
     final l10n = AppLocalizations.of(context)!;
-    final categories = _getAvailableCategories(context);
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.selectCategories),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: categories.length,
-            itemBuilder: (context, index) {
-              final category = categories[index];
-              return CheckboxListTile(
-                title: Text(category),
-                value: _selectedCategories.contains(category),
-                onChanged: (selected) {
-                  setState(() {
-                    if (selected == true) {
-                      _selectedCategories.add(category);
-                    } else {
-                      _selectedCategories.remove(category);
-                    }
-                  });
-                  Navigator.pop(context);
-                  _showCategoryPicker();
-                },
-              );
+      builder: (context) =>
+          BlocBuilder<
+            AdminRestaurantCategoryCubit,
+            AdminRestaurantCategoryState
+          >(
+            builder: (context, state) {
+              if (state is AdminRestaurantCategoryLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (state is AdminRestaurantCategoryError) {
+                return AlertDialog(
+                  title: const Text('Error'),
+                  content: Text(state.message),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(l10n.ok),
+                    ),
+                  ],
+                );
+              }
+
+              if (state is AdminRestaurantCategoriesLoaded) {
+                final categories = state.categories;
+                // Use StatefulBuilder to update checkboxes within dialog
+                return StatefulBuilder(
+                  builder: (context, setStateDialog) {
+                    return AlertDialog(
+                      title: Text(l10n.selectCategories),
+                      content: SizedBox(
+                        width: double.maxFinite,
+                        child: categories.isEmpty
+                            ? Center(child: Text('No categories available'))
+                            : ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: categories.length,
+                                itemBuilder: (context, index) {
+                                  final category = categories[index];
+                                  return CheckboxListTile(
+                                    title: Text(category.name),
+                                    value: _selectedCategoryIds.contains(
+                                      category.id,
+                                    ),
+                                    onChanged: (selected) {
+                                      setStateDialog(() {
+                                        if (selected == true) {
+                                          _selectedCategoryIds.add(category.id);
+                                        } else {
+                                          _selectedCategoryIds.remove(
+                                            category.id,
+                                          );
+                                        }
+                                      });
+                                      // Also update the main screen state
+                                      setState(() {});
+                                    },
+                                  );
+                                },
+                              ),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text(l10n.done),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              }
+              return const SizedBox();
             },
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.done),
-          ),
-        ],
-      ),
     );
   }
 
@@ -229,7 +218,7 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
       return;
     }
 
-    if (_selectedCategories.isEmpty) {
+    if (_selectedCategoryIds.isEmpty) {
       context.showErrorSnackBar(l10n.pleaseSelectAtLeastOneCategory);
       return;
     }
@@ -247,7 +236,7 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
       phone: _phoneController.text.trim(),
       email: _emailController.text.trim(),
       password: _passwordController.text.trim(),
-      categories: _selectedCategories,
+      categoryIds: _selectedCategoryIds,
       location: _selectedLocation!,
       imageFile: _selectedImage!,
       deliveryFee: double.parse(_deliveryFeeController.text),
@@ -265,7 +254,7 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
         _emailController.text.isNotEmpty ||
         _selectedImage != null ||
         _commercialRegistrationPhoto != null ||
-        _selectedCategories.isNotEmpty;
+        _selectedCategoryIds.isNotEmpty;
   }
 
   @override
@@ -275,282 +264,285 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
     return UnsavedChangesHandler(
       hasUnsavedChanges: _hasUnsavedChanges,
       child: Scaffold(
-      appBar: AppBar(title: Text(l10n.createRestaurant)),
-      body: BlocConsumer<AdminCubit, AdminState>(
-        listener: (context, state) {
-          if (state is RestaurantCreatedSuccess) {
-            // Show credentials dialog
-            showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (dialogContext) => AlertDialog(
-                title: Text(l10n.restaurantCreatedSuccessfully),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.provideCredentialsToRestaurant,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildCredentialRow('Email:', _emailController.text),
-                    const SizedBox(height: 8),
-                    _buildCredentialRow('Password:', _passwordController.text),
-                    const SizedBox(height: 16),
-                    Text(
-                      l10n.restaurantCanChangePasswordAfterLogin,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontStyle: FontStyle.italic,
-                        color: Colors.grey,
+        appBar: AppBar(title: Text(l10n.createRestaurant)),
+        body: BlocConsumer<AdminCubit, AdminState>(
+          listener: (context, state) {
+            if (state is RestaurantCreatedSuccess) {
+              // Show credentials dialog
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (dialogContext) => AlertDialog(
+                  title: Text(l10n.restaurantCreatedSuccessfully),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.provideCredentialsToRestaurant,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
+                      const SizedBox(height: 16),
+                      _buildCredentialRow('Email:', _emailController.text),
+                      const SizedBox(height: 8),
+                      _buildCredentialRow(
+                        'Password:',
+                        _passwordController.text,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        l10n.restaurantCanChangePasswordAfterLogin,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontStyle: FontStyle.italic,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                  actions: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(dialogContext);
+                        context.go('/admin/restaurants');
+                      },
+                      child: Text(l10n.ok),
                     ),
                   ],
                 ),
-                actions: [
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(dialogContext);
-                      context.go('/admin/restaurants');
+              );
+            } else if (state is AdminError) {
+              context.showErrorSnackBar(state.message);
+            }
+          },
+          builder: (context, state) {
+            if (state is AdminLoading) {
+              return LoadingWidget(message: l10n.creatingRestaurant);
+            }
+
+            return Form(
+              key: _formKey,
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  // Image Upload Section
+                  _buildImageUploadSection(l10n),
+                  const SizedBox(height: 24),
+
+                  // Basic Information
+                  _buildSectionTitle(l10n.basicInformation),
+                  const SizedBox(height: 12),
+                  _buildTextField(
+                    controller: _nameController,
+                    label: l10n.restaurantName,
+                    icon: Icons.restaurant,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return l10n.pleaseEnterRestaurantName;
+                      }
+                      return null;
                     },
-                    child: Text(l10n.ok),
                   ),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    controller: _descriptionController,
+                    label: l10n.description,
+                    icon: Icons.description,
+                    maxLines: 3,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return l10n.pleaseEnterDescription;
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Contact Information
+                  _buildSectionTitle(l10n.contactInformation),
+                  const SizedBox(height: 12),
+                  _buildTextField(
+                    controller: _phoneController,
+                    label: l10n.phoneNumber,
+                    icon: Icons.phone,
+                    keyboardType: TextInputType.phone,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return l10n.pleaseEnterPhoneNumber;
+                      }
+                      if (!value.isValidPhone) {
+                        return l10n.pleaseEnterValidPhoneNumber;
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    controller: _emailController,
+                    label: l10n.email,
+                    icon: Icons.email,
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return l10n.pleaseEnterEmail;
+                      }
+                      if (!value.isValidEmail) {
+                        return l10n.pleaseEnterValidEmail;
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _buildPasswordField(
+                    controller: _passwordController,
+                    label: l10n.password,
+                    icon: Icons.lock,
+                    obscureText: _obscurePassword,
+                    onToggleObscure: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return l10n.pleaseEnterPassword;
+                      }
+                      if (value.length < 6) {
+                        return l10n.passwordMustBeAtLeast6Characters;
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _buildPasswordField(
+                    controller: _confirmPasswordController,
+                    label: l10n.confirmPassword,
+                    icon: Icons.lock_outline,
+                    obscureText: _obscureConfirmPassword,
+                    onToggleObscure: () {
+                      setState(() {
+                        _obscureConfirmPassword = !_obscureConfirmPassword;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return l10n.pleaseConfirmPassword;
+                      }
+                      if (value != _passwordController.text) {
+                        return l10n.passwordsDoNotMatch;
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  // Commercial Registration Photo
+                  _buildSectionTitle(l10n.commercialRegistrationPhoto),
+                  const SizedBox(height: 12),
+                  _buildCommercialRegistrationPhotoSection(l10n),
+                  const SizedBox(height: 24),
+
+                  // Location
+                  _buildSectionTitle(l10n.location),
+                  const SizedBox(height: 12),
+                  _buildTextField(
+                    controller: _addressController,
+                    label: l10n.address,
+                    icon: Icons.location_on,
+                    maxLines: 2,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return l10n.pleaseEnterAddress;
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _buildLocationPicker(l10n),
+                  const SizedBox(height: 24),
+
+                  // Categories
+                  _buildSectionTitle(l10n.categories),
+                  const SizedBox(height: 12),
+                  _buildCategorySelector(l10n),
+                  const SizedBox(height: 24),
+
+                  // Delivery Settings
+                  _buildSectionTitle(l10n.deliverySettings),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildTextField(
+                          controller: _deliveryFeeController,
+                          label: l10n.deliveryFee,
+                          icon: Icons.delivery_dining,
+                          keyboardType: TextInputType.number,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return l10n.required;
+                            }
+                            if (double.tryParse(value) == null) {
+                              return l10n.invalidNumber;
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildTextField(
+                          controller: _minOrderAmountController,
+                          label: l10n.minOrder,
+                          icon: Icons.shopping_cart,
+                          keyboardType: TextInputType.number,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return l10n.required;
+                            }
+                            if (double.tryParse(value) == null) {
+                              return l10n.invalidNumber;
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    controller: _estimatedDeliveryController,
+                    label: l10n.estimatedDeliveryTime,
+                    icon: Icons.timer,
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return l10n.required;
+                      }
+                      if (int.tryParse(value) == null) {
+                        return l10n.invalidNumber;
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Submit Button
+                  ElevatedButton(
+                    onPressed: _submitForm,
+                    child: Text(
+                      l10n.createRestaurant,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
                 ],
               ),
             );
-          } else if (state is AdminError) {
-            context.showErrorSnackBar(state.message);
-          }
-        },
-        builder: (context, state) {
-          if (state is AdminLoading) {
-            return LoadingWidget(message: l10n.creatingRestaurant);
-          }
-
-          return Form(
-            key: _formKey,
-            child: ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                // Image Upload Section
-                _buildImageUploadSection(l10n),
-                const SizedBox(height: 24),
-
-                // Basic Information
-                _buildSectionTitle(l10n.basicInformation),
-                const SizedBox(height: 12),
-                _buildTextField(
-                  controller: _nameController,
-                  label: l10n.restaurantName,
-                  icon: Icons.restaurant,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return l10n.pleaseEnterRestaurantName;
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                _buildTextField(
-                  controller: _descriptionController,
-                  label: l10n.description,
-                  icon: Icons.description,
-                  maxLines: 3,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return l10n.pleaseEnterDescription;
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 24),
-
-                // Contact Information
-                _buildSectionTitle(l10n.contactInformation),
-                const SizedBox(height: 12),
-                _buildTextField(
-                  controller: _phoneController,
-                  label: l10n.phoneNumber,
-                  icon: Icons.phone,
-                  keyboardType: TextInputType.phone,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return l10n.pleaseEnterPhoneNumber;
-                    }
-                    if (!value.isValidPhone) {
-                      return l10n.pleaseEnterValidPhoneNumber;
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                _buildTextField(
-                  controller: _emailController,
-                  label: l10n.email,
-                  icon: Icons.email,
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return l10n.pleaseEnterEmail;
-                    }
-                    if (!value.isValidEmail) {
-                      return l10n.pleaseEnterValidEmail;
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                _buildPasswordField(
-                  controller: _passwordController,
-                  label: l10n.password,
-                  icon: Icons.lock,
-                  obscureText: _obscurePassword,
-                  onToggleObscure: () {
-                    setState(() {
-                      _obscurePassword = !_obscurePassword;
-                    });
-                  },
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return l10n.pleaseEnterPassword;
-                    }
-                    if (value.length < 6) {
-                      return l10n.passwordMustBeAtLeast6Characters;
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                _buildPasswordField(
-                  controller: _confirmPasswordController,
-                  label: l10n.confirmPassword,
-                  icon: Icons.lock_outline,
-                  obscureText: _obscureConfirmPassword,
-                  onToggleObscure: () {
-                    setState(() {
-                      _obscureConfirmPassword = !_obscureConfirmPassword;
-                    });
-                  },
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return l10n.pleaseConfirmPassword;
-                    }
-                    if (value != _passwordController.text) {
-                      return l10n.passwordsDoNotMatch;
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                // Commercial Registration Photo
-                _buildSectionTitle(l10n.commercialRegistrationPhoto),
-                const SizedBox(height: 12),
-                _buildCommercialRegistrationPhotoSection(l10n),
-                const SizedBox(height: 24),
-
-                // Location
-                _buildSectionTitle(l10n.location),
-                const SizedBox(height: 12),
-                _buildTextField(
-                  controller: _addressController,
-                  label: l10n.address,
-                  icon: Icons.location_on,
-                  maxLines: 2,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return l10n.pleaseEnterAddress;
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                _buildLocationPicker(l10n),
-                const SizedBox(height: 24),
-
-                // Categories
-                _buildSectionTitle(l10n.categories),
-                const SizedBox(height: 12),
-                _buildCategorySelector(l10n),
-                const SizedBox(height: 24),
-
-                // Delivery Settings
-                _buildSectionTitle(l10n.deliverySettings),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildTextField(
-                        controller: _deliveryFeeController,
-                        label: l10n.deliveryFee,
-                        icon: Icons.delivery_dining,
-                        keyboardType: TextInputType.number,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return l10n.required;
-                          }
-                          if (double.tryParse(value) == null) {
-                            return l10n.invalidNumber;
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildTextField(
-                        controller: _minOrderAmountController,
-                        label: l10n.minOrder,
-                        icon: Icons.shopping_cart,
-                        keyboardType: TextInputType.number,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return l10n.required;
-                          }
-                          if (double.tryParse(value) == null) {
-                            return l10n.invalidNumber;
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                _buildTextField(
-                  controller: _estimatedDeliveryController,
-                  label: l10n.estimatedDeliveryTime,
-                  icon: Icons.timer,
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return l10n.required;
-                    }
-                    if (int.tryParse(value) == null) {
-                      return l10n.invalidNumber;
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 32),
-
-                // Submit Button
-                ElevatedButton(
-                  onPressed: _submitForm,
-                  child: Text(
-                    l10n.createRestaurant,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 32),
-              ],
-            ),
-          );
-        },
-      ),
+          },
+        ),
       ),
     );
   }
@@ -714,7 +706,7 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
           border: Border.all(color: Colors.grey.shade300),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: _selectedCategories.isEmpty
+        child: _selectedCategoryIds.isEmpty
             ? Row(
                 children: [
                   const Icon(Icons.category, color: AppColors.primary),
@@ -735,47 +727,69 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                   ),
                 ],
               )
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            : BlocBuilder<
+                AdminRestaurantCategoryCubit,
+                AdminRestaurantCategoryState
+              >(
+                builder: (context, state) {
+                  List<RestaurantCategoryEntity> categories = [];
+                  if (state is AdminRestaurantCategoriesLoaded) {
+                    categories = state.categories;
+                  }
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        l10n.selectedCategories,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            l10n.selectedCategories,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: _showCategoryPicker,
+                            child: Text(l10n.edit),
+                          ),
+                        ],
                       ),
-                      TextButton(
-                        onPressed: _showCategoryPicker,
-                        child: Text(l10n.edit),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _selectedCategories
-                        .map(
-                          (category) => Chip(
-                            label: Text(category),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: _selectedCategoryIds.map((categoryId) {
+                          final category = categories.firstWhere(
+                            (c) => c.id == categoryId,
+                            orElse: () => RestaurantCategoryEntity(
+                              id: categoryId,
+                              name: 'Unknown',
+                              imageUrl: '',
+                              isActive: true,
+                              displayOrder: 0,
+                              createdAt: DateTime.now(),
+                            ),
+                          );
+
+                          return Chip(
+                            label: Text(category.name),
                             backgroundColor: AppColors.primary.withValues(
                               alpha: 0.1,
                             ),
                             deleteIcon: const Icon(Icons.close, size: 16),
                             onDeleted: () {
                               setState(() {
-                                _selectedCategories.remove(category);
+                                _selectedCategoryIds.remove(categoryId);
                               });
                             },
-                          ),
-                        )
-                        .toList(),
-                  ),
-                ],
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  );
+                },
               ),
       ),
     );

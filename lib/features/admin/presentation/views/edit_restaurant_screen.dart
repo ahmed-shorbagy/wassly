@@ -11,7 +11,9 @@ import '../../../../shared/widgets/loading_widget.dart';
 import '../../../../shared/widgets/safe_navigation_wrapper.dart';
 import '../../../restaurants/domain/entities/restaurant_entity.dart';
 import '../../../restaurants/domain/entities/product_entity.dart';
+import '../../../restaurants/domain/entities/restaurant_category_entity.dart';
 import '../cubits/admin_cubit.dart';
+import '../cubits/admin_restaurant_category_cubit.dart';
 
 class EditRestaurantScreen extends StatefulWidget {
   final String restaurantId;
@@ -43,7 +45,7 @@ class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
   File? _selectedImage;
   File? _commercialRegistrationPhoto;
   LatLng? _selectedLocation;
-  final List<String> _selectedCategories = [];
+  final List<String> _selectedCategoryIds = [];
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _isLoadingRestaurant = true;
@@ -63,6 +65,7 @@ class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
   @override
   void initState() {
     super.initState();
+    context.read<AdminRestaurantCategoryCubit>().loadCategories();
     _loadRestaurant();
     context.read<AdminCubit>().getRestaurantProducts(widget.restaurantId);
   }
@@ -114,7 +117,8 @@ class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
     );
     _estimatedDeliveryController.text = restaurant.estimatedDeliveryTime
         .toString();
-    _selectedCategories.addAll(restaurant.categories);
+    _selectedCategoryIds.clear();
+    _selectedCategoryIds.addAll(restaurant.categoryIds);
 
     // Populate discount fields
     _hasDiscount = restaurant.hasDiscount;
@@ -134,64 +138,6 @@ class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
         (restaurant.location['longitude'] as num).toDouble(),
       );
     }
-  }
-
-  List<String> _getAvailableCategories(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return [
-      // Arabian categories
-      l10n.arabic,
-      l10n.egyptian,
-      l10n.lebanese,
-      l10n.syrian,
-      l10n.palestinian,
-      l10n.jordanian,
-      l10n.saudi,
-      l10n.emirati,
-      l10n.gulf,
-      l10n.moroccan,
-      l10n.tunisian,
-      l10n.algerian,
-      l10n.yemeni,
-      l10n.iraqi,
-      // Specific Arabian dishes
-      l10n.kebabs,
-      l10n.shawarma,
-      l10n.falafel,
-      l10n.hummus,
-      l10n.mezze,
-      l10n.koshary,
-      l10n.mansaf,
-      l10n.mandi,
-      l10n.kabsa,
-      l10n.majboos,
-      l10n.maqluba,
-      l10n.musakhan,
-      l10n.waraqEnab,
-      l10n.mahshi,
-      l10n.kofta,
-      l10n.samosa,
-      l10n.grilledMeat,
-      l10n.bakedGoods,
-      l10n.orientalSweets,
-      // International categories
-      l10n.fastFood,
-      l10n.italian,
-      l10n.chinese,
-      l10n.indian,
-      l10n.mexican,
-      l10n.japanese,
-      l10n.thai,
-      l10n.mediterranean,
-      l10n.american,
-      l10n.vegetarian,
-      l10n.vegan,
-      l10n.desserts,
-      l10n.beverages,
-      l10n.healthy,
-      l10n.bbq,
-      l10n.seafood,
-    ];
   }
 
   @override
@@ -270,44 +216,85 @@ class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
 
   void _showCategoryPicker() {
     final l10n = AppLocalizations.of(context)!;
-    final categories = _getAvailableCategories(context);
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.selectCategories),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: categories.length,
-            itemBuilder: (context, index) {
-              final category = categories[index];
-              return CheckboxListTile(
-                title: Text(category),
-                value: _selectedCategories.contains(category),
-                onChanged: (selected) {
-                  setState(() {
-                    if (selected == true) {
-                      _selectedCategories.add(category);
-                    } else {
-                      _selectedCategories.remove(category);
-                    }
-                  });
-                  Navigator.pop(context);
-                  _showCategoryPicker();
-                },
-              );
+      builder: (context) =>
+          BlocBuilder<
+            AdminRestaurantCategoryCubit,
+            AdminRestaurantCategoryState
+          >(
+            builder: (context, state) {
+              if (state is AdminRestaurantCategoryLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (state is AdminRestaurantCategoryError) {
+                return AlertDialog(
+                  title: const Text('Error'),
+                  content: Text(state.message),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(l10n.ok),
+                    ),
+                  ],
+                );
+              }
+
+              if (state is AdminRestaurantCategoriesLoaded) {
+                final categories = state.categories;
+                // Use StatefulBuilder to update checkboxes within dialog
+                return StatefulBuilder(
+                  builder: (context, setStateDialog) {
+                    return AlertDialog(
+                      title: Text(l10n.selectCategories),
+                      content: SizedBox(
+                        width: double.maxFinite,
+                        child: categories.isEmpty
+                            ? const Center(
+                                child: Text('No categories available'),
+                              )
+                            : ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: categories.length,
+                                itemBuilder: (context, index) {
+                                  final category = categories[index];
+                                  return CheckboxListTile(
+                                    title: Text(category.name),
+                                    value: _selectedCategoryIds.contains(
+                                      category.id,
+                                    ),
+                                    onChanged: (selected) {
+                                      setStateDialog(() {
+                                        if (selected == true) {
+                                          _selectedCategoryIds.add(category.id);
+                                        } else {
+                                          _selectedCategoryIds.remove(
+                                            category.id,
+                                          );
+                                        }
+                                      });
+                                      // Also update the main screen state
+                                      setState(() {});
+                                    },
+                                  );
+                                },
+                              ),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text(l10n.done),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              }
+              return const SizedBox();
             },
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.done),
-          ),
-        ],
-      ),
     );
   }
 
@@ -323,7 +310,7 @@ class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
       return;
     }
 
-    if (_selectedCategories.isEmpty) {
+    if (_selectedCategoryIds.isEmpty) {
       context.showErrorSnackBar(l10n.pleaseSelectAtLeastOneCategory);
       return;
     }
@@ -356,7 +343,7 @@ class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
       phone: _phoneController.text.trim(),
       email: _emailController.text.trim(),
       newPassword: newPassword,
-      categories: _selectedCategories,
+      categoryIds: _selectedCategoryIds,
       location: _selectedLocation!,
       imageFile: _selectedImage,
       deliveryFee: double.parse(_deliveryFeeController.text),
@@ -907,7 +894,7 @@ class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
           border: Border.all(color: Colors.grey.shade300),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: _selectedCategories.isEmpty
+        child: _selectedCategoryIds.isEmpty
             ? Row(
                 children: [
                   const Icon(Icons.category, color: AppColors.primary),
@@ -928,47 +915,69 @@ class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
                   ),
                 ],
               )
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            : BlocBuilder<
+                AdminRestaurantCategoryCubit,
+                AdminRestaurantCategoryState
+              >(
+                builder: (context, state) {
+                  List<RestaurantCategoryEntity> categories = [];
+                  if (state is AdminRestaurantCategoriesLoaded) {
+                    categories = state.categories;
+                  }
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        l10n.selectedCategories,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            l10n.selectedCategories,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: _showCategoryPicker,
+                            child: Text(l10n.edit),
+                          ),
+                        ],
                       ),
-                      TextButton(
-                        onPressed: _showCategoryPicker,
-                        child: Text(l10n.edit),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _selectedCategories
-                        .map(
-                          (category) => Chip(
-                            label: Text(category),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: _selectedCategoryIds.map((categoryId) {
+                          final category = categories.firstWhere(
+                            (c) => c.id == categoryId,
+                            orElse: () => RestaurantCategoryEntity(
+                              id: categoryId,
+                              name: 'Unknown',
+                              imageUrl: '',
+                              isActive: true,
+                              displayOrder: 0,
+                              createdAt: DateTime.now(),
+                            ),
+                          );
+
+                          return Chip(
+                            label: Text(category.name),
                             backgroundColor: AppColors.primary.withValues(
                               alpha: 0.1,
                             ),
                             deleteIcon: const Icon(Icons.close, size: 16),
                             onDeleted: () {
                               setState(() {
-                                _selectedCategories.remove(category);
+                                _selectedCategoryIds.remove(categoryId);
                               });
                             },
-                          ),
-                        )
-                        .toList(),
-                  ),
-                ],
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  );
+                },
               ),
       ),
     );

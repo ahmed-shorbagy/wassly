@@ -114,7 +114,7 @@ class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
     required String phone,
     required String email,
     required String password,
-    required List<String> categories,
+    required List<String> categoryIds,
     required LatLng location,
     required File imageFile,
     required double deliveryFee,
@@ -236,7 +236,7 @@ class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
         'address': address,
         'phone': phone,
         'email': email,
-        'categories': categories,
+        'categoryIds': categoryIds,
         'location': GeoPoint(location.latitude, location.longitude),
         'imageUrl': imageUrl,
         'deliveryFee': deliveryFee,
@@ -380,7 +380,9 @@ class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
     bool hasDiscount,
   ) async {
     try {
-      AppLogger.logInfo('Toggling restaurant discount: $restaurantId to $hasDiscount');
+      AppLogger.logInfo(
+        'Toggling restaurant discount: $restaurantId to $hasDiscount',
+      );
 
       await firestore.collection('restaurants').doc(restaurantId).update({
         'hasDiscount': hasDiscount,
@@ -389,7 +391,10 @@ class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
       AppLogger.logSuccess('Restaurant discount updated');
       return const Right(null);
     } on FirebaseException catch (e) {
-      AppLogger.logError('Firebase error updating restaurant discount', error: e);
+      AppLogger.logError(
+        'Firebase error updating restaurant discount',
+        error: e,
+      );
       return Left(ServerFailure('Failed to update discount: ${e.message}'));
     } catch (e) {
       AppLogger.logError('Error updating restaurant discount', error: e);
@@ -470,11 +475,8 @@ class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
       final updateData = model.toFirestore();
       // Ensure 'id' field is not included in update (document ID is the ID)
       updateData.remove('id');
-      
-      await firestore
-          .collection('products')
-          .doc(product.id)
-          .update(updateData);
+
+      await firestore.collection('products').doc(product.id).update(updateData);
 
       AppLogger.logSuccess('Product updated: ${product.id}');
       return const Right(null);

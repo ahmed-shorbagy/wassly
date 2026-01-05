@@ -11,7 +11,7 @@ class RestaurantModel extends RestaurantEntity {
     required super.address,
     required super.phone,
     super.email,
-    super.categories,
+    super.categoryIds,
     required super.location,
     required super.isOpen,
     super.rating,
@@ -47,7 +47,12 @@ class RestaurantModel extends RestaurantEntity {
 
     // Handle categories
     List<String> categoriesList = [];
-    if (json['categories'] != null) {
+    if (json['categoryIds'] != null) {
+      if (json['categoryIds'] is List) {
+        categoriesList = List<String>.from(json['categoryIds']);
+      }
+    } else if (json['categories'] != null) {
+      // Backward compatibility
       if (json['categories'] is List) {
         categoriesList = List<String>.from(json['categories']);
       }
@@ -72,7 +77,7 @@ class RestaurantModel extends RestaurantEntity {
       address: json['address'] ?? '',
       phone: json['phone'] ?? '',
       email: json['email'],
-      categories: categoriesList,
+      categoryIds: categoriesList,
       location: locationData,
       isOpen: json['isOpen'] ?? true,
       rating: (json['rating'] ?? 0.0).toDouble(),
@@ -106,7 +111,7 @@ class RestaurantModel extends RestaurantEntity {
       address: entity.address,
       phone: entity.phone,
       email: entity.email,
-      categories: entity.categories,
+      categoryIds: entity.categoryIds,
       location: entity.location,
       isOpen: entity.isOpen,
       rating: entity.rating,
@@ -136,7 +141,7 @@ class RestaurantModel extends RestaurantEntity {
       'address': address,
       'phone': phone,
       'email': email,
-      'categories': categories,
+      'categoryIds': categoryIds,
       'location': location,
       'isOpen': isOpen,
       'rating': rating,
@@ -176,7 +181,7 @@ class RestaurantModel extends RestaurantEntity {
     String? address,
     String? phone,
     String? email,
-    List<String>? categories,
+    List<String>? categoryIds,
     Map<String, dynamic>? location,
     bool? isOpen,
     double? rating,
@@ -203,7 +208,7 @@ class RestaurantModel extends RestaurantEntity {
       address: address ?? this.address,
       phone: phone ?? this.phone,
       email: email ?? this.email,
-      categories: categories ?? this.categories,
+      categoryIds: categoryIds ?? this.categoryIds,
       location: location ?? this.location,
       isOpen: isOpen ?? this.isOpen,
       rating: rating ?? this.rating,

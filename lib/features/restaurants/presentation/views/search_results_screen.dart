@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/error_widget.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../cubits/restaurant_cubit.dart';
 import '../../domain/entities/restaurant_entity.dart';
-import '../cubits/favorites_cubit.dart';
+import '../widgets/restaurant_card.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../home/presentation/cubits/home_cubit.dart';
+import '../../domain/entities/restaurant_category_entity.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class SearchResultsScreen extends StatefulWidget {
   final String initialQuery;
@@ -27,30 +31,17 @@ class SearchResultsScreen extends StatefulWidget {
 class _SearchResultsScreenState extends State<SearchResultsScreen>
     with SingleTickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
-  late TabController _categoryTabController;
   List<RestaurantEntity> _allRestaurants = [];
   List<RestaurantEntity> _filteredRestaurants = [];
-  String _selectedCategory = 'all';
+  List<RestaurantCategoryEntity> _availableCategories = [];
+  String? _selectedCategoryName; // null means 'all'
   final String _sortBy = 'relevance';
   final bool _freeDeliveryOnly = false;
-
-  final List<String> _categories = [
-    'all',
-    'restaurants',
-    'groceries',
-    'health_beauty',
-  ];
 
   @override
   void initState() {
     super.initState();
     _searchController.text = widget.initialQuery;
-    _categoryTabController = TabController(
-      length: _categories.length,
-      vsync: this,
-    );
-    _categoryTabController.addListener(_onCategoryChanged);
-
     // Initialize with provided restaurants or load all
     if (widget.initialRestaurants != null) {
       _allRestaurants = List.from(widget.initialRestaurants!);
@@ -69,20 +60,9 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
 
   @override
   void dispose() {
-    _categoryTabController.removeListener(_onCategoryChanged);
-    _categoryTabController.dispose();
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
-  }
-
-  void _onCategoryChanged() {
-    if (!_categoryTabController.indexIsChanging) {
-      setState(() {
-        _selectedCategory = _categories[_categoryTabController.index];
-        _applyFilters();
-      });
-    }
   }
 
   void _onSearchChanged() {
@@ -96,23 +76,38 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
       // Filter by search query
       var filtered = _allRestaurants.where((restaurant) {
         if (query.isNotEmpty) {
-          final nameMatch = restaurant.name.toLowerCase().contains(query);
+          final queryLower = query.toLowerCase();
+          final nameMatch = restaurant.name.toLowerCase().contains(queryLower);
           final descMatch = restaurant.description.toLowerCase().contains(
-            query,
+            queryLower,
           );
-          final categoryMatch = restaurant.categories.any(
-            (cat) => cat.toLowerCase().contains(query),
+
+          // Use _availableCategories (already populated from HomeCubit) to resolve IDs to names
+          final categoryMatch = restaurant.categoryIds.any((cid) {
+            final category = _availableCategories
+                .where((c) => c.id == cid)
+                .firstOrNull;
+            return category?.name.toLowerCase().contains(queryLower) ??
+                cid.toLowerCase().contains(queryLower);
+          });
+
+          final addressMatch = restaurant.address.toLowerCase().contains(
+            queryLower,
           );
-          final addressMatch = restaurant.address.toLowerCase().contains(query);
           if (!(nameMatch || descMatch || categoryMatch || addressMatch)) {
             return false;
           }
         }
 
         // Filter by category
-        if (_selectedCategory != 'all') {
-          // For now, we'll treat all as restaurants since we only have restaurant entity
-          // In future, you can filter by actual category type
+        if (_selectedCategoryName != null) {
+          final matchesCategory = restaurant.categoryIds.any((cid) {
+            final category = _availableCategories
+                .where((c) => c.id == cid)
+                .firstOrNull;
+            return category?.name == _selectedCategoryName;
+          });
+          if (!matchesCategory) return false;
         }
 
         // Filter by free delivery
@@ -169,6 +164,22 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
           children: [
             // Search Bar Header
             _buildSearchBar(context, l10n),
+            // Top Categories
+            BlocConsumer<HomeCubit, HomeState>(
+              listener: (context, state) {
+                if (state is HomeLoaded) {
+                  setState(() {
+                    _availableCategories = state.categories;
+                  });
+                }
+              },
+              builder: (context, state) {
+                final categories = state is HomeLoaded
+                    ? state.categories
+                    : <RestaurantCategoryEntity>[];
+                return _buildTopCategories(context, l10n, categories);
+              },
+            ),
             // Results List
             Expanded(
               child: BlocBuilder<RestaurantCubit, RestaurantState>(
@@ -194,13 +205,14 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
                     padding: const EdgeInsets.all(16),
                     itemCount: _filteredRestaurants.length,
                     itemBuilder: (context, index) {
-                      return _SearchResultCard(
-                        restaurant: _filteredRestaurants[index],
-                        onTap: () {
-                          context.push(
-                            '/restaurant/${_filteredRestaurants[index].id}',
-                          );
-                        },
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: SizedBox(
+                          height: 240.h,
+                          child: RestaurantCard(
+                            restaurant: _filteredRestaurants[index],
+                          ),
+                        ),
                       );
                     },
                   );
@@ -347,212 +359,106 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
       ),
     );
   }
-}
 
-class _SearchResultCard extends StatelessWidget {
-  final RestaurantEntity restaurant;
-  final VoidCallback onTap;
-
-  const _SearchResultCard({required this.restaurant, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 15,
-              offset: const Offset(0, 5),
-            ),
-          ],
-          border: Border.all(color: AppColors.border.withOpacity(0.5)),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Restaurant Logo
-            _buildRestaurantLogo(context),
-            const SizedBox(width: 16),
-            // Restaurant Info
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    restaurant.name,
-                    style: TextStyle(
-                      fontSize: screenWidth < 360 ? 14 : 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.star,
-                        color: AppColors.warning,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        restaurant.rating.toStringAsFixed(1),
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '(${restaurant.totalReviews})',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary.withOpacity(0.8),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.access_time_rounded,
-                        size: 14,
-                        color: AppColors.textSecondary,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${restaurant.estimatedDeliveryTime} ${l10n.minutesAbbreviation}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      const Icon(
-                        Icons.delivery_dining_rounded,
-                        size: 14,
-                        color: AppColors.textSecondary,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${restaurant.deliveryFee.toStringAsFixed(0)} ${l10n.currencySymbol}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.success,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+  Widget _buildTopCategories(
+    BuildContext context,
+    AppLocalizations l10n,
+    List<RestaurantCategoryEntity> dynamicCategories,
+  ) {
+    final displayItems = [
+      {
+        'isAll': true,
+        'asset':
+            'assets/images/resturants.jpeg', // Using restaurants asset as 'All'
+        'title': l10n.all,
+        'action': () {
+          setState(() {
+            _selectedCategoryName = null;
+            _applyFilters();
+          });
+        },
+      },
+      ...dynamicCategories.map(
+        (cat) => {
+          'isAll': false,
+          'imageUrl': cat.imageUrl,
+          'title': cat.name,
+          'action': () {
+            setState(() {
+              _selectedCategoryName = cat.name;
+              _applyFilters();
+            });
+          },
+        },
       ),
-    );
-  }
+    ];
 
-  Widget _buildRestaurantLogo(BuildContext context) {
-    const double size = 75;
+    return Container(
+      height: 110.h,
+      padding: EdgeInsets.symmetric(vertical: 12.h),
+      child: ListView.separated(
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        scrollDirection: Axis.horizontal,
+        itemCount: displayItems.length,
+        separatorBuilder: (_, __) => SizedBox(width: 12.w),
+        itemBuilder: (context, index) {
+          final item = displayItems[index];
+          final isSelected = item['isAll'] == true
+              ? _selectedCategoryName == null
+              : _selectedCategoryName == item['title'];
 
-    return Stack(
-      children: [
-        Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: AppColors.border.withOpacity(0.5),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 5,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: ClipOval(
-            child:
-                restaurant.imageUrl != null && restaurant.imageUrl!.isNotEmpty
-                ? CachedNetworkImage(
-                    imageUrl: restaurant.imageUrl!,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                      color: AppColors.border,
-                      child: const Center(
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                    ),
-                    errorWidget: (context, url, error) =>
-                        _buildFallbackLogo(size),
-                  )
-                : _buildFallbackLogo(size),
-          ),
-        ),
-        // Heart Icon
-        Positioned(
-          top: 0,
-          right: 0,
-          child: BlocBuilder<FavoritesCubit, FavoritesState>(
-            builder: (context, state) {
-              final isFavorite = state.favoriteRestaurantIds.contains(
-                restaurant.id,
-              );
-              return GestureDetector(
-                onTap: () {
-                  context.read<FavoritesCubit>().toggleRestaurant(
-                    restaurant.id,
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
+          return GestureDetector(
+            onTap: item['action'] as VoidCallback,
+            child: Column(
+              children: [
+                Container(
+                  width: 60.w,
+                  height: 60.w,
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
+                    border: isSelected
+                        ? Border.all(color: AppColors.primary, width: 2)
+                        : null,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 4,
-                        offset: Offset(0, 2),
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 5,
+                        offset: const Offset(0, 2),
                       ),
                     ],
                   ),
-                  child: Icon(
-                    isFavorite ? Icons.favorite : Icons.favorite_border,
-                    size: 14,
-                    color: isFavorite ? Colors.red : AppColors.textSecondary,
+                  child: ClipOval(
+                    child: item['imageUrl'] != null
+                        ? CachedNetworkImage(
+                            imageUrl: item['imageUrl'] as String,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => const Center(
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                            errorWidget: (context, url, error) =>
+                                const Icon(Icons.category),
+                          )
+                        : Image.asset(
+                            item['asset'] as String,
+                            fit: BoxFit.cover,
+                          ),
                   ),
                 ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFallbackLogo(double size) {
-    return Container(
-      color: AppColors.border,
-      child: Icon(
-        Icons.restaurant,
-        size: size * 0.4,
-        color: AppColors.textSecondary,
+                SizedBox(height: 8.h),
+                Text(
+                  item['title'] as String,
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                    color: isSelected
+                        ? AppColors.primary
+                        : AppColors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

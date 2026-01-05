@@ -20,6 +20,7 @@ import '../../features/admin/presentation/views/edit_restaurant_screen.dart';
 import '../../features/admin/presentation/views/admin_category_list_screen.dart';
 import '../../features/admin/presentation/views/admin_add_category_screen.dart';
 import '../../features/admin/presentation/views/admin_edit_category_screen.dart';
+import '../../features/admin/presentation/views/admin_restaurant_categories_screen.dart';
 import '../../features/admin/presentation/views/order_management_screen.dart';
 import '../../features/admin/presentation/views/user_management_screen.dart';
 import '../../features/admin/presentation/views/analytics_screen.dart';
@@ -220,6 +221,13 @@ class AdminRouter {
             name: 'settings',
             builder: (context, state) => const AdminSettingsScreen(),
           ),
+          // Restaurant Categories (Global)
+          GoRoute(
+            path: 'categories',
+            name: 'admin-categories',
+            builder: (context, state) =>
+                const AdminRestaurantCategoriesScreen(),
+          ),
           // Market Products - Nested routes
           GoRoute(
             path: 'market-products',
@@ -324,4 +332,3 @@ class ErrorScreen extends StatelessWidget {
     return const Scaffold(body: Center(child: Text('Page Not Found')));
   }
 }
-

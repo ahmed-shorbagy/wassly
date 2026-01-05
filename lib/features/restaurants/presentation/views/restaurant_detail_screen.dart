@@ -7,6 +7,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../../../../shared/widgets/error_widget.dart';
 import '../cubits/restaurant_cubit.dart';
+import '../../../home/presentation/cubits/home_cubit.dart';
 import '../../../orders/presentation/cubits/cart_cubit.dart';
 import '../../domain/entities/product_entity.dart';
 import '../../domain/entities/restaurant_entity.dart';
@@ -374,14 +375,33 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
                   ),
                   const SizedBox(height: 8),
                   // Cuisine Type
-                  Text(
-                    restaurant.categories.isNotEmpty
-                        ? restaurant.categories.join(', ')
-                        : l10n.restaurants,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textSecondary,
-                    ),
+                  BlocBuilder<HomeCubit, HomeState>(
+                    builder: (context, state) {
+                      String categoriesText = l10n.restaurants;
+                      if (state is HomeLoaded &&
+                          restaurant.categoryIds.isNotEmpty) {
+                        final names = restaurant.categoryIds
+                            .map((id) {
+                              final cat = state.categories
+                                  .where((c) => c.id == id)
+                                  .firstOrNull;
+                              return cat?.name;
+                            })
+                            .whereType<String>()
+                            .toList();
+
+                        if (names.isNotEmpty) {
+                          categoriesText = names.join(', ');
+                        }
+                      }
+                      return Text(
+                        categoriesText,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textSecondary,
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 12),
                   // Rating
@@ -671,18 +691,15 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
           )
         else
           SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final product = _filteredProducts[index];
-                final isLast = index == _filteredProducts.length - 1;
-                return _ProductListTile(
-                  product: product,
-                  restaurant: restaurant,
-                  isLast: isLast,
-                );
-              },
-              childCount: _filteredProducts.length,
-            ),
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final product = _filteredProducts[index];
+              final isLast = index == _filteredProducts.length - 1;
+              return _ProductListTile(
+                product: product,
+                restaurant: restaurant,
+                isLast: isLast,
+              );
+            }, childCount: _filteredProducts.length),
           ),
       ],
     );
@@ -713,7 +730,6 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
       ),
     );
   }
-
 
   Widget _buildBottomBar(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -766,51 +782,56 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
               ],
             ),
             child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.total,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    Text(
-                      '${currentTotal.toStringAsFixed(2)} ${l10n.currencySymbol}',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                    if (remaining > 0)
+              children: [
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        l10n.addProductsWorth(remaining.toStringAsFixed(2)),
-                        style: TextStyle(fontSize: 11, color: AppColors.error),
+                        l10n.total,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
-                  ],
-                ),
-              ),
-              ElevatedButton(
-                onPressed: remaining == 0 ? () => context.push('/cart') : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 16,
+                      Text(
+                        '${currentTotal.toStringAsFixed(2)} ${l10n.currencySymbol}',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      if (remaining > 0)
+                        Text(
+                          l10n.addProductsWorth(remaining.toStringAsFixed(2)),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: AppColors.error,
+                          ),
+                        ),
+                    ],
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
                 ),
-                child: Text(l10n.viewCart),
-              ),
-            ],
+                ElevatedButton(
+                  onPressed: remaining == 0
+                      ? () => context.push('/cart')
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(l10n.viewCart),
+                ),
+              ],
             ),
           ),
         );
@@ -837,7 +858,10 @@ class _ProductListTile extends StatelessWidget {
     return InkWell(
       onTap: product.isAvailable
           ? () async {
-              await context.read<CartCubit>().addItem(product, context: context);
+              await context.read<CartCubit>().addItem(
+                product,
+                context: context,
+              );
             }
           : null,
       child: Column(
@@ -861,7 +885,9 @@ class _ProductListTile extends StatelessWidget {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: product.imageUrl != null && product.imageUrl!.isNotEmpty
+                        child:
+                            product.imageUrl != null &&
+                                product.imageUrl!.isNotEmpty
                             ? CachedNetworkImage(
                                 imageUrl: product.imageUrl!,
                                 width: 100,
@@ -870,7 +896,9 @@ class _ProductListTile extends StatelessWidget {
                                 placeholder: (context, url) => Container(
                                   color: AppColors.border,
                                   child: const Center(
-                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
                                   ),
                                 ),
                                 errorWidget: (context, url, error) => Container(
@@ -892,44 +920,40 @@ class _ProductListTile extends StatelessWidget {
                               ),
                       ),
                     ),
-                // Add Button Overlay (Bottom Left)
-                Positioned(
-                  bottom: 8,
-                  left: 8,
-                  child: GestureDetector(
-                    onTap: product.isAvailable
-                        ? () async {
-                            await context.read<CartCubit>().addItem(
+                    // Add Button Overlay (Bottom Left)
+                    Positioned(
+                      bottom: 8,
+                      left: 8,
+                      child: GestureDetector(
+                        onTap: product.isAvailable
+                            ? () async {
+                                await context.read<CartCubit>().addItem(
                                   product,
                                   context: context,
                                 );
-                          }
-                        : null,
-                    child: Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: product.isAvailable
-                            ? AppColors.warning
-                            : AppColors.textSecondary,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.15),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                            spreadRadius: 0,
+                              }
+                            : null,
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: product.isAvailable
+                                ? AppColors.warning
+                                : AppColors.textSecondary,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.15),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                                spreadRadius: 0,
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.add,
-                        color: Colors.white,
-                        size: 18,
+                          child: Icon(Icons.add, color: Colors.white, size: 18),
+                        ),
                       ),
                     ),
-                  ),
-                ),
                   ],
                 ),
                 const SizedBox(width: 16),

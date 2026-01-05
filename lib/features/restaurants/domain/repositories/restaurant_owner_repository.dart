@@ -9,9 +9,13 @@ import '../entities/product_entity.dart';
 abstract class RestaurantOwnerRepository {
   /// Upload an image to Supabase Storage
   Future<Either<Failure, String>> uploadImage(String path, String fileName);
-  
+
   /// Upload an image file directly to Supabase
-  Future<Either<Failure, String>> uploadImageFile(File file, String bucketName, String folder);
+  Future<Either<Failure, String>> uploadImageFile(
+    File file,
+    String bucketName,
+    String folder,
+  );
 
   /// Pick an image from gallery or camera
   Future<Either<Failure, XFile?>> pickImage(ImageSource source);
@@ -24,13 +28,14 @@ abstract class RestaurantOwnerRepository {
     required String phone,
     required String email,
     required String password,
-    required List<String> categories,
+    required List<String> categoryIds,
     required LatLng location,
     required File imageFile,
     required double deliveryFee,
     required double minOrderAmount,
     required int estimatedDeliveryTime,
-    File? commercialRegistrationPhotoFile, // Optional photo file for commercial registration
+    File?
+    commercialRegistrationPhotoFile, // Optional photo file for commercial registration
   });
 
   /// Update restaurant information
@@ -87,4 +92,3 @@ abstract class RestaurantOwnerRepository {
     String restaurantId,
   );
 }
-

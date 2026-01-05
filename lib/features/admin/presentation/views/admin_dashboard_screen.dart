@@ -10,7 +10,7 @@ class AdminDashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -88,7 +88,9 @@ class AdminDashboardScreen extends StatelessWidget {
                                     Text(
                                       l10n.welcomeBack,
                                       style: TextStyle(
-                                        color: Colors.white.withValues(alpha: 0.9),
+                                        color: Colors.white.withValues(
+                                          alpha: 0.9,
+                                        ),
                                         fontSize: 16,
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -101,7 +103,9 @@ class AdminDashboardScreen extends StatelessWidget {
                                     color: Colors.white.withValues(alpha: 0.2),
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: Colors.white.withValues(alpha: 0.3),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.3,
+                                      ),
                                       width: 2,
                                     ),
                                   ),
@@ -223,9 +227,9 @@ class AdminDashboardScreen extends StatelessWidget {
               child: Text(
                 l10n.quickActions,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
               ),
             ),
           ),
@@ -240,21 +244,16 @@ class AdminDashboardScreen extends StatelessWidget {
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
               ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final items = _getDashboardItems(context);
-                  if (index >= items.length) return const SizedBox.shrink();
-                  return _buildEnhancedDashboardCard(context, items[index]);
-                },
-                childCount: _getDashboardItems(context).length,
-              ),
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final items = _getDashboardItems(context);
+                if (index >= items.length) return const SizedBox.shrink();
+                return _buildEnhancedDashboardCard(context, items[index]);
+              }, childCount: _getDashboardItems(context).length),
             ),
           ),
 
           // Bottom spacing
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 20),
-          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 20)),
         ],
       ),
     );
@@ -297,6 +296,13 @@ class AdminDashboardScreen extends StatelessWidget {
         color: Colors.red,
         route: '/admin/orders',
         gradient: [Colors.red.shade400, Colors.red.shade600],
+      ),
+      _DashboardItem(
+        title: 'Categories',
+        icon: Icons.category,
+        color: Colors.amber,
+        route: '/admin/categories',
+        gradient: [Colors.amber.shade400, Colors.amber.shade600],
       ),
       _DashboardItem(
         title: l10n.settings,
@@ -408,20 +414,14 @@ class AdminDashboardScreen extends StatelessWidget {
       builder: (context, value, child) {
         return Transform.scale(
           scale: 0.9 + (value * 0.1),
-          child: Opacity(
-            opacity: value,
-            child: child,
-          ),
+          child: Opacity(opacity: value, child: child),
         );
       },
       child: Card(
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(
-            color: AppColors.border,
-            width: 1,
-          ),
+          side: BorderSide(color: AppColors.border, width: 1),
         ),
         child: InkWell(
           onTap: () => context.push(item.route),
@@ -464,11 +464,7 @@ class AdminDashboardScreen extends StatelessWidget {
                           color: Colors.white.withValues(alpha: 0.25),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Icon(
-                          item.icon,
-                          color: Colors.white,
-                          size: 28,
-                        ),
+                        child: Icon(item.icon, color: Colors.white, size: 28),
                       ),
                       // Title
                       Text(
@@ -526,4 +522,3 @@ class _DashboardItem {
     required this.gradient,
   });
 }
-

@@ -11,6 +11,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/error_widget.dart';
 import '../../../home/presentation/cubits/home_cubit.dart';
 import '../../../home/domain/entities/banner_entity.dart';
+import '../../domain/entities/restaurant_category_entity.dart';
 import '../cubits/restaurant_cubit.dart';
 import '../../domain/entities/restaurant_entity.dart';
 // import '../cubits/favorites_cubit.dart'; // Favorites not used in new card design
@@ -19,6 +20,7 @@ import '../../../ads/presentation/cubits/startup_ad_customer_cubit.dart';
 import '../../../../shared/widgets/startup_ad_popup.dart';
 import '../../../delivery_address/presentation/cubits/delivery_address_cubit.dart';
 import 'package:lottie/lottie.dart';
+import '../widgets/restaurant_card.dart';
 
 class CustomerHomeScreen extends StatefulWidget {
   const CustomerHomeScreen({super.key});
@@ -44,6 +46,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
         // Load restaurants when screen first loads
         context.read<RestaurantCubit>().getAllRestaurants();
         context.read<StartupAdCustomerCubit>().loadActiveStartupAds();
+        // Load home data (banners, categories)
+        context.read<HomeCubit>().loadHome();
       }
     });
   }
@@ -62,14 +66,26 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
         _filteredRestaurants = List.from(_allRestaurants);
       } else {
         _filteredRestaurants = _allRestaurants.where((restaurant) {
-          final nameMatch = restaurant.name.toLowerCase().contains(query);
+          final queryLower = query.toLowerCase();
+          final nameMatch = restaurant.name.toLowerCase().contains(queryLower);
           final descMatch = restaurant.description.toLowerCase().contains(
-            query,
+            queryLower,
           );
-          final categoryMatch = restaurant.categories.any(
-            (cat) => cat.toLowerCase().contains(query),
+
+          // Resolve category names from IDs to allow searching by category name
+          final homeState = context.read<HomeCubit>().state;
+          final categories = homeState is HomeLoaded
+              ? homeState.categories
+              : [];
+          final categoryMatch = restaurant.categoryIds.any((cid) {
+            final category = categories.where((c) => c.id == cid).firstOrNull;
+            return category?.name.toLowerCase().contains(queryLower) ??
+                cid.toLowerCase().contains(queryLower);
+          });
+
+          final addressMatch = restaurant.address.toLowerCase().contains(
+            queryLower,
           );
-          final addressMatch = restaurant.address.toLowerCase().contains(query);
           return nameMatch || descMatch || categoryMatch || addressMatch;
         }).toList();
       }
@@ -86,7 +102,6 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           BlocProvider<RestaurantCubit>.value(
             value: context.read<RestaurantCubit>(),
           ),
-          BlocProvider<HomeCubit>(create: (_) => HomeCubit()..loadHome()),
           BlocProvider<MarketProductCustomerCubit>(
             create: (context) =>
                 context.read<MarketProductCustomerCubit>()
@@ -274,24 +289,34 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           ),
 
           // Market Products Categories Section
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: ResponsiveHelper.padding(horizontal: 16, top: 16),
-              child: _MarketProductCategoriesSection(
-                onCategoryTap: (category, isMarket) {
-                  if (isMarket) {
-                    // Navigate to market products screen
-                    context.push('/market-products');
-                  } else if (category == l10n.restaurants) {
-                    // Navigate to search results with all restaurants
-                    context.push('/search', extra: _allRestaurants);
-                  } else {
-                    // Navigate to search results with category filter for restaurants
-                    context.push('/search?q=${Uri.encodeComponent(category)}');
-                  }
-                },
-              ),
-            ),
+          BlocBuilder<HomeCubit, HomeState>(
+            builder: (context, state) {
+              final categories = state is HomeLoaded
+                  ? state.categories
+                  : <RestaurantCategoryEntity>[];
+              return SliverToBoxAdapter(
+                child: Padding(
+                  padding: ResponsiveHelper.padding(horizontal: 16, top: 16),
+                  child: _MarketProductCategoriesSection(
+                    categories: categories,
+                    onCategoryTap: (category, isMarket) {
+                      if (category == l10n.market) {
+                        // Navigate to market products screen
+                        context.push('/market-products');
+                      } else if (category == l10n.restaurants) {
+                        // Navigate to search results with all restaurants
+                        context.push('/search', extra: _allRestaurants);
+                      } else {
+                        // Navigate to search results with category filter for restaurants
+                        context.push(
+                          '/search?q=${Uri.encodeComponent(category)}',
+                        );
+                      }
+                    },
+                  ),
+                ),
+              );
+            },
           ),
 
           // Discounted Restaurants Banner (in Market Section)
@@ -586,197 +611,6 @@ class _BannerCarousel extends StatelessWidget {
   }
 }
 
-class _RestaurantCard extends StatelessWidget {
-  final RestaurantEntity restaurant;
-
-  const _RestaurantCard({required this.restaurant});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 10.r,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () {
-          context.push('/restaurant/${restaurant.id}');
-        },
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Top image section - Image First Optimization
-            Expanded(
-              flex: 3,
-              child: Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(20.r),
-                      topRight: Radius.circular(20.r),
-                    ),
-                    child: Container(
-                      width: double.infinity,
-                      height: double.infinity,
-                      color: AppColors.surface,
-                      child: CachedNetworkImage(
-                        imageUrl:
-                            (restaurant.imageUrl != null &&
-                                restaurant.imageUrl!.isNotEmpty)
-                            ? restaurant.imageUrl!
-                            : '',
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: double.infinity,
-                        placeholder: (context, url) => Container(
-                          color: AppColors.surface,
-                          child: const Center(
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                        ),
-                        errorWidget: (context, url, error) => Container(
-                          color: AppColors.surface,
-                          child: Icon(
-                            Icons.restaurant,
-                            size: 40.w,
-                            color: AppColors.textSecondary.withOpacity(0.5),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Optional discount badge on image
-                  if (restaurant.isDiscountActive)
-                    Positioned(
-                      top: 10,
-                      right: 10,
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 8.w,
-                          vertical: 4.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(10.r),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 4,
-                            ),
-                          ],
-                        ),
-                        child: Text(
-                          'خصم',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: ResponsiveHelper.fontSize(10),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-
-            // Bottom info section - More compact
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: ResponsiveHelper.padding(horizontal: 12, vertical: 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      restaurant.name,
-                      style: TextStyle(
-                        fontSize: ResponsiveHelper.fontSize(14),
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-
-                    Row(
-                      children: [
-                        const Icon(Icons.star, color: Colors.amber, size: 14),
-                        SizedBox(width: 4.w),
-                        Text(
-                          restaurant.rating.toStringAsFixed(1),
-                          style: TextStyle(
-                            fontSize: ResponsiveHelper.fontSize(12),
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        SizedBox(width: 4.w),
-                        Text(
-                          '(${restaurant.totalReviews})',
-                          style: TextStyle(
-                            fontSize: ResponsiveHelper.fontSize(10),
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.access_time,
-                          size: 12.w,
-                          color: AppColors.textSecondary,
-                        ),
-                        SizedBox(width: 4.w),
-                        Builder(
-                          builder: (context) {
-                            final l10n = AppLocalizations.of(context)!;
-                            return Text(
-                              '${restaurant.estimatedDeliveryTime} ${l10n.minutesAbbreviation}',
-                              style: TextStyle(
-                                fontSize: ResponsiveHelper.fontSize(11),
-                                color: AppColors.textSecondary,
-                              ),
-                            );
-                          },
-                        ),
-                        const Spacer(),
-                        Builder(
-                          builder: (context) {
-                            final l10n = AppLocalizations.of(context)!;
-                            return Text(
-                              '${restaurant.deliveryFee.toStringAsFixed(0)} ${l10n.currencySymbol}',
-                              style: TextStyle(
-                                fontSize: ResponsiveHelper.fontSize(12),
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.success,
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 // Three separate horizontal rows for restaurants; each row scrolls independently.
 class _ThreeRowRestaurantScroller extends StatelessWidget {
   final List<RestaurantEntity> restaurants;
@@ -809,7 +643,7 @@ class _ThreeRowRestaurantScroller extends StatelessWidget {
             final restaurant = rowItems[index];
             return SizedBox(
               width: cardWidth,
-              child: _RestaurantCard(restaurant: restaurant),
+              child: RestaurantCard(restaurant: restaurant),
             );
           },
         ),
@@ -829,27 +663,35 @@ class _ThreeRowRestaurantScroller extends StatelessWidget {
 }
 
 class _MarketProductCategoriesSection extends StatelessWidget {
+  final List<RestaurantCategoryEntity> categories;
   final Function(String, bool) onCategoryTap; // category, isMarket
 
-  const _MarketProductCategoriesSection({required this.onCategoryTap});
+  const _MarketProductCategoriesSection({
+    required this.categories,
+    required this.onCategoryTap,
+  });
 
   Widget _buildCategoryCard(
     BuildContext context,
-    String imagePath,
+    String? imageUrl,
+    String? assetPath,
     String title,
     VoidCallback onTap,
   ) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16.r),
+          color: const Color(0xFFF7F7F7), // Slightly more grey for depth
+          borderRadius: BorderRadius.circular(
+            24.r,
+          ), // More rounded as requested
+          border: Border.all(color: Colors.black.withValues(alpha: 0.04)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 10.r,
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 10,
               offset: const Offset(0, 4),
             ),
           ],
@@ -864,15 +706,34 @@ class _MarketProductCategoriesSection extends StatelessWidget {
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12.r),
               ),
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) => Icon(
-                  Icons.category_rounded,
-                  size: 24.w,
-                  color: AppColors.textSecondary,
-                ),
-              ),
+              child: assetPath != null
+                  ? Image.asset(
+                      assetPath,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) => Icon(
+                        Icons.category_rounded,
+                        size: 24.w,
+                        color: AppColors.textSecondary,
+                      ),
+                    )
+                  : (imageUrl != null && imageUrl.isNotEmpty)
+                  ? CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      fit: BoxFit.contain,
+                      placeholder: (context, url) => const Center(
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                      errorWidget: (context, url, error) => Icon(
+                        Icons.category_rounded,
+                        size: 24.w,
+                        color: AppColors.textSecondary,
+                      ),
+                    )
+                  : Icon(
+                      Icons.category_rounded,
+                      size: 24.w,
+                      color: AppColors.textSecondary,
+                    ),
             ),
             SizedBox(width: 10.w),
             Expanded(
@@ -899,6 +760,46 @@ class _MarketProductCategoriesSection extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
 
+    final List<Map<String, dynamic>> displayItems = [
+      {
+        'asset': 'assets/images/market.jpeg',
+        'title': l10n.market,
+        'isMarket': true,
+        'categoryName': null,
+      },
+      {
+        'asset': 'assets/images/resturants.jpeg',
+        'title': l10n.restaurants,
+        'isMarket': false,
+        'categoryName': l10n.restaurants,
+      },
+      {
+        'asset': 'assets/images/poultry_meat_seafood.jpeg',
+        'title': isArabic ? "اللحوم" : "Meats",
+        'isMarket': true,
+        'categoryName': 'Meats',
+      },
+      {
+        'asset': 'assets/images/fruits&veg.jpeg',
+        'title': isArabic ? "خضروات وفواكه" : "Fruits & Vegs",
+        'isMarket': true,
+        'categoryName': 'Fruits & Vegetables',
+      },
+      {
+        'asset':
+            'assets/images/market.jpeg', // Using market as supermarket placeholder
+        'title': isArabic ? "سوبر ماركت" : "Super Markets",
+        'isMarket': true,
+        'categoryName': 'Supermarket',
+      },
+      {
+        'asset': 'assets/images/cake&cofee.jpeg',
+        'title': l10n.bakery,
+        'isMarket': true,
+        'categoryName': 'Bakery',
+      },
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -912,70 +813,72 @@ class _MarketProductCategoriesSection extends StatelessWidget {
           ),
         ),
         ResponsiveHelper.spacing(height: 12),
-        // Categories Grid
-        Builder(
-          builder: (context) {
-            final categories = [
-              {
-                'image': 'assets/images/market.jpeg',
-                'title': l10n.market,
-                'isMarket': true,
-                'category': null,
-              },
-              {
-                'image': 'assets/images/resturants.jpeg',
-                'title': l10n.restaurants,
-                'isMarket': false,
-                'category': null,
-              },
-              {
-                'image': 'assets/images/meats.jpeg',
-                'title': l10n.meat,
-                'isMarket': false,
-                'category': l10n.meat,
-              },
-              {
-                'image': 'assets/images/fruits&veg.jpeg',
-                'title': l10n.fruitsVegetables,
-                'isMarket': false,
-                'category': l10n.fruitsVegetables,
-              },
-            ];
-
-            return GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: EdgeInsets.zero,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12.w,
-                mainAxisSpacing: 12.h,
-                mainAxisExtent: 70.h,
+        // Horizontal Scrollable Categories in 2 Rows
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          padding: EdgeInsets.zero,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // First Row
+              Row(
+                children: List.generate((displayItems.length / 2).ceil(), (
+                  index,
+                ) {
+                  final item = displayItems[index];
+                  return Padding(
+                    padding: EdgeInsetsDirectional.only(end: 12.w),
+                    child: SizedBox(
+                      width: 160.w,
+                      height: 70.h,
+                      child: _buildCategoryCard(
+                        context,
+                        item['imageUrl'] as String?,
+                        item['asset'] as String?,
+                        item['title'] as String,
+                        () {
+                          onCategoryTap(
+                            item['categoryName'] as String? ??
+                                item['title'] as String,
+                            item['isMarket'] as bool,
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                }),
               ),
-              itemCount: categories.length,
-              itemBuilder: (context, index) {
-                final item = categories[index];
-                return _buildCategoryCard(
-                  context,
-                  item['image'] as String,
-                  item['title'] as String,
-                  () {
-                    final title = item['title'] as String;
-                    final isMarket = item['isMarket'] as bool;
-                    final category = item['category'] as String?;
-
-                    if (isMarket) {
-                      onCategoryTap(title, true);
-                    } else if (title == l10n.restaurants) {
-                      onCategoryTap(title, false);
-                    } else if (category != null) {
-                      onCategoryTap(category, false);
-                    }
-                  },
-                );
-              },
-            );
-          },
+              ResponsiveHelper.spacing(height: 12),
+              // Second Row
+              Row(
+                children: List.generate(displayItems.length ~/ 2, (index) {
+                  final item =
+                      displayItems[index + (displayItems.length / 2).ceil()];
+                  return Padding(
+                    padding: EdgeInsetsDirectional.only(end: 12.w),
+                    child: SizedBox(
+                      width: 160.w,
+                      height: 70.h,
+                      child: _buildCategoryCard(
+                        context,
+                        item['imageUrl'] as String?,
+                        item['asset'] as String?,
+                        item['title'] as String,
+                        () {
+                          onCategoryTap(
+                            item['categoryName'] as String? ??
+                                item['title'] as String,
+                            item['isMarket'] as bool,
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -1039,7 +942,7 @@ class _DiscountRestaurantsBannerCarousel extends StatelessWidget {
         // Banner Carousel
         CarouselSlider(
           options: CarouselOptions(
-            height: bannerHeight + 50.h, // Add space for text below
+            height: bannerHeight + 65.h, // Add space for text below
             viewportFraction: 0.95,
             enlargeCenterPage: false,
             enableInfiniteScroll: restaurants.length > 1,
@@ -1067,9 +970,7 @@ class _DiscountRestaurantsBannerCarousel extends StatelessWidget {
                         // For now, let's assume we can navigate to product details directly or open restaurant with product highlighted
                         // If route doesn't exist, we fallback to restaurant detail
                         // Since I don't know if product detail route exists nested,
-                        // I will navigate to restaurant detail and pass productId as query param if needed,
-                        // or assuming clear requirement: "nav him to this product inside the resturant page"
-                        // I'll assume passing query parameter 'productId' to restaurant page is enough for now,
+                        // I will assume passing query parameter 'productId' to restaurant page is enough for now,
                         // or find if there is a product detail route.
                         // I'll push to restaurant details with extra product ID.
                         context.push(

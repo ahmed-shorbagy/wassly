@@ -31,11 +31,6 @@ class _AdminAddMarketProductScreenState
   bool _isAvailable = true;
   String? _selectedCategory;
 
-  List<String> _getAvailableCategories(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return MarketProductCategories.getCategories(l10n);
-  }
-
   @override
   void dispose() {
     _nameController.dispose();
@@ -279,7 +274,7 @@ class _AdminAddMarketProductScreenState
 
                     // Category - Required
                     DropdownButtonFormField<String>(
-                      value: _selectedCategory,
+                      initialValue: _selectedCategory,
                       decoration: InputDecoration(
                         labelText: l10n.productCategory,
                         hintText: l10n.pleaseSelectCategory,
@@ -288,11 +283,12 @@ class _AdminAddMarketProductScreenState
                         ),
                         prefixIcon: const Icon(Icons.category),
                       ),
-                      items: _getAvailableCategories(context)
+                      items: MarketProductCategories.getCategoryMap(l10n)
+                          .entries
                           .map(
-                            (category) => DropdownMenuItem(
-                              value: category,
-                              child: Text(category),
+                            (entry) => DropdownMenuItem(
+                              value: entry.key,
+                              child: Text(entry.value),
                             ),
                           )
                           .toList(),

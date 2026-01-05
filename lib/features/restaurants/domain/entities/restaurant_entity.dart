@@ -9,7 +9,7 @@ class RestaurantEntity extends Equatable {
   final String address;
   final String phone;
   final String? email;
-  final List<String> categories;
+  final List<String> categoryIds;
   final Map<String, dynamic> location;
   final bool isOpen;
   final double rating;
@@ -36,7 +36,7 @@ class RestaurantEntity extends Equatable {
     required this.address,
     required this.phone,
     this.email,
-    this.categories = const [],
+    this.categoryIds = const [],
     required this.location,
     required this.isOpen,
     this.rating = 0.0,
@@ -78,7 +78,7 @@ class RestaurantEntity extends Equatable {
     address,
     phone,
     email,
-    categories,
+    categoryIds,
     location,
     isOpen,
     rating,

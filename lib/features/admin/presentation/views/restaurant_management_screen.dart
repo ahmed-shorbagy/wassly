@@ -8,6 +8,8 @@ import '../../../../shared/widgets/loading_widget.dart';
 import '../../../../shared/widgets/error_widget.dart';
 import '../../../restaurants/domain/entities/restaurant_entity.dart';
 import '../../../restaurants/presentation/cubits/restaurant_cubit.dart';
+import '../../../restaurants/domain/entities/restaurant_category_entity.dart';
+import '../cubits/admin_restaurant_category_cubit.dart';
 import '../cubits/admin_cubit.dart';
 
 class RestaurantManagementScreen extends StatefulWidget {
@@ -28,6 +30,7 @@ class _RestaurantManagementScreenState
   void initState() {
     super.initState();
     _loadRestaurants();
+    context.read<AdminRestaurantCategoryCubit>().loadCategories();
     _searchController.addListener(_filterRestaurants);
   }
 
@@ -44,6 +47,12 @@ class _RestaurantManagementScreenState
 
   void _filterRestaurants() {
     final query = _searchController.text.toLowerCase().trim();
+    final categoryState = context.read<AdminRestaurantCategoryCubit>().state;
+    List<RestaurantCategoryEntity> allCategories = [];
+    if (categoryState is AdminRestaurantCategoriesLoaded) {
+      allCategories = categoryState.categories;
+    }
+
     setState(() {
       if (query.isEmpty) {
         _filteredRestaurants = List.from(_allRestaurants);
@@ -52,7 +61,15 @@ class _RestaurantManagementScreenState
           final nameMatch = restaurant.name.toLowerCase().contains(query);
           final addressMatch = restaurant.address.toLowerCase().contains(query);
           final phoneMatch = restaurant.phone.toLowerCase().contains(query);
-          final categoryMatch = restaurant.categories.any((cat) => cat.toLowerCase().contains(query));
+
+          // Category name match
+          final restaurantCategories = allCategories.where(
+            (cat) => restaurant.categoryIds.contains(cat.id),
+          );
+          final categoryMatch = restaurantCategories.any(
+            (cat) => cat.name.toLowerCase().contains(query),
+          );
+
           return nameMatch || addressMatch || phoneMatch || categoryMatch;
         }).toList();
       }
@@ -65,7 +82,7 @@ class _RestaurantManagementScreenState
       canPop: false,
       onPopInvoked: (didPop) async {
         if (didPop) return;
-        
+
         // Check if we can pop (go back to previous route)
         if (context.canPop()) {
           context.pop();
@@ -86,11 +103,11 @@ class _RestaurantManagementScreenState
             ),
           ],
         ),
-      body: Column(
-        children: [
-          // Search Bar
-          Padding(
-            padding: const EdgeInsets.all(16),
+        body: Column(
+          children: [
+            // Search Bar
+            Padding(
+              padding: const EdgeInsets.all(16),
               child: StatefulBuilder(
                 builder: (context, setState) => TextField(
                   controller: _searchController,
@@ -117,92 +134,99 @@ class _RestaurantManagementScreenState
                   ),
                 ),
               ),
-          ),
-          // Restaurants List
-          Expanded(
-            child: BlocConsumer<AdminCubit, AdminState>(
-              listener: (context, state) {
-                if (state is RestaurantStatusUpdated) {
-                  context.showSuccessSnackBar('Restaurant status updated');
-                  _loadRestaurants();
-                } else if (state is RestaurantDeletedSuccess) {
-                  context.showSuccessSnackBar('Restaurant deleted successfully');
-                  _loadRestaurants();
-                } else if (state is AdminError) {
-                  context.showErrorSnackBar(state.message);
-                }
-              },
-              builder: (context, adminState) {
-                return BlocBuilder<RestaurantCubit, RestaurantState>(
-                  builder: (context, state) {
-                    if (state is RestaurantLoading) {
-                      return const LoadingWidget();
-                    }
+            ),
+            // Restaurants List
+            Expanded(
+              child: BlocConsumer<AdminCubit, AdminState>(
+                listener: (context, state) {
+                  if (state is RestaurantStatusUpdated) {
+                    context.showSuccessSnackBar('Restaurant status updated');
+                    _loadRestaurants();
+                  } else if (state is RestaurantDeletedSuccess) {
+                    context.showSuccessSnackBar(
+                      'Restaurant deleted successfully',
+                    );
+                    _loadRestaurants();
+                  } else if (state is AdminError) {
+                    context.showErrorSnackBar(state.message);
+                  }
+                },
+                builder: (context, adminState) {
+                  return BlocBuilder<RestaurantCubit, RestaurantState>(
+                    builder: (context, state) {
+                      if (state is RestaurantLoading) {
+                        return const LoadingWidget();
+                      }
 
-                    if (state is RestaurantError) {
-                      return ErrorDisplayWidget(
-                        message: state.message,
-                        onRetry: _loadRestaurants,
-                      );
-                    }
-
-                    if (state is RestaurantsLoaded) {
-                      // Update all restaurants list
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted) {
-                          setState(() {
-                            _allRestaurants = state.restaurants;
-                            _filteredRestaurants = _allRestaurants;
-                          });
-                          _filterRestaurants(); // Apply current search filter
-                        }
-                      });
-                      
-                      // Use filtered list for display
-                      final displayList = _filteredRestaurants.isEmpty && _searchController.text.isEmpty
-                          ? state.restaurants
-                          : _filteredRestaurants;
-                      
-                      if (displayList.isEmpty && _searchController.text.isNotEmpty) {
-                        return Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(32),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.search_off,
-                                  size: 64,
-                                  color: AppColors.textSecondary.withValues(alpha: 0.5),
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'No restaurants found',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                      if (state is RestaurantError) {
+                        return ErrorDisplayWidget(
+                          message: state.message,
+                          onRetry: _loadRestaurants,
                         );
                       }
-                      
-                      if (displayList.isEmpty) {
-                        return _buildEmptyState();
-                      }
-                      return _buildRestaurantList(displayList);
-                    }
 
-                    return _buildEmptyState();
-                  },
-                );
-              },
+                      if (state is RestaurantsLoaded) {
+                        // Update all restaurants list
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted) {
+                            setState(() {
+                              _allRestaurants = state.restaurants;
+                              _filteredRestaurants = _allRestaurants;
+                            });
+                            _filterRestaurants(); // Apply current search filter
+                          }
+                        });
+
+                        // Use filtered list for display
+                        final displayList =
+                            _filteredRestaurants.isEmpty &&
+                                _searchController.text.isEmpty
+                            ? state.restaurants
+                            : _filteredRestaurants;
+
+                        if (displayList.isEmpty &&
+                            _searchController.text.isNotEmpty) {
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(32),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.search_off,
+                                    size: 64,
+                                    color: AppColors.textSecondary.withValues(
+                                      alpha: 0.5,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'No restaurants found',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }
+
+                        if (displayList.isEmpty) {
+                          return _buildEmptyState();
+                        }
+                        return _buildRestaurantList(displayList);
+                      }
+
+                      return _buildEmptyState();
+                    },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () => context.push('/admin/restaurants/create'),
           icon: const Icon(Icons.add),
@@ -295,7 +319,11 @@ class _RestaurantManagementScreenState
                           ),
                           Row(
                             children: [
-                              const Icon(Icons.star, color: Colors.amber, size: 16),
+                              const Icon(
+                                Icons.star,
+                                color: Colors.amber,
+                                size: 16,
+                              ),
                               const SizedBox(width: 4),
                               Text(
                                 restaurant.rating.toStringAsFixed(1),
@@ -311,22 +339,58 @@ class _RestaurantManagementScreenState
                       const SizedBox(height: 4),
 
                       // Categories
-                      Text(
-                        restaurant.categories.join(', '),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      BlocBuilder<
+                        AdminRestaurantCategoryCubit,
+                        AdminRestaurantCategoryState
+                      >(
+                        builder: (context, state) {
+                          String categoriesText = 'No categories';
+                          if (state is AdminRestaurantCategoriesLoaded) {
+                            final names = restaurant.categoryIds
+                                .map((id) {
+                                  final cat = state.categories.firstWhere(
+                                    (c) => c.id == id,
+                                    orElse: () => RestaurantCategoryEntity(
+                                      id: id,
+                                      name: 'Unknown',
+                                      imageUrl: '',
+                                      isActive: true,
+                                      displayOrder: 0,
+                                      createdAt: DateTime.now(),
+                                    ),
+                                  );
+                                  return cat.name;
+                                })
+                                .where((name) => name != 'Unknown')
+                                .toList();
+
+                            if (names.isNotEmpty) {
+                              categoriesText =
+                                  'Categories: ${names.join(', ')}';
+                            }
+                          }
+
+                          return Text(
+                            categoriesText,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          );
+                        },
                       ),
                       const SizedBox(height: 8),
 
                       // Address
                       Row(
                         children: [
-                          Icon(Icons.location_on,
-                              size: 14, color: AppColors.textSecondary),
+                          Icon(
+                            Icons.location_on,
+                            size: 14,
+                            color: AppColors.textSecondary,
+                          ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
@@ -346,8 +410,11 @@ class _RestaurantManagementScreenState
                       // Phone
                       Row(
                         children: [
-                          Icon(Icons.phone,
-                              size: 14, color: AppColors.textSecondary),
+                          Icon(
+                            Icons.phone,
+                            size: 14,
+                            color: AppColors.textSecondary,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             restaurant.phone,
@@ -414,7 +481,9 @@ class _RestaurantManagementScreenState
                             activeThumbColor: AppColors.warning,
                           ),
                           Text(
-                            restaurant.hasDiscount ? 'Discount ON' : 'Discount OFF',
+                            restaurant.hasDiscount
+                                ? 'Discount ON'
+                                : 'Discount OFF',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -509,7 +578,10 @@ class _RestaurantManagementScreenState
   }
 
   void _toggleRestaurantDiscount(String restaurantId, bool hasDiscount) {
-    context.read<AdminCubit>().updateRestaurantDiscount(restaurantId, hasDiscount);
+    context.read<AdminCubit>().updateRestaurantDiscount(
+      restaurantId,
+      hasDiscount,
+    );
   }
 
   void _navigateToProducts(RestaurantEntity restaurant) {
@@ -549,4 +621,3 @@ class _RestaurantManagementScreenState
     );
   }
 }
-

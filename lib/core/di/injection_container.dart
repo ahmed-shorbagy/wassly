@@ -38,6 +38,11 @@ import '../../features/restaurants/data/repositories/restaurant_owner_repository
 import '../../features/restaurants/domain/repositories/food_category_repository.dart';
 import '../../features/restaurants/data/repositories/food_category_repository_impl.dart';
 import '../../features/restaurants/presentation/cubits/food_category_cubit.dart';
+import '../../features/restaurants/domain/repositories/restaurant_category_repository.dart';
+import '../../features/restaurants/data/repositories/restaurant_category_repository_impl.dart';
+import '../../features/admin/presentation/cubits/admin_restaurant_category_cubit.dart';
+import '../../features/home/presentation/cubits/home_cubit.dart';
+
 import '../../features/market_products/domain/repositories/market_product_repository.dart';
 import '../../features/market_products/data/repositories/market_product_repository_impl.dart';
 import '../../features/market_products/presentation/cubits/market_product_cubit.dart';
@@ -81,6 +86,7 @@ class InjectionContainer {
   late final MarketProductRepository _marketProductRepository;
   late final AdRepository _adRepository;
   late final FoodCategoryRepository _foodCategoryRepository;
+  late final RestaurantCategoryRepository _restaurantCategoryRepository;
   late final DriverRepository _driverRepository;
   late final DeliveryAddressRepository _deliveryAddressRepository;
   late final ArticleRepository _articleRepository;
@@ -91,7 +97,7 @@ class InjectionContainer {
     _firestore = FirebaseFirestore.instance;
     _firebaseStorage = FirebaseStorage.instance;
     _networkInfo = NetworkInfoImpl();
-    
+
     // Supabase services
     _supabaseService = SupabaseService();
     _imageUploadHelper = ImageUploadHelper(supabaseService: _supabaseService);
@@ -108,9 +114,7 @@ class InjectionContainer {
       networkInfo: _networkInfo,
     );
 
-    _orderRepository = OrderRepositoryImpl(
-      firestore: _firestore,
-    );
+    _orderRepository = OrderRepositoryImpl(firestore: _firestore);
 
     _restaurantOwnerRepository = RestaurantOwnerRepositoryImpl(
       firestore: _firestore,
@@ -118,13 +122,9 @@ class InjectionContainer {
       supabaseService: _supabaseService,
     );
 
-    _favoritesRepository = FavoritesRepositoryImpl(
-      firestore: _firestore,
-    );
+    _favoritesRepository = FavoritesRepositoryImpl(firestore: _firestore);
 
-    _cartRepository = CartRepositoryImpl(
-      firestore: _firestore,
-    );
+    _cartRepository = CartRepositoryImpl(firestore: _firestore);
 
     _marketProductRepository = MarketProductRepositoryImpl(
       firestore: _firestore,
@@ -141,6 +141,11 @@ class InjectionContainer {
       networkInfo: _networkInfo,
     );
 
+    _restaurantCategoryRepository = RestaurantCategoryRepositoryImpl(
+      firestore: _firestore,
+      storage: _firebaseStorage,
+    );
+
     _driverRepository = DriverRepositoryImpl(
       firestore: _firestore,
       networkInfo: _networkInfo,
@@ -151,20 +156,16 @@ class InjectionContainer {
       firestore: _firestore,
     );
 
-    _articleRepository = ArticleRepositoryImpl(
-      firestore: _firestore,
-    );
+    _articleRepository = ArticleRepositoryImpl(firestore: _firestore);
   }
-  
+
   // Getters for accessing services from other parts of the app
   SupabaseService get supabaseService => _supabaseService;
   ImageUploadHelper get imageUploadHelper => _imageUploadHelper;
 
   List<BlocProvider> getBlocProviders() {
     return [
-      BlocProvider<LocaleCubit>(
-        create: (_) => LocaleCubit()..load(),
-      ),
+      BlocProvider<LocaleCubit>(create: (_) => LocaleCubit()..load()),
       BlocProvider<AuthCubit>(
         create: (_) => AuthCubit(
           loginUseCase: LoginUseCase(_authRepository),
@@ -190,10 +191,8 @@ class InjectionContainer {
         ),
       ),
       BlocProvider<CartCubit>(
-        create: (_) => CartCubit(
-          repository: _cartRepository,
-          firebaseAuth: _firebaseAuth,
-        ),
+        create: (_) =>
+            CartCubit(repository: _cartRepository, firebaseAuth: _firebaseAuth),
       ),
       BlocProvider<FavoritesCubit>(
         create: (_) => FavoritesCubit(
@@ -212,49 +211,40 @@ class InjectionContainer {
         ),
       ),
       BlocProvider<ProductManagementCubit>(
-        create: (_) => ProductManagementCubit(
-          repository: _restaurantOwnerRepository,
-        ),
+        create: (_) =>
+            ProductManagementCubit(repository: _restaurantOwnerRepository),
       ),
       BlocProvider<RestaurantOnboardingCubit>(
-        create: (_) => RestaurantOnboardingCubit(
-          repository: _restaurantOwnerRepository,
-        ),
+        create: (_) =>
+            RestaurantOnboardingCubit(repository: _restaurantOwnerRepository),
       ),
       BlocProvider<AdminCubit>(
-        create: (_) => AdminCubit(
-          repository: _restaurantOwnerRepository,
+        create: (_) => AdminCubit(repository: _restaurantOwnerRepository),
+      ),
+      BlocProvider<AdminRestaurantCategoryCubit>(
+        create: (_) => AdminRestaurantCategoryCubit(
+          repository: _restaurantCategoryRepository,
         ),
       ),
       BlocProvider<AdminProductCubit>(
-        create: (_) => AdminProductCubit(
-          repository: _restaurantOwnerRepository,
-        ),
+        create: (_) =>
+            AdminProductCubit(repository: _restaurantOwnerRepository),
       ),
       BlocProvider<MarketProductCubit>(
-        create: (_) => MarketProductCubit(
-          repository: _marketProductRepository,
-        ),
+        create: (_) => MarketProductCubit(repository: _marketProductRepository),
       ),
       BlocProvider<MarketProductCustomerCubit>(
-        create: (_) => MarketProductCustomerCubit(
-          repository: _marketProductRepository,
-        ),
+        create: (_) =>
+            MarketProductCustomerCubit(repository: _marketProductRepository),
       ),
       BlocProvider<AdManagementCubit>(
-        create: (_) => AdManagementCubit(
-          repository: _adRepository,
-        ),
+        create: (_) => AdManagementCubit(repository: _adRepository),
       ),
       BlocProvider<StartupAdCustomerCubit>(
-        create: (_) => StartupAdCustomerCubit(
-          repository: _adRepository,
-        ),
+        create: (_) => StartupAdCustomerCubit(repository: _adRepository),
       ),
       BlocProvider<FoodCategoryCubit>(
-        create: (_) => FoodCategoryCubit(
-          repository: _foodCategoryRepository,
-        ),
+        create: (_) => FoodCategoryCubit(repository: _foodCategoryRepository),
       ),
       BlocProvider<DriverCubit>(
         create: (_) => DriverCubit(
@@ -268,10 +258,13 @@ class InjectionContainer {
           authCubit: context.read<AuthCubit>(),
         ),
       ),
+      BlocProvider<HomeCubit>(
+        create: (_) =>
+            HomeCubit(categoryRepository: _restaurantCategoryRepository)
+              ..loadHome(),
+      ),
       BlocProvider<ArticleCubit>(
-        create: (_) => ArticleCubit(
-          repository: _articleRepository,
-        ),
+        create: (_) => ArticleCubit(repository: _articleRepository),
       ),
     ];
   }
@@ -279,13 +272,9 @@ class InjectionContainer {
   // Minimal providers for web app - only what's needed for landing page
   List<BlocProvider> getWebBlocProviders() {
     return [
-      BlocProvider<LocaleCubit>(
-        create: (_) => LocaleCubit()..load(),
-      ),
+      BlocProvider<LocaleCubit>(create: (_) => LocaleCubit()..load()),
       BlocProvider<ArticleCubit>(
-        create: (_) => ArticleCubit(
-          repository: _articleRepository,
-        ),
+        create: (_) => ArticleCubit(repository: _articleRepository),
       ),
     ];
   }
