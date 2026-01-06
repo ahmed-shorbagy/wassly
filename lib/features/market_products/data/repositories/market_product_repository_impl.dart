@@ -30,13 +30,10 @@ class MarketProductRepositoryImpl implements MarketProductRepository {
         bucketName: bucketName,
         folder: folder,
       );
-      return result.fold(
-        (failure) => Left(failure),
-        (url) {
-          AppLogger.logSuccess('Image uploaded successfully');
-          return Right(url);
-        },
-      );
+      return result.fold((failure) => Left(failure), (url) {
+        AppLogger.logSuccess('Image uploaded successfully');
+        return Right(url);
+      });
     } catch (e) {
       AppLogger.logError('Error uploading image', error: e);
       return Left(ServerFailure('Failed to upload image: $e'));
@@ -44,7 +41,8 @@ class MarketProductRepositoryImpl implements MarketProductRepository {
   }
 
   @override
-  Future<Either<Failure, List<MarketProductEntity>>> getAllMarketProducts() async {
+  Future<Either<Failure, List<MarketProductEntity>>>
+  getAllMarketProducts() async {
     try {
       AppLogger.logInfo('Fetching all market products');
 
@@ -98,6 +96,43 @@ class MarketProductRepositoryImpl implements MarketProductRepository {
   }
 
   @override
+  Future<Either<Failure, List<MarketProductEntity>>>
+  getMarketProductsByRestaurantId(String restaurantId) async {
+    try {
+      AppLogger.logInfo(
+        'Fetching market products for restaurant: $restaurantId',
+      );
+
+      final snapshot = await firestore
+          .collection('market_products')
+          .where('restaurantId', isEqualTo: restaurantId)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      final products = snapshot.docs
+          .map((doc) => MarketProductModel.fromFirestore(doc))
+          .toList();
+
+      AppLogger.logSuccess(
+        'Fetched ${products.length} market products for restaurant: $restaurantId',
+      );
+      return Right(products);
+    } on FirebaseException catch (e) {
+      AppLogger.logError(
+        'Firebase error fetching market products for restaurant',
+        error: e,
+      );
+      return Left(ServerFailure('Failed to fetch products: ${e.message}'));
+    } catch (e) {
+      AppLogger.logError(
+        'Error fetching market products for restaurant',
+        error: e,
+      );
+      return Left(ServerFailure('Failed to fetch products'));
+    }
+  }
+
+  @override
   Future<Either<Failure, MarketProductEntity>> createMarketProduct(
     MarketProductEntity product,
   ) async {
@@ -117,6 +152,7 @@ class MarketProductRepositoryImpl implements MarketProductRepository {
         imageUrl: product.imageUrl,
         category: product.category,
         isAvailable: product.isAvailable,
+        restaurantId: product.restaurantId,
         createdAt: product.createdAt,
         updatedAt: product.updatedAt,
       );
@@ -196,9 +232,11 @@ class MarketProductRepositoryImpl implements MarketProductRepository {
       );
       return Left(ServerFailure('Failed to update availability: ${e.message}'));
     } catch (e) {
-      AppLogger.logError('Error updating market product availability', error: e);
+      AppLogger.logError(
+        'Error updating market product availability',
+        error: e,
+      );
       return Left(ServerFailure('Failed to update availability'));
     }
   }
 }
-

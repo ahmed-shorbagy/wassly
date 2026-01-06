@@ -1524,4 +1524,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shopByCategory => 'Shop by Category';
+
+  @override
+  String get mostSoldProducts => 'Most Sold Products';
 }

@@ -681,7 +681,7 @@ class _MarketProductCategoriesSection extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
         decoration: BoxDecoration(
           color: const Color(0xFFF7F7F7), // Slightly more grey for depth
           borderRadius: BorderRadius.circular(
@@ -699,8 +699,8 @@ class _MarketProductCategoriesSection extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 50.w,
-              height: 50.w,
+              width: 38.w,
+              height: 38.w,
               padding: EdgeInsets.all(6.r),
               decoration: BoxDecoration(
                 color: AppColors.surface,
@@ -712,7 +712,7 @@ class _MarketProductCategoriesSection extends StatelessWidget {
                       fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) => Icon(
                         Icons.category_rounded,
-                        size: 24.w,
+                        size: 20.w,
                         color: AppColors.textSecondary,
                       ),
                     )
@@ -725,22 +725,22 @@ class _MarketProductCategoriesSection extends StatelessWidget {
                       ),
                       errorWidget: (context, url, error) => Icon(
                         Icons.category_rounded,
-                        size: 24.w,
+                        size: 20.w,
                         color: AppColors.textSecondary,
                       ),
                     )
                   : Icon(
                       Icons.category_rounded,
-                      size: 24.w,
+                      size: 20.w,
                       color: AppColors.textSecondary,
                     ),
             ),
-            SizedBox(width: 10.w),
+            SizedBox(width: 8.w),
             Expanded(
               child: Text(
                 title,
                 style: TextStyle(
-                  fontSize: ResponsiveHelper.fontSize(13),
+                  fontSize: ResponsiveHelper.fontSize(12),
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
                   height: 1.1,
@@ -788,9 +788,9 @@ class _MarketProductCategoriesSection extends StatelessWidget {
       {
         'asset':
             'assets/images/market.jpeg', // Using market as supermarket placeholder
-        'title': isArabic ? "سوبر ماركت" : "Super Markets",
-        'isMarket': true,
-        'categoryName': 'Supermarket',
+        'title': l10n.groceries,
+        'isMarket': false,
+        'categoryName': 'Groceries',
       },
       {
         'asset': 'assets/images/cake&cofee.jpeg',
@@ -830,8 +830,8 @@ class _MarketProductCategoriesSection extends StatelessWidget {
                   return Padding(
                     padding: EdgeInsetsDirectional.only(end: 12.w),
                     child: SizedBox(
-                      width: 160.w,
-                      height: 70.h,
+                      width: 130.w,
+                      height: 55.h,
                       child: _buildCategoryCard(
                         context,
                         item['imageUrl'] as String?,
@@ -858,8 +858,8 @@ class _MarketProductCategoriesSection extends StatelessWidget {
                   return Padding(
                     padding: EdgeInsetsDirectional.only(end: 12.w),
                     child: SizedBox(
-                      width: 160.w,
-                      height: 70.h,
+                      width: 130.w,
+                      height: 55.h,
                       child: _buildCategoryCard(
                         context,
                         item['imageUrl'] as String?,

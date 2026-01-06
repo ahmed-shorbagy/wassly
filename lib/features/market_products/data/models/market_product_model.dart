@@ -10,6 +10,7 @@ class MarketProductModel extends MarketProductEntity {
     super.imageUrl,
     super.category,
     required super.isAvailable,
+    super.restaurantId,
     required super.createdAt,
     required super.updatedAt,
   });
@@ -23,6 +24,7 @@ class MarketProductModel extends MarketProductEntity {
       imageUrl: json['imageUrl'],
       category: json['category'],
       isAvailable: json['isAvailable'] ?? true,
+      restaurantId: json['restaurantId'],
       createdAt: json['createdAt'] is Timestamp
           ? (json['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
@@ -41,6 +43,7 @@ class MarketProductModel extends MarketProductEntity {
       imageUrl: entity.imageUrl,
       category: entity.category,
       isAvailable: entity.isAvailable,
+      restaurantId: entity.restaurantId,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     );
@@ -54,6 +57,7 @@ class MarketProductModel extends MarketProductEntity {
       'imageUrl': imageUrl,
       'category': category,
       'isAvailable': isAvailable,
+      'restaurantId': restaurantId,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
     };
@@ -67,6 +71,7 @@ class MarketProductModel extends MarketProductEntity {
       'imageUrl': imageUrl,
       'category': category,
       'isAvailable': isAvailable,
+      'restaurantId': restaurantId,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
     };
@@ -85,6 +90,7 @@ class MarketProductModel extends MarketProductEntity {
     String? imageUrl,
     String? category,
     bool? isAvailable,
+    String? restaurantId,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -96,9 +102,9 @@ class MarketProductModel extends MarketProductEntity {
       imageUrl: imageUrl ?? this.imageUrl,
       category: category ?? this.category,
       isAvailable: isAvailable ?? this.isAvailable,
+      restaurantId: restaurantId ?? this.restaurantId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }
-

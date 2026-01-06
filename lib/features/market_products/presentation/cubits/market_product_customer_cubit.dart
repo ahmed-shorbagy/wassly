@@ -10,14 +10,22 @@ class MarketProductCustomerCubit extends Cubit<MarketProductCustomerState> {
   final MarketProductRepository repository;
 
   MarketProductCustomerCubit({required this.repository})
-      : super(MarketProductCustomerInitial());
+    : super(MarketProductCustomerInitial());
 
-  Future<void> loadMarketProducts() async {
+  Future<void> loadMarketProducts({String? restaurantId}) async {
     try {
       emit(MarketProductCustomerLoading());
-      AppLogger.logInfo('Loading market products for customer');
+      if (restaurantId != null) {
+        AppLogger.logInfo(
+          'Loading market products for restaurant: $restaurantId',
+        );
+      } else {
+        AppLogger.logInfo('Loading market products for customer');
+      }
 
-      final result = await repository.getAllMarketProducts();
+      final result = restaurantId != null
+          ? await repository.getMarketProductsByRestaurantId(restaurantId)
+          : await repository.getAllMarketProducts();
 
       result.fold(
         (failure) {
@@ -29,8 +37,9 @@ class MarketProductCustomerCubit extends Cubit<MarketProductCustomerState> {
         },
         (products) {
           // Filter only available products
-          final availableProducts =
-              products.where((p) => p.isAvailable).toList();
+          final availableProducts = products
+              .where((p) => p.isAvailable)
+              .toList();
           AppLogger.logSuccess(
             'Market products loaded: ${availableProducts.length}',
           );
@@ -43,4 +52,3 @@ class MarketProductCustomerCubit extends Cubit<MarketProductCustomerState> {
     }
   }
 }
-

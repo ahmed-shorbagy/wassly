@@ -8,6 +8,7 @@ class MarketProductEntity extends Equatable {
   final String? imageUrl;
   final String? category;
   final bool isAvailable;
+  final String? restaurantId;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -19,21 +20,21 @@ class MarketProductEntity extends Equatable {
     this.imageUrl,
     this.category,
     required this.isAvailable,
+    this.restaurantId,
     required this.createdAt,
     required this.updatedAt,
   });
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        description,
-        price,
-        imageUrl,
-        category,
-        isAvailable,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    name,
+    description,
+    price,
+    imageUrl,
+    category,
+    isAvailable,
+    createdAt,
+    updatedAt,
+  ];
 }
-

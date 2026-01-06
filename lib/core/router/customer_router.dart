@@ -165,8 +165,12 @@ class CustomerRouter {
         path: '/market-products',
         name: 'market-products',
         builder: (context, state) {
-          // Pass extra data (like category) to the screen
-          return MarketProductsScreen();
+          final restaurantId = state.uri.queryParameters['restaurantId'];
+          final restaurantName = state.uri.queryParameters['restaurantName'];
+          return MarketProductsScreen(
+            restaurantId: restaurantId,
+            restaurantName: restaurantName,
+          );
         },
       ),
       GoRoute(

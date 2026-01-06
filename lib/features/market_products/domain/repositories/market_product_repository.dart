@@ -19,6 +19,10 @@ abstract class MarketProductRepository {
     String productId,
   );
 
+  /// Get market products by restaurant ID
+  Future<Either<Failure, List<MarketProductEntity>>>
+  getMarketProductsByRestaurantId(String restaurantId);
+
   /// Create a new market product
   Future<Either<Failure, MarketProductEntity>> createMarketProduct(
     MarketProductEntity product,
@@ -38,4 +42,3 @@ abstract class MarketProductRepository {
     bool isAvailable,
   );
 }
-

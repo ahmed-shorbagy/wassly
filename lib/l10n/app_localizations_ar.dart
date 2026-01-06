@@ -528,7 +528,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get subtotal => 'المجموع الفرعي';
 
   @override
-  String get deliveryFee => 'رسوم التوصيل';
+  String get deliveryFee => 'رسوم التوصيل (ريال)';
 
   @override
   String get tax => 'الضريبة';
@@ -719,7 +719,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get searchProducts => 'ابحث عن المنتجات...';
 
   @override
-  String get searchRestaurants => 'ابحث عن المطاعم...';
+  String get searchRestaurants => 'ابحث عن مطعم...';
 
   @override
   String get deleteProduct => 'حذف المنتج';
@@ -923,7 +923,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get phoneNumberRequired => 'رقم الهاتف مطلوب';
 
   @override
-  String get pleaseEnterValidPhoneNumber => 'يرجى إدخال رقم هاتف صحيح';
+  String get pleaseEnterValidPhoneNumber => 'الرجاء إدخال رقم هاتف صحيح';
 
   @override
   String get deliveryAddress => 'عنوان التوصيل';
@@ -1514,4 +1514,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get shopByCategory => 'تسوق حسب الفئة';
+
+  @override
+  String get mostSoldProducts => 'الأكثر مبيعاً';
 }

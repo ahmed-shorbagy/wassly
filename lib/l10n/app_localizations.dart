@@ -3037,6 +3037,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Shop by Category'**
   String get shopByCategory;
+
+  /// No description provided for @mostSoldProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Sold Products'**
+  String get mostSoldProducts;
 }
 
 class _AppLocalizationsDelegate

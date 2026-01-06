@@ -29,7 +29,21 @@ class RestaurantCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
-          context.push('/restaurant/${restaurant.id}');
+          // Check if this is a supermarket/grocery store
+          // We check if the category list includes anything related to groceries
+          final isSupermarket = restaurant.categoryIds.any(
+            (cid) =>
+                cid.toLowerCase().contains('groceries') ||
+                cid.toLowerCase().contains('supermarket'),
+          );
+
+          if (isSupermarket) {
+            context.push(
+              '/market-products?restaurantId=${restaurant.id}&restaurantName=${Uri.encodeComponent(restaurant.name)}',
+            );
+          } else {
+            context.push('/restaurant/${restaurant.id}');
+          }
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

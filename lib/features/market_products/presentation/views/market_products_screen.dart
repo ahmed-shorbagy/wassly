@@ -16,7 +16,14 @@ import '../cubits/market_product_customer_cubit.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class MarketProductsScreen extends StatefulWidget {
-  const MarketProductsScreen({super.key});
+  final String? restaurantId;
+  final String? restaurantName;
+
+  const MarketProductsScreen({
+    super.key,
+    this.restaurantId,
+    this.restaurantName,
+  });
 
   @override
   State<MarketProductsScreen> createState() => _MarketProductsScreenState();
@@ -37,7 +44,9 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
     // Load products when screen opens
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        context.read<MarketProductCustomerCubit>().loadMarketProducts();
+        context.read<MarketProductCustomerCubit>().loadMarketProducts(
+          restaurantId: widget.restaurantId,
+        );
       }
     });
   }
@@ -141,12 +150,13 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
             ),
             flexibleSpace: FlexibleSpaceBar(
               title: Text(
-                _selectedCategory != null
-                    ? MarketProductCategories.getCategoryName(
-                        _selectedCategory!,
-                        l10n,
-                      )
-                    : l10n.market,
+                widget.restaurantName ??
+                    (_selectedCategory != null
+                        ? MarketProductCategories.getCategoryName(
+                            _selectedCategory!,
+                            l10n,
+                          )
+                        : l10n.market),
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -331,7 +341,7 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
                         );
                       }),
                     ),
-                    SizedBox(height: 12.h),
+                    SizedBox(height: 10.h),
                     // Row 2
                     Row(
                       children: List.generate((categories.length / 3).ceil(), (
@@ -349,7 +359,7 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
                         );
                       }),
                     ),
-                    SizedBox(height: 12.h),
+                    SizedBox(height: 10.h),
                     // Row 3
                     Row(
                       children: List.generate(
@@ -373,6 +383,7 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
               ),
             ),
             // Optional: Banner or other sections below
+            _buildMostSoldSection(context, l10n),
           ],
 
           // 2. If Category Selected or Search -> Show Products Grid (Existing Design)
@@ -487,12 +498,12 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
         });
       },
       child: Container(
-        width: 100.w,
+        width: 90.w,
         margin: EdgeInsetsDirectional.only(end: 12.w),
         child: Column(
           children: [
             Container(
-              height: 80.h,
+              height: 72.h,
               width: double.infinity,
               decoration: BoxDecoration(
                 color: const Color(0xFFF7F7F7),
@@ -510,7 +521,7 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
                 ],
               ),
               child: Padding(
-                padding: EdgeInsets.all(10.r),
+                padding: EdgeInsets.all(8.r),
                 child: imagePath != null
                     ? Image.asset(imagePath, fit: BoxFit.contain)
                     : Icon(
@@ -522,13 +533,13 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
             ),
             SizedBox(height: 6.h),
             SizedBox(
-              height: 34.h,
+              height: 30.h,
               child: Center(
                 child: Text(
                   MarketProductCategories.getCategoryName(category, l10n),
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: ResponsiveHelper.fontSize(10.5),
+                    fontSize: ResponsiveHelper.fontSize(9.5),
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
                     height: 1.1,
@@ -541,6 +552,67 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildMostSoldSection(BuildContext context, AppLocalizations l10n) {
+    return BlocBuilder<MarketProductCustomerCubit, MarketProductCustomerState>(
+      builder: (context, state) {
+        if (state is MarketProductCustomerLoaded && state.products.isNotEmpty) {
+          // Select products to show in "Most Sold" section
+          // For now, we take the first few products or randomize them
+          // Since there's no sales count, this is a placeholder for the logic
+          final mostSoldProducts = state.products.take(10).toList();
+
+          return SliverToBoxAdapter(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Text(
+                    l10n.mostSoldProducts,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 260.h,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: mostSoldProducts.length,
+                    itemBuilder: (context, index) {
+                      final product = mostSoldProducts[index];
+                      return Container(
+                        width: 160.w,
+                        margin: EdgeInsetsDirectional.only(end: 16.w),
+                        child: ProductCard(
+                          productId: product.id,
+                          productName: product.name,
+                          description: product.description,
+                          price: product.price,
+                          imageUrl: product.imageUrl,
+                          isAvailable: product.isAvailable,
+                          isMarketProduct: true,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                SizedBox(height: 24.h),
+              ],
+            ),
+          );
+        }
+        return const SliverToBoxAdapter(child: SizedBox.shrink());
+      },
     );
   }
 }
