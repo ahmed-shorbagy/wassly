@@ -60,7 +60,7 @@ import '../../features/delivery_address/presentation/cubits/delivery_address_cub
 import '../../features/articles/domain/repositories/article_repository.dart';
 import '../../features/articles/data/repositories/article_repository_impl.dart';
 import '../../features/articles/presentation/cubits/article_cubit.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+
 import '../network/network_info.dart';
 import '../network/supabase_service.dart';
 import '../utils/image_upload_helper.dart';
@@ -73,7 +73,6 @@ class InjectionContainer {
 
   late final FirebaseAuth _firebaseAuth;
   late final FirebaseFirestore _firestore;
-  late final FirebaseStorage _firebaseStorage;
   late final NetworkInfo _networkInfo;
   late final SupabaseService _supabaseService;
   late final ImageUploadHelper _imageUploadHelper;
@@ -95,7 +94,6 @@ class InjectionContainer {
     // External dependencies
     _firebaseAuth = FirebaseAuth.instance;
     _firestore = FirebaseFirestore.instance;
-    _firebaseStorage = FirebaseStorage.instance;
     _networkInfo = NetworkInfoImpl();
 
     // Supabase services
@@ -118,7 +116,6 @@ class InjectionContainer {
 
     _restaurantOwnerRepository = RestaurantOwnerRepositoryImpl(
       firestore: _firestore,
-      storage: _firebaseStorage,
       supabaseService: _supabaseService,
     );
 
@@ -143,7 +140,7 @@ class InjectionContainer {
 
     _restaurantCategoryRepository = RestaurantCategoryRepositoryImpl(
       firestore: _firestore,
-      storage: _firebaseStorage,
+      supabaseService: _supabaseService,
     );
 
     _driverRepository = DriverRepositoryImpl(

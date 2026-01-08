@@ -254,6 +254,8 @@ class _RestaurantManagementScreenState
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
+      color: Colors.white,
+      surfaceTintColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Column(
         children: [
@@ -262,10 +264,9 @@ class _RestaurantManagementScreenState
             children: [
               // Restaurant Image
               ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  bottomLeft: Radius.circular(12),
-                ),
+                borderRadius: BorderRadiusDirectional.horizontal(
+                  start: const Radius.circular(12),
+                ).resolve(Directionality.of(context)),
                 child: restaurant.imageUrl != null
                     ? CachedNetworkImage(
                         imageUrl: restaurant.imageUrl!,
@@ -275,7 +276,7 @@ class _RestaurantManagementScreenState
                         placeholder: (context, url) => Container(
                           width: 120,
                           height: 120,
-                          color: AppColors.surface,
+                          color: Colors.grey[100],
                           child: const Center(
                             child: CircularProgressIndicator(),
                           ),
@@ -283,14 +284,14 @@ class _RestaurantManagementScreenState
                         errorWidget: (context, url, error) => Container(
                           width: 120,
                           height: 120,
-                          color: AppColors.surface,
+                          color: Colors.grey[100],
                           child: const Icon(Icons.restaurant, size: 40),
                         ),
                       )
                     : Container(
                         width: 120,
                         height: 120,
-                        color: AppColors.surface,
+                        color: Colors.grey[100],
                         child: const Icon(Icons.restaurant, size: 40),
                       ),
               ),
@@ -435,9 +436,10 @@ class _RestaurantManagementScreenState
           // Actions
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: const BorderRadius.only(
+            decoration: const BoxDecoration(
+              color: Colors.transparent,
+              border: Border(top: BorderSide(color: Color(0xFFF0F0F0))),
+              borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(12),
                 bottomRight: Radius.circular(12),
               ),
@@ -456,14 +458,17 @@ class _RestaurantManagementScreenState
                                 _toggleRestaurantStatus(restaurant.id, value),
                             activeThumbColor: Colors.green,
                           ),
-                          Text(
-                            restaurant.isOpen ? 'Open' : 'Closed',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: restaurant.isOpen
-                                  ? Colors.green
-                                  : AppColors.error,
+                          Flexible(
+                            child: Text(
+                              restaurant.isOpen ? 'Open' : 'Closed',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: restaurant.isOpen
+                                    ? Colors.green
+                                    : AppColors.error,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
@@ -480,16 +485,19 @@ class _RestaurantManagementScreenState
                                 _toggleRestaurantDiscount(restaurant.id, value),
                             activeThumbColor: AppColors.warning,
                           ),
-                          Text(
-                            restaurant.hasDiscount
-                                ? 'Discount ON'
-                                : 'Discount OFF',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: restaurant.hasDiscount
-                                  ? AppColors.warning
-                                  : AppColors.textSecondary,
+                          Flexible(
+                            child: Text(
+                              restaurant.hasDiscount
+                                  ? 'Discount ON'
+                                  : 'Discount OFF',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: restaurant.hasDiscount
+                                    ? AppColors.warning
+                                    : AppColors.textSecondary,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],

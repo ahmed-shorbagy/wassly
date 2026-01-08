@@ -1,22 +1,24 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/utils/logger.dart';
+import '../../../../core/network/supabase_service.dart';
+import '../../../../core/constants/supabase_constants.dart';
 import '../../domain/entities/restaurant_category_entity.dart';
 import '../../domain/repositories/restaurant_category_repository.dart';
 import '../models/restaurant_category_model.dart';
 
 class RestaurantCategoryRepositoryImpl implements RestaurantCategoryRepository {
   final FirebaseFirestore _firestore;
-  final FirebaseStorage _storage;
+  final SupabaseService _supabaseService;
 
   RestaurantCategoryRepositoryImpl({
     required FirebaseFirestore firestore,
-    required FirebaseStorage storage,
+    required SupabaseService supabaseService,
   }) : _firestore = firestore,
-       _storage = storage;
+       _supabaseService = supabaseService;
 
   @override
   Future<Either<Failure, List<RestaurantCategoryEntity>>>
@@ -48,12 +50,26 @@ class RestaurantCategoryRepositoryImpl implements RestaurantCategoryRepository {
       String? imageUrl;
 
       if (imageFile != null) {
-        final ref = _storage
-            .ref()
-            .child('restaurant_categories')
-            .child('$id.jpg');
-        await ref.putFile(imageFile);
-        imageUrl = await ref.getDownloadURL();
+        AppLogger.logInfo('Uploading category image to Supabase...');
+        final result = await _supabaseService.uploadImage(
+          file: imageFile,
+          bucketName: SupabaseConstants.restaurantImagesBucket,
+          folder: 'categories',
+          fileName: '$id.jpg',
+        );
+
+        result.fold(
+          (failure) {
+            AppLogger.logError(
+              'Failed to upload category image',
+              error: failure.message,
+            );
+            throw Exception('Failed to upload image: ${failure.message}');
+          },
+          (url) {
+            imageUrl = url;
+          },
+        );
       }
 
       final category = RestaurantCategoryModel(
@@ -96,12 +112,26 @@ class RestaurantCategoryRepositoryImpl implements RestaurantCategoryRepository {
       String? imageUrl = currentCategory.imageUrl;
 
       if (imageFile != null) {
-        final ref = _storage
-            .ref()
-            .child('restaurant_categories')
-            .child('$id.jpg');
-        await ref.putFile(imageFile);
-        imageUrl = await ref.getDownloadURL();
+        AppLogger.logInfo('Uploading updated category image to Supabase...');
+        final result = await _supabaseService.uploadImage(
+          file: imageFile,
+          bucketName: SupabaseConstants.restaurantImagesBucket,
+          folder: 'categories',
+          fileName: '$id.jpg',
+        );
+
+        result.fold(
+          (failure) {
+            AppLogger.logError(
+              'Failed to upload category image',
+              error: failure.message,
+            );
+            throw Exception('Failed to upload image: ${failure.message}');
+          },
+          (url) {
+            imageUrl = url;
+          },
+        );
       }
 
       final updatedCategory = RestaurantCategoryModel(

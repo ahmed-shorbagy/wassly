@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:dartz/dartz.dart';
 import 'package:image_picker/image_picker.dart';
@@ -18,14 +17,12 @@ import '../models/product_model.dart';
 
 class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
   final FirebaseFirestore firestore;
-  final FirebaseStorage storage;
   final FirebaseAuth firebaseAuth;
   final ImagePicker imagePicker;
   final SupabaseService supabaseService;
 
   RestaurantOwnerRepositoryImpl({
     required this.firestore,
-    required this.storage,
     FirebaseAuth? firebaseAuth,
     ImagePicker? imagePicker,
     SupabaseService? supabaseService,
