@@ -1,4 +1,4 @@
-package com.wassly.app
+package com.toorder.app
 
 import io.flutter.embedding.android.FlutterActivity
 

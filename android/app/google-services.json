@@ -7,9 +7,47 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:54852093651:android:6db658d840711857493626",
+        "mobilesdk_app_id": "1:54852093651:android:7773d99bb38212d7493626",
         "android_client_info": {
-          "package_name": "com.wassly.app"
+          "package_name": "com.toorder.admin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAsPP9TgJVWdlBCRdj54FWCwUoBriF-iyk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:54852093651:android:222128beb999ecc9493626",
+        "android_client_info": {
+          "package_name": "com.toorder.customer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAsPP9TgJVWdlBCRdj54FWCwUoBriF-iyk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:54852093651:android:9bf49ff3ccda2c40493626",
+        "android_client_info": {
+          "package_name": "com.toorder.partner"
         }
       },
       "oauth_client": [],

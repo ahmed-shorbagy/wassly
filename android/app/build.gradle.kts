@@ -8,8 +8,17 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+import java.util.Properties
+import java.io.FileInputStream
+
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+}
+
 android {
-    namespace = "com.wassly.app"
+    namespace = "com.toorder.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -24,7 +33,7 @@ android {
 
     defaultConfig {
         // Default application ID (will be overridden by flavors)
-        applicationId = "com.wassly.app"
+        applicationId = "com.toorder.app"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -36,31 +45,38 @@ android {
     productFlavors {
         create("customer") {
             dimension = "app"
-            applicationId = "com.wassly.customer"
-            resValue("string", "app_name", "Wassly")
+            applicationId = "com.toorder.customer"
+            resValue("string", "app_name", "To Order")
             manifestPlaceholders["appIcon"] = "@mipmap/ic_launcher_customer"
         }
         
         create("partner") {
             dimension = "app"
-            applicationId = "com.wassly.partner"
-            resValue("string", "app_name", "Wassly Partner")
+            applicationId = "com.toorder.partner"
+            resValue("string", "app_name", "To Order Partner")
             manifestPlaceholders["appIcon"] = "@mipmap/ic_launcher_partner"
         }
         
         create("admin") {
             dimension = "app"
-            applicationId = "com.wassly.admin"
-            resValue("string", "app_name", "Wassly Admin")
+            applicationId = "com.toorder.admin"
+            resValue("string", "app_name", "To Order Admin")
             manifestPlaceholders["appIcon"] = "@mipmap/ic_launcher_admin"
+        }
+    }
+
+    signingConfigs {
+        create("release") {
+            keyAlias = keystoreProperties.getProperty("keyAlias")
+            keyPassword = keystoreProperties.getProperty("keyPassword")
+            storeFile = keystoreProperties.getProperty("storeFile")?.let { file(it) }
+            storePassword = keystoreProperties.getProperty("storePassword")
         }
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 }
