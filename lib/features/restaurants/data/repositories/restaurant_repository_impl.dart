@@ -33,7 +33,7 @@ class RestaurantRepositoryImpl implements RestaurantRepository {
           'Found ${snapshot.docs.length} restaurants in Firestore',
         );
 
-        final restaurants = snapshot.docs.map((doc) {
+        final List<RestaurantEntity> restaurants = snapshot.docs.map((doc) {
           try {
             final data = doc.data();
             AppLogger.logInfo(
@@ -97,15 +97,19 @@ class RestaurantRepositoryImpl implements RestaurantRepository {
   ) async {
     if (await networkInfo.isConnected) {
       try {
-        AppLogger.logInfo('Fetching products from Firestore for restaurant: $restaurantId');
-        
+        AppLogger.logInfo(
+          'Fetching products from Firestore for restaurant: $restaurantId',
+        );
+
         // First try to get all products for the restaurant
         final snapshot = await firestore
             .collection(AppConstants.productsCollection)
             .where('restaurantId', isEqualTo: restaurantId)
             .get();
 
-        AppLogger.logInfo('Found ${snapshot.docs.length} total products in Firestore for restaurant');
+        AppLogger.logInfo(
+          'Found ${snapshot.docs.length} total products in Firestore for restaurant',
+        );
 
         // Filter products in memory to include:
         // 1. Products with isAvailable == true
@@ -115,31 +119,35 @@ class RestaurantRepositoryImpl implements RestaurantRepository {
               try {
                 // Ensure document has a valid ID
                 if (doc.id.isEmpty) {
-                  AppLogger.logWarning('Skipping product with empty document ID');
+                  AppLogger.logWarning(
+                    'Skipping product with empty document ID',
+                  );
                   return null;
                 }
-                
+
                 final data = doc.data();
                 final isAvailable = data['isAvailable'];
                 // Include product if isAvailable is true, null, or missing
                 if (isAvailable == false) {
                   return null; // Skip unavailable products
                 }
-                
+
                 // Remove 'id' from data if it exists, then set it to doc.id
                 // This ensures the document ID is always used, not any id in the data
                 final cleanData = Map<String, dynamic>.from(data);
                 cleanData.remove('id'); // Remove any existing id field
                 cleanData['id'] = doc.id; // Set the document ID
-                
+
                 final product = ProductModel.fromJson(cleanData);
-                
+
                 // Double-check that product has valid ID after parsing
                 if (product.id.isEmpty) {
-                  AppLogger.logWarning('Skipping product with empty ID after parsing: ${doc.id}');
+                  AppLogger.logWarning(
+                    'Skipping product with empty ID after parsing: ${doc.id}',
+                  );
                   return null;
                 }
-                
+
                 return product;
               } catch (e) {
                 AppLogger.logError('Error parsing product ${doc.id}', error: e);
@@ -150,10 +158,15 @@ class RestaurantRepositoryImpl implements RestaurantRepository {
             .cast<ProductEntity>()
             .toList();
 
-        AppLogger.logSuccess('Successfully loaded ${products.length} available products');
+        AppLogger.logSuccess(
+          'Successfully loaded ${products.length} available products',
+        );
         return Right(products);
       } on ServerException catch (e) {
-        AppLogger.logError('Server exception loading products', error: e.message);
+        AppLogger.logError(
+          'Server exception loading products',
+          error: e.message,
+        );
         return Left(ServerFailure(e.message));
       } catch (e) {
         AppLogger.logError('Failed to load products', error: e);

@@ -29,7 +29,7 @@ class RestaurantCategoryRepositoryImpl implements RestaurantCategoryRepository {
           .orderBy('displayOrder')
           .get();
 
-      final categories = snapshot.docs
+      final List<RestaurantCategoryEntity> categories = snapshot.docs
           .map((doc) => RestaurantCategoryModel.fromJson(doc.data()))
           .toList();
 

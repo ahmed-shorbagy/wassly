@@ -349,17 +349,19 @@ class _RestaurantManagementScreenState
                           if (state is AdminRestaurantCategoriesLoaded) {
                             final names = restaurant.categoryIds
                                 .map((id) {
-                                  final cat = state.categories.firstWhere(
-                                    (c) => c.id == id,
-                                    orElse: () => RestaurantCategoryEntity(
-                                      id: id,
-                                      name: 'Unknown',
-                                      imageUrl: '',
-                                      isActive: true,
-                                      displayOrder: 0,
-                                      createdAt: DateTime.now(),
-                                    ),
-                                  );
+                                  final cat = state.categories
+                                      .cast<RestaurantCategoryEntity>()
+                                      .firstWhere(
+                                        (c) => c.id == id,
+                                        orElse: () => RestaurantCategoryEntity(
+                                          id: id,
+                                          name: 'Unknown',
+                                          imageUrl: '',
+                                          isActive: true,
+                                          displayOrder: 0,
+                                          createdAt: DateTime.now(),
+                                        ),
+                                      );
                                   return cat.name;
                                 })
                                 .where((name) => name != 'Unknown')

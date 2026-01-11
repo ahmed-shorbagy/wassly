@@ -17,7 +17,8 @@ extension StringExtensions on String {
   }
 
   bool get isValidPhone {
-    final phoneRegex = RegExp(r'^\+?[1-9]\d{1,14}$');
+    // Egyptian phone format: 01x-xxxx-xxxx or +201x-xxxx-xxxx
+    final phoneRegex = RegExp(r'^(?:\+20|0)1[0125]\d{8}$');
     return phoneRegex.hasMatch(this);
   }
 }

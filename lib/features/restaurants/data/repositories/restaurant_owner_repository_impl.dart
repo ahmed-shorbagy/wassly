@@ -121,6 +121,8 @@ class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
   }) async {
     try {
       AppLogger.logInfo('Creating restaurant: $name');
+      AppLogger.logInfo('Email to Auth: "$email"');
+      AppLogger.logInfo('Password length to Auth: ${password.length}');
 
       // Create Firebase Auth user account first
       AppLogger.logInfo('Creating Firebase Auth user account...');

@@ -32,6 +32,8 @@ class AdminCubit extends Cubit<AdminState> {
     try {
       emit(AdminLoading());
       AppLogger.logInfo('Creating restaurant: $name');
+      AppLogger.logInfo('Email: "$email"');
+      AppLogger.logInfo('Password length: ${password.length}');
 
       final result = await repository.createRestaurant(
         name: name,
