@@ -45,4 +45,8 @@ class RestaurantCategoryModel extends RestaurantCategoryEntity {
       createdAt: entity.createdAt,
     );
   }
+  factory RestaurantCategoryModel.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return RestaurantCategoryModel.fromJson({...data, 'id': doc.id});
+  }
 }

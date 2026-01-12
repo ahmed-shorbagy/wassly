@@ -42,6 +42,25 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
   void initState() {
     super.initState();
     _searchController.text = widget.initialQuery;
+    // Initialize available categories if already loaded
+    final homeState = context.read<HomeCubit>().state;
+    if (homeState is HomeLoaded) {
+      _availableCategories = homeState.categories;
+    }
+
+    // Determine the selected category from the initial query
+    // If q matches a category name, we consider it a category filter
+    if (widget.initialQuery.isNotEmpty) {
+      final queryLower = widget.initialQuery.toLowerCase().trim();
+      final matchingCategory = _availableCategories.where((c) {
+        return c.name.toLowerCase().trim() == queryLower;
+      }).firstOrNull;
+
+      if (matchingCategory != null) {
+        _selectedCategoryName = matchingCategory.name;
+      }
+    }
+
     // Initialize with provided restaurants or load all
     if (widget.initialRestaurants != null) {
       _allRestaurants = List.from(widget.initialRestaurants!);
@@ -105,7 +124,8 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
             final category = _availableCategories
                 .where((c) => c.id == cid)
                 .firstOrNull;
-            return category?.name == _selectedCategoryName;
+            return category?.name.toLowerCase().trim() ==
+                _selectedCategoryName?.toLowerCase().trim();
           });
           if (!matchesCategory) return false;
         }
@@ -171,6 +191,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
                   setState(() {
                     _availableCategories = state.categories;
                   });
+                  _applyFilters();
                 }
               },
               builder: (context, state) {

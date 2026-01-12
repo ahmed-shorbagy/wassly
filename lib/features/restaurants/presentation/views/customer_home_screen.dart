@@ -148,6 +148,13 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 }
               },
             ),
+            BlocListener<HomeCubit, HomeState>(
+              listener: (context, state) {
+                if (state is HomeLoaded) {
+                  _filterRestaurants();
+                }
+              },
+            ),
           ],
           child: BlocBuilder<RestaurantCubit, RestaurantState>(
             buildWhen: (previous, current) {
@@ -775,28 +782,28 @@ class _MarketProductCategoriesSection extends StatelessWidget {
       },
       {
         'asset': 'assets/images/poultry_meat_seafood.jpeg',
-        'title': isArabic ? "اللحوم" : "Meats",
+        'title': l10n.meat,
         'isMarket': true,
-        'categoryName': 'Meats',
+        'categoryName': l10n.meat,
       },
       {
         'asset': 'assets/images/fruits&veg.jpeg',
-        'title': isArabic ? "خضروات وفواكه" : "Fruits & Vegs",
+        'title': l10n.fruitsVegetables,
         'isMarket': true,
-        'categoryName': 'Fruits & Vegetables',
+        'categoryName': l10n.fruitsVegetables,
       },
       {
         'asset':
             'assets/images/market.jpeg', // Using market as supermarket placeholder
         'title': l10n.groceries,
         'isMarket': false,
-        'categoryName': 'Groceries',
+        'categoryName': l10n.groceries,
       },
       {
         'asset': 'assets/images/cake&cofee.jpeg',
         'title': l10n.bakery,
         'isMarket': true,
-        'categoryName': 'Bakery',
+        'categoryName': l10n.bakery,
       },
     ];
 

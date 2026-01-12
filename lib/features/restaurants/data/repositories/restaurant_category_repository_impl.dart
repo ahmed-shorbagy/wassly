@@ -30,7 +30,7 @@ class RestaurantCategoryRepositoryImpl implements RestaurantCategoryRepository {
           .get();
 
       final List<RestaurantCategoryEntity> categories = snapshot.docs
-          .map((doc) => RestaurantCategoryModel.fromJson(doc.data()))
+          .map((doc) => RestaurantCategoryModel.fromFirestore(doc))
           .toList();
 
       return Right(categories);
