@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -43,6 +44,21 @@ void main() async {
     AppLogger.logInfo('Initializing dependency injection...');
     await InjectionContainer().init();
     AppLogger.logSuccess('Dependency injection initialized');
+
+    // Initialize Notifications
+    AppLogger.logInfo('Initializing Notifications...');
+    final notificationService = InjectionContainer().notificationService;
+    await notificationService.init();
+
+    // Save Token if user is logged in
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      await notificationService.saveTokenToDatabase(
+        currentUser.uid,
+        'customer',
+      );
+    }
+    AppLogger.logSuccess('Notifications initialized');
 
     AppLogger.logInfo('Launching Customer app...');
     runApp(const ToOrderCustomerApp());

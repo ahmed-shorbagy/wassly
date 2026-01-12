@@ -7,10 +7,16 @@ import '../../domain/entities/order_entity.dart';
 import '../../domain/repositories/order_repository.dart';
 import '../models/order_model.dart';
 
+import '../../../../core/services/notification_sender_service.dart';
+
 class OrderRepositoryImpl implements OrderRepository {
   final FirebaseFirestore firestore;
+  final NotificationSenderService notificationSenderService;
 
-  OrderRepositoryImpl({required this.firestore});
+  OrderRepositoryImpl({
+    required this.firestore,
+    required this.notificationSenderService,
+  });
 
   @override
   Future<Either<Failure, OrderEntity>> createOrder(OrderEntity order) async {
@@ -18,9 +24,9 @@ class OrderRepositoryImpl implements OrderRepository {
       AppLogger.logInfo('Creating order for customer: ${order.customerId}');
 
       final orderModel = OrderModel.fromEntity(order);
-      final docRef = await firestore.collection('orders').add(
-            orderModel.toFirestore(),
-          );
+      final docRef = await firestore
+          .collection('orders')
+          .add(orderModel.toFirestore());
 
       final createdOrder = OrderModel(
         id: docRef.id,
@@ -45,6 +51,24 @@ class OrderRepositoryImpl implements OrderRepository {
       );
 
       AppLogger.logSuccess('Order created successfully: ${docRef.id}');
+
+      // Send Notifications (Client-side trigger)
+      // 1. To Restaurant
+      await notificationSenderService.sendNotificationToTopic(
+        topic: 'restaurant_${order.restaurantId}',
+        title: 'New Order Received! 🔔',
+        body: 'Order #${docRef.id.substring(0, 8)} has been placed.',
+        data: {'orderId': docRef.id},
+      );
+
+      // 2. To Admin
+      await notificationSenderService.sendNotificationToTopic(
+        topic: 'admin_notifications',
+        title: 'New Order Alert 🚨',
+        body: 'New order placed at ${order.restaurantName}.',
+        data: {'orderId': docRef.id},
+      );
+
       return Right(createdOrder);
     } on FirebaseException catch (e) {
       AppLogger.logError('Firebase error creating order', error: e);
@@ -117,13 +141,10 @@ class OrderRepositoryImpl implements OrderRepository {
       final snapshot = await firestore
           .collection('orders')
           .where('customerId', isEqualTo: customerId)
-          .where('status', whereIn: [
-            'pending',
-            'accepted',
-            'preparing',
-            'ready',
-            'pickedUp',
-          ])
+          .where(
+            'status',
+            whereIn: ['pending', 'accepted', 'preparing', 'ready', 'pickedUp'],
+          )
           .orderBy('createdAt', descending: true)
           .get();
 
@@ -212,13 +233,10 @@ class OrderRepositoryImpl implements OrderRepository {
     return firestore
         .collection('orders')
         .where('customerId', isEqualTo: customerId)
-        .where('status', whereIn: [
-          'pending',
-          'accepted',
-          'preparing',
-          'ready',
-          'pickedUp',
-        ])
+        .where(
+          'status',
+          whereIn: ['pending', 'accepted', 'preparing', 'ready', 'pickedUp'],
+        )
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {
@@ -326,6 +344,63 @@ class OrderRepositoryImpl implements OrderRepository {
       });
 
       AppLogger.logSuccess('Order status updated successfully');
+
+      // Send Notification to Customer
+      try {
+        // 1. Fetch Order to get Customer ID
+        final orderDoc = await firestore
+            .collection('orders')
+            .doc(orderId)
+            .get();
+        if (orderDoc.exists) {
+          final customerId = orderDoc.data()?['customerId'] as String?;
+          if (customerId != null) {
+            // 2. Fetch Customer User Doc to get Token
+            final userDoc = await firestore
+                .collection('users')
+                .doc(customerId)
+                .get();
+            final fcmToken = userDoc.data()?['fcmToken'] as String?;
+
+            if (fcmToken != null) {
+              // 3. Send Notification
+              String title = 'Order Update';
+              String body = 'Your order status is now ${status.name}';
+
+              if (status == OrderStatus.accepted) {
+                title = 'Order Accepted! ✅';
+                body = 'The restaurant has accepted your order.';
+              } else if (status == OrderStatus.preparing) {
+                title = 'Order Preparing 🍳';
+                body = 'Your food is being prepared.';
+              } else if (status == OrderStatus.ready) {
+                title = 'Order Ready 🥡';
+                body = 'Your order is ready for pickup/delivery.';
+              } else if (status == OrderStatus.pickedUp) {
+                title = 'Order Picked Up 🛵';
+                body = 'Your order is on the way!';
+              } else if (status == OrderStatus.delivered) {
+                title = 'Order Delivered 🍽️';
+                body = 'Enjoy your meal!';
+              }
+
+              await notificationSenderService.sendNotificationToToken(
+                token: fcmToken,
+                title: title,
+                body: body,
+                data: {'orderId': orderId},
+              );
+            }
+          }
+        }
+      } catch (e) {
+        AppLogger.logError(
+          'Failed to send status update notification',
+          error: e,
+        );
+        // Don't fail the usecase just because notification failed
+      }
+
       return const Right(null);
     } on FirebaseException catch (e) {
       AppLogger.logError('Firebase error updating order status', error: e);
@@ -394,7 +469,8 @@ class OrderRepositoryImpl implements OrderRepository {
   }
 
   @override
-  Future<Either<Failure, List<OrderEntity>>> getAvailableOrdersForDrivers() async {
+  Future<Either<Failure, List<OrderEntity>>>
+  getAvailableOrdersForDrivers() async {
     try {
       AppLogger.logInfo('Fetching available orders for drivers');
 
@@ -413,7 +489,9 @@ class OrderRepositoryImpl implements OrderRepository {
       return Right(orders);
     } on FirebaseException catch (e) {
       AppLogger.logError('Firebase error fetching available orders', error: e);
-      return Left(ServerFailure('Failed to fetch available orders: ${e.message}'));
+      return Left(
+        ServerFailure('Failed to fetch available orders: ${e.message}'),
+      );
     } catch (e) {
       AppLogger.logError('Error fetching available orders', error: e);
       return Left(ServerFailure('Failed to fetch available orders'));
@@ -449,9 +527,10 @@ class OrderRepositoryImpl implements OrderRepository {
           // Filter out orders that already have a driver assigned
           return snapshot.docs
               .map((doc) => OrderModel.fromFirestore(doc))
-              .where((order) => order.driverId == null || order.driverId!.isEmpty)
+              .where(
+                (order) => order.driverId == null || order.driverId!.isEmpty,
+              )
               .toList();
         });
   }
 }
-

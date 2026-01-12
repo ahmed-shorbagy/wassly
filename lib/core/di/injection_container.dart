@@ -65,6 +65,8 @@ import '../network/network_info.dart';
 import '../network/supabase_service.dart';
 import '../utils/image_upload_helper.dart';
 import '../localization/locale_cubit.dart';
+import '../services/notification_service.dart';
+import '../services/notification_sender_service.dart';
 
 class InjectionContainer {
   static final InjectionContainer _instance = InjectionContainer._internal();
@@ -89,6 +91,8 @@ class InjectionContainer {
   late final DriverRepository _driverRepository;
   late final DeliveryAddressRepository _deliveryAddressRepository;
   late final ArticleRepository _articleRepository;
+  late final NotificationService _notificationService;
+  late final NotificationSenderService _notificationSenderService;
 
   Future<void> init() async {
     // External dependencies
@@ -112,7 +116,10 @@ class InjectionContainer {
       networkInfo: _networkInfo,
     );
 
-    _orderRepository = OrderRepositoryImpl(firestore: _firestore);
+    _orderRepository = OrderRepositoryImpl(
+      firestore: _firestore,
+      notificationSenderService: _notificationSenderService,
+    );
 
     _restaurantOwnerRepository = RestaurantOwnerRepositoryImpl(
       firestore: _firestore,
@@ -154,11 +161,17 @@ class InjectionContainer {
     );
 
     _articleRepository = ArticleRepositoryImpl(firestore: _firestore);
+
+    _notificationService = NotificationService(firestore: _firestore);
+    _notificationSenderService = NotificationSenderService();
   }
 
   // Getters for accessing services from other parts of the app
   SupabaseService get supabaseService => _supabaseService;
   ImageUploadHelper get imageUploadHelper => _imageUploadHelper;
+  NotificationService get notificationService => _notificationService;
+  NotificationSenderService get notificationSenderService =>
+      _notificationSenderService;
 
   List<BlocProvider> getBlocProviders() {
     return [

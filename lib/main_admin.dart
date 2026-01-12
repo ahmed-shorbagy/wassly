@@ -61,6 +61,20 @@ void main() async {
     await InjectionContainer().init();
     AppLogger.logSuccess('Dependency injection initialized');
 
+    // Initialize Notifications
+    AppLogger.logInfo('Initializing Notifications...');
+    final notificationService = InjectionContainer().notificationService;
+    await notificationService.init();
+
+    // Save Token
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      await notificationService.saveTokenToDatabase(currentUser.uid, 'admin');
+    }
+
+    // Subscribe to Admin topic
+    await notificationService.subscribeToTopic('admin_notifications');
+
     AppLogger.logInfo('Launching Admin app...');
     runApp(const ToOrderAdminApp());
     FlutterNativeSplash.remove();
