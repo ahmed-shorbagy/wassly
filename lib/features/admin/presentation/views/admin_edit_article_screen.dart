@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/supabase_constants.dart';
 import '../../../../core/utils/extensions.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../shared/widgets/loading_widget.dart';
@@ -102,7 +103,7 @@ class _AdminEditArticleScreenState extends State<AdminEditArticleScreen> {
     try {
       final result = await InjectionContainer().imageUploadHelper.uploadFile(
         file: _selectedImage!,
-        bucketName: 'articles',
+        bucketName: SupabaseConstants.articlesBucket,
       );
       return result.fold((failure) {
         if (mounted) {

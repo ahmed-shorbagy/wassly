@@ -95,10 +95,15 @@ class InjectionContainer {
   late final NotificationSenderService _notificationSenderService;
 
   Future<void> init() async {
+    // Services - Initialize these early as they are dependencies for repositories
+    _notificationSenderService = NotificationSenderService();
+
     // External dependencies
     _firebaseAuth = FirebaseAuth.instance;
     _firestore = FirebaseFirestore.instance;
     _networkInfo = NetworkInfoImpl();
+
+    _notificationService = NotificationService(firestore: _firestore);
 
     // Supabase services
     _supabaseService = SupabaseService();
@@ -161,9 +166,6 @@ class InjectionContainer {
     );
 
     _articleRepository = ArticleRepositoryImpl(firestore: _firestore);
-
-    _notificationService = NotificationService(firestore: _firestore);
-    _notificationSenderService = NotificationSenderService();
   }
 
   // Getters for accessing services from other parts of the app
