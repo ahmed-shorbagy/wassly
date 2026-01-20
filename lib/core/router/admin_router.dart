@@ -16,6 +16,9 @@ import '../../features/admin/presentation/views/admin_add_startup_ad_screen.dart
 import '../../features/admin/presentation/views/admin_edit_startup_ad_screen.dart';
 import '../../features/admin/presentation/views/admin_add_banner_ad_screen.dart';
 import '../../features/admin/presentation/views/admin_edit_banner_ad_screen.dart';
+import '../../features/admin/presentation/views/admin_promotional_images_screen.dart';
+import '../../features/admin/presentation/views/admin_add_promotional_image_screen.dart';
+import '../../features/admin/presentation/views/admin_edit_promotional_image_screen.dart';
 import '../../features/admin/presentation/views/edit_restaurant_screen.dart';
 import '../../features/admin/presentation/views/admin_category_list_screen.dart';
 import '../../features/admin/presentation/views/admin_add_category_screen.dart';
@@ -32,6 +35,7 @@ import '../../features/restaurants/domain/entities/restaurant_entity.dart';
 import '../../features/market_products/domain/entities/market_product_entity.dart';
 import '../../features/ads/domain/entities/startup_ad_entity.dart';
 import '../../features/home/domain/entities/banner_entity.dart';
+import '../../features/home/domain/entities/promotional_image_entity.dart';
 import '../../features/admin/presentation/views/admin_article_list_screen.dart';
 import '../../features/admin/presentation/views/admin_add_article_screen.dart';
 import '../../features/admin/presentation/views/admin_edit_article_screen.dart';
@@ -309,6 +313,34 @@ class AdminRouter {
                       return AdminEditBannerAdScreen(
                         bannerId: bannerId,
                         banner: banner,
+                      );
+                    },
+                  ),
+                ],
+              ),
+              GoRoute(
+                path: 'promotional',
+                name: 'promotional-images',
+                builder: (context, state) =>
+                    const AdminPromotionalImagesScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'add',
+                    name: 'add-promotional-image',
+                    builder: (context, state) =>
+                        const AdminAddPromotionalImageScreen(),
+                  ),
+                  GoRoute(
+                    path: 'edit/:id',
+                    name: 'edit-promotional-image',
+                    builder: (context, state) {
+                      final imageId = state.pathParameters['id'] ?? '';
+                      final image = state.extra is PromotionalImageEntity
+                          ? state.extra as PromotionalImageEntity
+                          : null;
+                      return AdminEditPromotionalImageScreen(
+                        imageId: imageId,
+                        image: image,
                       );
                     },
                   ),

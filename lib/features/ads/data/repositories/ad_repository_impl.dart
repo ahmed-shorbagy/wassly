@@ -9,6 +9,8 @@ import '../../domain/repositories/ad_repository.dart';
 import '../models/startup_ad_model.dart';
 import '../../../home/domain/entities/banner_entity.dart';
 import '../../../home/data/models/banner_model.dart';
+import '../../../home/domain/entities/promotional_image_entity.dart';
+import '../../../home/data/models/promotional_image_model.dart';
 
 class AdRepositoryImpl implements AdRepository {
   final FirebaseFirestore firestore;
@@ -325,6 +327,189 @@ class AdRepositoryImpl implements AdRepository {
     } catch (e) {
       AppLogger.logError('Error toggling banner ad status', error: e);
       return Left(ServerFailure('Failed to update banner ad status: $e'));
+    }
+  }
+
+  // Promotional Images
+  @override
+  Future<Either<Failure, List<PromotionalImageEntity>>>
+  getAllPromotionalImages() async {
+    try {
+      AppLogger.logInfo('Fetching all promotional images');
+      QuerySnapshot snapshot;
+      try {
+        snapshot = await firestore
+            .collection('promotional_images')
+            .orderBy('priority', descending: false)
+            .get();
+      } catch (e) {
+        // Fallback if priority index doesn't exist
+        AppLogger.logWarning(
+          'Promotional images query with orderBy failed, using fallback: $e',
+        );
+        snapshot = await firestore.collection('promotional_images').get();
+      }
+
+      final images = snapshot.docs
+          .map((doc) => PromotionalImageModel.fromFirestore(doc))
+          .where((img) => img.imageUrl.isNotEmpty)
+          .toList();
+
+      // Sort by priority client-side
+      images.sort((a, b) => a.priority.compareTo(b.priority));
+
+      AppLogger.logSuccess('Fetched ${images.length} promotional images');
+      return Right(images);
+    } catch (e) {
+      AppLogger.logError('Error fetching promotional images', error: e);
+      return Left(ServerFailure('Failed to fetch promotional images: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<PromotionalImageEntity>>>
+  getActivePromotionalImages() async {
+    try {
+      AppLogger.logInfo('Fetching active promotional images');
+      QuerySnapshot snapshot;
+      try {
+        snapshot = await firestore
+            .collection('promotional_images')
+            .where('isActive', isEqualTo: true)
+            .orderBy('priority', descending: false)
+            .get();
+      } catch (e) {
+        // Fallback: fetch all and filter client-side
+        AppLogger.logWarning(
+          'Promotional images query with filters failed, using fallback: $e',
+        );
+        snapshot = await firestore.collection('promotional_images').get();
+      }
+
+      final images = snapshot.docs
+          .map((doc) => PromotionalImageModel.fromFirestore(doc))
+          .where((img) => img.imageUrl.isNotEmpty && img.isActive)
+          .toList();
+
+      // Sort by priority client-side
+      images.sort((a, b) => a.priority.compareTo(b.priority));
+
+      AppLogger.logSuccess(
+        'Fetched ${images.length} active promotional images',
+      );
+      return Right(images);
+    } catch (e) {
+      AppLogger.logError('Error fetching active promotional images', error: e);
+      return Left(ServerFailure('Failed to fetch promotional images: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, PromotionalImageEntity>> getPromotionalImageById(
+    String imageId,
+  ) async {
+    try {
+      AppLogger.logInfo('Fetching promotional image: $imageId');
+      final doc = await firestore
+          .collection('promotional_images')
+          .doc(imageId)
+          .get();
+
+      if (!doc.exists) {
+        return const Left(CacheFailure('Promotional image not found'));
+      }
+
+      final image = PromotionalImageModel.fromFirestore(doc);
+      AppLogger.logSuccess('Promotional image fetched successfully');
+      return Right(image);
+    } catch (e) {
+      AppLogger.logError('Error fetching promotional image', error: e);
+      return Left(ServerFailure('Failed to fetch promotional image: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, PromotionalImageEntity>> createPromotionalImage(
+    PromotionalImageEntity image,
+  ) async {
+    try {
+      AppLogger.logInfo('Creating promotional image');
+      final model = PromotionalImageModel.fromEntity(image);
+      final docRef = await firestore
+          .collection('promotional_images')
+          .add(model.toFirestore());
+
+      final createdImage = PromotionalImageModel(
+        id: docRef.id,
+        imageUrl: image.imageUrl,
+        title: image.title,
+        subtitle: image.subtitle,
+        deepLink: image.deepLink,
+        isActive: image.isActive,
+        priority: image.priority,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      AppLogger.logSuccess('Promotional image created: ${docRef.id}');
+      return Right(createdImage);
+    } catch (e) {
+      AppLogger.logError('Error creating promotional image', error: e);
+      return Left(ServerFailure('Failed to create promotional image: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> updatePromotionalImage(
+    PromotionalImageEntity image,
+  ) async {
+    try {
+      AppLogger.logInfo('Updating promotional image: ${image.id}');
+      final model = PromotionalImageModel.fromEntity(image);
+      await firestore
+          .collection('promotional_images')
+          .doc(image.id)
+          .update(model.toFirestore());
+
+      AppLogger.logSuccess('Promotional image updated: ${image.id}');
+      return const Right(null);
+    } catch (e) {
+      AppLogger.logError('Error updating promotional image', error: e);
+      return Left(ServerFailure('Failed to update promotional image: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deletePromotionalImage(String imageId) async {
+    try {
+      AppLogger.logInfo('Deleting promotional image: $imageId');
+      await firestore.collection('promotional_images').doc(imageId).delete();
+      AppLogger.logSuccess('Promotional image deleted: $imageId');
+      return const Right(null);
+    } catch (e) {
+      AppLogger.logError('Error deleting promotional image', error: e);
+      return Left(ServerFailure('Failed to delete promotional image: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> togglePromotionalImageStatus(
+    String imageId,
+    bool isActive,
+  ) async {
+    try {
+      AppLogger.logInfo('Toggling promotional image status: $imageId');
+      await firestore.collection('promotional_images').doc(imageId).update({
+        'isActive': isActive,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      AppLogger.logSuccess('Promotional image status updated');
+      return const Right(null);
+    } catch (e) {
+      AppLogger.logError('Error toggling promotional image status', error: e);
+      return Left(
+        ServerFailure('Failed to update promotional image status: $e'),
+      );
     }
   }
 }

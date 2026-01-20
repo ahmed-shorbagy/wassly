@@ -44,11 +44,7 @@ void main() async {
     );
     runApp(
       MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: Text('Error initializing app: $e'),
-          ),
-        ),
+        home: Scaffold(body: Center(child: Text('Error initializing app: $e'))),
       ),
     );
   }
@@ -70,4 +66,3 @@ class WasslyWebApp extends StatelessWidget {
     );
   }
 }
-

@@ -3043,6 +3043,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Most Sold Products'**
   String get mostSoldProducts;
+
+  /// No description provided for @promotionalImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Promotional Images'**
+  String get promotionalImages;
+
+  /// No description provided for @addPromotionalImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Promotional Image'**
+  String get addPromotionalImage;
+
+  /// No description provided for @editPromotionalImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Promotional Image'**
+  String get editPromotionalImage;
+
+  /// No description provided for @deletePromotionalImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Promotional Image'**
+  String get deletePromotionalImage;
+
+  /// No description provided for @areYouSureDeletePromotionalImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete the promotional image'**
+  String get areYouSureDeletePromotionalImage;
+
+  /// No description provided for @promotionalImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Promotional Image'**
+  String get promotionalImage;
+
+  /// No description provided for @noPromotionalImages.
+  ///
+  /// In en, this message translates to:
+  /// **'No Promotional Images'**
+  String get noPromotionalImages;
+
+  /// No description provided for @startByAddingYourFirstPromotionalImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Start by adding your first promotional image'**
+  String get startByAddingYourFirstPromotionalImage;
+
+  /// No description provided for @tapToChangeImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to change image'**
+  String get tapToChangeImage;
+
+  /// No description provided for @title.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get title;
+
+  /// No description provided for @optionalTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter optional title'**
+  String get optionalTitleHint;
+
+  /// No description provided for @subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle'**
+  String get subtitle;
+
+  /// No description provided for @optionalSubtitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter optional subtitle'**
+  String get optionalSubtitleHint;
+
+  /// No description provided for @saveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get saveChanges;
+
+  /// No description provided for @deactivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate'**
+  String get deactivate;
+
+  /// No description provided for @activate.
+  ///
+  /// In en, this message translates to:
+  /// **'Activate'**
+  String get activate;
+
+  /// No description provided for @exploreOurRichWorld.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore our rich world'**
+  String get exploreOurRichWorld;
+
+  /// No description provided for @pickupFromRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup from Restaurant'**
+  String get pickupFromRestaurant;
+
+  /// No description provided for @deliveryMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Mode'**
+  String get deliveryMode;
+
+  /// No description provided for @delivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery'**
+  String get delivery;
+
+  /// No description provided for @startNewOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Start New Order'**
+  String get startNewOrder;
+
+  /// No description provided for @clearCartConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'You have items from another restaurant. Start a new order to clear the cart?'**
+  String get clearCartConfirmation;
+
+  /// No description provided for @newOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'New Order'**
+  String get newOrder;
+
+  /// No description provided for @cancelAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancelAction;
 }
 
 class _AppLocalizationsDelegate

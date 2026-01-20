@@ -11,6 +11,8 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/error_widget.dart';
 import '../../../home/presentation/cubits/home_cubit.dart';
 import '../../../home/domain/entities/banner_entity.dart';
+import '../../../home/domain/entities/promotional_image_entity.dart';
+import '../../../home/presentation/widgets/promotional_image_widget.dart';
 import '../../domain/entities/restaurant_category_entity.dart';
 import '../cubits/restaurant_cubit.dart';
 import '../../domain/entities/restaurant_entity.dart';
@@ -290,6 +292,36 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     });
                   },
                   currentIndex: _currentBannerIndex,
+                ),
+              );
+            },
+          ),
+
+          // Promotional Image Section
+          BlocBuilder<HomeCubit, HomeState>(
+            builder: (context, state) {
+              final promoImages = state is HomeLoaded
+                  ? state.promotionalImages
+                  : <PromotionalImageEntity>[];
+              if (promoImages.isEmpty) {
+                return const SliverToBoxAdapter(child: SizedBox.shrink());
+              }
+              return SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                      child: Text(
+                        l10n.exploreOurRichWorld,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
+                    PromotionalImageWidget(image: promoImages.first),
+                  ],
                 ),
               );
             },

@@ -28,6 +28,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final _addressController = TextEditingController();
   final _notesController = TextEditingController();
   final _phoneController = TextEditingController();
+  bool _isPickup = false;
 
   @override
   void initState() {
@@ -115,7 +116,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ),
                       const SizedBox(height: 24),
                       ElevatedButton(
-                        onPressed: () => context.push('/home'),
+                        onPressed: () => context.go('/home'),
                         child: Text(
                           AppLocalizations.of(context)?.browseRestaurants ??
                               'تصفح المطاعم',
@@ -136,88 +137,202 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Delivery Address
-                            BlocBuilder<
-                              DeliveryAddressCubit,
-                              DeliveryAddressState
-                            >(
-                              builder: (context, addressState) {
+                            // Delivery Mode Toggle
+                            Builder(
+                              builder: (context) {
                                 final l10n = AppLocalizations.of(context);
                                 return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        _buildSectionHeader(
-                                          l10n?.deliveryAddress ??
-                                              'عنوان التوصيل',
-                                        ),
-                                        if (addressState
-                                            is DeliveryAddressSelected)
-                                          TextButton.icon(
-                                            onPressed: () {
-                                              // Show dialog to manage addresses
-                                              showDialog(
-                                                context: context,
-                                                builder: (context) =>
-                                                    const DeliveryAddressDialog(),
-                                              );
-                                            },
-                                            icon: const Icon(
-                                              Icons.edit,
-                                              size: 16,
-                                            ),
-                                            label: Text(
-                                              l10n?.edit ?? 'تعديل',
-                                              style: const TextStyle(
-                                                fontSize: 12,
+                                    _buildSectionHeader(
+                                      l10n?.deliveryMode ?? 'Delivery Mode',
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.shade200,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      padding: const EdgeInsets.all(4),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: GestureDetector(
+                                              onTap: () => setState(
+                                                () => _isPickup = false,
+                                              ),
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      vertical: 12,
+                                                    ),
+                                                decoration: BoxDecoration(
+                                                  color: !_isPickup
+                                                      ? Colors.white
+                                                      : Colors.transparent,
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  boxShadow: !_isPickup
+                                                      ? [
+                                                          BoxShadow(
+                                                            color:
+                                                                Colors.black12,
+                                                            blurRadius: 4,
+                                                          ),
+                                                        ]
+                                                      : null,
+                                                ),
+                                                alignment: Alignment.center,
+                                                child: Text(
+                                                  l10n?.delivery ?? 'Delivery',
+                                                  style: TextStyle(
+                                                    fontWeight: !_isPickup
+                                                        ? FontWeight.bold
+                                                        : FontWeight.normal,
+                                                    color: !_isPickup
+                                                        ? AppColors.primary
+                                                        : Colors.grey.shade700,
+                                                  ),
+                                                ),
                                               ),
                                             ),
                                           ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    TextFormField(
-                                      controller: _addressController,
-                                      decoration: InputDecoration(
-                                        labelText:
-                                            l10n?.deliveryAddress ??
-                                            'عنوان التوصيل',
-                                        hintText:
-                                            l10n?.enterDeliveryAddress ??
-                                            'أدخل عنوان التوصيل',
-                                        prefixIcon: const Icon(
-                                          Icons.location_on,
-                                        ),
-                                        suffixIcon:
-                                            addressState
-                                                is DeliveryAddressSelected
-                                            ? Icon(
-                                                Icons.check_circle,
-                                                color: AppColors.success,
-                                                size: 20,
-                                              )
-                                            : null,
+                                          Expanded(
+                                            child: GestureDetector(
+                                              onTap: () => setState(
+                                                () => _isPickup = true,
+                                              ),
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      vertical: 12,
+                                                    ),
+                                                decoration: BoxDecoration(
+                                                  color: _isPickup
+                                                      ? Colors.white
+                                                      : Colors.transparent,
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  boxShadow: _isPickup
+                                                      ? [
+                                                          BoxShadow(
+                                                            color:
+                                                                Colors.black12,
+                                                            blurRadius: 4,
+                                                          ),
+                                                        ]
+                                                      : null,
+                                                ),
+                                                alignment: Alignment.center,
+                                                child: Text(
+                                                  l10n?.pickupFromRestaurant ??
+                                                      'Pickup',
+                                                  style: TextStyle(
+                                                    fontWeight: _isPickup
+                                                        ? FontWeight.bold
+                                                        : FontWeight.normal,
+                                                    color: _isPickup
+                                                        ? AppColors.primary
+                                                        : Colors.grey.shade700,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      validator: (value) {
-                                        final l10n = AppLocalizations.of(
-                                          context,
-                                        );
-                                        if (value == null ||
-                                            value.trim().isEmpty) {
-                                          return l10n?.addressRequired ??
-                                              'العنوان مطلوب';
-                                        }
-                                        return null;
-                                      },
-                                      maxLines: 2,
                                     ),
                                   ],
                                 );
                               },
                             ),
+
+                            const SizedBox(height: 24),
+
+                            // Delivery Address
+                            if (!_isPickup)
+                              BlocBuilder<
+                                DeliveryAddressCubit,
+                                DeliveryAddressState
+                              >(
+                                builder: (context, addressState) {
+                                  final l10n = AppLocalizations.of(context);
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          _buildSectionHeader(
+                                            l10n?.deliveryAddress ??
+                                                'عنوان التوصيل',
+                                          ),
+                                          if (addressState
+                                              is DeliveryAddressSelected)
+                                            TextButton.icon(
+                                              onPressed: () {
+                                                // Show dialog to manage addresses
+                                                showDialog(
+                                                  context: context,
+                                                  builder: (context) =>
+                                                      const DeliveryAddressDialog(),
+                                                );
+                                              },
+                                              icon: const Icon(
+                                                Icons.edit,
+                                                size: 16,
+                                              ),
+                                              label: Text(
+                                                l10n?.edit ?? 'تعديل',
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      TextFormField(
+                                        controller: _addressController,
+                                        decoration: InputDecoration(
+                                          labelText:
+                                              l10n?.deliveryAddress ??
+                                              'عنوان التوصيل',
+                                          hintText:
+                                              l10n?.enterDeliveryAddress ??
+                                              'أدخل عنوان التوصيل',
+                                          prefixIcon: const Icon(
+                                            Icons.location_on,
+                                          ),
+                                          suffixIcon:
+                                              addressState
+                                                  is DeliveryAddressSelected
+                                              ? Icon(
+                                                  Icons.check_circle,
+                                                  color: AppColors.success,
+                                                  size: 20,
+                                                )
+                                              : null,
+                                        ),
+                                        validator: (value) {
+                                          if (_isPickup) return null;
+                                          final l10n = AppLocalizations.of(
+                                            context,
+                                          );
+                                          if (value == null ||
+                                              value.trim().isEmpty) {
+                                            return l10n?.addressRequired ??
+                                                'العنوان مطلوب';
+                                          }
+                                          return null;
+                                        },
+                                        maxLines: 2,
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
                             const SizedBox(height: 16),
 
                             // Contact Phone
@@ -403,24 +518,25 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             const SizedBox(height: 8),
 
             // Delivery Fee
-            Builder(
-              builder: (context) {
-                final l10n = AppLocalizations.of(context);
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      l10n?.deliveryFee ?? 'رسوم التوصيل',
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                    Text(
-                      '${_getDeliveryFee().toStringAsFixed(2)} ${l10n?.currencySymbol ?? 'ج.م'}',
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                  ],
-                );
-              },
-            ),
+            if (!_isPickup)
+              Builder(
+                builder: (context) {
+                  final l10n = AppLocalizations.of(context);
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        l10n?.deliveryFee ?? 'رسوم التوصيل',
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                      Text(
+                        '${_getDeliveryFee().toStringAsFixed(2)} ${l10n?.currencySymbol ?? 'ج.م'}',
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ],
+                  );
+                },
+              ),
             const SizedBox(height: 12),
 
             // Total
@@ -449,6 +565,22 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 );
               },
             ),
+            if (_isPickup)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Builder(
+                  builder: (context) {
+                    final l10n = AppLocalizations.of(context);
+                    return Text(
+                      l10n?.pickupFromRestaurant ?? 'Pickup',
+                      style: const TextStyle(
+                        color: AppColors.success,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    );
+                  },
+                ),
+              ),
           ],
         ),
       ),
@@ -495,6 +627,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   double _getDeliveryFee() {
+    if (_isPickup) return 0.0;
     // Use restaurant's delivery fee, fallback to 5.0 if not available
     return widget.restaurant.deliveryFee > 0
         ? widget.restaurant.deliveryFee
@@ -618,7 +751,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       items: items,
       totalAmount: _getTotalAmount(cartState.totalPrice),
       status: OrderStatus.pending,
-      deliveryAddress: _addressController.text.trim(),
+      deliveryAddress: _isPickup ? 'PICKUP' : _addressController.text.trim(),
       deliveryLocation: deliveryLocation,
       restaurantLocation: _convertToGeoPoint(widget.restaurant.location),
       createdAt: DateTime.now(),
@@ -626,15 +759,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       notes: _notesController.text.trim().isEmpty
           ? null
           : _notesController.text.trim(),
+      isPickup: _isPickup,
     );
 
     // Save delivery address to cubit for future use (syncs across all apps)
     // This ensures the address is synced in Firebase and available across all apps
-    final l10nForAddress = AppLocalizations.of(context);
-    context.read<DeliveryAddressCubit>().setDeliveryAddress(
-      address: _addressController.text.trim(),
-      addressLabel: l10nForAddress?.defaultAddress ?? 'Default',
-    );
+    if (!_isPickup) {
+      final l10nForAddress = AppLocalizations.of(context);
+      context.read<DeliveryAddressCubit>().setDeliveryAddress(
+        address: _addressController.text.trim(),
+        addressLabel: l10nForAddress?.defaultAddress ?? 'Default',
+      );
+    }
 
     // Place order
     context.read<OrderCubit>().createOrder(order);

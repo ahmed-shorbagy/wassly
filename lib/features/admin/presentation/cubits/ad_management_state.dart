@@ -59,6 +59,31 @@ class BannerAdDeleted extends AdManagementState {}
 
 class BannerAdStatusToggled extends AdManagementState {}
 
+// Promotional Images
+class PromotionalImagesLoaded extends AdManagementState {
+  final List<PromotionalImageEntity> images;
+
+  const PromotionalImagesLoaded(this.images);
+
+  @override
+  List<Object?> get props => [images];
+}
+
+class PromotionalImageAdded extends AdManagementState {
+  final PromotionalImageEntity image;
+
+  const PromotionalImageAdded(this.image);
+
+  @override
+  List<Object?> get props => [image];
+}
+
+class PromotionalImageUpdated extends AdManagementState {}
+
+class PromotionalImageDeleted extends AdManagementState {}
+
+class PromotionalImageStatusToggled extends AdManagementState {}
+
 class AdManagementError extends AdManagementState {
   final String message;
 
@@ -67,4 +92,3 @@ class AdManagementError extends AdManagementState {
   @override
   List<Object?> get props => [message];
 }
-

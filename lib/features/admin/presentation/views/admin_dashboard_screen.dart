@@ -333,6 +333,13 @@ class AdminDashboardScreen extends StatelessWidget {
         gradient: [Colors.cyan.shade400, Colors.cyan.shade600],
       ),
       _DashboardItem(
+        title: l10n.promotionalImages,
+        icon: Icons.local_offer,
+        color: Colors.pink,
+        route: '/admin/ads/promotional',
+        gradient: [Colors.pink.shade400, Colors.pink.shade600],
+      ),
+      _DashboardItem(
         title: 'Articles',
         icon: Icons.article,
         color: Colors.pink,

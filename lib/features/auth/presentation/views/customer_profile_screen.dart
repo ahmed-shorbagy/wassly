@@ -47,51 +47,37 @@ class CustomerProfileScreen extends StatelessWidget {
                   // Account Information Section
                   _buildSectionTitle(l10n.accountInformation),
                   ResponsiveHelper.spacing(height: 12),
-                  _buildInfoCard(
-                    context,
-                    [
-                      _buildInfoRow(
-                        Icons.person_outline,
-                        l10n.fullName,
-                        user.name,
-                      ),
-                      const Divider(height: 1),
-                      _buildInfoRow(
-                        Icons.email_outlined,
-                        l10n.email,
-                        user.email,
-                      ),
-                      const Divider(height: 1),
-                      _buildInfoRow(
-                        Icons.phone_outlined,
-                        l10n.phone,
-                        user.phone,
-                      ),
-                    ],
-                  ),
+                  _buildInfoCard(context, [
+                    _buildInfoRow(
+                      Icons.person_outline,
+                      l10n.fullName,
+                      user.name,
+                    ),
+                    const Divider(height: 1),
+                    _buildInfoRow(Icons.email_outlined, l10n.email, user.email),
+                    const Divider(height: 1),
+                    _buildInfoRow(Icons.phone_outlined, l10n.phone, user.phone),
+                  ]),
                   ResponsiveHelper.spacing(height: 24),
 
                   // Actions Section
                   _buildSectionTitle(l10n.settings),
                   ResponsiveHelper.spacing(height: 12),
-                  _buildActionCard(
-                    context,
-                    [
-                      _buildActionTile(
-                        context,
-                        icon: Icons.shopping_bag_outlined,
-                        title: l10n.myOrders,
-                        onTap: () => context.push('/orders'),
-                      ),
-                      const Divider(height: 1),
-                      _buildActionTile(
-                        context,
-                        icon: Icons.lock_outline,
-                        title: l10n.changePassword,
-                        onTap: () => _showChangePasswordDialog(context, l10n),
-                      ),
-                    ],
-                  ),
+                  _buildActionCard(context, [
+                    _buildActionTile(
+                      context,
+                      icon: Icons.shopping_bag_outlined,
+                      title: l10n.myOrders,
+                      onTap: () => context.go('/orders'),
+                    ),
+                    const Divider(height: 1),
+                    _buildActionTile(
+                      context,
+                      icon: Icons.lock_outline,
+                      title: l10n.changePassword,
+                      onTap: () => _showChangePasswordDialog(context, l10n),
+                    ),
+                  ]),
                   ResponsiveHelper.spacing(height: 24),
 
                   // Logout Button
@@ -148,9 +134,7 @@ class CustomerProfileScreen extends StatelessWidget {
                   onPressed: () => context.push('/login'),
                   child: Text(
                     l10n.login,
-                    style: TextStyle(
-                      fontSize: ResponsiveHelper.fontSize(16),
-                    ),
+                    style: TextStyle(fontSize: ResponsiveHelper.fontSize(16)),
                   ),
                 ),
               ],
@@ -170,10 +154,7 @@ class CustomerProfileScreen extends StatelessWidget {
       padding: ResponsiveHelper.padding(all: 24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            AppColors.primary,
-            AppColors.primary.withOpacity(0.8),
-          ],
+          colors: [AppColors.primary, AppColors.primary.withOpacity(0.8)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -257,18 +238,13 @@ class CustomerProfileScreen extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        children: children,
-      ),
+      child: Column(children: children),
     );
   }
 
   Widget _buildInfoRow(IconData icon, String label, String value) {
     return Padding(
-      padding: ResponsiveHelper.padding(
-        horizontal: 16,
-        vertical: 12,
-      ),
+      padding: ResponsiveHelper.padding(horizontal: 16, vertical: 12),
       child: Row(
         children: [
           Icon(
@@ -320,9 +296,7 @@ class CustomerProfileScreen extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        children: children,
-      ),
+      child: Column(children: children),
     );
   }
 
@@ -354,10 +328,7 @@ class CustomerProfileScreen extends StatelessWidget {
     );
   }
 
-  void _showChangePasswordDialog(
-    BuildContext context,
-    AppLocalizations l10n,
-  ) {
+  void _showChangePasswordDialog(BuildContext context, AppLocalizations l10n) {
     final currentPasswordController = TextEditingController();
     final newPasswordController = TextEditingController();
     final confirmPasswordController = TextEditingController();
@@ -388,7 +359,9 @@ class CustomerProfileScreen extends StatelessWidget {
                   style: TextStyle(fontSize: ResponsiveHelper.fontSize(16)),
                   decoration: InputDecoration(
                     labelText: l10n.currentPassword,
-                    labelStyle: TextStyle(fontSize: ResponsiveHelper.fontSize(14)),
+                    labelStyle: TextStyle(
+                      fontSize: ResponsiveHelper.fontSize(14),
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
                     ),
@@ -401,7 +374,9 @@ class CustomerProfileScreen extends StatelessWidget {
                   style: TextStyle(fontSize: ResponsiveHelper.fontSize(16)),
                   decoration: InputDecoration(
                     labelText: l10n.newPassword,
-                    labelStyle: TextStyle(fontSize: ResponsiveHelper.fontSize(14)),
+                    labelStyle: TextStyle(
+                      fontSize: ResponsiveHelper.fontSize(14),
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
                     ),
@@ -414,7 +389,9 @@ class CustomerProfileScreen extends StatelessWidget {
                   style: TextStyle(fontSize: ResponsiveHelper.fontSize(16)),
                   decoration: InputDecoration(
                     labelText: l10n.confirmNewPassword,
-                    labelStyle: TextStyle(fontSize: ResponsiveHelper.fontSize(14)),
+                    labelStyle: TextStyle(
+                      fontSize: ResponsiveHelper.fontSize(14),
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
                     ),
@@ -437,9 +414,7 @@ class CustomerProfileScreen extends StatelessWidget {
                       : () {
                           if (newPasswordController.text !=
                               confirmPasswordController.text) {
-                            context.showErrorSnackBar(
-                              'Passwords do not match',
-                            );
+                            context.showErrorSnackBar('Passwords do not match');
                             return;
                           }
                           if (newPasswordController.text.length < 6) {
@@ -449,9 +424,9 @@ class CustomerProfileScreen extends StatelessWidget {
                             return;
                           }
                           context.read<AuthCubit>().changePassword(
-                                currentPasswordController.text,
-                                newPasswordController.text,
-                              );
+                            currentPasswordController.text,
+                            newPasswordController.text,
+                          );
                         },
                   child: isLoading
                       ? SizedBox(
@@ -461,7 +436,9 @@ class CustomerProfileScreen extends StatelessWidget {
                         )
                       : Text(
                           l10n.updatePassword,
-                          style: TextStyle(fontSize: ResponsiveHelper.fontSize(16)),
+                          style: TextStyle(
+                            fontSize: ResponsiveHelper.fontSize(16),
+                          ),
                         ),
                 );
               },
@@ -511,4 +488,3 @@ class CustomerProfileScreen extends StatelessWidget {
     );
   }
 }
-

@@ -1517,4 +1517,79 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get mostSoldProducts => 'الأكثر مبيعاً';
+
+  @override
+  String get promotionalImages => 'الصور الترويجية';
+
+  @override
+  String get addPromotionalImage => 'إضافة صورة ترويجية';
+
+  @override
+  String get editPromotionalImage => 'تعديل صورة ترويجية';
+
+  @override
+  String get deletePromotionalImage => 'حذف صورة ترويجية';
+
+  @override
+  String get areYouSureDeletePromotionalImage =>
+      'هل أنت متأكد من حذف الصورة الترويجية';
+
+  @override
+  String get promotionalImage => 'صورة ترويجية';
+
+  @override
+  String get noPromotionalImages => 'لا توجد صور ترويجية';
+
+  @override
+  String get startByAddingYourFirstPromotionalImage =>
+      'ابدأ بإضافة صورتك الترويجية الأولى';
+
+  @override
+  String get tapToChangeImage => 'اضغط لتغيير الصورة';
+
+  @override
+  String get title => 'العنوان';
+
+  @override
+  String get optionalTitleHint => 'أدخل العنوان (اختياري)';
+
+  @override
+  String get subtitle => 'العنوان الفرعي';
+
+  @override
+  String get optionalSubtitleHint => 'أدخل العنوان الفرعي (اختياري)';
+
+  @override
+  String get saveChanges => 'حفظ التغييرات';
+
+  @override
+  String get deactivate => 'إلغاء التنشيط';
+
+  @override
+  String get activate => 'تنشيط';
+
+  @override
+  String get exploreOurRichWorld => 'استكشف عالمنا الغني';
+
+  @override
+  String get pickupFromRestaurant => 'استلام من المطعم';
+
+  @override
+  String get deliveryMode => 'طريقة الاستلام';
+
+  @override
+  String get delivery => 'توصيل';
+
+  @override
+  String get startNewOrder => 'بدء طلب جديد';
+
+  @override
+  String get clearCartConfirmation =>
+      'لديك عناصر من مطعم آخر. هل تريد بدء طلب جديد ومسح السلة؟';
+
+  @override
+  String get newOrder => 'طلب جديد';
+
+  @override
+  String get cancelAction => 'إلغاء';
 }

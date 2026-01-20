@@ -207,7 +207,7 @@ class ErrorScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () => context.push('/home'),
+              onPressed: () => context.go('/home'),
               child: const Text('Go to Home'),
             ),
           ],

@@ -62,6 +62,7 @@ class OrderModel extends OrderEntity {
     required super.createdAt,
     required super.updatedAt,
     super.notes,
+    super.isPickup,
   });
 
   factory OrderModel.fromEntity(OrderEntity entity) {
@@ -85,12 +86,13 @@ class OrderModel extends OrderEntity {
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
       notes: entity.notes,
+      isPickup: entity.isPickup,
     );
   }
 
   factory OrderModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    
+
     return OrderModel(
       id: doc.id,
       customerId: data['customerId'] as String,
@@ -113,6 +115,7 @@ class OrderModel extends OrderEntity {
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),
       notes: data['notes'] as String?,
+      isPickup: data['isPickup'] as bool? ?? false,
     );
   }
 
@@ -127,7 +130,9 @@ class OrderModel extends OrderEntity {
       'driverId': driverId,
       'driverName': driverName,
       'driverPhone': driverPhone,
-      'items': items.map((item) => OrderItemModel.fromEntity(item).toJson()).toList(),
+      'items': items
+          .map((item) => OrderItemModel.fromEntity(item).toJson())
+          .toList(),
       'totalAmount': totalAmount,
       'status': _statusToString(status),
       'deliveryAddress': deliveryAddress,
@@ -136,6 +141,7 @@ class OrderModel extends OrderEntity {
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
       'notes': notes,
+      'isPickup': isPickup,
     };
   }
 
@@ -179,4 +185,3 @@ class OrderModel extends OrderEntity {
     }
   }
 }
-

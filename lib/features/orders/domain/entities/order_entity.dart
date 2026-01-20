@@ -29,8 +29,13 @@ class OrderItemEntity extends Equatable {
   double get totalPrice => price * quantity;
 
   @override
-  List<Object?> get props =>
-      [productId, productName, price, quantity, imageUrl];
+  List<Object?> get props => [
+    productId,
+    productName,
+    price,
+    quantity,
+    imageUrl,
+  ];
 }
 
 class OrderEntity extends Equatable {
@@ -53,6 +58,7 @@ class OrderEntity extends Equatable {
   final DateTime createdAt;
   final DateTime updatedAt;
   final String? notes;
+  final bool isPickup;
 
   const OrderEntity({
     required this.id,
@@ -74,6 +80,7 @@ class OrderEntity extends Equatable {
     required this.createdAt,
     required this.updatedAt,
     this.notes,
+    this.isPickup = false,
   });
 
   // Helper methods
@@ -104,25 +111,25 @@ class OrderEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        customerId,
-        customerName,
-        customerPhone,
-        restaurantId,
-        restaurantName,
-        restaurantImage,
-        driverId,
-        driverName,
-        driverPhone,
-        items,
-        totalAmount,
-        status,
-        deliveryAddress,
-        deliveryLocation,
-        restaurantLocation,
-        createdAt,
-        updatedAt,
-        notes,
-      ];
+    id,
+    customerId,
+    customerName,
+    customerPhone,
+    restaurantId,
+    restaurantName,
+    restaurantImage,
+    driverId,
+    driverName,
+    driverPhone,
+    items,
+    totalAmount,
+    status,
+    deliveryAddress,
+    deliveryLocation,
+    restaurantLocation,
+    createdAt,
+    updatedAt,
+    notes,
+    isPickup,
+  ];
 }
-

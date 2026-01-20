@@ -16,7 +16,7 @@ class CartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.cart),
@@ -39,7 +39,7 @@ class CartScreen extends StatelessWidget {
         listener: (context, state) {
           // Only show error snackbar for stream errors, not validation errors
           // Validation errors are handled by ToastService in CartCubit
-          if (state is CartError && 
+          if (state is CartError &&
               !state.message.contains('Invalid product') &&
               !state.message.contains('not authenticated') &&
               !state.message.contains('Quantity must be')) {
@@ -52,9 +52,9 @@ class CartScreen extends StatelessWidget {
           }
 
           // Only show error screen for critical stream errors
-          if (state is CartError && 
+          if (state is CartError &&
               (state.message.contains('Failed to load cart') ||
-               state.message.contains('stream'))) {
+                  state.message.contains('stream'))) {
             return ErrorDisplayWidget(
               message: state.message,
               onRetry: () {
@@ -102,21 +102,21 @@ class CartScreen extends StatelessWidget {
             Text(
               l10n.cartEmpty,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               l10n.startAddingProductsFromRestaurants,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
             ElevatedButton.icon(
-              onPressed: () => context.push('/home'),
+              onPressed: () => context.go('/home'),
               icon: const Icon(Icons.restaurant_menu),
               label: Text(l10n.browseRestaurants),
               style: ElevatedButton.styleFrom(
@@ -138,10 +138,10 @@ class CartScreen extends StatelessWidget {
     AppLocalizations l10n,
   ) {
     // Check for unavailable products
-    final unavailableItems = state.items.where(
-      (item) => !item.product.isAvailable
-    ).toList();
-    
+    final unavailableItems = state.items
+        .where((item) => !item.product.isAvailable)
+        .toList();
+
     // Auto-remove unavailable items
     if (unavailableItems.isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -150,7 +150,7 @@ class CartScreen extends StatelessWidget {
         }
       });
     }
-    
+
     return Column(
       children: [
         // Warning banner if any items are unavailable
@@ -177,7 +177,7 @@ class CartScreen extends StatelessWidget {
               ],
             ),
           ),
-        
+
         // Cart Items List
         Expanded(
           child: ListView.builder(
@@ -206,73 +206,73 @@ class CartScreen extends StatelessWidget {
               ],
             ),
             child: Column(
-            children: [
-              // Subtotal
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    l10n.subtotal,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  Text(
-                    '${state.totalPrice.toStringAsFixed(2)} ${l10n.currencySymbol}',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              // Delivery Fee (if applicable)
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //   children: [
-              //     Text(l10n.deliveryFee),
-              //     Text('10.00 ر.س'),
-              //   ],
-              // ),
-              const Divider(height: 24),
-              // Grand Total
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    l10n.grandTotal,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  Text(
-                    '${state.totalPrice.toStringAsFixed(2)} ${l10n.currencySymbol}',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
-                        ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => _proceedToCheckout(context, state),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: Text(
-                    l10n.proceedToCheckout,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+              children: [
+                // Subtotal
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      l10n.subtotal,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    Text(
+                      '${state.totalPrice.toStringAsFixed(2)} ${l10n.currencySymbol}',
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                // Delivery Fee (if applicable)
+                // Row(
+                //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //   children: [
+                //     Text(l10n.deliveryFee),
+                //     Text('10.00 ر.س'),
+                //   ],
+                // ),
+                const Divider(height: 24),
+                // Grand Total
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      l10n.grandTotal,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      '${state.totalPrice.toStringAsFixed(2)} ${l10n.currencySymbol}',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => _proceedToCheckout(context, state),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: Text(
+                      l10n.proceedToCheckout,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
           ),
         ),
       ],
@@ -285,7 +285,8 @@ class CartScreen extends StatelessWidget {
   ) async {
     if (state.items.isEmpty) return;
 
-    final restaurantId = state.restaurantId ?? state.items.first.product.restaurantId;
+    final restaurantId =
+        state.restaurantId ?? state.items.first.product.restaurantId;
 
     // Fetch restaurant data
     await context.read<RestaurantCubit>().getRestaurantById(restaurantId);
@@ -303,7 +304,9 @@ class CartScreen extends StatelessWidget {
     } else {
       if (context.mounted) {
         final l10n = AppLocalizations.of(context);
-        context.showErrorSnackBar(l10n?.failedToLoadRestaurantData ?? 'Failed to load restaurant data');
+        context.showErrorSnackBar(
+          l10n?.failedToLoadRestaurantData ?? 'Failed to load restaurant data',
+        );
       }
     }
   }
@@ -344,25 +347,22 @@ class _CartItemCard extends StatelessWidget {
   final dynamic item; // CartItemEntity
   final AppLocalizations l10n;
 
-  const _CartItemCard({
-    required this.item,
-    required this.l10n,
-  });
+  const _CartItemCard({required this.item, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
     final isUnavailable = !item.product.isAvailable;
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: isUnavailable 
+        side: isUnavailable
             ? BorderSide(color: AppColors.error, width: 1)
             : BorderSide.none,
       ),
-      color: isUnavailable 
+      color: isUnavailable
           ? AppColors.error.withValues(alpha: 0.05)
           : Colors.white,
       child: Padding(
@@ -372,7 +372,8 @@ class _CartItemCard extends StatelessWidget {
             // Product Image
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: item.product.imageUrl != null &&
+              child:
+                  item.product.imageUrl != null &&
                       item.product.imageUrl!.isNotEmpty
                   ? CachedNetworkImage(
                       imageUrl: item.product.imageUrl!,
@@ -383,9 +384,7 @@ class _CartItemCard extends StatelessWidget {
                         width: 80,
                         height: 80,
                         color: AppColors.surface,
-                        child: const Center(
-                          child: CircularProgressIndicator(),
-                        ),
+                        child: const Center(child: CircularProgressIndicator()),
                       ),
                       errorWidget: (context, url, error) => Container(
                         width: 80,
@@ -416,10 +415,10 @@ class _CartItemCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: isUnavailable 
+                            color: isUnavailable
                                 ? AppColors.textSecondary
                                 : AppColors.textPrimary,
-                            decoration: isUnavailable 
+                            decoration: isUnavailable
                                 ? TextDecoration.lineThrough
                                 : TextDecoration.none,
                           ),
@@ -453,7 +452,7 @@ class _CartItemCard extends StatelessWidget {
                     '${item.product.price.toStringAsFixed(2)} ${l10n.currencySymbol}',
                     style: TextStyle(
                       fontSize: 14,
-                      color: isUnavailable 
+                      color: isUnavailable
                           ? AppColors.textSecondary
                           : AppColors.primary,
                       fontWeight: FontWeight.w600,
@@ -482,9 +481,9 @@ class _CartItemCard extends StatelessWidget {
                         icon: const Icon(Icons.remove_circle_outline),
                         onPressed: () {
                           context.read<CartCubit>().updateQuantity(
-                                item.product.id,
-                                item.quantity - 1,
-                              );
+                            item.product.id,
+                            item.quantity - 1,
+                          );
                         },
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
@@ -503,9 +502,9 @@ class _CartItemCard extends StatelessWidget {
                         icon: const Icon(Icons.add_circle_outline),
                         onPressed: () {
                           context.read<CartCubit>().updateQuantity(
-                                item.product.id,
-                                item.quantity + 1,
-                              );
+                            item.product.id,
+                            item.quantity + 1,
+                          );
                         },
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
@@ -518,10 +517,7 @@ class _CartItemCard extends StatelessWidget {
                   },
                   child: Text(
                     l10n.remove,
-                    style: TextStyle(
-                      color: AppColors.error,
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: AppColors.error, fontSize: 12),
                   ),
                 ),
               ],

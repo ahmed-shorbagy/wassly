@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../home/domain/entities/banner_entity.dart';
+import '../../../home/domain/entities/promotional_image_entity.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../restaurants/domain/entities/restaurant_category_entity.dart';
 import '../../../restaurants/domain/repositories/restaurant_category_repository.dart';
@@ -23,6 +24,7 @@ class HomeCubit extends Cubit<HomeState> {
     try {
       emit(HomeLoading());
       final banners = await _loadBanners();
+      final promotionalImages = await _loadPromotionalImages();
       final categoriesResult = await _categoryRepository.getCategories();
 
       categoriesResult.fold(
@@ -31,10 +33,21 @@ class HomeCubit extends Cubit<HomeState> {
             'Failed to load categories',
             error: failure.message,
           );
-          emit(HomeLoaded(banners: banners, categories: const []));
+          emit(
+            HomeLoaded(
+              banners: banners,
+              categories: const [],
+              promotionalImages: promotionalImages,
+            ),
+          );
         },
-        (categories) =>
-            emit(HomeLoaded(banners: banners, categories: categories)),
+        (categories) => emit(
+          HomeLoaded(
+            banners: banners,
+            categories: categories,
+            promotionalImages: promotionalImages,
+          ),
+        ),
       );
     } catch (e) {
       AppLogger.logError('Failed to load home', error: e);
@@ -85,6 +98,55 @@ class HomeCubit extends Cubit<HomeState> {
       return banners;
     } catch (e) {
       AppLogger.logError('Failed to fetch banners', error: e);
+      return [];
+    }
+  }
+
+  Future<List<PromotionalImageEntity>> _loadPromotionalImages() async {
+    try {
+      QuerySnapshot snapshot;
+      try {
+        // Try with isActive filter and priority order
+        snapshot = await firestore
+            .collection('promotional_images')
+            .where('isActive', isEqualTo: true)
+            .orderBy('priority', descending: false)
+            .get();
+      } catch (e) {
+        // Fallback: fetch all and filter client-side
+        AppLogger.logWarning(
+          'Promotional images query with filters failed, using fallback: $e',
+        );
+        snapshot = await firestore
+            .collection('promotional_images')
+            .orderBy('priority', descending: false)
+            .get();
+      }
+
+      final images = snapshot.docs
+          .map((d) {
+            final data = d.data() as Map<String, dynamic>;
+            // Filter active images client-side if query didn't include filter
+            final isActive = data['isActive'] ?? true;
+            if (!isActive) return null;
+
+            return PromotionalImageEntity(
+              id: d.id,
+              imageUrl: (data['imageUrl'] ?? '') as String,
+              title: data['title'] as String?,
+              subtitle: data['subtitle'] as String?,
+              deepLink: data['deepLink'] as String?,
+              isActive: isActive,
+              priority: data['priority'] ?? 0,
+            );
+          })
+          .where((img) => img != null && img.imageUrl.isNotEmpty)
+          .cast<PromotionalImageEntity>()
+          .toList();
+
+      return images;
+    } catch (e) {
+      AppLogger.logError('Failed to fetch promotional images', error: e);
       return [];
     }
   }

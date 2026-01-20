@@ -6,6 +6,7 @@ import '../../../../core/constants/supabase_constants.dart';
 import '../../../ads/domain/entities/startup_ad_entity.dart';
 import '../../../ads/domain/repositories/ad_repository.dart';
 import '../../../home/domain/entities/banner_entity.dart';
+import '../../../home/domain/entities/promotional_image_entity.dart';
 
 part 'ad_management_state.dart';
 
@@ -424,6 +425,223 @@ class AdManagementCubit extends Cubit<AdManagementState> {
           AppLogger.logSuccess('Banner ad status updated');
           emit(BannerAdStatusToggled());
           loadAllBannerAds();
+        },
+      );
+    } catch (e) {
+      AppLogger.logError('Error toggling status', error: e);
+      emit(AdManagementError('Failed to update status: $e'));
+    }
+  }
+
+  // Promotional Images
+  Future<void> loadAllPromotionalImages() async {
+    try {
+      emit(AdManagementLoading());
+      AppLogger.logInfo('Loading all promotional images');
+
+      final result = await repository.getAllPromotionalImages();
+
+      result.fold(
+        (failure) {
+          AppLogger.logError(
+            'Failed to load promotional images',
+            error: failure.message,
+          );
+          emit(AdManagementError(failure.message));
+        },
+        (images) {
+          AppLogger.logSuccess('Promotional images loaded: ${images.length}');
+          emit(PromotionalImagesLoaded(images));
+        },
+      );
+    } catch (e) {
+      AppLogger.logError('Error loading promotional images', error: e);
+      emit(AdManagementError('Failed to load promotional images: $e'));
+    }
+  }
+
+  Future<void> addPromotionalImage({
+    required String imageUrl,
+    String? title,
+    String? subtitle,
+    String? deepLink,
+    required File? imageFile,
+    int priority = 0,
+  }) async {
+    try {
+      emit(AdManagementLoading());
+      AppLogger.logInfo('Adding promotional image');
+
+      String? finalImageUrl = imageUrl;
+      if (imageFile != null) {
+        final uploadResult = await repository.uploadImageFile(
+          imageFile,
+          SupabaseConstants.restaurantImagesBucket,
+          'promotional_images',
+        );
+        final result = uploadResult.fold((failure) {
+          emit(AdManagementError('Failed to upload image: ${failure.message}'));
+          return null as String?;
+        }, (url) => url);
+        if (result == null) return;
+        finalImageUrl = result;
+      }
+
+      final image = PromotionalImageEntity(
+        id: '',
+        imageUrl: finalImageUrl,
+        title: title,
+        subtitle: subtitle,
+        deepLink: deepLink,
+        isActive: true,
+        priority: priority,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      final result = await repository.createPromotionalImage(image);
+
+      result.fold(
+        (failure) {
+          AppLogger.logError(
+            'Failed to add promotional image',
+            error: failure.message,
+          );
+          emit(AdManagementError(failure.message));
+        },
+        (createdImage) {
+          AppLogger.logSuccess('Promotional image added: ${createdImage.id}');
+          emit(PromotionalImageAdded(createdImage));
+          loadAllPromotionalImages();
+        },
+      );
+    } catch (e) {
+      AppLogger.logError('Error adding promotional image', error: e);
+      emit(AdManagementError('Failed to add promotional image: $e'));
+    }
+  }
+
+  Future<void> updatePromotionalImage({
+    required String imageId,
+    required String imageUrl,
+    String? title,
+    String? subtitle,
+    String? deepLink,
+    File? imageFile,
+    int? priority,
+    bool? isActive,
+  }) async {
+    try {
+      emit(AdManagementLoading());
+      AppLogger.logInfo('Updating promotional image: $imageId');
+
+      String? finalImageUrl = imageUrl;
+      if (imageFile != null) {
+        final uploadResult = await repository.uploadImageFile(
+          imageFile,
+          SupabaseConstants.restaurantImagesBucket,
+          'promotional_images',
+        );
+        final result = uploadResult.fold((failure) {
+          emit(AdManagementError('Failed to upload image: ${failure.message}'));
+          return null as String?;
+        }, (url) => url);
+        if (result == null) return;
+        finalImageUrl = result;
+      }
+
+      // Get existing image to preserve fields
+      final existingResult = await repository.getPromotionalImageById(imageId);
+      PromotionalImageEntity? existingImage;
+      final existingImageResult = existingResult.fold((failure) {
+        emit(AdManagementError('Failed to get existing image'));
+        return null as PromotionalImageEntity?;
+      }, (image) => image);
+      if (existingImageResult == null) return;
+      existingImage = existingImageResult;
+
+      final image = PromotionalImageEntity(
+        id: imageId,
+        imageUrl: finalImageUrl,
+        title: title ?? existingImage.title,
+        subtitle: subtitle ?? existingImage.subtitle,
+        deepLink: deepLink ?? existingImage.deepLink,
+        isActive: isActive ?? existingImage.isActive,
+        priority: priority ?? existingImage.priority,
+        createdAt: existingImage.createdAt,
+        updatedAt: DateTime.now(),
+      );
+
+      final updateResult = await repository.updatePromotionalImage(image);
+
+      updateResult.fold(
+        (failure) {
+          AppLogger.logError(
+            'Failed to update promotional image',
+            error: failure.message,
+          );
+          emit(AdManagementError(failure.message));
+        },
+        (_) {
+          AppLogger.logSuccess('Promotional image updated: $imageId');
+          emit(PromotionalImageUpdated());
+          loadAllPromotionalImages();
+        },
+      );
+    } catch (e) {
+      AppLogger.logError('Error updating promotional image', error: e);
+      emit(AdManagementError('Failed to update promotional image: $e'));
+    }
+  }
+
+  Future<void> deletePromotionalImage(String imageId) async {
+    try {
+      emit(AdManagementLoading());
+      AppLogger.logInfo('Deleting promotional image: $imageId');
+
+      final result = await repository.deletePromotionalImage(imageId);
+
+      result.fold(
+        (failure) {
+          AppLogger.logError(
+            'Failed to delete promotional image',
+            error: failure.message,
+          );
+          emit(AdManagementError(failure.message));
+        },
+        (_) {
+          AppLogger.logSuccess('Promotional image deleted: $imageId');
+          emit(PromotionalImageDeleted());
+          loadAllPromotionalImages();
+        },
+      );
+    } catch (e) {
+      AppLogger.logError('Error deleting promotional image', error: e);
+      emit(AdManagementError('Failed to delete promotional image: $e'));
+    }
+  }
+
+  Future<void> togglePromotionalImageStatus(
+    String imageId,
+    bool isActive,
+  ) async {
+    try {
+      AppLogger.logInfo('Toggling promotional image status: $imageId');
+
+      final result = await repository.togglePromotionalImageStatus(
+        imageId,
+        isActive,
+      );
+
+      result.fold(
+        (failure) {
+          AppLogger.logError('Failed to toggle status', error: failure.message);
+          emit(AdManagementError(failure.message));
+        },
+        (_) {
+          AppLogger.logSuccess('Promotional image status updated');
+          emit(PromotionalImageStatusToggled());
+          loadAllPromotionalImages();
         },
       );
     } catch (e) {

@@ -14,11 +14,16 @@ class HomeLoading extends HomeState {}
 class HomeLoaded extends HomeState {
   final List<BannerEntity> banners;
   final List<RestaurantCategoryEntity> categories;
+  final List<PromotionalImageEntity> promotionalImages;
 
-  const HomeLoaded({this.banners = const [], this.categories = const []});
+  const HomeLoaded({
+    this.banners = const [],
+    this.categories = const [],
+    this.promotionalImages = const [],
+  });
 
   @override
-  List<Object?> get props => [banners, categories];
+  List<Object?> get props => [banners, categories, promotionalImages];
 }
 
 class HomeError extends HomeState {

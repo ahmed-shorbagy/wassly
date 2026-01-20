@@ -102,14 +102,6 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
     return filtered;
   }
 
-  double get _cartTotal {
-    final cartState = context.read<CartCubit>().state;
-    if (cartState is CartLoaded) {
-      return cartState.totalPrice;
-    }
-    return 0.0;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -738,11 +730,14 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
     if (restaurant == null) return const SizedBox.shrink();
 
     final minOrder = restaurant.minOrderAmount;
-    final currentTotal = _cartTotal;
-    final remaining = minOrder > currentTotal ? minOrder - currentTotal : 0.0;
-
     return BlocBuilder<CartCubit, CartState>(
       builder: (context, state) {
+        final double currentTotal = state is CartLoaded
+            ? state.totalPrice
+            : 0.0;
+        final remaining = minOrder > currentTotal
+            ? minOrder - currentTotal
+            : 0.0;
         final itemCount = state is CartLoaded ? state.itemCount : 0;
 
         if (itemCount == 0) {
@@ -815,9 +810,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: remaining == 0
-                      ? () => context.push('/cart')
-                      : null,
+                  onPressed: remaining == 0 ? () => context.go('/cart') : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
@@ -851,19 +844,54 @@ class _ProductListTile extends StatelessWidget {
     required this.isLast,
   });
 
+  Future<void> _handleAddToCart(BuildContext context) async {
+    final cartCubit = context.read<CartCubit>();
+    final state = cartCubit.state;
+
+    if (state is CartLoaded &&
+        state.restaurantId != null &&
+        state.restaurantId != product.restaurantId &&
+        state.items.isNotEmpty) {
+      final l10n = AppLocalizations.of(context);
+
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(l10n?.startNewOrder ?? 'Start New Order'),
+          content: Text(
+            l10n?.clearCartConfirmation ??
+                'You have items from another restaurant. Start a new order to clear the cart?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(l10n?.cancelAction ?? 'Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(l10n?.newOrder ?? 'New Order'),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed == true) {
+        await cartCubit.clearCart();
+        if (context.mounted) {
+          await cartCubit.addItem(product, context: context);
+        }
+      }
+    } else {
+      await cartCubit.addItem(product, context: context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
     return InkWell(
-      onTap: product.isAvailable
-          ? () async {
-              await context.read<CartCubit>().addItem(
-                product,
-                context: context,
-              );
-            }
-          : null,
+      onTap: product.isAvailable ? () => _handleAddToCart(context) : null,
       child: Column(
         children: [
           Container(
@@ -926,12 +954,7 @@ class _ProductListTile extends StatelessWidget {
                       left: 8,
                       child: GestureDetector(
                         onTap: product.isAvailable
-                            ? () async {
-                                await context.read<CartCubit>().addItem(
-                                  product,
-                                  context: context,
-                                );
-                              }
+                            ? () => _handleAddToCart(context)
                             : null,
                         child: Container(
                           width: 32,

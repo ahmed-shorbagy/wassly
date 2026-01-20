@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/entities/product_entity.dart';
+import '../../../../core/utils/logger.dart';
 
 class ProductModel extends ProductEntity {
   const ProductModel({
@@ -21,18 +22,53 @@ class ProductModel extends ProductEntity {
     if (id == null || (id is String && id.isEmpty)) {
       throw FormatException('Product ID is required and cannot be empty');
     }
-    
+
+    double parsePrice(dynamic value) {
+      if (value == null) {
+        // AppLogger.logWarning('ProductModel: Price is null for id: $id');
+        return 0.0;
+      }
+      if (value is num) return value.toDouble();
+      if (value is String) {
+        final parsed = double.tryParse(value);
+        if (parsed == null) {
+          AppLogger.logError(
+            'ProductModel: Failed to parse price string: $value for id: $id',
+          );
+        }
+        return parsed ?? 0.0;
+      }
+      AppLogger.logError(
+        'ProductModel: Unknown price type: ${value.runtimeType} for id: $id',
+      );
+      return 0.0;
+    }
+
+    DateTime parseDate(dynamic value) {
+      if (value == null) return DateTime.now();
+      if (value is Timestamp) return value.toDate();
+      if (value is String) return DateTime.tryParse(value) ?? DateTime.now();
+      return DateTime.now();
+    }
+
+    // Log problematic entries
+    if (json['price'] == null || json['price'] == 0) {
+      AppLogger.logInfo(
+        'ProductModel: Parsed product with 0/null price. ID: $id, Raw Price: ${json['price']}',
+      );
+    }
+
     return ProductModel(
       id: id as String,
-      restaurantId: json['restaurantId'] ?? '',
-      name: json['name'] ?? '',
-      description: json['description'] ?? '',
-      price: (json['price'] ?? 0).toDouble(),
-      imageUrl: json['imageUrl'],
-      categoryId: json['categoryId'],
-      category: json['category'], // Keep for backward compatibility
-      isAvailable: json['isAvailable'] ?? true,
-      createdAt: (json['createdAt'] as Timestamp).toDate(),
+      restaurantId: json['restaurantId'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      description: json['description'] as String? ?? '',
+      price: parsePrice(json['price']),
+      imageUrl: json['imageUrl'] as String?,
+      categoryId: json['categoryId'] as String?,
+      category: json['category'] as String?, // Keep for backward compatibility
+      isAvailable: json['isAvailable'] as bool? ?? true,
+      createdAt: parseDate(json['createdAt']),
     );
   }
 

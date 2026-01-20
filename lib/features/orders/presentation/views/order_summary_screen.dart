@@ -313,6 +313,7 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
   }
 
   Widget _buildDeliverySection(BuildContext context, OrderEntity order) {
+    if (order.isPickup) return const SizedBox.shrink();
     final l10n = AppLocalizations.of(context);
 
     return Transform.translate(
@@ -636,6 +637,23 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
   }
 
   String _getEstimatedDeliveryTime(OrderEntity order) {
+    if (order.isPickup) {
+      switch (order.status) {
+        case OrderStatus.pending:
+          return '20-35 min';
+        case OrderStatus.accepted:
+          return '15-30 min';
+        case OrderStatus.preparing:
+          return '10-20 min';
+        case OrderStatus.ready:
+          return 'Ready now';
+        case OrderStatus.pickedUp:
+        case OrderStatus.delivered:
+          return 'Completed';
+        case OrderStatus.cancelled:
+          return 'Cancelled';
+      }
+    }
     switch (order.status) {
       case OrderStatus.pending:
         return '30-45 min';
@@ -655,6 +673,23 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
   }
 
   String _getStatusMessage(OrderEntity order, AppLocalizations? l10n) {
+    if (order.isPickup) {
+      switch (order.status) {
+        case OrderStatus.pending:
+          return l10n?.orderPending ?? 'Order pending confirmation.';
+        case OrderStatus.accepted:
+          return l10n?.orderAccepted ?? 'Order accepted! Preparing soon.';
+        case OrderStatus.preparing:
+          return '${order.restaurantName} is preparing your order.';
+        case OrderStatus.ready:
+          return 'Your order is ready for pickup at the restaurant!';
+        case OrderStatus.pickedUp:
+        case OrderStatus.delivered:
+          return 'You have picked up your order. Enjoy!';
+        case OrderStatus.cancelled:
+          return 'Order cancelled.';
+      }
+    }
     switch (order.status) {
       case OrderStatus.pending:
         return l10n?.orderPending ?? 'طلبك قيد المراجعة! سيتم تأكيده قريباً.';

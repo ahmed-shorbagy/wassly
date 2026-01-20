@@ -1527,4 +1527,79 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mostSoldProducts => 'Most Sold Products';
+
+  @override
+  String get promotionalImages => 'Promotional Images';
+
+  @override
+  String get addPromotionalImage => 'Add Promotional Image';
+
+  @override
+  String get editPromotionalImage => 'Edit Promotional Image';
+
+  @override
+  String get deletePromotionalImage => 'Delete Promotional Image';
+
+  @override
+  String get areYouSureDeletePromotionalImage =>
+      'Are you sure you want to delete the promotional image';
+
+  @override
+  String get promotionalImage => 'Promotional Image';
+
+  @override
+  String get noPromotionalImages => 'No Promotional Images';
+
+  @override
+  String get startByAddingYourFirstPromotionalImage =>
+      'Start by adding your first promotional image';
+
+  @override
+  String get tapToChangeImage => 'Tap to change image';
+
+  @override
+  String get title => 'Title';
+
+  @override
+  String get optionalTitleHint => 'Enter optional title';
+
+  @override
+  String get subtitle => 'Subtitle';
+
+  @override
+  String get optionalSubtitleHint => 'Enter optional subtitle';
+
+  @override
+  String get saveChanges => 'Save Changes';
+
+  @override
+  String get deactivate => 'Deactivate';
+
+  @override
+  String get activate => 'Activate';
+
+  @override
+  String get exploreOurRichWorld => 'Explore our rich world';
+
+  @override
+  String get pickupFromRestaurant => 'Pickup from Restaurant';
+
+  @override
+  String get deliveryMode => 'Delivery Mode';
+
+  @override
+  String get delivery => 'Delivery';
+
+  @override
+  String get startNewOrder => 'Start New Order';
+
+  @override
+  String get clearCartConfirmation =>
+      'You have items from another restaurant. Start a new order to clear the cart?';
+
+  @override
+  String get newOrder => 'New Order';
+
+  @override
+  String get cancelAction => 'Cancel';
 }
