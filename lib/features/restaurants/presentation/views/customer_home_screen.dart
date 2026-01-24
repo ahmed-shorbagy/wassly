@@ -23,7 +23,7 @@ import '../../../ads/presentation/cubits/startup_ad_customer_cubit.dart';
 import '../../../../shared/widgets/startup_ad_popup.dart';
 import '../../../delivery_address/presentation/cubits/delivery_address_cubit.dart';
 import 'package:lottie/lottie.dart';
-// import '../widgets/restaurant_card.dart'; // Unused
+import '../../../../core/utils/search_helper.dart';
 // import '../../../../core/constants/market_product_categories.dart'; // Unused
 // import '../../../market_products/domain/entities/market_product_entity.dart'; // Unused
 
@@ -66,34 +66,36 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
 
   void _filterRestaurants() {
     final query = _searchController.text.toLowerCase().trim();
-    setState(() {
-      if (query.isEmpty) {
+    if (query.isEmpty) {
+      setState(() {
         _filteredRestaurants = List.from(_allRestaurants);
-      } else {
-        _filteredRestaurants = _allRestaurants.where((restaurant) {
-          final queryLower = query.toLowerCase();
-          final nameMatch = restaurant.name.toLowerCase().contains(queryLower);
-          final descMatch = restaurant.description.toLowerCase().contains(
-            queryLower,
-          );
+      });
+      return;
+    }
 
+    setState(() {
+      _filteredRestaurants = SearchHelper.filterList(
+        items: _allRestaurants,
+        query: query,
+        getSearchStrings: (restaurant) {
           // Resolve category names from IDs to allow searching by category name
           final homeState = context.read<HomeCubit>().state;
           final categories = homeState is HomeLoaded
               ? homeState.categories
               : [];
-          final categoryMatch = restaurant.categoryIds.any((cid) {
+          final categoryNames = restaurant.categoryIds.map((cid) {
             final category = categories.where((c) => c.id == cid).firstOrNull;
-            return category?.name.toLowerCase().contains(queryLower) ??
-                cid.toLowerCase().contains(queryLower);
-          });
+            return category?.name ?? cid;
+          }).toList();
 
-          final addressMatch = restaurant.address.toLowerCase().contains(
-            queryLower,
-          );
-          return nameMatch || descMatch || categoryMatch || addressMatch;
-        }).toList();
-      }
+          return [
+            restaurant.name,
+            restaurant.description,
+            restaurant.address,
+            ...categoryNames,
+          ];
+        },
+      );
     });
   }
 

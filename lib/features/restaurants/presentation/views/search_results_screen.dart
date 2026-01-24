@@ -13,6 +13,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../home/presentation/cubits/home_cubit.dart';
 import '../../domain/entities/restaurant_category_entity.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../../../core/utils/search_helper.dart';
 
 class SearchResultsScreen extends StatefulWidget {
   final String initialQuery;
@@ -92,32 +93,32 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
     setState(() {
       String query = _searchController.text.toLowerCase().trim();
 
-      // Filter by search query
-      var filtered = _allRestaurants.where((restaurant) {
-        if (query.isNotEmpty) {
-          final queryLower = query.toLowerCase();
-          final nameMatch = restaurant.name.toLowerCase().contains(queryLower);
-          final descMatch = restaurant.description.toLowerCase().contains(
-            queryLower,
-          );
+      // Filter by search query using Smart Fuzzy Search
+      var filtered = query.isEmpty
+          ? List<RestaurantEntity>.from(_allRestaurants)
+          : SearchHelper.filterList(
+              items: _allRestaurants,
+              query: query,
+              getSearchStrings: (restaurant) {
+                // Resolve category IDs to names for searching
+                final categories = restaurant.categoryIds.map((cid) {
+                  final category = _availableCategories
+                      .where((c) => c.id == cid)
+                      .firstOrNull;
+                  return category?.name ?? cid;
+                }).toList();
 
-          // Use _availableCategories (already populated from HomeCubit) to resolve IDs to names
-          final categoryMatch = restaurant.categoryIds.any((cid) {
-            final category = _availableCategories
-                .where((c) => c.id == cid)
-                .firstOrNull;
-            return category?.name.toLowerCase().contains(queryLower) ??
-                cid.toLowerCase().contains(queryLower);
-          });
+                return [
+                  restaurant.name,
+                  restaurant.description,
+                  restaurant.address,
+                  ...categories,
+                ];
+              },
+            );
 
-          final addressMatch = restaurant.address.toLowerCase().contains(
-            queryLower,
-          );
-          if (!(nameMatch || descMatch || categoryMatch || addressMatch)) {
-            return false;
-          }
-        }
-
+      // Further filter by UI criteria
+      filtered = filtered.where((restaurant) {
         // Filter by category
         if (_selectedCategoryName != null) {
           final matchesCategory = restaurant.categoryIds.any((cid) {
@@ -134,9 +135,6 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
         if (_freeDeliveryOnly && restaurant.deliveryFee > 0) {
           return false;
         }
-
-        // Filter by pickup (if restaurant supports pickup, you'd check that here)
-        // For now, we'll show all restaurants for pickup
 
         return true;
       }).toList();

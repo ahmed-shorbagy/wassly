@@ -7,6 +7,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../../../../shared/widgets/error_widget.dart';
 import '../../../../shared/widgets/market_product_card.dart';
+import '../../../../core/utils/search_helper.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -93,16 +94,14 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
           .toList();
     }
 
-    // Filter by search query
+    // Filter by search query using Smart Fuzzy Search
     final searchQuery = _searchController.text.toLowerCase().trim();
     if (searchQuery.isNotEmpty) {
-      filtered = filtered.where((product) {
-        final nameMatch = product.name.toLowerCase().contains(searchQuery);
-        final descMatch = product.description.toLowerCase().contains(
-          searchQuery,
-        );
-        return nameMatch || descMatch;
-      }).toList();
+      filtered = SearchHelper.filterList(
+        items: filtered,
+        query: searchQuery,
+        getSearchStrings: (product) => [product.name, product.description],
+      );
     }
 
     _filteredProducts = filtered;

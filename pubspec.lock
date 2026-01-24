@@ -1194,6 +1194,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.1"
+  string_similarity:
+    dependency: "direct main"
+    description:
+      name: string_similarity
+      sha256: cdbd18900edd9d62c98b1731a438b2573fa3e24e12ff2db6a4f407be0340fefe
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   supabase:
     dependency: transitive
     description:
