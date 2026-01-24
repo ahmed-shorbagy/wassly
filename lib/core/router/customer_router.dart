@@ -167,9 +167,11 @@ class CustomerRouter {
         builder: (context, state) {
           final restaurantId = state.uri.queryParameters['restaurantId'];
           final restaurantName = state.uri.queryParameters['restaurantName'];
+          final category = state.uri.queryParameters['category'];
           return MarketProductsScreen(
             restaurantId: restaurantId,
             restaurantName: restaurantName,
+            initialCategory: category,
           );
         },
       ),

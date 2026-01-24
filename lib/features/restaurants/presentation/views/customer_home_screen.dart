@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:wassly/features/restaurants/presentation/widgets/restaurant_card.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/responsive_helper.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -22,7 +23,9 @@ import '../../../ads/presentation/cubits/startup_ad_customer_cubit.dart';
 import '../../../../shared/widgets/startup_ad_popup.dart';
 import '../../../delivery_address/presentation/cubits/delivery_address_cubit.dart';
 import 'package:lottie/lottie.dart';
-import '../widgets/restaurant_card.dart';
+// import '../widgets/restaurant_card.dart'; // Unused
+// import '../../../../core/constants/market_product_categories.dart'; // Unused
+// import '../../../market_products/domain/entities/market_product_entity.dart'; // Unused
 
 class CustomerHomeScreen extends StatefulWidget {
   const CustomerHomeScreen({super.key});
@@ -327,7 +330,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             },
           ),
 
-          // Market Products Categories Section
+          // Restaurant Categories Section
           BlocBuilder<HomeCubit, HomeState>(
             builder: (context, state) {
               final categories = state is HomeLoaded
@@ -337,19 +340,27 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 child: Padding(
                   padding: ResponsiveHelper.padding(horizontal: 16, top: 16),
                   child: _MarketProductCategoriesSection(
-                    categories: categories,
+                    restaurantCategories: categories,
                     onCategoryTap: (category, isMarket) {
-                      if (category == l10n.market) {
-                        // Navigate to market products screen
-                        context.push('/market-products');
-                      } else if (category == l10n.restaurants) {
-                        // Navigate to search results with all restaurants
-                        context.push('/search', extra: _allRestaurants);
+                      if (isMarket) {
+                        // Navigate to Market Products Screen
+                        if (category == l10n.market) {
+                          // Main Market Page
+                          context.push('/market-products');
+                        } else {
+                          // Filtered Market Page
+                          context.push('/market-products?category=$category');
+                        }
                       } else {
-                        // Navigate to search results with category filter for restaurants
-                        context.push(
-                          '/search?q=${Uri.encodeComponent(category)}',
-                        );
+                        // Navigate to Restaurants Search
+                        if (category == l10n.restaurants) {
+                          context.push('/search', extra: _allRestaurants);
+                        } else {
+                          context.push(
+                            '/search?q=${Uri.encodeComponent(category)}',
+                            extra: _allRestaurants,
+                          );
+                        }
                       }
                     },
                   ),
@@ -701,14 +712,49 @@ class _ThreeRowRestaurantScroller extends StatelessWidget {
   }
 }
 
-class _MarketProductCategoriesSection extends StatelessWidget {
-  final List<RestaurantCategoryEntity> categories;
-  final Function(String, bool) onCategoryTap; // category, isMarket
+class _MarketProductCategoriesSection extends StatefulWidget {
+  final List<RestaurantCategoryEntity> restaurantCategories;
+  final Function(String, bool) onCategoryTap; // categoryName, isMarket
 
   const _MarketProductCategoriesSection({
-    required this.categories,
+    required this.restaurantCategories,
     required this.onCategoryTap,
   });
+
+  @override
+  State<_MarketProductCategoriesSection> createState() =>
+      _MarketProductCategoriesSectionState();
+}
+
+class _MarketProductCategoriesSectionState
+    extends State<_MarketProductCategoriesSection> {
+  late List<RestaurantCategoryEntity> _randomCategories;
+
+  @override
+  void initState() {
+    super.initState();
+    _pickRandomCategories();
+  }
+
+  @override
+  void didUpdateWidget(_MarketProductCategoriesSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.restaurantCategories != oldWidget.restaurantCategories) {
+      _pickRandomCategories();
+    }
+  }
+
+  void _pickRandomCategories() {
+    if (widget.restaurantCategories.isEmpty) {
+      _randomCategories = [];
+      return;
+    }
+    final available = List<RestaurantCategoryEntity>.from(
+      widget.restaurantCategories,
+    );
+    available.shuffle();
+    _randomCategories = available.take(4).toList();
+  }
 
   Widget _buildCategoryCard(
     BuildContext context,
@@ -722,14 +768,12 @@ class _MarketProductCategoriesSection extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
         decoration: BoxDecoration(
-          color: const Color(0xFFF7F7F7), // Slightly more grey for depth
-          borderRadius: BorderRadius.circular(
-            24.r,
-          ), // More rounded as requested
-          border: Border.all(color: Colors.black.withValues(alpha: 0.04)),
+          color: const Color(0xFFF7F7F7),
+          borderRadius: BorderRadius.circular(24.r),
+          border: Border.all(color: Colors.black.withOpacity(0.04)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.02),
+              color: Colors.black.withOpacity(0.02),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -810,34 +854,19 @@ class _MarketProductCategoriesSection extends StatelessWidget {
         'asset': 'assets/images/resturants.jpeg',
         'title': l10n.restaurants,
         'isMarket': false,
-        'categoryName': l10n.restaurants,
-      },
-      {
-        'asset': 'assets/images/poultry_meat_seafood.jpeg',
-        'title': l10n.meat,
-        'isMarket': true,
-        'categoryName': l10n.meat,
-      },
-      {
-        'asset': 'assets/images/fruits&veg.jpeg',
-        'title': l10n.fruitsVegetables,
-        'isMarket': true,
-        'categoryName': l10n.fruitsVegetables,
-      },
-      {
-        'asset':
-            'assets/images/market.jpeg', // Using market as supermarket placeholder
-        'title': l10n.groceries,
-        'isMarket': false,
-        'categoryName': l10n.groceries,
-      },
-      {
-        'asset': 'assets/images/cake&cofee.jpeg',
-        'title': l10n.bakery,
-        'isMarket': true,
-        'categoryName': l10n.bakery,
+        'categoryName': null,
       },
     ];
+
+    for (var cat in _randomCategories) {
+      displayItems.add({
+        'asset': null,
+        'imageUrl': cat.imageUrl,
+        'title': cat.name,
+        'isMarket': false,
+        'categoryName': cat.name,
+      });
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -877,7 +906,7 @@ class _MarketProductCategoriesSection extends StatelessWidget {
                         item['asset'] as String?,
                         item['title'] as String,
                         () {
-                          onCategoryTap(
+                          widget.onCategoryTap(
                             item['categoryName'] as String? ??
                                 item['title'] as String,
                             item['isMarket'] as bool,
@@ -905,7 +934,7 @@ class _MarketProductCategoriesSection extends StatelessWidget {
                         item['asset'] as String?,
                         item['title'] as String,
                         () {
-                          onCategoryTap(
+                          widget.onCategoryTap(
                             item['categoryName'] as String? ??
                                 item['title'] as String,
                             item['isMarket'] as bool,
@@ -924,7 +953,6 @@ class _MarketProductCategoriesSection extends StatelessWidget {
   }
 }
 
-// New banner-style carousel for discounted restaurants in market section
 class _DiscountRestaurantsBannerCarousel extends StatelessWidget {
   final List<RestaurantEntity> restaurants;
   final Function(int) onPageChanged;

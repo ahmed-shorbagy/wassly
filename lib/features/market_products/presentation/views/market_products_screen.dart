@@ -6,23 +6,28 @@ import '../../../../core/constants/market_product_categories.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../../../../shared/widgets/error_widget.dart';
-import '../../../../shared/widgets/product_card.dart';
+import '../../../../shared/widgets/market_product_card.dart';
+
 import 'package:cached_network_image/cached_network_image.dart';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import '../../../../core/utils/responsive_helper.dart';
 import '../../../home/presentation/cubits/home_cubit.dart';
 import '../../../home/domain/entities/banner_entity.dart';
 import '../cubits/market_product_customer_cubit.dart';
+import '../../domain/entities/market_product_entity.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class MarketProductsScreen extends StatefulWidget {
   final String? restaurantId;
   final String? restaurantName;
+  final String? initialCategory;
 
   const MarketProductsScreen({
     super.key,
     this.restaurantId,
     this.restaurantName,
+    this.initialCategory,
   });
 
   @override
@@ -34,13 +39,20 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
 
   String? _selectedCategory;
 
-  List<dynamic> _allProducts = [];
-  List<dynamic> _filteredProducts = [];
+  List<MarketProductEntity> _allProducts = [];
+  List<MarketProductEntity> _filteredProducts = [];
+  List<String> _availableCategories = [];
 
   @override
   void initState() {
     super.initState();
     _searchController.addListener(_filterProducts);
+
+    // Initialize category from widget param if provided
+    if (widget.initialCategory != null && widget.initialCategory!.isNotEmpty) {
+      _selectedCategory = widget.initialCategory;
+    }
+
     // Load products when screen opens
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
@@ -54,24 +66,6 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Check if category was passed from home page navigation (if applicable)
-    final router = GoRouter.of(context);
-    final location = router.routeInformationProvider.value.uri;
-    final categoryParam = location.queryParameters['category'];
-    if (categoryParam != null &&
-        categoryParam.isNotEmpty &&
-        _selectedCategory != categoryParam) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() {
-            _selectedCategory = categoryParam;
-            if (_allProducts.isNotEmpty) {
-              _applyFilters();
-            }
-          });
-        }
-      });
-    }
   }
 
   @override
@@ -88,7 +82,7 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
   }
 
   void _applyFilters() {
-    var filtered = List.from(_allProducts);
+    List<MarketProductEntity> filtered = List.from(_allProducts);
 
     // Filter by category
     if (_selectedCategory != null) {
@@ -115,7 +109,8 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final categories = MarketProductCategories.getCategories(l10n);
+    // Use dynamic categories if available, otherwise empty (or fallback if desired)
+    final categories = _availableCategories;
 
     // If typing in search, treat as "filtering products" regardless of category view?
     // Let's stick to the requested design: Category Grid First.
@@ -124,359 +119,574 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: CustomScrollView(
-        slivers: [
-          // App Bar
-          SliverAppBar(
-            expandedHeight: 80,
-            pinned: true,
-            floating: false,
-            backgroundColor: AppColors.primary,
-            elevation: 0,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-              onPressed: () {
-                if (_selectedCategory != null) {
-                  setState(() {
-                    _selectedCategory = null;
+      // Wrap with BlocListener to always update _allProducts when products are loaded
+      body: BlocListener<MarketProductCustomerCubit, MarketProductCustomerState>(
+        listener: (context, state) {
+          if (state is MarketProductCustomerLoaded) {
+            final uniqueCategories = state.products
+                .map((p) => p.category)
+                .where((c) => c != null && c.isNotEmpty)
+                .cast<String>()
+                .toSet()
+                .toList();
 
-                    _searchController.clear();
-                    _applyFilters();
-                  });
-                } else {
-                  context.pop();
-                }
-              },
-            ),
-            flexibleSpace: FlexibleSpaceBar(
-              title: Text(
-                widget.restaurantName ??
-                    (_selectedCategory != null
-                        ? MarketProductCategories.getCategoryName(
-                            _selectedCategory!,
-                            l10n,
-                          )
-                        : l10n.market),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-              centerTitle: true,
-            ),
-          ),
+            // Sort: 'offers' first, then alphabetical
+            uniqueCategories.sort((a, b) {
+              if (a == 'offers') return -1;
+              if (b == 'offers') return 1;
+              return a.compareTo(b);
+            });
 
-          // Search Bar
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: l10n.searchProducts,
-                    hintStyle: TextStyle(color: AppColors.textHint),
-                    prefixIcon: Icon(Icons.search, color: AppColors.primary),
-                    suffixIcon: _searchController.text.isNotEmpty
-                        ? IconButton(
-                            icon: Icon(
-                              Icons.clear,
-                              color: AppColors.textSecondary,
-                            ),
-                            onPressed: () {
-                              _searchController.clear();
-                              _filterProducts();
-                            },
-                          )
-                        : null,
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
+            setState(() {
+              _allProducts = state.products;
+              _availableCategories = uniqueCategories;
+              _applyFilters();
+            });
+          }
+        },
+        child: CustomScrollView(
+          slivers: [
+            // App Bar
+            SliverAppBar(
+              expandedHeight: 80,
+              pinned: true,
+              floating: false,
+              backgroundColor: AppColors.primary,
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                onPressed: () {
+                  if (_selectedCategory != null) {
+                    setState(() {
+                      _selectedCategory = null;
 
-          // Market Banners Carousel
-          if (_selectedCategory == null && _searchController.text.isEmpty)
-            SliverToBoxAdapter(
-              child: BlocBuilder<HomeCubit, HomeState>(
-                builder: (context, state) {
-                  if (state is HomeLoaded && state.banners.isNotEmpty) {
-                    final marketBanners = state.banners
-                        .where((b) => b.type == 'market')
-                        .toList();
-
-                    // If no market banners, show a high-quality placeholder for testing
-                    final effectiveBanners = marketBanners.isEmpty
-                        ? [
-                            BannerEntity(
-                              id: 'placeholder_market',
-                              type: 'market',
-                              imageUrl:
-                                  'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1200', // Fresh Grocery Market image
-                              title: l10n.market,
-                            ),
-                          ]
-                        : marketBanners;
-
-                    return Padding(
-                      padding: ResponsiveHelper.padding(top: 16, bottom: 8),
-                      child: CarouselSlider(
-                        options: CarouselOptions(
-                          height: 200.h,
-                          viewportFraction: 0.95,
-                          enlargeCenterPage: true,
-                          enableInfiniteScroll: effectiveBanners.length > 1,
-                          autoPlay: effectiveBanners.length > 1,
-                          autoPlayInterval: const Duration(seconds: 4),
-                          autoPlayAnimationDuration: const Duration(
-                            milliseconds: 800,
-                          ),
-                          autoPlayCurve: Curves.fastOutSlowIn,
-                        ),
-                        items: effectiveBanners.map((banner) {
-                          return Builder(
-                            builder: (BuildContext context) {
-                              return Container(
-                                width: MediaQuery.of(context).size.width,
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 4,
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(16.r),
-                                  child: CachedNetworkImage(
-                                    imageUrl: banner.imageUrl,
-                                    width: double.infinity,
-                                    height: 200.h,
-                                    fit: BoxFit.cover,
-                                    placeholder: (c, u) => Container(
-                                      color: AppColors.surface,
-                                      child: const Center(
-                                        child: CircularProgressIndicator(),
-                                      ),
-                                    ),
-                                    errorWidget: (c, u, e) => Container(
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          colors: [
-                                            AppColors.primary,
-                                            AppColors.primaryDark,
-                                          ],
-                                        ),
-                                      ),
-                                      child: const Icon(
-                                        Icons.image_not_supported,
-                                        color: Colors.white,
-                                        size: 50,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          );
-                        }).toList(),
-                      ),
-                    );
+                      _searchController.clear();
+                      _applyFilters();
+                    });
+                  } else {
+                    context.pop();
                   }
-                  return const SizedBox.shrink(); // Hide if loading or error for now
                 },
               ),
+              flexibleSpace: FlexibleSpaceBar(
+                title: Text(
+                  widget.restaurantName ??
+                      (_selectedCategory != null
+                          ? MarketProductCategories.getCategoryName(
+                              _selectedCategory!,
+                              l10n,
+                            )
+                          : l10n.market),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+                centerTitle: true,
+              ),
             ),
 
-          // 1. If NO Category Selected and NO Search -> Show Categories Grid
-          if (!showProductList) ...[
+            // Search Bar
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                child: Text(
-                  l10n.shopByCategory,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                padding: const EdgeInsets.all(16),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: l10n.searchProducts,
+                      hintStyle: TextStyle(color: AppColors.textHint),
+                      prefixIcon: Icon(Icons.search, color: AppColors.primary),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: Icon(
+                                Icons.clear,
+                                color: AppColors.textSecondary,
+                              ),
+                              onPressed: () {
+                                _searchController.clear();
+                                _filterProducts();
+                              },
+                            )
+                          : null,
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
-            SliverToBoxAdapter(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Row 1
-                    Row(
-                      children: List.generate((categories.length / 3).ceil(), (
-                        index,
-                      ) {
-                        final category = categories[index];
-                        return _buildMarketCategoryCard(
-                          context,
-                          category,
-                          l10n,
-                        );
-                      }),
-                    ),
-                    SizedBox(height: 10.h),
-                    // Row 2
-                    Row(
-                      children: List.generate((categories.length / 3).ceil(), (
-                        index,
-                      ) {
-                        final actualIndex =
-                            index + (categories.length / 3).ceil();
-                        if (actualIndex >= categories.length)
-                          return const SizedBox.shrink();
-                        final category = categories[actualIndex];
-                        return _buildMarketCategoryCard(
-                          context,
-                          category,
-                          l10n,
-                        );
-                      }),
-                    ),
-                    SizedBox(height: 10.h),
-                    // Row 3
-                    Row(
-                      children: List.generate(
-                        categories.length - 2 * (categories.length / 3).ceil(),
-                        (index) {
-                          final actualIndex =
-                              index + 2 * (categories.length / 3).ceil();
-                          if (actualIndex >= categories.length)
-                            return const SizedBox.shrink();
-                          final category = categories[actualIndex];
-                          return _buildMarketCategoryCard(
-                            context,
+
+            // Horizontal Category Chip Filter (shown when viewing products)
+            if (showProductList)
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 90.h,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: categories.length,
+                    itemBuilder: (context, index) {
+                      final category = categories[index];
+                      final isSelected = _selectedCategory == category;
+                      final categoryName =
+                          MarketProductCategories.getCategoryName(
                             category,
                             l10n,
                           );
+
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedCategory = category;
+                            _applyFilters();
+                          });
                         },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            // Optional: Banner or other sections below
-            _buildMostSoldSection(context, l10n),
-          ],
-
-          // 2. If Category Selected or Search -> Show Products Grid (Existing Design)
-          if (showProductList) ...[
-            BlocConsumer<
-              MarketProductCustomerCubit,
-              MarketProductCustomerState
-            >(
-              listener: (context, state) {
-                if (state is MarketProductCustomerLoaded) {
-                  setState(() {
-                    _allProducts = state.products;
-                    _applyFilters();
-                    // Extract categories logic if needed, but we use static categories now
-                  });
-                }
-              },
-              builder: (context, state) {
-                if (state is MarketProductCustomerLoading) {
-                  return const SliverFillRemaining(child: LoadingWidget());
-                }
-
-                if (state is MarketProductCustomerError) {
-                  return SliverFillRemaining(
-                    child: ErrorDisplayWidget(
-                      message: state.message,
-                      onRetry: () {
-                        context
-                            .read<MarketProductCustomerCubit>()
-                            .loadMarketProducts();
-                      },
-                    ),
-                  );
-                }
-
-                if (state is MarketProductCustomerLoaded) {
-                  if (_filteredProducts.isEmpty) {
-                    return SliverFillRemaining(
-                      child: Center(
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
-                              Icons.shopping_bag_outlined,
-                              size: 80,
-                              color: AppColors.textSecondary.withOpacity(0.5),
+                            Container(
+                              width: 50.w,
+                              height: 50.w,
+                              margin: EdgeInsetsDirectional.only(end: 10.w),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white,
+                                border: Border.all(
+                                  color: isSelected
+                                      ? AppColors.primary
+                                      : Colors.transparent,
+                                  width: 2,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.05),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: ClipOval(
+                                child: Padding(
+                                  padding: EdgeInsets.all(
+                                    isSelected ? 2.0 : 0.0,
+                                  ), // Gap for border
+                                  child: ClipOval(
+                                    child: Image.asset(
+                                      MarketProductCategories.getCategoryImageUrl(
+                                            category,
+                                            l10n,
+                                          ) ??
+                                          'assets/images/logo.jpeg',
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) => Icon(
+                                            Icons.image_not_supported_outlined,
+                                            size: 24.w,
+                                            color: AppColors.textSecondary
+                                                .withOpacity(0.3),
+                                          ),
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
-                            const SizedBox(height: 16),
-                            Text(
-                              l10n.noProductsFound,
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: AppColors.textSecondary,
+                            SizedBox(height: 4.h),
+                            SizedBox(
+                              width: 60.w, // Slightly wider for text
+                              child: Text(
+                                categoryName,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 10.sp,
+                                  fontWeight: isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.w500,
+                                  color: isSelected
+                                      ? AppColors.primary
+                                      : AppColors.textPrimary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
                         ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+
+            // Market Banners Carousel
+            if (_selectedCategory == null && _searchController.text.isEmpty)
+              SliverToBoxAdapter(
+                child: BlocBuilder<HomeCubit, HomeState>(
+                  builder: (context, state) {
+                    if (state is HomeLoaded && state.banners.isNotEmpty) {
+                      final marketBanners = state.banners
+                          .where((b) => b.type == 'market')
+                          .toList();
+
+                      // If no market banners, show a high-quality placeholder for testing
+                      final effectiveBanners = marketBanners.isEmpty
+                          ? [
+                              BannerEntity(
+                                id: 'placeholder_market',
+                                type: 'market',
+                                imageUrl:
+                                    'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1200', // Fresh Grocery Market image
+                                title: l10n.market,
+                              ),
+                            ]
+                          : marketBanners;
+
+                      return Padding(
+                        padding: ResponsiveHelper.padding(top: 16, bottom: 8),
+                        child: CarouselSlider(
+                          options: CarouselOptions(
+                            height: 200.h,
+                            viewportFraction: 0.95,
+                            enlargeCenterPage: true,
+                            enableInfiniteScroll: effectiveBanners.length > 1,
+                            autoPlay: effectiveBanners.length > 1,
+                            autoPlayInterval: const Duration(seconds: 4),
+                            autoPlayAnimationDuration: const Duration(
+                              milliseconds: 800,
+                            ),
+                            autoPlayCurve: Curves.fastOutSlowIn,
+                          ),
+                          items: effectiveBanners.map((banner) {
+                            return Builder(
+                              builder: (BuildContext context) {
+                                return Container(
+                                  width: MediaQuery.of(context).size.width,
+                                  margin: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(16.r),
+                                    child: CachedNetworkImage(
+                                      imageUrl: banner.imageUrl,
+                                      width: double.infinity,
+                                      height: 200.h,
+                                      fit: BoxFit.cover,
+                                      placeholder: (c, u) => Container(
+                                        color: AppColors.surface,
+                                        child: const Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      ),
+                                      errorWidget: (c, u, e) => Container(
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [
+                                              AppColors.primary,
+                                              AppColors.primaryDark,
+                                            ],
+                                          ),
+                                        ),
+                                        child: const Icon(
+                                          Icons.image_not_supported,
+                                          color: Colors.white,
+                                          size: 50,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          }).toList(),
+                        ),
+                      );
+                    }
+                    return const SizedBox.shrink(); // Hide if loading or error for now
+                  },
+                ),
+              ),
+
+            // 1. If NO Category Selected and NO Search -> Show Dashboard (Banners, Top Products, Categories)
+            if (!showProductList) ...[
+              // Most Sold / Top Products Section (Moved to top as requested)
+              _buildMostSoldSection(context, l10n),
+
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Text(
+                    l10n.shopByCategory,
+
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Row 1
+                      Row(
+                        children: List.generate(
+                          (categories.length / 3).ceil(),
+                          (index) {
+                            final category = categories[index];
+                            return _buildMarketCategoryCard(
+                              context,
+                              category,
+                              l10n,
+                            );
+                          },
+                        ),
+                      ),
+                      SizedBox(height: 10.h),
+                      // Row 2
+                      Row(
+                        children: List.generate(
+                          (categories.length / 3).ceil(),
+                          (index) {
+                            final actualIndex =
+                                index + (categories.length / 3).ceil();
+                            if (actualIndex >= categories.length)
+                              return const SizedBox.shrink();
+                            final category = categories[actualIndex];
+                            return _buildMarketCategoryCard(
+                              context,
+                              category,
+                              l10n,
+                            );
+                          },
+                        ),
+                      ),
+                      SizedBox(height: 10.h),
+                      // Row 3
+                      Row(
+                        children: List.generate(
+                          categories.length -
+                              2 * (categories.length / 3).ceil(),
+                          (index) {
+                            final actualIndex =
+                                index + 2 * (categories.length / 3).ceil();
+                            if (actualIndex >= categories.length)
+                              return const SizedBox.shrink();
+                            final category = categories[actualIndex];
+                            return _buildMarketCategoryCard(
+                              context,
+                              category,
+                              l10n,
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              // Optional: Banner or other sections below
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Text(
+                    'كل المنتجات', // All Products
+                    style: const TextStyle(
+                      fontSize: 20,
+
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+
+              // Reuse the builder logic but for _allProducts (or a subset)
+              // Since logic below uses _filteredProducts which is initialized to _allProducts
+              // we can just reuse the same BlocBuilder logic or duplicate it here.
+              // To avoid code duplication and keep it clean, let's render the grid here too.
+              // But wait, the grid below uses BlocConsumer.
+              // Let's copy the BlocBuilder logic here to show the grid.
+              BlocBuilder<
+                MarketProductCustomerCubit,
+                MarketProductCustomerState
+              >(
+                builder: (context, state) {
+                  if (state is MarketProductCustomerLoaded) {
+                    final productsToShow =
+                        _allProducts; // Show everything on dashboard
+
+                    if (productsToShow.isEmpty)
+                      return const SliverToBoxAdapter(child: SizedBox.shrink());
+
+                    return SliverPadding(
+                      padding: const EdgeInsets.all(16),
+                      sliver: SliverGrid(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              childAspectRatio: 0.68,
+                              crossAxisSpacing: 16,
+                              mainAxisSpacing: 16,
+                            ),
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final product = productsToShow[index];
+                          return MarketProductCard(
+                            productId: product.id,
+                            productName: product.name,
+                            description: product.description,
+                            price: product.price,
+                            imageUrl: product.imageUrl,
+                            isAvailable: product.isAvailable,
+                            // No special promo label for regular list
+                          );
+                        }, childCount: productsToShow.length),
+                      ),
+                    );
+                  }
+                  // Loading state is handled by the main listener/overlay or effectively hidden here
+                  // until loaded to avoid double spinners if one plays top.
+                  // But usually good to show spinner if empty.
+                  if (state is MarketProductCustomerLoading &&
+                      _allProducts.isEmpty) {
+                    return const SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.all(32),
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                    );
+                  }
+                  return const SliverToBoxAdapter(child: SizedBox.shrink());
+                },
+              ),
+
+              SliverToBoxAdapter(
+                child: SizedBox(height: 24.h),
+              ), // Bottom padding
+            ],
+
+            // 2. If Category Selected or Search -> Show Products Grid (Existing Design)
+            if (showProductList) ...[
+              BlocConsumer<
+                MarketProductCustomerCubit,
+                MarketProductCustomerState
+              >(
+                listener: (context, state) {
+                  if (state is MarketProductCustomerLoaded) {
+                    setState(() {
+                      _allProducts = state.products;
+                      _applyFilters();
+                      // Extract categories logic if needed, but we use static categories now
+                    });
+                  }
+                },
+                builder: (context, state) {
+                  if (state is MarketProductCustomerLoading) {
+                    return const SliverFillRemaining(child: LoadingWidget());
+                  }
+
+                  if (state is MarketProductCustomerError) {
+                    return SliverFillRemaining(
+                      child: ErrorDisplayWidget(
+                        message: state.message,
+                        onRetry: () {
+                          context
+                              .read<MarketProductCustomerCubit>()
+                              .loadMarketProducts();
+                        },
                       ),
                     );
                   }
 
-                  return SliverPadding(
-                    padding: const EdgeInsets.all(16),
-                    sliver: SliverGrid(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 0.68,
-                            crossAxisSpacing: 16,
-                            mainAxisSpacing: 16,
+                  if (state is MarketProductCustomerLoaded) {
+                    if (_filteredProducts.isEmpty) {
+                      return SliverFillRemaining(
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.shopping_bag_outlined,
+                                size: 80,
+                                color: AppColors.textSecondary.withOpacity(0.5),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                l10n.noProductsFound,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
                           ),
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        final product = _filteredProducts[index];
-                        return ProductCard(
-                          productId: product.id,
-                          productName: product.name,
-                          description: product.description,
-                          price: product.price,
-                          imageUrl: product.imageUrl,
-                          isAvailable: product.isAvailable,
-                          isMarketProduct: true,
-                        );
-                      }, childCount: _filteredProducts.length),
-                    ),
-                  );
-                }
+                        ),
+                      );
+                    }
 
-                return const SliverFillRemaining(child: LoadingWidget());
-              },
-            ),
+                    return SliverPadding(
+                      padding: const EdgeInsets.all(16),
+                      sliver: SliverGrid(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              childAspectRatio: 0.68,
+                              crossAxisSpacing: 16,
+                              mainAxisSpacing: 16,
+                            ),
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final product = _filteredProducts[index];
+                          return MarketProductCard(
+                            productId: product.id,
+                            productName: product.name,
+                            description: product.description,
+                            price: product.price,
+                            imageUrl: product.imageUrl,
+                            isAvailable: product.isAvailable,
+                            promotionalLabel: index < 3
+                                ? 'إعلان'
+                                : null, // Show ad label on first few
+                          );
+                        }, childCount: _filteredProducts.length),
+                      ),
+                    );
+                  }
+
+                  return const SliverFillRemaining(child: LoadingWidget());
+                },
+              ),
+            ],
           ],
-        ],
-      ),
+        ),
+      ), // Close BlocListener child
     );
   }
 
@@ -593,14 +803,14 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
                       return Container(
                         width: 160.w,
                         margin: EdgeInsetsDirectional.only(end: 16.w),
-                        child: ProductCard(
+                        child: MarketProductCard(
                           productId: product.id,
                           productName: product.name,
                           description: product.description,
                           price: product.price,
                           imageUrl: product.imageUrl,
                           isAvailable: product.isAvailable,
-                          isMarketProduct: true,
+                          promotionalLabel: 'الأكثر مبيعًا', // Most sold label
                         ),
                       );
                     },
