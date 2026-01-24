@@ -17,6 +17,8 @@ import '../../../home/domain/entities/banner_entity.dart';
 import '../cubits/market_product_customer_cubit.dart';
 import '../../domain/entities/market_product_entity.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../orders/presentation/cubits/cart_cubit.dart';
+import '../../../restaurants/domain/entities/product_entity.dart';
 
 class MarketProductsScreen extends StatefulWidget {
   final String? restaurantId;
@@ -566,6 +568,22 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
                             price: product.price,
                             imageUrl: product.imageUrl,
                             isAvailable: product.isAvailable,
+                            onAddToCart: () async {
+                              final productEntity = ProductEntity(
+                                id: product.id,
+                                name: product.name,
+                                description: product.description,
+                                price: product.price,
+                                imageUrl: product.imageUrl,
+                                isAvailable: product.isAvailable,
+                                restaurantId: product.restaurantId ?? 'market',
+                                createdAt: product.createdAt,
+                              );
+                              return await context.read<CartCubit>().addItem(
+                                productEntity,
+                                context: context,
+                              );
+                            },
                             // No special promo label for regular list
                           );
                         }, childCount: productsToShow.length),
@@ -811,6 +829,22 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
                           imageUrl: product.imageUrl,
                           isAvailable: product.isAvailable,
                           promotionalLabel: 'الأكثر مبيعًا', // Most sold label
+                          onAddToCart: () async {
+                            final productEntity = ProductEntity(
+                              id: product.id,
+                              name: product.name,
+                              description: product.description,
+                              price: product.price,
+                              imageUrl: product.imageUrl,
+                              isAvailable: product.isAvailable,
+                              restaurantId: product.restaurantId ?? 'market',
+                              createdAt: product.createdAt,
+                            );
+                            return await context.read<CartCubit>().addItem(
+                              productEntity,
+                              context: context,
+                            );
+                          },
                         ),
                       );
                     },

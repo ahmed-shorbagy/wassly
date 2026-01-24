@@ -833,7 +833,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
   }
 }
 
-class _ProductListTile extends StatelessWidget {
+class _ProductListTile extends StatefulWidget {
   final ProductEntity product;
   final RestaurantEntity restaurant;
   final bool isLast;
@@ -844,45 +844,98 @@ class _ProductListTile extends StatelessWidget {
     required this.isLast,
   });
 
-  Future<void> _handleAddToCart(BuildContext context) async {
+  @override
+  State<_ProductListTile> createState() => _ProductListTileState();
+}
+
+class _ProductListTileState extends State<_ProductListTile> {
+  bool _isLoading = false;
+  bool _isSuccess = false;
+
+  Future<void> _handleAddToCart() async {
+    if (_isLoading) return;
+
+    setState(() {
+      _isLoading = true;
+      _isSuccess = false;
+    });
+
     final cartCubit = context.read<CartCubit>();
     final state = cartCubit.state;
+    bool success = false;
 
-    if (state is CartLoaded &&
-        state.restaurantId != null &&
-        state.restaurantId != product.restaurantId &&
-        state.items.isNotEmpty) {
-      final l10n = AppLocalizations.of(context);
+    try {
+      if (state is CartLoaded &&
+          state.restaurantId != null &&
+          state.restaurantId != widget.product.restaurantId &&
+          state.items.isNotEmpty) {
+        final l10n = AppLocalizations.of(context);
 
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text(l10n?.startNewOrder ?? 'Start New Order'),
-          content: Text(
-            l10n?.clearCartConfirmation ??
-                'You have items from another restaurant. Start a new order to clear the cart?',
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(l10n?.startNewOrder ?? 'Start New Order'),
+            content: Text(
+              l10n?.clearCartConfirmation ??
+                  'You have items from another restaurant. Start a new order to clear the cart?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(l10n?.cancelAction ?? 'Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: Text(l10n?.newOrder ?? 'New Order'),
+              ),
+            ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text(l10n?.cancelAction ?? 'Cancel'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: Text(l10n?.newOrder ?? 'New Order'),
-            ),
-          ],
-        ),
-      );
+        );
 
-      if (confirmed == true) {
-        await cartCubit.clearCart();
-        if (context.mounted) {
-          await cartCubit.addItem(product, context: context);
+        if (confirmed == true) {
+          await cartCubit.clearCart();
+          if (mounted) {
+            success = await cartCubit.addItem(widget.product, context: context);
+          }
+        } else {
+          // User cancelled
+          if (mounted) {
+            setState(() {
+              _isLoading = false;
+            });
+          }
+          return;
+        }
+      } else {
+        success = await cartCubit.addItem(widget.product, context: context);
+      }
+
+      if (mounted) {
+        if (success) {
+          setState(() {
+            _isLoading = false;
+            _isSuccess = true;
+          });
+          // Show success state for 1.5 seconds then reset
+          await Future.delayed(const Duration(milliseconds: 1500));
+          if (mounted) {
+            setState(() {
+              _isSuccess = false;
+            });
+          }
+        } else {
+          // Failed (toast already shown by Cubit)
+          setState(() {
+            _isLoading = false;
+          });
         }
       }
-    } else {
-      await cartCubit.addItem(product, context: context);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -891,7 +944,7 @@ class _ProductListTile extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return InkWell(
-      onTap: product.isAvailable ? () => _handleAddToCart(context) : null,
+      onTap: widget.product.isAvailable ? _handleAddToCart : null,
       child: Column(
         children: [
           Container(
@@ -914,10 +967,10 @@ class _ProductListTile extends StatelessWidget {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(12),
                         child:
-                            product.imageUrl != null &&
-                                product.imageUrl!.isNotEmpty
+                            widget.product.imageUrl != null &&
+                                widget.product.imageUrl!.isNotEmpty
                             ? CachedNetworkImage(
-                                imageUrl: product.imageUrl!,
+                                imageUrl: widget.product.imageUrl!,
                                 width: 100,
                                 height: 100,
                                 fit: BoxFit.cover,
@@ -953,27 +1006,52 @@ class _ProductListTile extends StatelessWidget {
                       bottom: 8,
                       left: 8,
                       child: GestureDetector(
-                        onTap: product.isAvailable
-                            ? () => _handleAddToCart(context)
+                        onTap: widget.product.isAvailable
+                            ? _handleAddToCart
                             : null,
-                        child: Container(
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
                           width: 32,
                           height: 32,
                           decoration: BoxDecoration(
-                            color: product.isAvailable
-                                ? AppColors.warning
-                                : AppColors.textSecondary,
+                            color: _isSuccess
+                                ? AppColors.success
+                                : (widget.product.isAvailable
+                                      ? AppColors.warning
+                                      : AppColors.textSecondary),
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.15),
+                                color:
+                                    (_isSuccess
+                                            ? AppColors.success
+                                            : Colors.black)
+                                        .withValues(alpha: 0.15),
                                 blurRadius: 6,
                                 offset: const Offset(0, 2),
                                 spreadRadius: 0,
                               ),
                             ],
                           ),
-                          child: Icon(Icons.add, color: Colors.white, size: 18),
+                          child: _isLoading
+                              ? const Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : _isSuccess
+                              ? const Icon(
+                                  Icons.check,
+                                  color: Colors.white,
+                                  size: 18,
+                                )
+                              : const Icon(
+                                  Icons.add,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
                         ),
                       ),
                     ),
@@ -988,7 +1066,7 @@ class _ProductListTile extends StatelessWidget {
                     children: [
                       // Product Title
                       Text(
-                        product.name,
+                        widget.product.name,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -1001,7 +1079,7 @@ class _ProductListTile extends StatelessWidget {
                       const SizedBox(height: 6),
                       // Product Description
                       Text(
-                        product.description,
+                        widget.product.description,
                         style: TextStyle(
                           fontSize: 13,
                           color: AppColors.textSecondary,
@@ -1013,7 +1091,7 @@ class _ProductListTile extends StatelessWidget {
                       const SizedBox(height: 10),
                       // Price
                       Text(
-                        '${product.price.toStringAsFixed(2)} ${l10n.currencySymbol}',
+                        '${widget.product.price.toStringAsFixed(2)} ${l10n.currencySymbol}',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -1027,7 +1105,7 @@ class _ProductListTile extends StatelessWidget {
             ),
           ),
           // Separator
-          if (!isLast)
+          if (!widget.isLast)
             Divider(
               height: 1,
               thickness: 1,

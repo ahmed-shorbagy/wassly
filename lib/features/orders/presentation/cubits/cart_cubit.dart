@@ -116,7 +116,7 @@ class CartCubit extends Cubit<CartState> {
     return super.close();
   }
 
-  Future<void> addItem(
+  Future<bool> addItem(
     ProductEntity product, {
     int quantity = 1,
     BuildContext? context,
@@ -130,7 +130,7 @@ class CartCubit extends Cubit<CartState> {
         message = l10n?.pleaseLoginToContinue ?? message;
       }
       ToastService.showError(message);
-      return;
+      return false;
     }
 
     // Validate product ID - this is critical
@@ -141,7 +141,7 @@ class CartCubit extends Cubit<CartState> {
         message = l10n?.invalidProduct ?? message;
       }
       ToastService.showError(message);
-      return;
+      return false;
     }
 
     // Validate restaurant ID
@@ -152,7 +152,7 @@ class CartCubit extends Cubit<CartState> {
         message = l10n?.invalidProduct ?? message;
       }
       ToastService.showError(message);
-      return;
+      return false;
     }
 
     if (quantity <= 0) {
@@ -162,7 +162,7 @@ class CartCubit extends Cubit<CartState> {
         message = l10n?.quantityMustBeGreaterThanZero ?? message;
       }
       ToastService.showError(message);
-      return;
+      return false;
     }
 
     // Check if adding item from different restaurant
@@ -177,7 +177,7 @@ class CartCubit extends Cubit<CartState> {
           message = l10n?.cannotAddDifferentRestaurant ?? message;
         }
         ToastService.showWarning(message);
-        return;
+        return false;
       }
     }
 
@@ -185,7 +185,7 @@ class CartCubit extends Cubit<CartState> {
 
     final result = await repository.addItem(userId, item);
 
-    result.fold(
+    return result.fold(
       (failure) {
         // Show user-friendly error message
         final errorMessage = _getUserFriendlyErrorMessage(
@@ -193,17 +193,12 @@ class CartCubit extends Cubit<CartState> {
           context,
         );
         ToastService.showError(errorMessage);
+        return false;
       },
       (_) {
-        // Success - show success message if context is available
-        if (context != null) {
-          final l10n = AppLocalizations.of(context);
-          final message =
-              l10n?.itemAddedToCart(product.name) ??
-              '${product.name} added to cart';
-          ToastService.showSuccess(message);
-        }
-        // State will be updated via stream
+        // Success - State will be updated via stream
+        // Toast removed per user request for better UX (handled locally by widgets)
+        return true;
       },
     );
   }

@@ -18,7 +18,7 @@ class MarketProductCard extends StatefulWidget {
   final String? imageUrl;
   final bool isAvailable;
   final VoidCallback? onTap;
-  final Future<void> Function()? onAddToCart;
+  final Future<bool> Function()? onAddToCart;
   final String? promotionalLabel;
   final String? volume;
   final bool showAddButton;
@@ -80,21 +80,31 @@ class _MarketProductCardState extends State<MarketProductCard>
     await _animationController.reverse();
 
     try {
+      bool success = false;
       if (widget.onAddToCart != null) {
-        await widget.onAddToCart!();
+        success = await widget.onAddToCart!();
       } else {
         await Future.delayed(const Duration(milliseconds: 500));
+        success = true; // Simulate success if no callback
       }
 
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _isSuccess = true;
-        });
-
-        await Future.delayed(const Duration(milliseconds: 1500));
-        if (mounted) {
+        if (success) {
           setState(() {
+            _isLoading = false;
+            _isSuccess = true;
+          });
+
+          await Future.delayed(const Duration(milliseconds: 1500));
+          if (mounted) {
+            setState(() {
+              _isSuccess = false;
+            });
+          }
+        } else {
+          // Failed (toast already shown by Cubit usually, or just return false)
+          setState(() {
+            _isLoading = false;
             _isSuccess = false;
           });
         }
