@@ -5,6 +5,7 @@ class RestaurantCategoryEntity extends Equatable {
   final String name;
   final String? imageUrl;
   final bool isActive;
+  final bool isMarket;
   final int displayOrder;
   final DateTime createdAt;
 
@@ -13,6 +14,7 @@ class RestaurantCategoryEntity extends Equatable {
     required this.name,
     this.imageUrl,
     this.isActive = true,
+    this.isMarket = false,
     this.displayOrder = 0,
     required this.createdAt,
   });
@@ -23,6 +25,7 @@ class RestaurantCategoryEntity extends Equatable {
     name,
     imageUrl,
     isActive,
+    isMarket,
     displayOrder,
     createdAt,
   ];

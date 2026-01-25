@@ -7,6 +7,7 @@ class RestaurantCategoryModel extends RestaurantCategoryEntity {
     required super.name,
     super.imageUrl,
     super.isActive,
+    super.isMarket,
     super.displayOrder,
     required super.createdAt,
   });
@@ -17,6 +18,7 @@ class RestaurantCategoryModel extends RestaurantCategoryEntity {
       name: json['name'] as String,
       imageUrl: json['imageUrl'] as String?,
       isActive: json['isActive'] as bool? ?? true,
+      isMarket: json['isMarket'] as bool? ?? false,
       displayOrder: json['displayOrder'] as int? ?? 0,
       createdAt: json['createdAt'] is Timestamp
           ? (json['createdAt'] as Timestamp).toDate()
@@ -30,6 +32,7 @@ class RestaurantCategoryModel extends RestaurantCategoryEntity {
       'name': name,
       'imageUrl': imageUrl,
       'isActive': isActive,
+      'isMarket': isMarket,
       'displayOrder': displayOrder,
       'createdAt': createdAt.toIso8601String(),
     };
@@ -41,6 +44,7 @@ class RestaurantCategoryModel extends RestaurantCategoryEntity {
       name: entity.name,
       imageUrl: entity.imageUrl,
       isActive: entity.isActive,
+      isMarket: entity.isMarket,
       displayOrder: entity.displayOrder,
       createdAt: entity.createdAt,
     );

@@ -730,32 +730,26 @@ class _MarketProductCategoriesSection extends StatefulWidget {
 
 class _MarketProductCategoriesSectionState
     extends State<_MarketProductCategoriesSection> {
-  late List<RestaurantCategoryEntity> _randomCategories;
+  // Fixed items
+  late final List<Map<String, dynamic>> _fixedItems;
 
   @override
   void initState() {
     super.initState();
-    _pickRandomCategories();
-  }
-
-  @override
-  void didUpdateWidget(_MarketProductCategoriesSection oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.restaurantCategories != oldWidget.restaurantCategories) {
-      _pickRandomCategories();
-    }
-  }
-
-  void _pickRandomCategories() {
-    if (widget.restaurantCategories.isEmpty) {
-      _randomCategories = [];
-      return;
-    }
-    final available = List<RestaurantCategoryEntity>.from(
-      widget.restaurantCategories,
-    );
-    available.shuffle();
-    _randomCategories = available.take(4).toList();
+    _fixedItems = [
+      {
+        'asset': 'assets/images/market.jpeg',
+        'title': 'Market', // Will be localized in build
+        'isMarket': true,
+        'categoryName': null,
+      },
+      {
+        'asset': 'assets/images/resturants.jpeg',
+        'title': 'Restaurants', // Will be localized in build
+        'isMarket': false,
+        'categoryName': null,
+      },
+    ];
   }
 
   Widget _buildCategoryCard(
@@ -845,28 +839,30 @@ class _MarketProductCategoriesSectionState
     final l10n = AppLocalizations.of(context)!;
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
 
-    final List<Map<String, dynamic>> displayItems = [
-      {
-        'asset': 'assets/images/market.jpeg',
-        'title': l10n.market,
-        'isMarket': true,
-        'categoryName': null,
-      },
-      {
-        'asset': 'assets/images/resturants.jpeg',
-        'title': l10n.restaurants,
-        'isMarket': false,
-        'categoryName': null,
-      },
-    ];
+    // Prepare display items: Fixed + Market Categories
+    final List<Map<String, dynamic>> displayItems = [];
 
-    for (var cat in _randomCategories) {
+    // Add Fixed Items (Market & Restaurants)
+    displayItems.add({..._fixedItems[0], 'title': l10n.market});
+    displayItems.add({..._fixedItems[1], 'title': l10n.restaurants});
+
+    // Add Dynamic Market Categories (e.g. Pharmacy, Vegetable Shop)
+    // Filter categories where isMarket == true
+    final marketCategories = widget.restaurantCategories
+        .where((c) => c.isMarket)
+        .toList();
+
+    // Sort by display order or name if desired
+    marketCategories.sort((a, b) => a.displayOrder.compareTo(b.displayOrder));
+
+    for (var cat in marketCategories) {
       displayItems.add({
         'asset': null,
         'imageUrl': cat.imageUrl,
         'title': cat.name,
-        'isMarket': false,
-        'categoryName': cat.name,
+        'isMarket': true, // Use market flow
+        'categoryName': cat.name, // To filter by category
+        'isSpecificCategory': true, // Flag to indicate specific category search
       });
     }
 
@@ -908,11 +904,20 @@ class _MarketProductCategoriesSectionState
                         item['asset'] as String?,
                         item['title'] as String,
                         () {
-                          widget.onCategoryTap(
-                            item['categoryName'] as String? ??
-                                item['title'] as String,
-                            item['isMarket'] as bool,
-                          );
+                          // If specific category (like Pharmacy), open Market Page filtered by that category
+                          // User requested: "open the market page instead"
+                          if (item['isSpecificCategory'] == true) {
+                            widget.onCategoryTap(
+                              item['categoryName'],
+                              true, // Treat as Market Page
+                            );
+                          } else {
+                            widget.onCategoryTap(
+                              item['categoryName'] as String? ??
+                                  item['title'] as String,
+                              item['isMarket'] as bool,
+                            );
+                          }
                         },
                       ),
                     ),
@@ -921,32 +926,37 @@ class _MarketProductCategoriesSectionState
               ),
               ResponsiveHelper.spacing(height: 12),
               // Second Row
-              Row(
-                children: List.generate(displayItems.length ~/ 2, (index) {
-                  final item =
-                      displayItems[index + (displayItems.length / 2).ceil()];
-                  return Padding(
-                    padding: EdgeInsetsDirectional.only(end: 12.w),
-                    child: SizedBox(
-                      width: 130.w,
-                      height: 55.h,
-                      child: _buildCategoryCard(
-                        context,
-                        item['imageUrl'] as String?,
-                        item['asset'] as String?,
-                        item['title'] as String,
-                        () {
-                          widget.onCategoryTap(
-                            item['categoryName'] as String? ??
-                                item['title'] as String,
-                            item['isMarket'] as bool,
-                          );
-                        },
+              if (displayItems.length > 1)
+                Row(
+                  children: List.generate(displayItems.length ~/ 2, (index) {
+                    final item =
+                        displayItems[index + (displayItems.length / 2).ceil()];
+                    return Padding(
+                      padding: EdgeInsetsDirectional.only(end: 12.w),
+                      child: SizedBox(
+                        width: 130.w,
+                        height: 55.h,
+                        child: _buildCategoryCard(
+                          context,
+                          item['imageUrl'] as String?,
+                          item['asset'] as String?,
+                          item['title'] as String,
+                          () {
+                            if (item['isSpecificCategory'] == true) {
+                              widget.onCategoryTap(item['categoryName'], false);
+                            } else {
+                              widget.onCategoryTap(
+                                item['categoryName'] as String? ??
+                                    item['title'] as String,
+                                item['isMarket'] as bool,
+                              );
+                            }
+                          },
+                        ),
                       ),
-                    ),
-                  );
-                }),
-              ),
+                    );
+                  }),
+                ),
             ],
           ),
         ),

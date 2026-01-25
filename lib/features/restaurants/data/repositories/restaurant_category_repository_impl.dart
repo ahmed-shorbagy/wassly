@@ -43,6 +43,7 @@ class RestaurantCategoryRepositoryImpl implements RestaurantCategoryRepository {
   Future<Either<Failure, RestaurantCategoryEntity>> createCategory({
     required String name,
     File? imageFile,
+    bool isMarket = false,
     int displayOrder = 0,
   }) async {
     try {
@@ -77,6 +78,7 @@ class RestaurantCategoryRepositoryImpl implements RestaurantCategoryRepository {
         name: name,
         imageUrl: imageUrl,
         isActive: true,
+        isMarket: isMarket,
         displayOrder: displayOrder,
         createdAt: DateTime.now(),
       );
@@ -98,6 +100,7 @@ class RestaurantCategoryRepositoryImpl implements RestaurantCategoryRepository {
     String? name,
     File? imageFile,
     bool? isActive,
+    bool? isMarket,
     int? displayOrder,
   }) async {
     try {
@@ -139,6 +142,7 @@ class RestaurantCategoryRepositoryImpl implements RestaurantCategoryRepository {
         name: name ?? currentCategory.name,
         imageUrl: imageUrl,
         isActive: isActive ?? currentCategory.isActive,
+        isMarket: isMarket ?? currentCategory.isMarket,
         displayOrder: displayOrder ?? currentCategory.displayOrder,
         createdAt: currentCategory.createdAt,
       );

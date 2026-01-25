@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -6,6 +7,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/responsive_helper.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/restaurant_entity.dart';
+import '../../../home/presentation/cubits/home_cubit.dart';
 
 class RestaurantCard extends StatelessWidget {
   final RestaurantEntity restaurant;
@@ -29,15 +31,35 @@ class RestaurantCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
-          // Check if this is a supermarket/grocery store
-          // We check if the category list includes anything related to groceries
-          final isSupermarket = restaurant.categoryIds.any(
-            (cid) =>
-                cid.toLowerCase().contains('groceries') ||
-                cid.toLowerCase().contains('supermarket'),
-          );
+          // Check if this restaurant belongs to a "Market" category (e.g., Pharmacy, Supermarket)
+          bool isMarketStore = false;
 
-          if (isSupermarket) {
+          try {
+            // Access HomeCubit to get loaded categories
+            // We use read here because we just want the current state, not to listen
+            // However, depending on where this is used, we might need to be careful.
+            // But usually HomeCubit is high up.
+
+            // Note: We need to import HomeCubit and HomeState
+            final homeState = context.read<HomeCubit>().state;
+            if (homeState is HomeLoaded) {
+              // Check if any of the restaurant's categories have isMarket == true
+              isMarketStore = homeState.categories.any((category) {
+                return restaurant.categoryIds.contains(category.id) &&
+                    category.isMarket;
+              });
+            }
+          } catch (e) {
+            // Fallback or ignore if HomeCubit not found (unlikely in main flow)
+            // Existing hardcoded check as fallback
+            isMarketStore = restaurant.categoryIds.any(
+              (cid) =>
+                  cid.toLowerCase().contains('groceries') ||
+                  cid.toLowerCase().contains('supermarket'),
+            );
+          }
+
+          if (isMarketStore) {
             context.push(
               '/market-products?restaurantId=${restaurant.id}&restaurantName=${Uri.encodeComponent(restaurant.name)}',
             );

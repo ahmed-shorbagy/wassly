@@ -65,12 +65,14 @@ class AdminRestaurantCategoryCubit extends Cubit<AdminRestaurantCategoryState> {
   Future<void> createCategory({
     required String name,
     File? imageFile,
+    bool isMarket = false,
     int displayOrder = 0,
   }) async {
     emit(AdminRestaurantCategoryLoading());
     final result = await _repository.createCategory(
       name: name,
       imageFile: imageFile,
+      isMarket: isMarket,
       displayOrder: displayOrder,
     );
     result.fold(
@@ -91,6 +93,7 @@ class AdminRestaurantCategoryCubit extends Cubit<AdminRestaurantCategoryState> {
     String? name,
     File? imageFile,
     bool? isActive,
+    bool? isMarket,
     int? displayOrder,
   }) async {
     emit(AdminRestaurantCategoryLoading());
@@ -99,6 +102,7 @@ class AdminRestaurantCategoryCubit extends Cubit<AdminRestaurantCategoryState> {
       name: name,
       imageFile: imageFile,
       isActive: isActive,
+      isMarket: isMarket,
       displayOrder: displayOrder,
     );
     result.fold(
