@@ -116,6 +116,7 @@ class _AdminAddArticleScreenState extends State<AdminAddArticleScreen> {
               if (state is ArticleLoaded && _isLoading) {
                 setState(() => _isLoading = false);
                 context.showSuccessSnackBar('Article created successfully');
+                context.read<ArticleCubit>().resetState();
                 context.pop();
               } else if (state is ArticleError && _isLoading) {
                 setState(() => _isLoading = false);

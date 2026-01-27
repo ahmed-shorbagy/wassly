@@ -4,6 +4,7 @@ import '../../features/admin/presentation/views/admin_splash_screen.dart';
 import '../../features/admin/presentation/views/admin_dashboard_screen.dart';
 import '../../features/admin/presentation/views/restaurant_management_screen.dart';
 import '../../features/admin/presentation/views/create_restaurant_screen.dart';
+import '../../features/admin/presentation/views/admin_create_market_screen.dart';
 import '../../features/admin/presentation/views/admin_product_list_screen.dart';
 import '../../features/admin/presentation/views/admin_add_product_screen.dart';
 import '../../features/admin/presentation/views/admin_market_product_list_screen.dart';
@@ -79,6 +80,11 @@ class AdminRouter {
                 path: 'create',
                 name: 'create-restaurant',
                 builder: (context, state) => const CreateRestaurantScreen(),
+              ),
+              GoRoute(
+                path: 'create-market',
+                name: 'create-market',
+                builder: (context, state) => const AdminCreateMarketScreen(),
               ),
               GoRoute(
                 path: 'edit/:id',

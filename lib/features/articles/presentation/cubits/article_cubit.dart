@@ -80,5 +80,8 @@ class ArticleCubit extends Cubit<ArticleState> {
       },
     );
   }
-}
 
+  void resetState() {
+    emit(ArticleInitial());
+  }
+}

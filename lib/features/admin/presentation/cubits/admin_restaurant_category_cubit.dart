@@ -64,6 +64,7 @@ class AdminRestaurantCategoryCubit extends Cubit<AdminRestaurantCategoryState> {
 
   Future<void> createCategory({
     required String name,
+    String? id,
     File? imageFile,
     bool isMarket = false,
     int displayOrder = 0,
@@ -71,6 +72,7 @@ class AdminRestaurantCategoryCubit extends Cubit<AdminRestaurantCategoryState> {
     emit(AdminRestaurantCategoryLoading());
     final result = await _repository.createCategory(
       name: name,
+      id: id,
       imageFile: imageFile,
       isMarket: isMarket,
       displayOrder: displayOrder,

@@ -9,8 +9,10 @@ import '../../../../shared/widgets/error_widget.dart';
 import '../../../restaurants/domain/entities/restaurant_entity.dart';
 import '../../../restaurants/presentation/cubits/restaurant_cubit.dart';
 import '../../../restaurants/domain/entities/restaurant_category_entity.dart';
-import '../cubits/admin_restaurant_category_cubit.dart';
 import '../cubits/admin_cubit.dart';
+import '../cubits/admin_restaurant_category_cubit.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../services/market_seeding_service.dart';
 
 class RestaurantManagementScreen extends StatefulWidget {
   const RestaurantManagementScreen({super.key});
@@ -20,15 +22,18 @@ class RestaurantManagementScreen extends StatefulWidget {
       _RestaurantManagementScreenState();
 }
 
-class _RestaurantManagementScreenState
-    extends State<RestaurantManagementScreen> {
+class _RestaurantManagementScreenState extends State<RestaurantManagementScreen>
+    with SingleTickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
+  late TabController _tabController;
   List<RestaurantEntity> _filteredRestaurants = [];
   List<RestaurantEntity> _allRestaurants = [];
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(_handleTabSelection);
     _loadRestaurants();
     context.read<AdminRestaurantCategoryCubit>().loadCategories();
     _searchController.addListener(_filterRestaurants);
@@ -36,9 +41,17 @@ class _RestaurantManagementScreenState
 
   @override
   void dispose() {
+    _tabController.removeListener(_handleTabSelection);
+    _tabController.dispose();
     _searchController.removeListener(_filterRestaurants);
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _handleTabSelection() {
+    if (_tabController.indexIsChanging) {
+      _filterRestaurants();
+    }
   }
 
   void _loadRestaurants() {
@@ -53,11 +66,25 @@ class _RestaurantManagementScreenState
       allCategories = categoryState.categories;
     }
 
+    final isMarketTab = _tabController.index == 1;
+
     setState(() {
+      // First filter by type (Restaurant vs Market)
+      final typeFiltered = _allRestaurants.where((restaurant) {
+        final restaurantCategories = allCategories.where(
+          (cat) => restaurant.categoryIds.contains(cat.id),
+        );
+
+        // If it has ANY market category, it's considered a Market
+        final isMarket = restaurantCategories.any((cat) => cat.isMarket);
+
+        return isMarketTab ? isMarket : !isMarket;
+      }).toList();
+
       if (query.isEmpty) {
-        _filteredRestaurants = List.from(_allRestaurants);
+        _filteredRestaurants = typeFiltered;
       } else {
-        _filteredRestaurants = _allRestaurants.where((restaurant) {
+        _filteredRestaurants = typeFiltered.where((restaurant) {
           final nameMatch = restaurant.name.toLowerCase().contains(query);
           final addressMatch = restaurant.address.toLowerCase().contains(query);
           final phoneMatch = restaurant.phone.toLowerCase().contains(query);
@@ -76,8 +103,52 @@ class _RestaurantManagementScreenState
     });
   }
 
+  Future<void> _seedMarkets(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Seed Markets'),
+        content: const Text(
+          'This will create several default markets for testing. Continue?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Seed'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      context.showInfoSnackBar('Seeding markets...');
+      try {
+        await MarketSeedingService.seedDefaultMarkets(
+          context.read<AdminCubit>(),
+          context.read<AdminRestaurantCategoryCubit>(),
+          AppLocalizations.of(context)!,
+        );
+        if (mounted) {
+          context.showSuccessSnackBar('Markets seeded successfully!');
+          _loadRestaurants();
+        }
+      } catch (e) {
+        if (mounted) {
+          context.showErrorSnackBar('Failed to seed markets: $e');
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Force filtering when categories are loaded to ensure correct display
+    final l10n = AppLocalizations.of(context)!;
+
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) async {
@@ -97,11 +168,34 @@ class _RestaurantManagementScreenState
           backgroundColor: Colors.purple,
           actions: [
             IconButton(
+              icon: const Icon(Icons.auto_awesome),
+              onPressed: () => _seedMarkets(context),
+              tooltip: 'Seed Markets',
+            ),
+            IconButton(
               icon: const Icon(Icons.refresh),
               onPressed: _loadRestaurants,
               tooltip: 'Refresh',
             ),
           ],
+          bottom: TabBar(
+            controller: _tabController,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white70,
+            indicatorColor: Colors.white,
+            tabs: [
+              Tab(text: l10n.restaurants, icon: const Icon(Icons.restaurant)),
+              Tab(
+                text: l10n.markets ?? 'Markets',
+                icon: const Icon(Icons.storefront),
+              ),
+            ],
+            onTap: (_) {
+              // Trigger filter update on tap as well to be safe
+              setState(() {});
+              _filterRestaurants();
+            },
+          ),
         ),
         body: Column(
           children: [
@@ -116,7 +210,7 @@ class _RestaurantManagementScreenState
                     _filterRestaurants();
                   },
                   decoration: InputDecoration(
-                    hintText: 'Search restaurants...',
+                    hintText: 'Search...',
                     prefixIcon: const Icon(Icons.search),
                     suffixIcon: _searchController.text.isNotEmpty
                         ? IconButton(
@@ -137,101 +231,166 @@ class _RestaurantManagementScreenState
             ),
             // Restaurants List
             Expanded(
-              child: BlocConsumer<AdminCubit, AdminState>(
-                listener: (context, state) {
-                  if (state is RestaurantStatusUpdated) {
-                    context.showSuccessSnackBar('Restaurant status updated');
-                    _loadRestaurants();
-                  } else if (state is RestaurantDeletedSuccess) {
-                    context.showSuccessSnackBar(
-                      'Restaurant deleted successfully',
-                    );
-                    _loadRestaurants();
-                  } else if (state is AdminError) {
-                    context.showErrorSnackBar(state.message);
-                  }
-                },
-                builder: (context, adminState) {
-                  return BlocBuilder<RestaurantCubit, RestaurantState>(
-                    builder: (context, state) {
-                      if (state is RestaurantLoading) {
-                        return const LoadingWidget();
+              child:
+                  BlocListener<
+                    AdminRestaurantCategoryCubit,
+                    AdminRestaurantCategoryState
+                  >(
+                    listener: (context, state) {
+                      if (state is AdminRestaurantCategoriesLoaded) {
+                        _filterRestaurants();
                       }
-
-                      if (state is RestaurantError) {
-                        return ErrorDisplayWidget(
-                          message: state.message,
-                          onRetry: _loadRestaurants,
-                        );
-                      }
-
-                      if (state is RestaurantsLoaded) {
-                        // Update all restaurants list
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          if (mounted) {
-                            setState(() {
-                              _allRestaurants = state.restaurants;
-                              _filteredRestaurants = _allRestaurants;
-                            });
-                            _filterRestaurants(); // Apply current search filter
-                          }
-                        });
-
-                        // Use filtered list for display
-                        final displayList =
-                            _filteredRestaurants.isEmpty &&
-                                _searchController.text.isEmpty
-                            ? state.restaurants
-                            : _filteredRestaurants;
-
-                        if (displayList.isEmpty &&
-                            _searchController.text.isNotEmpty) {
-                          return Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(32),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.search_off,
-                                    size: 64,
-                                    color: AppColors.textSecondary.withValues(
-                                      alpha: 0.5,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    'No restaurants found',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        }
-
-                        if (displayList.isEmpty) {
-                          return _buildEmptyState();
-                        }
-                        return _buildRestaurantList(displayList);
-                      }
-
-                      return _buildEmptyState();
                     },
-                  );
-                },
-              ),
+                    child: BlocConsumer<AdminCubit, AdminState>(
+                      listener: (context, state) {
+                        if (state is RestaurantStatusUpdated) {
+                          context.showSuccessSnackBar('Status updated');
+                          _loadRestaurants();
+                        } else if (state is RestaurantDeletedSuccess) {
+                          context.showSuccessSnackBar('Deleted successfully');
+                          _loadRestaurants();
+                        } else if (state is AdminError) {
+                          context.showErrorSnackBar(state.message);
+                        }
+                      },
+                      builder: (context, adminState) {
+                        return BlocConsumer<RestaurantCubit, RestaurantState>(
+                          listener: (context, state) {
+                            if (state is RestaurantsLoaded) {
+                              // Initial filter when data loads
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (mounted) {
+                                  setState(() {
+                                    _allRestaurants = state.restaurants;
+                                  });
+                                  _filterRestaurants();
+                                }
+                              });
+                            }
+                          },
+                          builder: (context, state) {
+                            if (state is RestaurantLoading) {
+                              return const LoadingWidget();
+                            }
+
+                            if (state is RestaurantError) {
+                              return ErrorDisplayWidget(
+                                message: state.message,
+                                onRetry: _loadRestaurants,
+                              );
+                            }
+
+                            if (_filteredRestaurants.isEmpty) {
+                              if (state is RestaurantsLoaded &&
+                                  _allRestaurants.isEmpty) {
+                                if (state.restaurants.isNotEmpty) {
+                                  if (_searchController.text.isNotEmpty) {
+                                    return _buildNoSearchResults();
+                                  } else {
+                                    return _buildEmptyTabState(l10n);
+                                  }
+                                }
+                              }
+
+                              if (_searchController.text.isEmpty &&
+                                  _allRestaurants.isEmpty &&
+                                  state is! RestaurantsLoaded) {
+                                return const SizedBox();
+                              } else if (_filteredRestaurants.isEmpty &&
+                                  _allRestaurants.isNotEmpty) {
+                                if (_searchController.text.isNotEmpty) {
+                                  return _buildNoSearchResults();
+                                } else {
+                                  return _buildEmptyTabState(l10n);
+                                }
+                              }
+
+                              return _buildEmptyState();
+                            }
+
+                            return _buildRestaurantList(_filteredRestaurants);
+                          },
+                        );
+                      },
+                    ),
+                  ),
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () => context.push('/admin/restaurants/create'),
-          icon: const Icon(Icons.add),
-          label: const Text('Create Restaurant'),
-          backgroundColor: Colors.purple,
+        floatingActionButton: AnimatedBuilder(
+          animation: _tabController,
+          builder: (context, child) {
+            final isMarketTab = _tabController.index == 1;
+            return FloatingActionButton.extended(
+              heroTag: isMarketTab ? 'create_market' : 'create_restaurant',
+              onPressed: () => context.push(
+                isMarketTab
+                    ? '/admin/restaurants/create-market'
+                    : '/admin/restaurants/create',
+              ),
+              icon: Icon(isMarketTab ? Icons.storefront : Icons.add),
+              label: Text(isMarketTab ? 'Create Market' : 'Create Restaurant'),
+              backgroundColor: isMarketTab ? Colors.teal : Colors.purple,
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNoSearchResults() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_off,
+              size: 64,
+              color: AppColors.textSecondary.withValues(alpha: 0.5),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No results found',
+              style: TextStyle(fontSize: 18, color: AppColors.textSecondary),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyTabState(AppLocalizations l10n) {
+    final isMarketTab = _tabController.index == 1;
+    final message = isMarketTab ? 'No Markets Yet' : 'No Restaurants Yet';
+    final subMessage = isMarketTab
+        ? 'Start by creating your first market'
+        : 'Start by creating your first restaurant';
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              isMarketTab ? Icons.storefront : Icons.restaurant_menu,
+              size: 100,
+              color: AppColors.textSecondary.withValues(alpha: 0.3),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              message,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              subMessage,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
+            ),
+          ],
         ),
       ),
     );

@@ -12,10 +12,8 @@ class DriverCubit extends Cubit<DriverState> {
   final DriverRepository driverRepository;
   final AuthRepository authRepository;
 
-  DriverCubit({
-    required this.driverRepository,
-    required this.authRepository,
-  }) : super(DriverInitial());
+  DriverCubit({required this.driverRepository, required this.authRepository})
+    : super(DriverInitial());
 
   Future<void> loadAllDrivers() async {
     try {
@@ -70,8 +68,13 @@ class DriverCubit extends Cubit<DriverState> {
 
       await signupResult.fold(
         (failure) async {
-          AppLogger.logError('Failed to create user account', error: failure.message);
-          emit(DriverError('Failed to create user account: ${failure.message}'));
+          AppLogger.logError(
+            'Failed to create user account',
+            error: failure.message,
+          );
+          emit(
+            DriverError('Failed to create user account: ${failure.message}'),
+          );
         },
         (user) async {
           AppLogger.logSuccess('User account created: ${user.id}');
@@ -104,11 +107,16 @@ class DriverCubit extends Cubit<DriverState> {
 
           await driverResult.fold(
             (failure) async {
-              AppLogger.logError('Failed to create driver', error: failure.message);
+              AppLogger.logError(
+                'Failed to create driver',
+                error: failure.message,
+              );
               emit(DriverError('Failed to create driver: ${failure.message}'));
             },
             (createdDriver) async {
-              AppLogger.logSuccess('Driver created successfully: ${createdDriver.name}');
+              AppLogger.logSuccess(
+                'Driver created successfully: ${createdDriver.name}',
+              );
               emit(DriverCreated(createdDriver));
               loadAllDrivers(); // Refresh list
             },
@@ -192,5 +200,8 @@ class DriverCubit extends Cubit<DriverState> {
       emit(DriverError('Failed to load driver: $e'));
     }
   }
-}
 
+  void resetState() {
+    emit(DriverInitial());
+  }
+}

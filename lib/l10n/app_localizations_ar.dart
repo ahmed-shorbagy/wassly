@@ -540,6 +540,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get restaurants => 'المطاعم';
 
   @override
+  String get markets => 'المتاجر';
+
+  @override
+  String get restaurantsAndMarkets => 'المطاعم والماركت';
+
+  @override
   String get nearbyRestaurants => 'مطاعم قريبة منك';
 
   @override
@@ -1489,7 +1495,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get coffeeAndTea => 'القهوة والشاي';
 
   @override
-  String get pharmacy => 'الصيدليه';
+  String get pharmacy => 'الصيدليات';
+
+  @override
+  String get cakeAndCoffee => 'الكيك والقهوة';
+
+  @override
+  String get vegetablesAndFruits => 'الخضروات والفواكه';
 
   @override
   String get tissuesAndBags => 'مناديل و اكياس';

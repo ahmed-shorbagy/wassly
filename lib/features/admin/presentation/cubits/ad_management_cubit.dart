@@ -649,4 +649,8 @@ class AdManagementCubit extends Cubit<AdManagementState> {
       emit(AdManagementError('Failed to update status: $e'));
     }
   }
+
+  void resetState() {
+    emit(AdManagementInitial());
+  }
 }

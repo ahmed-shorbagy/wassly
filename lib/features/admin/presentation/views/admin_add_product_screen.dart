@@ -64,7 +64,10 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
     }
   }
 
-  void _showCategoryPicker(BuildContext context, List<FoodCategoryEntity> categories) {
+  void _showCategoryPicker(
+    BuildContext context,
+    List<FoodCategoryEntity> categories,
+  ) {
     final l10n = AppLocalizations.of(context)!;
 
     if (categories.isEmpty) {
@@ -152,136 +155,137 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
           title: Text(l10n.addProduct),
           backgroundColor: Colors.purple,
         ),
-      body: BlocConsumer<AdminProductCubit, AdminProductState>(
-        listener: (context, state) {
-          if (state is AdminProductAdded) {
-            context.pop();
-          } else if (state is AdminProductError) {
-            context.showErrorSnackBar(state.message);
-          }
-        },
-        builder: (context, state) {
-          if (state is AdminProductLoading) {
-            return LoadingWidget(message: l10n.creatingProduct);
-          }
+        body: BlocConsumer<AdminProductCubit, AdminProductState>(
+          listener: (context, state) {
+            if (state is AdminProductAdded) {
+              context.read<AdminProductCubit>().resetState();
+              context.pop();
+            } else if (state is AdminProductError) {
+              context.showErrorSnackBar(state.message);
+            }
+          },
+          builder: (context, state) {
+            if (state is AdminProductLoading) {
+              return LoadingWidget(message: l10n.creatingProduct);
+            }
 
-          return Form(
-            key: _formKey,
-            child: ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                // Image Upload Section
-                _buildImageUploadSection(l10n),
-                const SizedBox(height: 24),
+            return Form(
+              key: _formKey,
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  // Image Upload Section
+                  _buildImageUploadSection(l10n),
+                  const SizedBox(height: 24),
 
-                // Basic Information
-                _buildSectionTitle(l10n.basicInformation),
-                const SizedBox(height: 12),
-                _buildTextField(
-                  controller: _nameController,
-                  label: l10n.productName,
-                  icon: Icons.fastfood,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return l10n.pleaseEnterProductName;
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                _buildTextField(
-                  controller: _descriptionController,
-                  label: l10n.productDescription,
-                  icon: Icons.description,
-                  maxLines: 3,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return l10n.pleaseEnterProductDescription;
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                _buildTextField(
-                  controller: _priceController,
-                  label: l10n.productPrice,
-                  icon: Icons.attach_money,
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return l10n.pleaseEnterProductPrice;
-                    }
-                    if (double.tryParse(value) == null) {
-                      return l10n.invalidNumber;
-                    }
-                    if (double.parse(value) <= 0) {
-                      return l10n.invalidNumber;
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 24),
-
-                // Category
-                _buildSectionTitle(l10n.productCategory),
-                const SizedBox(height: 12),
-                BlocProvider.value(
-                  value: context.read<FoodCategoryCubit>()
-                    ..loadRestaurantCategories(widget.restaurantId),
-                  child: BlocBuilder<FoodCategoryCubit, FoodCategoryState>(
-                    builder: (context, state) {
-                      if (state is FoodCategoryLoaded) {
-                        return _buildCategorySelector(
-                          context,
-                          l10n,
-                          state.categories,
-                        );
+                  // Basic Information
+                  _buildSectionTitle(l10n.basicInformation),
+                  const SizedBox(height: 12),
+                  _buildTextField(
+                    controller: _nameController,
+                    label: l10n.productName,
+                    icon: Icons.fastfood,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return l10n.pleaseEnterProductName;
                       }
-                      return _buildCategorySelector(context, l10n, []);
+                      return null;
                     },
                   ),
-                ),
-                const SizedBox(height: 24),
-
-                // Availability
-                _buildSectionTitle(l10n.productAvailable),
-                const SizedBox(height: 12),
-                SwitchListTile(
-                  title: Text(
-                    _isAvailable
-                        ? l10n.productAvailable
-                        : l10n.productUnavailable,
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    controller: _descriptionController,
+                    label: l10n.productDescription,
+                    icon: Icons.description,
+                    maxLines: 3,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return l10n.pleaseEnterProductDescription;
+                      }
+                      return null;
+                    },
                   ),
-                  value: _isAvailable,
-                  onChanged: (value) {
-                    setState(() {
-                      _isAvailable = value;
-                    });
-                  },
-                ),
-                const SizedBox(height: 32),
-
-                // Submit Button
-                ElevatedButton(
-                  onPressed: _submitForm,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.purple,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    controller: _priceController,
+                    label: l10n.productPrice,
+                    icon: Icons.attach_money,
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return l10n.pleaseEnterProductPrice;
+                      }
+                      if (double.tryParse(value) == null) {
+                        return l10n.invalidNumber;
+                      }
+                      if (double.parse(value) <= 0) {
+                        return l10n.invalidNumber;
+                      }
+                      return null;
+                    },
                   ),
-                  child: Text(
-                    l10n.addProduct,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                  const SizedBox(height: 24),
+
+                  // Category
+                  _buildSectionTitle(l10n.productCategory),
+                  const SizedBox(height: 12),
+                  BlocProvider.value(
+                    value: context.read<FoodCategoryCubit>()
+                      ..loadRestaurantCategories(widget.restaurantId),
+                    child: BlocBuilder<FoodCategoryCubit, FoodCategoryState>(
+                      builder: (context, state) {
+                        if (state is FoodCategoryLoaded) {
+                          return _buildCategorySelector(
+                            context,
+                            l10n,
+                            state.categories,
+                          );
+                        }
+                        return _buildCategorySelector(context, l10n, []);
+                      },
                     ),
                   ),
-                ),
-                const SizedBox(height: 32),
-              ],
-            ),
-          );
-        },
-      ),
+                  const SizedBox(height: 24),
+
+                  // Availability
+                  _buildSectionTitle(l10n.productAvailable),
+                  const SizedBox(height: 12),
+                  SwitchListTile(
+                    title: Text(
+                      _isAvailable
+                          ? l10n.productAvailable
+                          : l10n.productUnavailable,
+                    ),
+                    value: _isAvailable,
+                    onChanged: (value) {
+                      setState(() {
+                        _isAvailable = value;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Submit Button
+                  ElevatedButton(
+                    onPressed: _submitForm,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.purple,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: Text(
+                      l10n.addProduct,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

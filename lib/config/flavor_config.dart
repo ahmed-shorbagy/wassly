@@ -1,15 +1,6 @@
-enum Flavor {
-  customer,
-  partner,
-  admin,
-}
+enum Flavor { customer, partner, admin }
 
-enum AppType {
-  customer,
-  restaurant,
-  driver,
-  admin,
-}
+enum AppType { customer, restaurant, driver, admin }
 
 class FlavorConfig {
   final Flavor flavor;
@@ -17,7 +8,7 @@ class FlavorConfig {
   final String packageName;
   final AppThemeConfig theme;
   final List<AppType> supportedTypes;
-  
+
   FlavorConfig._internal({
     required this.flavor,
     required this.appName,
@@ -68,7 +59,7 @@ class FlavorConfig {
       case Flavor.admin:
         _instance = FlavorConfig._internal(
           flavor: Flavor.admin,
-          appName: 'To Order Admin',
+          appName: 'Admin',
           packageName: 'com.wassly.admin',
           theme: AppThemeConfig(
             primaryColor: 0xFF6A1B9A, // Purple
@@ -99,4 +90,3 @@ class AppThemeConfig {
     required this.isDark,
   });
 }
-

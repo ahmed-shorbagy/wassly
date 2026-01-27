@@ -8,6 +8,7 @@ abstract class RestaurantCategoryRepository {
 
   Future<Either<Failure, RestaurantCategoryEntity>> createCategory({
     required String name,
+    String? id,
     File? imageFile,
     bool isMarket = false,
     int displayOrder = 0,

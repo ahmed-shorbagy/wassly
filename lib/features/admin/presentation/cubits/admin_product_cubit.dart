@@ -61,8 +61,13 @@ class AdminProductCubit extends Cubit<AdminProductState> {
 
         uploadResult.fold(
           (failure) {
-            AppLogger.logError('Failed to upload image', error: failure.message);
-            emit(AdminProductError('Failed to upload image: ${failure.message}'));
+            AppLogger.logError(
+              'Failed to upload image',
+              error: failure.message,
+            );
+            emit(
+              AdminProductError('Failed to upload image: ${failure.message}'),
+            );
             return;
           },
           (url) {
@@ -133,8 +138,13 @@ class AdminProductCubit extends Cubit<AdminProductState> {
 
         uploadResult.fold(
           (failure) {
-            AppLogger.logError('Failed to upload image', error: failure.message);
-            emit(AdminProductError('Failed to upload image: ${failure.message}'));
+            AppLogger.logError(
+              'Failed to upload image',
+              error: failure.message,
+            );
+            emit(
+              AdminProductError('Failed to upload image: ${failure.message}'),
+            );
             return;
           },
           (url) {
@@ -155,7 +165,8 @@ class AdminProductCubit extends Cubit<AdminProductState> {
         price: price ?? product.price,
         imageUrl: imageUrl,
         categoryId: categoryId ?? product.categoryId,
-        category: category ?? product.category, // Keep for backward compatibility
+        category:
+            category ?? product.category, // Keep for backward compatibility
         isAvailable: isAvailable ?? product.isAvailable,
         createdAt: product.createdAt,
       );
@@ -164,7 +175,10 @@ class AdminProductCubit extends Cubit<AdminProductState> {
 
       result.fold(
         (failure) {
-          AppLogger.logError('Failed to update product', error: failure.message);
+          AppLogger.logError(
+            'Failed to update product',
+            error: failure.message,
+          );
           emit(AdminProductError(failure.message));
         },
         (_) {
@@ -189,7 +203,10 @@ class AdminProductCubit extends Cubit<AdminProductState> {
 
       result.fold(
         (failure) {
-          AppLogger.logError('Failed to delete product', error: failure.message);
+          AppLogger.logError(
+            'Failed to delete product',
+            error: failure.message,
+          );
           emit(AdminProductError(failure.message));
         },
         (_) {
@@ -205,15 +222,25 @@ class AdminProductCubit extends Cubit<AdminProductState> {
     }
   }
 
-  Future<void> toggleProductAvailability(String productId, bool isAvailable, String restaurantId) async {
+  Future<void> toggleProductAvailability(
+    String productId,
+    bool isAvailable,
+    String restaurantId,
+  ) async {
     try {
       AppLogger.logInfo('Toggling product availability: $productId');
 
-      final result = await repository.toggleProductAvailability(productId, isAvailable);
+      final result = await repository.toggleProductAvailability(
+        productId,
+        isAvailable,
+      );
 
       result.fold(
         (failure) {
-          AppLogger.logError('Failed to toggle availability', error: failure.message);
+          AppLogger.logError(
+            'Failed to toggle availability',
+            error: failure.message,
+          );
           emit(AdminProductError(failure.message));
         },
         (_) {
@@ -227,5 +254,8 @@ class AdminProductCubit extends Cubit<AdminProductState> {
       emit(AdminProductError('Failed to toggle product availability: $e'));
     }
   }
-}
 
+  void resetState() {
+    emit(AdminProductInitial());
+  }
+}

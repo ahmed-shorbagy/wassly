@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -23,8 +23,7 @@ import '../../../ads/presentation/cubits/startup_ad_customer_cubit.dart';
 import '../../../../shared/widgets/startup_ad_popup.dart';
 import '../../../delivery_address/presentation/cubits/delivery_address_cubit.dart';
 import 'package:lottie/lottie.dart';
-import '../../../../core/utils/search_helper.dart';
-import '../../../../core/utils/category_image_helper.dart';
+// import '../widgets/restaurant_card.dart'; // Unused
 // import '../../../../core/constants/market_product_categories.dart'; // Unused
 // import '../../../market_products/domain/entities/market_product_entity.dart'; // Unused
 
@@ -67,36 +66,34 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
 
   void _filterRestaurants() {
     final query = _searchController.text.toLowerCase().trim();
-    if (query.isEmpty) {
-      setState(() {
-        _filteredRestaurants = List.from(_allRestaurants);
-      });
-      return;
-    }
-
     setState(() {
-      _filteredRestaurants = SearchHelper.filterList(
-        items: _allRestaurants,
-        query: query,
-        getSearchStrings: (restaurant) {
+      if (query.isEmpty) {
+        _filteredRestaurants = List.from(_allRestaurants);
+      } else {
+        _filteredRestaurants = _allRestaurants.where((restaurant) {
+          final queryLower = query.toLowerCase();
+          final nameMatch = restaurant.name.toLowerCase().contains(queryLower);
+          final descMatch = restaurant.description.toLowerCase().contains(
+            queryLower,
+          );
+
           // Resolve category names from IDs to allow searching by category name
           final homeState = context.read<HomeCubit>().state;
           final categories = homeState is HomeLoaded
               ? homeState.categories
               : [];
-          final categoryNames = restaurant.categoryIds.map((cid) {
+          final categoryMatch = restaurant.categoryIds.any((cid) {
             final category = categories.where((c) => c.id == cid).firstOrNull;
-            return category?.name ?? cid;
-          }).toList();
+            return category?.name.toLowerCase().contains(queryLower) ??
+                cid.toLowerCase().contains(queryLower);
+          });
 
-          return [
-            restaurant.name,
-            restaurant.description,
-            restaurant.address,
-            ...categoryNames,
-          ];
-        },
-      );
+          final addressMatch = restaurant.address.toLowerCase().contains(
+            queryLower,
+          );
+          return nameMatch || descMatch || categoryMatch || addressMatch;
+        }).toList();
+      }
     });
   }
 
@@ -346,17 +343,13 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     restaurantCategories: categories,
                     onCategoryTap: (category, isMarket) {
                       if (isMarket) {
-                        // Navigate to Markets (Vendors)
+                        // Navigate to Market Products Screen
                         if (category == l10n.market) {
-                          // Navigate to "Our Market" page (Market Products)
+                          // Main Market Page
                           context.push('/market-products');
                         } else {
-                          // Show vendors for specific market category
-                          // Pass filterType=market to hide restaurant top categories
-                          context.push(
-                            '/search?q=${Uri.encodeComponent(category)}&filterType=market',
-                            extra: _allRestaurants,
-                          );
+                          // Filtered Market Page
+                          context.push('/market-products?category=$category');
                         }
                       } else {
                         // Navigate to Restaurants Search
@@ -735,26 +728,32 @@ class _MarketProductCategoriesSection extends StatefulWidget {
 
 class _MarketProductCategoriesSectionState
     extends State<_MarketProductCategoriesSection> {
-  // Fixed items
-  late final List<Map<String, dynamic>> _fixedItems;
+  late List<RestaurantCategoryEntity> _randomCategories;
 
   @override
   void initState() {
     super.initState();
-    _fixedItems = [
-      {
-        'asset': 'assets/images/market.jpeg',
-        'title': 'Market', // Will be localized in build
-        'isMarket': true,
-        'categoryName': null,
-      },
-      {
-        'asset': 'assets/images/resturants.jpeg',
-        'title': 'Restaurants', // Will be localized in build
-        'isMarket': false,
-        'categoryName': null,
-      },
-    ];
+    _pickRandomCategories();
+  }
+
+  @override
+  void didUpdateWidget(_MarketProductCategoriesSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.restaurantCategories != oldWidget.restaurantCategories) {
+      _pickRandomCategories();
+    }
+  }
+
+  void _pickRandomCategories() {
+    if (widget.restaurantCategories.isEmpty) {
+      _randomCategories = [];
+      return;
+    }
+    final available = List<RestaurantCategoryEntity>.from(
+      widget.restaurantCategories,
+    );
+    available.shuffle();
+    _randomCategories = available.take(4).toList();
   }
 
   Widget _buildCategoryCard(
@@ -844,82 +843,28 @@ class _MarketProductCategoriesSectionState
     final l10n = AppLocalizations.of(context)!;
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
 
-    // Prepare display items: Fixed + Market Categories
-    final List<Map<String, dynamic>> displayItems = [];
+    final List<Map<String, dynamic>> displayItems = [
+      {
+        'asset': 'assets/images/market.jpeg',
+        'title': l10n.market,
+        'isMarket': true,
+        'categoryName': null,
+      },
+      {
+        'asset': 'assets/images/resturants.jpeg',
+        'title': l10n.restaurants,
+        'isMarket': false,
+        'categoryName': null,
+      },
+    ];
 
-    // 1. Fixed Main Chips
-    displayItems.add({..._fixedItems[0], 'title': l10n.market});
-    displayItems.add({..._fixedItems[1], 'title': l10n.restaurants});
-
-    // 2. Fixed Category Chips (Requested)
-    displayItems.add({
-      'asset': 'assets/images/pharamcies.jpeg',
-      'title': l10n.pharmacy,
-      'isMarket': true,
-      'categoryName': 'Pharmacies',
-      'isSpecificCategory': true,
-    });
-    displayItems.add({
-      'asset': 'assets/images/fruits&veg.jpeg',
-      'title': l10n.vegetablesAndFruits,
-      'isMarket': true,
-      'categoryName': 'Vegetables & Fruits',
-      'isSpecificCategory': true,
-    });
-    displayItems.add({
-      'asset': 'assets/images/cake&cofee.jpeg',
-      'title': l10n.cakeAndCoffee,
-      'isMarket': true,
-      'categoryName': 'Cake & Coffee',
-      'isSpecificCategory': true,
-    });
-
-    // Add Dynamic Market Categories (e.g. Pharmacy, Vegetable Shop)
-    // Filter categories where isMarket == true
-    final marketCategories = widget.restaurantCategories
-        .where((c) => c.isMarket)
-        .toList();
-
-    // Sort by display order or name if desired
-    marketCategories.sort((a, b) => a.displayOrder.compareTo(b.displayOrder));
-
-    // Track seen titles to prevent duplicates (e.g. if DB has duplicate categories or matches fixed items)
-    final Set<String> seenTitles = {
-      l10n.market,
-      l10n.restaurants,
-      l10n.pharmacy,
-      l10n.vegetablesAndFruits,
-      l10n.cakeAndCoffee,
-    };
-
-    for (var cat in marketCategories) {
-      String displayName = cat.name;
-
-      // Normalize and localize known legacy English names if we are in Arabic mode (or generally)
-      // This helps deduplicate "Pharmacies" vs "الصيدليه" by converting them to the same localized string
-      final lowerName = cat.name.toLowerCase().trim();
-
-      if (lowerName.contains('pharmacy') || lowerName.contains('pharmacies')) {
-        displayName = l10n.pharmacy;
-      } else if (lowerName.contains('vegetable') ||
-          lowerName == 'fruits and vegetables') {
-        displayName = l10n.vegetablesAndFruits;
-      } else if (lowerName.contains('cake') && lowerName.contains('coffee')) {
-        displayName = l10n.cakeAndCoffee;
-      }
-
-      // specialized check: filter out if name is same as existing ones
-      if (seenTitles.contains(displayName)) continue;
-      seenTitles.add(displayName);
-
+    for (var cat in _randomCategories) {
       displayItems.add({
-        'asset': CategoryImageHelper.getAssetForCategory(cat.name),
+        'asset': null,
         'imageUrl': cat.imageUrl,
-        'title': displayName,
-        'isMarket': true, // Use market flow
-        'categoryName':
-            cat.name, // To filter by category - keep ORIGINAL name for querying
-        'isSpecificCategory': true, // Flag to indicate specific category search
+        'title': cat.name,
+        'isMarket': false,
+        'categoryName': cat.name,
       });
     }
 
@@ -928,7 +873,7 @@ class _MarketProductCategoriesSectionState
       children: [
         // Header
         Text(
-          isArabic ? "اكتشف " : "Discover Wassly",
+          isArabic ? "╪º┘â╪¬╪┤┘ü " : "Discover Wassly",
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
@@ -961,30 +906,11 @@ class _MarketProductCategoriesSectionState
                         item['asset'] as String?,
                         item['title'] as String,
                         () {
-                          // If specific category (like Pharmacy), open Market Page filtered by that category
-                          if (item['isSpecificCategory'] == true) {
-                            // Use a special param to indicate we want Markets filtered by this category
-                            // We leverage the existing onCategoryTap but maybe we need to be clearer
-                            // The existing logic inside onCategoryTap in CustomerHomeScreen needs to handle this.
-                            // Let's modify onCategoryTap to accept filterType.
-                            // BUT onCategoryTap is a callback defined in the parent.
-                            // I should update how onCategoryTap is CALLED here, or Update the Parent's callback.
-                            // The parent logic:
-                            // onCategoryTap: (category, isMarket) { ... }
-
-                            // If isSpecificCategory is true, we want to open MARKETS filtered by categoryName.
-                            // We pass isMarket=true to the callback.
-                            widget.onCategoryTap(
-                              item['categoryName'] ?? item['title'],
-                              true, // It IS a market category search
-                            );
-                          } else {
-                            widget.onCategoryTap(
-                              item['categoryName'] as String? ??
-                                  item['title'] as String,
-                              item['isMarket'] as bool,
-                            );
-                          }
+                          widget.onCategoryTap(
+                            item['categoryName'] as String? ??
+                                item['title'] as String,
+                            item['isMarket'] as bool,
+                          );
                         },
                       ),
                     ),
@@ -993,40 +919,32 @@ class _MarketProductCategoriesSectionState
               ),
               ResponsiveHelper.spacing(height: 12),
               // Second Row
-              if (displayItems.length > 1)
-                Row(
-                  children: List.generate(displayItems.length ~/ 2, (index) {
-                    final item =
-                        displayItems[index + (displayItems.length / 2).ceil()];
-                    return Padding(
-                      padding: EdgeInsetsDirectional.only(end: 12.w),
-                      child: SizedBox(
-                        width: 130.w,
-                        height: 55.h,
-                        child: _buildCategoryCard(
-                          context,
-                          item['imageUrl'] as String?,
-                          item['asset'] as String?,
-                          item['title'] as String,
-                          () {
-                            if (item['isSpecificCategory'] == true) {
-                              widget.onCategoryTap(
-                                item['categoryName'] ?? item['title'],
-                                true, // It IS a market category search
-                              );
-                            } else {
-                              widget.onCategoryTap(
-                                item['categoryName'] as String? ??
-                                    item['title'] as String,
-                                item['isMarket'] as bool,
-                              );
-                            }
-                          },
-                        ),
+              Row(
+                children: List.generate(displayItems.length ~/ 2, (index) {
+                  final item =
+                      displayItems[index + (displayItems.length / 2).ceil()];
+                  return Padding(
+                    padding: EdgeInsetsDirectional.only(end: 12.w),
+                    child: SizedBox(
+                      width: 130.w,
+                      height: 55.h,
+                      child: _buildCategoryCard(
+                        context,
+                        item['imageUrl'] as String?,
+                        item['asset'] as String?,
+                        item['title'] as String,
+                        () {
+                          widget.onCategoryTap(
+                            item['categoryName'] as String? ??
+                                item['title'] as String,
+                            item['isMarket'] as bool,
+                          );
+                        },
                       ),
-                    );
-                  }),
-                ),
+                    ),
+                  );
+                }),
+              ),
             ],
           ),
         ),
@@ -1457,14 +1375,14 @@ class _CombinedAppBar extends StatelessWidget {
                               errorBuilder: (context, error, stackTrace) {
                                 return const Center(
                                   child: Text(
-                                    '🌙',
+                                    '≡ƒîÖ',
                                     style: TextStyle(fontSize: 16),
                                   ),
                                 );
                               },
                             ),
                           ),
-                          const Text('✨', style: TextStyle(fontSize: 16)),
+                          const Text('Γ£¿', style: TextStyle(fontSize: 16)),
                         ],
                       ),
                     ),

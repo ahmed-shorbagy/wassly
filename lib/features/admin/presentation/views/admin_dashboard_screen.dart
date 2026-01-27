@@ -263,7 +263,7 @@ class AdminDashboardScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return [
       _DashboardItem(
-        title: l10n.restaurants,
+        title: l10n.restaurantsAndMarkets,
         icon: Icons.restaurant,
         color: Colors.orange,
         route: '/admin/restaurants',

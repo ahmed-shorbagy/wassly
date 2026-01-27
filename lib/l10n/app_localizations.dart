@@ -1136,6 +1136,18 @@ abstract class AppLocalizations {
   /// **'Restaurants'**
   String get restaurants;
 
+  /// No description provided for @markets.
+  ///
+  /// In en, this message translates to:
+  /// **'Markets'**
+  String get markets;
+
+  /// No description provided for @restaurantsAndMarkets.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurants & Markets'**
+  String get restaurantsAndMarkets;
+
   /// No description provided for @nearbyRestaurants.
   ///
   /// In en, this message translates to:
@@ -2987,8 +2999,20 @@ abstract class AppLocalizations {
   /// No description provided for @pharmacy.
   ///
   /// In en, this message translates to:
-  /// **'Pharmacy'**
+  /// **'Pharmacies'**
   String get pharmacy;
+
+  /// No description provided for @cakeAndCoffee.
+  ///
+  /// In en, this message translates to:
+  /// **'Cake & Coffee'**
+  String get cakeAndCoffee;
+
+  /// No description provided for @vegetablesAndFruits.
+  ///
+  /// In en, this message translates to:
+  /// **'Vegetables & Fruits'**
+  String get vegetablesAndFruits;
 
   /// No description provided for @tissuesAndBags.
   ///

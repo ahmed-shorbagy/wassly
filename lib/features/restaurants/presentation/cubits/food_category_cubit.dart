@@ -23,7 +23,10 @@ class FoodCategoryCubit extends Cubit<FoodCategoryState> {
       result.fold(
         (failure) {
           if (isClosed) return;
-          AppLogger.logError('Failed to load categories', error: failure.message);
+          AppLogger.logError(
+            'Failed to load categories',
+            error: failure.message,
+          );
           emit(FoodCategoryError(failure.message));
         },
         (categories) {
@@ -67,7 +70,10 @@ class FoodCategoryCubit extends Cubit<FoodCategoryState> {
       result.fold(
         (failure) {
           if (isClosed) return;
-          AppLogger.logError('Failed to create category', error: failure.message);
+          AppLogger.logError(
+            'Failed to create category',
+            error: failure.message,
+          );
           emit(FoodCategoryError(failure.message));
         },
         (createdCategory) {
@@ -114,7 +120,10 @@ class FoodCategoryCubit extends Cubit<FoodCategoryState> {
       result.fold(
         (failure) {
           if (isClosed) return;
-          AppLogger.logError('Failed to update category', error: failure.message);
+          AppLogger.logError(
+            'Failed to update category',
+            error: failure.message,
+          );
           emit(FoodCategoryError(failure.message));
         },
         (_) {
@@ -144,7 +153,10 @@ class FoodCategoryCubit extends Cubit<FoodCategoryState> {
       result.fold(
         (failure) {
           if (isClosed) return;
-          AppLogger.logError('Failed to delete category', error: failure.message);
+          AppLogger.logError(
+            'Failed to delete category',
+            error: failure.message,
+          );
           emit(FoodCategoryError(failure.message));
         },
         (_) {
@@ -171,13 +183,19 @@ class FoodCategoryCubit extends Cubit<FoodCategoryState> {
     try {
       AppLogger.logInfo('Toggling category status: $categoryId');
 
-      final result = await repository.toggleCategoryStatus(categoryId, isActive);
+      final result = await repository.toggleCategoryStatus(
+        categoryId,
+        isActive,
+      );
 
       if (isClosed) return;
       result.fold(
         (failure) {
           if (isClosed) return;
-          AppLogger.logError('Failed to toggle category status', error: failure.message);
+          AppLogger.logError(
+            'Failed to toggle category status',
+            error: failure.message,
+          );
           emit(FoodCategoryError(failure.message));
         },
         (_) {
@@ -193,5 +211,8 @@ class FoodCategoryCubit extends Cubit<FoodCategoryState> {
       emit(FoodCategoryError('Failed to toggle category status: $e'));
     }
   }
-}
 
+  void resetState() {
+    emit(FoodCategoryInitial());
+  }
+}

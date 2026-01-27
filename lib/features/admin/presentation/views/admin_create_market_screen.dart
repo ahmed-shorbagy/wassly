@@ -6,21 +6,22 @@ import 'package:image_picker/image_picker.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/market_product_categories.dart'; // Import constants
 import '../../../../core/utils/extensions.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../../../../shared/widgets/back_button_handler.dart';
-import '../../../restaurants/domain/entities/restaurant_category_entity.dart';
 import '../cubits/admin_cubit.dart';
-import '../cubits/admin_restaurant_category_cubit.dart';
+// import '../cubits/admin_restaurant_category_cubit.dart'; // Not needed as we use fixed categories
 
-class CreateRestaurantScreen extends StatefulWidget {
-  const CreateRestaurantScreen({super.key});
+class AdminCreateMarketScreen extends StatefulWidget {
+  const AdminCreateMarketScreen({super.key});
 
   @override
-  State<CreateRestaurantScreen> createState() => _CreateRestaurantScreenState();
+  State<AdminCreateMarketScreen> createState() =>
+      _AdminCreateMarketScreenState();
 }
 
-class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
+class _AdminCreateMarketScreenState extends State<AdminCreateMarketScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -40,10 +41,44 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
+  // Fixed Market Categories
+  late final List<Map<String, String>> _fixedMarketCategories;
+
   @override
   void initState() {
     super.initState();
-    context.read<AdminRestaurantCategoryCubit>().loadCategories();
+    // No need to load categories from DB
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final l10n = AppLocalizations.of(context)!;
+    // Define the fixed categories for markets
+    _fixedMarketCategories = [
+      {
+        'id': MarketProductCategories.fruitsVegetables,
+        'name': MarketProductCategories.getCategoryName(
+          MarketProductCategories.fruitsVegetables,
+          l10n,
+        ),
+      },
+      {
+        'id': MarketProductCategories.pharmacy,
+        'name': MarketProductCategories.getCategoryName(
+          MarketProductCategories.pharmacy,
+          l10n,
+        ),
+      },
+      {
+        'id': MarketProductCategories.cakeAndCoffee,
+        'name': MarketProductCategories.getCategoryName(
+          MarketProductCategories.cakeAndCoffee,
+          l10n,
+        ),
+      },
+      // Add more if needed or allow all MarketProductCategories
+    ];
   }
 
   @override
@@ -88,10 +123,10 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
     try {
       final ImagePicker picker = ImagePicker();
       final XFile? image = await picker.pickImage(
-        source: ImageSource.camera, // Camera only
+        source: ImageSource.camera,
         maxWidth: 1920,
         maxHeight: 1080,
-        imageQuality: 90, // Higher quality for documents
+        imageQuality: 90,
       );
 
       if (image != null) {
@@ -109,7 +144,6 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
 
   Future<void> _pickLocation() async {
     // For now, use a default location (Cairo, Egypt)
-    // In production, you'd integrate with Google Maps Place Picker
     setState(() {
       _selectedLocation = const LatLng(30.0444, 31.2357);
     });
@@ -124,80 +158,45 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
 
     showDialog(
       context: context,
-      builder: (context) =>
-          BlocBuilder<
-            AdminRestaurantCategoryCubit,
-            AdminRestaurantCategoryState
-          >(
-            builder: (context, state) {
-              if (state is AdminRestaurantCategoryLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              if (state is AdminRestaurantCategoryError) {
-                return AlertDialog(
-                  title: const Text('Error'),
-                  content: Text(state.message),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text(l10n.ok),
-                    ),
-                  ],
-                );
-              }
-
-              if (state is AdminRestaurantCategoriesLoaded) {
-                final categories = state.categories;
-                // Use StatefulBuilder to update checkboxes within dialog
-                return StatefulBuilder(
-                  builder: (context, setStateDialog) {
-                    return AlertDialog(
-                      title: Text(l10n.selectCategories),
-                      content: SizedBox(
-                        width: double.maxFinite,
-                        child: categories.isEmpty
-                            ? Center(child: Text('No categories available'))
-                            : ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: categories.length,
-                                itemBuilder: (context, index) {
-                                  final category = categories[index];
-                                  return CheckboxListTile(
-                                    title: Text(category.name),
-                                    value: _selectedCategoryIds.contains(
-                                      category.id,
-                                    ),
-                                    onChanged: (selected) {
-                                      setStateDialog(() {
-                                        if (selected == true) {
-                                          _selectedCategoryIds.add(category.id);
-                                        } else {
-                                          _selectedCategoryIds.remove(
-                                            category.id,
-                                          );
-                                        }
-                                      });
-                                      // Also update the main screen state
-                                      setState(() {});
-                                    },
-                                  );
-                                },
-                              ),
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: Text(l10n.done),
-                        ),
-                      ],
-                    );
-                  },
-                );
-              }
-              return const SizedBox();
-            },
-          ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setStateDialog) {
+          return AlertDialog(
+            title: Text(l10n.selectCategories),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: _fixedMarketCategories.length,
+                itemBuilder: (context, index) {
+                  final category = _fixedMarketCategories[index];
+                  final catId = category['id']!;
+                  return CheckboxListTile(
+                    title: Text(category['name']!),
+                    value: _selectedCategoryIds.contains(catId),
+                    onChanged: (selected) {
+                      setStateDialog(() {
+                        if (selected == true) {
+                          _selectedCategoryIds.add(catId);
+                        } else {
+                          _selectedCategoryIds.remove(catId);
+                        }
+                      });
+                      // Also update the main screen state
+                      setState(() {});
+                    },
+                  );
+                },
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(l10n.done),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -236,6 +235,7 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
       phone: _phoneController.text.trim(),
       email: _emailController.text.trim(),
       password: _passwordController.text.trim(),
+      // Use the selected market category IDs directly
       categoryIds: _selectedCategoryIds,
       location: _selectedLocation!,
       imageFile: _selectedImage!,
@@ -264,7 +264,7 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
     return UnsavedChangesHandler(
       hasUnsavedChanges: _hasUnsavedChanges,
       child: Scaffold(
-        appBar: AppBar(title: Text(l10n.createRestaurant)),
+        appBar: AppBar(title: const Text('Create Market')), // localized title?
         body: BlocConsumer<AdminCubit, AdminState>(
           listener: (context, state) {
             if (state is RestaurantCreatedSuccess) {
@@ -273,13 +273,21 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                 context: context,
                 barrierDismissible: false,
                 builder: (dialogContext) => AlertDialog(
-                  title: Text(l10n.restaurantCreatedSuccessfully),
+                  title: Text(
+                    l10n.restaurantCreatedSuccessfully.replaceAll(
+                      'Restaurant',
+                      'Market',
+                    ),
+                  ), // Text replacement hack or new key
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        l10n.provideCredentialsToRestaurant,
+                        l10n.provideCredentialsToRestaurant.replaceAll(
+                          'Restaurant',
+                          'Market',
+                        ),
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 16),
@@ -291,8 +299,11 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        l10n.restaurantCanChangePasswordAfterLogin,
-                        style: TextStyle(
+                        l10n.restaurantCanChangePasswordAfterLogin.replaceAll(
+                          'Restaurant',
+                          'Market',
+                        ),
+                        style: const TextStyle(
                           fontSize: 12,
                           fontStyle: FontStyle.italic,
                           color: Colors.grey,
@@ -305,7 +316,7 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                       onPressed: () {
                         Navigator.pop(dialogContext);
                         context.read<AdminCubit>().resetState();
-                        context.go('/admin/restaurants');
+                        context.go('/admin/restaurants'); // Go to list
                       },
                       child: Text(l10n.ok),
                     ),
@@ -318,7 +329,7 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
           },
           builder: (context, state) {
             if (state is AdminLoading) {
-              return LoadingWidget(message: l10n.creatingRestaurant);
+              return LoadingWidget(message: 'Creating Market...');
             }
 
             return Form(
@@ -337,11 +348,14 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                     const SizedBox(height: 12),
                     _buildTextField(
                       controller: _nameController,
-                      label: l10n.restaurantName,
-                      icon: Icons.restaurant,
+                      label: 'Market Name', // Localize
+                      icon: Icons.store_mall_directory,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return l10n.pleaseEnterRestaurantName;
+                          return l10n.pleaseEnterRestaurantName.replaceAll(
+                            'Restaurant',
+                            'Market',
+                          );
                         }
                         return null;
                       },
@@ -463,8 +477,8 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                     _buildLocationPicker(l10n),
                     const SizedBox(height: 24),
 
-                    // Categories
-                    _buildSectionTitle(l10n.categories),
+                    // Categories - Market Specific
+                    _buildSectionTitle('Market Category'), // Localize
                     const SizedBox(height: 12),
                     _buildCategorySelector(l10n),
                     const SizedBox(height: 24),
@@ -533,7 +547,7 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                     ElevatedButton(
                       onPressed: _submitForm,
                       child: Text(
-                        l10n.createRestaurant,
+                        'Create Market', // Localize
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -611,7 +625,7 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      l10n.tapToUploadRestaurantImage,
+                      'Tap to upload market image', // Localize
                       style: const TextStyle(
                         fontSize: 16,
                         color: Colors.grey,
@@ -731,79 +745,108 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                   ),
                 ],
               )
-            : BlocBuilder<
-                AdminRestaurantCategoryCubit,
-                AdminRestaurantCategoryState
-              >(
-                builder: (context, state) {
-                  List<RestaurantCategoryEntity> categories = [];
-                  if (state is AdminRestaurantCategoriesLoaded) {
-                    categories = state.categories;
-                  }
-
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            l10n.selectedCategories,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: _showCategoryPicker,
-                            child: Text(l10n.edit),
-                          ),
-                        ],
+                      Text(
+                        l10n.selectedCategories,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: _selectedCategoryIds.map((categoryId) {
-                          final category = categories
-                              .cast<RestaurantCategoryEntity>()
-                              .firstWhere(
-                                (c) => c.id == categoryId,
-                                orElse: () => RestaurantCategoryEntity(
-                                  id: categoryId,
-                                  name: 'Unknown',
-                                  imageUrl: '',
-                                  isActive: true,
-                                  displayOrder: 0,
-                                  createdAt: DateTime.now(),
-                                ),
-                              );
-
-                          return Chip(
-                            label: Text(category.name),
-                            backgroundColor: AppColors.primary.withValues(
-                              alpha: 0.1,
-                            ),
-                            deleteIcon: const Icon(Icons.close, size: 16),
-                            onDeleted: () {
-                              setState(() {
-                                _selectedCategoryIds.remove(categoryId);
-                              });
-                            },
-                          );
-                        }).toList(),
+                      TextButton(
+                        onPressed: _showCategoryPicker,
+                        child: Text(l10n.edit),
                       ),
                     ],
-                  );
-                },
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _selectedCategoryIds.map((categoryId) {
+                      final categoryName = _fixedMarketCategories.firstWhere(
+                        (c) => c['id'] == categoryId,
+                        orElse: () => {'name': 'Unknown'},
+                      )['name']!;
+
+                      return Chip(
+                        label: Text(categoryName),
+                        backgroundColor: AppColors.primary.withValues(
+                          alpha: 0.1,
+                        ),
+                        deleteIcon: const Icon(Icons.close, size: 16),
+                        onDeleted: () {
+                          setState(() {
+                            _selectedCategoryIds.remove(categoryId);
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ],
               ),
       ),
     );
   }
 
+  Widget _buildPasswordField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    required bool obscureText,
+    required VoidCallback onToggleObscure,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      obscureText: obscureText,
+      validator: validator,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, color: AppColors.primary),
+        suffixIcon: IconButton(
+          icon: Icon(
+            obscureText ? Icons.visibility : Icons.visibility_off,
+            color: Colors.grey,
+          ),
+          onPressed: onToggleObscure,
+        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCredentialRow(String label, String value) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 80,
+          child: Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+        ),
+        Expanded(child: SelectableText(value)), // Copy-paste friendly
+      ],
+    );
+  }
+
   Widget _buildCommercialRegistrationPhotoSection(AppLocalizations l10n) {
     return Container(
-      height: 200,
+      height: 150,
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
@@ -817,7 +860,7 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                   child: Image.file(
                     _commercialRegistrationPhoto!,
                     width: double.infinity,
-                    height: 200,
+                    height: 150,
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -854,81 +897,20 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.camera_alt, size: 60, color: Colors.grey),
+                    const Icon(Icons.camera_alt, size: 50, color: Colors.grey),
                     const SizedBox(height: 12),
                     Text(
-                      l10n.openCamera,
+                      l10n.takePhoto,
                       style: const TextStyle(
                         fontSize: 16,
                         color: Colors.grey,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      l10n.commercialRegistrationPhoto,
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
                   ],
                 ),
               ),
             ),
-    );
-  }
-
-  Widget _buildPasswordField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    required bool obscureText,
-    required VoidCallback onToggleObscure,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      obscureText: obscureText,
-      validator: validator,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon, color: AppColors.primary),
-        suffixIcon: IconButton(
-          icon: Icon(
-            obscureText ? Icons.visibility : Icons.visibility_off,
-            color: AppColors.textSecondary,
-          ),
-          onPressed: onToggleObscure,
-        ),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCredentialRow(String label, String value) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 80,
-          child: Text(
-            label,
-            style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
-        ),
-        Expanded(
-          child: SelectableText(
-            value,
-            style: const TextStyle(fontFamily: 'monospace'),
-          ),
-        ),
-      ],
     );
   }
 }

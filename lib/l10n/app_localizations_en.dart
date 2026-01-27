@@ -544,6 +544,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get restaurants => 'Restaurants';
 
   @override
+  String get markets => 'Markets';
+
+  @override
+  String get restaurantsAndMarkets => 'Restaurants & Markets';
+
+  @override
   String get nearbyRestaurants => 'Nearby Restaurants';
 
   @override
@@ -1499,7 +1505,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get coffeeAndTea => 'Coffee & Tea';
 
   @override
-  String get pharmacy => 'Pharmacy';
+  String get pharmacy => 'Pharmacies';
+
+  @override
+  String get cakeAndCoffee => 'Cake & Coffee';
+
+  @override
+  String get vegetablesAndFruits => 'Vegetables & Fruits';
 
   @override
   String get tissuesAndBags => 'Tissues & Bags';

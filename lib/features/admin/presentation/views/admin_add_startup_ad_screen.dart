@@ -15,7 +15,8 @@ class AdminAddStartupAdScreen extends StatefulWidget {
   const AdminAddStartupAdScreen({super.key});
 
   @override
-  State<AdminAddStartupAdScreen> createState() => _AdminAddStartupAdScreenState();
+  State<AdminAddStartupAdScreen> createState() =>
+      _AdminAddStartupAdScreenState();
 }
 
 class _AdminAddStartupAdScreenState extends State<AdminAddStartupAdScreen> {
@@ -129,13 +130,13 @@ class _AdminAddStartupAdScreenState extends State<AdminAddStartupAdScreen> {
     final priority = int.tryParse(_priorityController.text.trim()) ?? 0;
 
     context.read<AdManagementCubit>().addStartupAd(
-          imageUrl: '',
-          restaurantId: _selectedRestaurantId,
-          restaurantName: _selectedRestaurantName,
-          imageFile: _selectedImage,
-          isActive: _isActive,
-          priority: priority,
-        );
+      imageUrl: '',
+      restaurantId: _selectedRestaurantId,
+      restaurantName: _selectedRestaurantName,
+      imageFile: _selectedImage,
+      isActive: _isActive,
+      priority: priority,
+    );
   }
 
   @override
@@ -153,6 +154,7 @@ class _AdminAddStartupAdScreenState extends State<AdminAddStartupAdScreen> {
             listener: (context, state) {
               if (state is StartupAdAdded) {
                 context.showSuccessSnackBar(l10n.adAddedSuccessfully);
+                context.read<AdManagementCubit>().resetState();
                 context.pop();
               } else if (state is AdManagementError) {
                 context.showErrorSnackBar(state.message);
@@ -223,7 +225,7 @@ class _AdminAddStartupAdScreenState extends State<AdminAddStartupAdScreen> {
 
                     // Restaurant Selector
                     DropdownButtonFormField<String>(
-                      value: _selectedRestaurantId,
+                      initialValue: _selectedRestaurantId,
                       decoration: InputDecoration(
                         labelText: 'Select Restaurant',
                         border: OutlineInputBorder(
@@ -303,4 +305,3 @@ class _AdminAddStartupAdScreenState extends State<AdminAddStartupAdScreen> {
     );
   }
 }
-

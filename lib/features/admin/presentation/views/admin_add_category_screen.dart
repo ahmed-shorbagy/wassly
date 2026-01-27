@@ -10,10 +10,7 @@ import '../../../restaurants/presentation/cubits/food_category_cubit.dart';
 class AdminAddCategoryScreen extends StatefulWidget {
   final String restaurantId;
 
-  const AdminAddCategoryScreen({
-    super.key,
-    required this.restaurantId,
-  });
+  const AdminAddCategoryScreen({super.key, required this.restaurantId});
 
   @override
   State<AdminAddCategoryScreen> createState() => _AdminAddCategoryScreenState();
@@ -61,8 +58,9 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
       body: BlocConsumer<FoodCategoryCubit, FoodCategoryState>(
         listener: (context, state) {
           if (state is FoodCategoryCreated) {
-            context.pop();
             context.showSuccessSnackBar(l10n.categoryCreatedSuccessfully);
+            context.read<FoodCategoryCubit>().resetState();
+            context.pop();
           } else if (state is FoodCategoryError) {
             context.showErrorSnackBar(state.message);
           }
@@ -126,9 +124,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                       child: Text(
                         _displayOrder.toString(),
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
@@ -194,4 +190,3 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
     );
   }
 }
-

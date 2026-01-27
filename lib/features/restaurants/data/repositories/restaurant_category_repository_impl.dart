@@ -42,12 +42,13 @@ class RestaurantCategoryRepositoryImpl implements RestaurantCategoryRepository {
   @override
   Future<Either<Failure, RestaurantCategoryEntity>> createCategory({
     required String name,
+    String? id,
     File? imageFile,
     bool isMarket = false,
     int displayOrder = 0,
   }) async {
     try {
-      final id = const Uuid().v4();
+      final categoryId = id ?? const Uuid().v4();
       String? imageUrl;
 
       if (imageFile != null) {
@@ -56,7 +57,7 @@ class RestaurantCategoryRepositoryImpl implements RestaurantCategoryRepository {
           file: imageFile,
           bucketName: SupabaseConstants.restaurantImagesBucket,
           folder: 'categories',
-          fileName: '$id.jpg',
+          fileName: '$categoryId.jpg',
         );
 
         result.fold(
@@ -74,7 +75,7 @@ class RestaurantCategoryRepositoryImpl implements RestaurantCategoryRepository {
       }
 
       final category = RestaurantCategoryModel(
-        id: id,
+        id: categoryId,
         name: name,
         imageUrl: imageUrl,
         isActive: true,
@@ -85,7 +86,7 @@ class RestaurantCategoryRepositoryImpl implements RestaurantCategoryRepository {
 
       await _firestore
           .collection('restaurant_categories')
-          .doc(id)
+          .doc(categoryId)
           .set(category.toJson());
 
       return Right(category);

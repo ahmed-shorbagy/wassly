@@ -8,6 +8,7 @@ class MarketProductCategories {
   static const String offers = 'offers';
   static const String fruitsVegetables = 'fruits_vegetables';
   static const String bakery = 'bakery';
+  static const String cakeAndCoffee = 'cake_and_coffee';
   static const String poultryMeatSeafood = 'poultry_meat_seafood';
   static const String freshFood = 'fresh_food';
   static const String readyToEat = 'ready_to_eat';
@@ -36,6 +37,8 @@ class MarketProductCategories {
       offers: l10n.offers,
       fruitsVegetables: l10n.fruitsVegetables,
       bakery: l10n.bakery,
+      cakeAndCoffee:
+          'Cake & Coffee', // Loc key missing, using hardcoded for now or add to arb if possible. Using English as fallback.
       poultryMeatSeafood: l10n.poultryMeatSeafood,
       freshFood: l10n.freshFood,
       readyToEat: l10n.readyToEat,
@@ -82,6 +85,8 @@ class MarketProductCategories {
         return 'assets/images/fruits&veg.jpeg';
       case bakery:
         return 'assets/images/cake&cofee.jpeg'; // Placeholder
+      case cakeAndCoffee:
+        return 'assets/images/cake&cofee.jpeg';
       case poultryMeatSeafood:
         return 'assets/images/poultry_meat_seafood.jpeg';
       case freshFood:

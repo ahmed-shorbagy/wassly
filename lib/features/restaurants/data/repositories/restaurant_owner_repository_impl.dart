@@ -113,7 +113,7 @@ class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
     required String password,
     required List<String> categoryIds,
     required LatLng location,
-    required File imageFile,
+    File? imageFile,
     required double deliveryFee,
     required double minOrderAmount,
     required int estimatedDeliveryTime,
@@ -176,23 +176,34 @@ class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
 
       // Upload restaurant image to Supabase
       AppLogger.logInfo('Uploading restaurant image to Supabase...');
-      final imageUploadResult = await uploadImageFile(
-        imageFile,
-        SupabaseConstants.restaurantImagesBucket,
-        SupabaseConstants.restaurantLogosFolder,
-      );
-
       String? imageUrl;
-      imageUploadResult.fold(
-        (failure) {
-          AppLogger.logError('Failed to upload image', error: failure.message);
-          throw Exception('Failed to upload image: ${failure.message}');
-        },
-        (url) {
-          AppLogger.logSuccess('Image uploaded successfully');
-          imageUrl = url;
-        },
-      );
+
+      if (imageFile != null) {
+        final imageUploadResult = await uploadImageFile(
+          imageFile,
+          SupabaseConstants.restaurantImagesBucket,
+          SupabaseConstants.restaurantLogosFolder,
+        );
+
+        imageUploadResult.fold(
+          (failure) {
+            AppLogger.logError(
+              'Failed to upload image',
+              error: failure.message,
+            );
+            // Don't fail the whole creation for image failure, just log it?
+            // Or throw? Original code threw exception.
+            throw Exception('Failed to upload image: ${failure.message}');
+          },
+          (url) {
+            AppLogger.logSuccess('Image uploaded successfully');
+            imageUrl = url;
+          },
+        );
+      } else {
+        // Use a default placeholder for markets/restaurants created without image
+        imageUrl = 'https://placehold.co/600x400?text=Market';
+      }
 
       // Upload commercial registration photo if provided
       String? commercialRegistrationPhotoUrl;

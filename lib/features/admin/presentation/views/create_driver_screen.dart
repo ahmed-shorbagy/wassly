@@ -121,7 +121,7 @@ class _CreateDriverScreenState extends State<CreateDriverScreen> {
 
   void _submitForm() {
     final l10n = AppLocalizations.of(context)!;
-    
+
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -152,20 +152,20 @@ class _CreateDriverScreenState extends State<CreateDriverScreen> {
     }
 
     context.read<DriverCubit>().createDriver(
-          name: _nameController.text.trim(),
-          email: _emailController.text.trim(),
-          password: _passwordController.text.trim(),
-          phone: _phoneController.text.trim(),
-          address: _addressController.text.trim(),
-          vehicleType: _vehicleTypeController.text.trim(),
-          vehicleModel: _vehicleModelController.text.trim(),
-          vehicleColor: _vehicleColorController.text.trim(),
-          vehiclePlateNumber: _vehiclePlateController.text.trim(),
-          personalImageFile: _personalImage!,
-          driverLicenseFile: _driverLicenseImage!,
-          vehicleLicenseFile: _vehicleLicenseImage!,
-          vehiclePhotoFile: _vehiclePhotoImage!,
-        );
+      name: _nameController.text.trim(),
+      email: _emailController.text.trim(),
+      password: _passwordController.text.trim(),
+      phone: _phoneController.text.trim(),
+      address: _addressController.text.trim(),
+      vehicleType: _vehicleTypeController.text.trim(),
+      vehicleModel: _vehicleModelController.text.trim(),
+      vehicleColor: _vehicleColorController.text.trim(),
+      vehiclePlateNumber: _vehiclePlateController.text.trim(),
+      personalImageFile: _personalImage!,
+      driverLicenseFile: _driverLicenseImage!,
+      vehicleLicenseFile: _vehicleLicenseImage!,
+      vehiclePhotoFile: _vehiclePhotoImage!,
+    );
   }
 
   bool get _hasUnsavedChanges {
@@ -213,9 +213,15 @@ class _CreateDriverScreenState extends State<CreateDriverScreen> {
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 16),
-                      _buildCredentialRow('${l10n.email}:', _emailController.text),
+                      _buildCredentialRow(
+                        '${l10n.email}:',
+                        _emailController.text,
+                      ),
                       const SizedBox(height: 8),
-                      _buildCredentialRow('${l10n.password}:', _passwordController.text),
+                      _buildCredentialRow(
+                        '${l10n.password}:',
+                        _passwordController.text,
+                      ),
                       const SizedBox(height: 16),
                       Text(
                         l10n.noteDriverCanChangePassword,
@@ -231,6 +237,7 @@ class _CreateDriverScreenState extends State<CreateDriverScreen> {
                     ElevatedButton(
                       onPressed: () {
                         Navigator.pop(dialogContext);
+                        context.read<DriverCubit>().resetState();
                         context.go('/admin/drivers');
                       },
                       child: Text(l10n.ok),
@@ -244,7 +251,7 @@ class _CreateDriverScreenState extends State<CreateDriverScreen> {
           },
           builder: (context, state) {
             final l10n = AppLocalizations.of(context)!;
-            
+
             if (state is DriverLoading) {
               return LoadingWidget(message: l10n.creatingDriver);
             }
@@ -257,7 +264,7 @@ class _CreateDriverScreenState extends State<CreateDriverScreen> {
                   // Personal Information Section
                   _buildSectionTitle(l10n.personalInformation),
                   const SizedBox(height: 12),
-                  
+
                   // Personal Image
                   _buildImageUploadSection(
                     l10n.personalPhoto,
@@ -302,7 +309,9 @@ class _CreateDriverScreenState extends State<CreateDriverScreen> {
                     obscureText: _obscurePassword,
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                        _obscurePassword
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                       ),
                       onPressed: () {
                         setState(() {
@@ -379,7 +388,7 @@ class _CreateDriverScreenState extends State<CreateDriverScreen> {
                   // License Information Section
                   _buildSectionTitle(l10n.licenseInformation),
                   const SizedBox(height: 12),
-                  
+
                   // Driver License
                   _buildImageUploadSection(
                     l10n.driverLicense,
@@ -392,7 +401,7 @@ class _CreateDriverScreenState extends State<CreateDriverScreen> {
                   // Vehicle Information Section
                   _buildSectionTitle(l10n.vehicleInformation),
                   const SizedBox(height: 12),
-                  
+
                   // Vehicle License
                   _buildImageUploadSection(
                     l10n.vehicleLicense,
@@ -401,7 +410,7 @@ class _CreateDriverScreenState extends State<CreateDriverScreen> {
                     l10n,
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Vehicle Photo
                   _buildImageUploadSection(
                     l10n.vehiclePhoto,
@@ -567,8 +576,10 @@ class _CreateDriverScreenState extends State<CreateDriverScreen> {
                       child: ElevatedButton.icon(
                         onPressed: () {
                           String type = 'personal';
-                          if (label == l10n.driverLicense) type = 'driverLicense';
-                          if (label == l10n.vehicleLicense) type = 'vehicleLicense';
+                          if (label == l10n.driverLicense)
+                            type = 'driverLicense';
+                          if (label == l10n.vehicleLicense)
+                            type = 'vehicleLicense';
                           if (label == l10n.vehiclePhoto) type = 'vehiclePhoto';
                           _showImageSourceDialog(type);
                         },
@@ -654,7 +665,7 @@ class _CreateDriverScreenState extends State<CreateDriverScreen> {
     String? Function(String?)? validator,
   }) {
     return DropdownButtonFormField<String>(
-      value: controller.text.isEmpty ? null : controller.text,
+      initialValue: controller.text.isEmpty ? null : controller.text,
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon, color: AppColors.primary),
@@ -702,4 +713,3 @@ class _CreateDriverScreenState extends State<CreateDriverScreen> {
     );
   }
 }
-

@@ -112,10 +112,12 @@ class CustomerRouter {
         name: 'search',
         builder: (context, state) {
           final query = state.uri.queryParameters['q'] ?? '';
+          final filterType = state.uri.queryParameters['filterType'];
           final restaurants = state.extra as List?;
           return SearchResultsScreen(
             initialQuery: query,
             initialRestaurants: restaurants?.cast(),
+            filterType: filterType,
           );
         },
       ),

@@ -30,7 +30,7 @@ abstract class RestaurantOwnerRepository {
     required String password,
     required List<String> categoryIds,
     required LatLng location,
-    required File imageFile,
+    File? imageFile,
     required double deliveryFee,
     required double minOrderAmount,
     required int estimatedDeliveryTime,

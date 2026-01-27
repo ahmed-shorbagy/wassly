@@ -73,7 +73,8 @@ class AppRouter {
             path: 'checkout',
             name: 'customer-checkout',
             builder: (context, state) {
-              final restaurantId = state.uri.queryParameters['restaurantId'] ?? '';
+              final restaurantId =
+                  state.uri.queryParameters['restaurantId'] ?? '';
               // Get restaurant from cubit or pass as extra
               final restaurant = state.extra;
               if (restaurant != null) {
@@ -171,9 +172,7 @@ class AppRouter {
                   },
                 );
               }
-              return const Scaffold(
-                body: Center(child: Text('Please login')),
-              );
+              return const Scaffold(body: Center(child: Text('Please login')));
             },
           ),
           GoRoute(
@@ -205,9 +204,7 @@ class AppRouter {
                   },
                 );
               }
-              return const Scaffold(
-                body: Center(child: Text('Please login')),
-              );
+              return const Scaffold(body: Center(child: Text('Please login')));
             },
           ),
           GoRoute(
@@ -281,7 +278,10 @@ class ErrorScreen extends StatelessWidget {
 }
 
 // Helper function to get restaurant
-Future<dynamic> _getRestaurant(BuildContext context, String restaurantId) async {
+Future<dynamic> _getRestaurant(
+  BuildContext context,
+  String restaurantId,
+) async {
   final cubit = context.read<RestaurantCubit>();
   await cubit.getRestaurantById(restaurantId);
   final state = cubit.state;
@@ -292,7 +292,10 @@ Future<dynamic> _getRestaurant(BuildContext context, String restaurantId) async 
 }
 
 // Helper function to get restaurant by owner ID
-Future<dynamic> _getRestaurantByOwnerId(BuildContext context, String ownerId) async {
+Future<dynamic> _getRestaurantByOwnerId(
+  BuildContext context,
+  String ownerId,
+) async {
   final cubit = context.read<RestaurantCubit>();
   await cubit.getRestaurantByOwnerId(ownerId);
   final state = cubit.state;

@@ -11,7 +11,8 @@ part 'market_product_state.dart';
 class MarketProductCubit extends Cubit<MarketProductState> {
   final MarketProductRepository repository;
 
-  MarketProductCubit({required this.repository}) : super(MarketProductInitial());
+  MarketProductCubit({required this.repository})
+    : super(MarketProductInitial());
 
   Future<void> loadAllMarketProducts() async {
     try {
@@ -22,7 +23,10 @@ class MarketProductCubit extends Cubit<MarketProductState> {
 
       result.fold(
         (failure) {
-          AppLogger.logError('Failed to load market products', error: failure.message);
+          AppLogger.logError(
+            'Failed to load market products',
+            error: failure.message,
+          );
           emit(MarketProductError(failure.message));
         },
         (products) {
@@ -55,13 +59,12 @@ class MarketProductCubit extends Cubit<MarketProductState> {
           SupabaseConstants.productImagesBucket,
           'market_products',
         );
-        final result = uploadResult.fold(
-          (failure) {
-            emit(MarketProductError('Failed to upload image: ${failure.message}'));
-            return null as String?;
-          },
-          (url) => url,
-        );
+        final result = uploadResult.fold((failure) {
+          emit(
+            MarketProductError('Failed to upload image: ${failure.message}'),
+          );
+          return null as String?;
+        }, (url) => url);
         if (result == null) return;
         imageUrl = result;
       }
@@ -82,7 +85,10 @@ class MarketProductCubit extends Cubit<MarketProductState> {
 
       result.fold(
         (failure) {
-          AppLogger.logError('Failed to add market product', error: failure.message);
+          AppLogger.logError(
+            'Failed to add market product',
+            error: failure.message,
+          );
           emit(MarketProductError(failure.message));
         },
         (createdProduct) {
@@ -113,7 +119,7 @@ class MarketProductCubit extends Cubit<MarketProductState> {
       // Get existing product to preserve image if not updating
       final existingResult = await repository.getMarketProductById(productId);
       String? imageUrl;
-      
+
       existingResult.fold(
         (failure) {
           emit(MarketProductError('Failed to get existing product'));
@@ -131,13 +137,12 @@ class MarketProductCubit extends Cubit<MarketProductState> {
           SupabaseConstants.productImagesBucket,
           'market_products',
         );
-        final result = uploadResult.fold(
-          (failure) {
-            emit(MarketProductError('Failed to upload image: ${failure.message}'));
-            return null as String?;
-          },
-          (url) => url,
-        );
+        final result = uploadResult.fold((failure) {
+          emit(
+            MarketProductError('Failed to upload image: ${failure.message}'),
+          );
+          return null as String?;
+        }, (url) => url);
         if (result == null) return;
         imageUrl = result;
       }
@@ -158,7 +163,10 @@ class MarketProductCubit extends Cubit<MarketProductState> {
 
       result.fold(
         (failure) {
-          AppLogger.logError('Failed to update market product', error: failure.message);
+          AppLogger.logError(
+            'Failed to update market product',
+            error: failure.message,
+          );
           emit(MarketProductError(failure.message));
         },
         (_) {
@@ -182,7 +190,10 @@ class MarketProductCubit extends Cubit<MarketProductState> {
 
       result.fold(
         (failure) {
-          AppLogger.logError('Failed to delete market product', error: failure.message);
+          AppLogger.logError(
+            'Failed to delete market product',
+            error: failure.message,
+          );
           emit(MarketProductError(failure.message));
         },
         (_) {
@@ -225,5 +236,8 @@ class MarketProductCubit extends Cubit<MarketProductState> {
       emit(MarketProductError('Failed to update availability: $e'));
     }
   }
-}
 
+  void resetState() {
+    emit(MarketProductInitial());
+  }
+}

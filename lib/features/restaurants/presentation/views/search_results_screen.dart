@@ -14,15 +14,18 @@ import '../../../home/presentation/cubits/home_cubit.dart';
 import '../../domain/entities/restaurant_category_entity.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/utils/search_helper.dart';
+import '../../../../core/utils/category_image_helper.dart';
 
 class SearchResultsScreen extends StatefulWidget {
   final String initialQuery;
   final List<RestaurantEntity>? initialRestaurants;
+  final String? filterType;
 
   const SearchResultsScreen({
     super.key,
     this.initialQuery = '',
     this.initialRestaurants,
+    this.filterType,
   });
 
   @override
@@ -397,19 +400,31 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
           });
         },
       },
-      ...dynamicCategories.map(
-        (cat) => {
-          'isAll': false,
-          'imageUrl': cat.imageUrl,
-          'title': cat.name,
-          'action': () {
-            setState(() {
-              _selectedCategoryName = cat.name;
-              _applyFilters();
-            });
-          },
-        },
-      ),
+      ...dynamicCategories
+          .where((cat) {
+            if (widget.filterType == 'market') {
+              return cat.isMarket;
+            } else {
+              // Default to showing only restaurant categories if not explicitly market mode
+              // or show all? The user said "categories added by admin is for resturants only"
+              // referring to the ones currently visible.
+              return !cat.isMarket;
+            }
+          })
+          .map(
+            (cat) => {
+              'isAll': false,
+              'imageUrl': cat.imageUrl,
+              'asset': CategoryImageHelper.getAssetForCategory(cat.name),
+              'title': cat.name,
+              'action': () {
+                setState(() {
+                  _selectedCategoryName = cat.name;
+                  _applyFilters();
+                });
+              },
+            },
+          ),
     ];
 
     return Container(
@@ -457,10 +472,18 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
                             errorWidget: (context, url, error) =>
                                 const Icon(Icons.category),
                           )
-                        : Image.asset(
-                            item['asset'] as String,
-                            fit: BoxFit.cover,
-                          ),
+                        : (item['asset'] != null
+                              ? Image.asset(
+                                  item['asset'] as String,
+                                  fit: BoxFit.cover,
+                                )
+                              : const Padding(
+                                  padding: EdgeInsets.all(12),
+                                  child: Icon(
+                                    Icons.category,
+                                    color: AppColors.primary,
+                                  ),
+                                )),
                   ),
                 ),
                 SizedBox(height: 8.h),

@@ -25,8 +25,6 @@ class _AdminAddEditRestaurantCategoryScreenState
   final _nameController = TextEditingController();
   final _displayOrderController = TextEditingController(text: '0');
   File? _selectedImage;
-  bool _isMarket = false;
-
   bool get _isEditing => widget.category != null;
 
   @override
@@ -35,7 +33,6 @@ class _AdminAddEditRestaurantCategoryScreenState
     if (_isEditing) {
       _nameController.text = widget.category!.name;
       _displayOrderController.text = widget.category!.displayOrder.toString();
-      _isMarket = widget.category!.isMarket;
     }
   }
 
@@ -72,7 +69,7 @@ class _AdminAddEditRestaurantCategoryScreenState
         id: widget.category!.id,
         name: name,
         imageFile: _selectedImage,
-        isMarket: _isMarket,
+        isMarket: false,
         displayOrder: displayOrder,
       );
     } else {
@@ -83,7 +80,7 @@ class _AdminAddEditRestaurantCategoryScreenState
       context.read<AdminRestaurantCategoryCubit>().createCategory(
         name: name,
         imageFile: _selectedImage,
-        isMarket: _isMarket,
+        isMarket: false,
         displayOrder: displayOrder,
       );
     }
@@ -200,18 +197,7 @@ class _AdminAddEditRestaurantCategoryScreenState
                         },
                       ),
                       const SizedBox(height: 16),
-                      SwitchListTile(
-                        title: const Text('Is Market Category?'),
-                        subtitle: const Text(
-                          'Enable this if this category represents a market (e.g. Pharmacy, Supermarket)',
-                        ),
-                        value: _isMarket,
-                        onChanged: (value) {
-                          setState(() {
-                            _isMarket = value;
-                          });
-                        },
-                      ),
+
                       const SizedBox(height: 32),
                       ElevatedButton(
                         onPressed: _submit,

@@ -62,7 +62,7 @@ android {
         create("admin") {
             dimension = "app"
             applicationId = "com.toorder.admin"
-            resValue("string", "app_name", "To Order Admin")
+            resValue("string", "app_name", "Admin")
             manifestPlaceholders["appIcon"] = "@mipmap/ic_launcher_admin"
         }
     }

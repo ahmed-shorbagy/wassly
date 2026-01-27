@@ -147,6 +147,7 @@ class _AdminAddBannerAdScreenState extends State<AdminAddBannerAdScreen> {
           listener: (context, state) {
             if (state is BannerAdAdded) {
               context.showSuccessSnackBar(l10n.adAddedSuccessfully);
+              context.read<AdManagementCubit>().resetState();
               context.pop();
             } else if (state is AdManagementError) {
               context.showErrorSnackBar(state.message);

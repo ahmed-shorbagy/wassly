@@ -23,7 +23,7 @@ class AdminCubit extends Cubit<AdminState> {
     required String password,
     required List<String> categoryIds,
     required LatLng location,
-    required File imageFile,
+    File? imageFile,
     required double deliveryFee,
     required double minOrderAmount,
     required int estimatedDeliveryTime,
@@ -390,5 +390,9 @@ class AdminCubit extends Cubit<AdminState> {
       AppLogger.logError('Error deleting restaurant', error: e);
       emit(const AdminError('Failed to delete restaurant'));
     }
+  }
+
+  void resetState() {
+    emit(AdminInitial());
   }
 }

@@ -44,7 +44,6 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
 
   List<MarketProductEntity> _allProducts = [];
   List<MarketProductEntity> _filteredProducts = [];
-  List<String> _availableCategories = [];
 
   @override
   void initState() {
@@ -110,8 +109,8 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    // Use dynamic categories if available, otherwise empty (or fallback if desired)
-    final categories = _availableCategories;
+    // Use static hardcoded categories as per new requirement
+    final categories = MarketProductCategories.getCategories(l10n);
 
     // If typing in search, treat as "filtering products" regardless of category view?
     // Let's stick to the requested design: Category Grid First.
@@ -124,23 +123,8 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
       body: BlocListener<MarketProductCustomerCubit, MarketProductCustomerState>(
         listener: (context, state) {
           if (state is MarketProductCustomerLoaded) {
-            final uniqueCategories = state.products
-                .map((p) => p.category)
-                .where((c) => c != null && c.isNotEmpty)
-                .cast<String>()
-                .toSet()
-                .toList();
-
-            // Sort: 'offers' first, then alphabetical
-            uniqueCategories.sort((a, b) {
-              if (a == 'offers') return -1;
-              if (b == 'offers') return 1;
-              return a.compareTo(b);
-            });
-
             setState(() {
               _allProducts = state.products;
-              _availableCategories = uniqueCategories;
               _applyFilters();
             });
           }
@@ -428,186 +412,7 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
               // Most Sold / Top Products Section (Moved to top as requested)
               _buildMostSoldSection(context, l10n),
 
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: Text(
-                    l10n.shopByCategory,
-
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Row 1
-                      Row(
-                        children: List.generate(
-                          (categories.length / 3).ceil(),
-                          (index) {
-                            final category = categories[index];
-                            return _buildMarketCategoryCard(
-                              context,
-                              category,
-                              l10n,
-                            );
-                          },
-                        ),
-                      ),
-                      SizedBox(height: 10.h),
-                      // Row 2
-                      Row(
-                        children: List.generate(
-                          (categories.length / 3).ceil(),
-                          (index) {
-                            final actualIndex =
-                                index + (categories.length / 3).ceil();
-                            if (actualIndex >= categories.length)
-                              return const SizedBox.shrink();
-                            final category = categories[actualIndex];
-                            return _buildMarketCategoryCard(
-                              context,
-                              category,
-                              l10n,
-                            );
-                          },
-                        ),
-                      ),
-                      SizedBox(height: 10.h),
-                      // Row 3
-                      Row(
-                        children: List.generate(
-                          categories.length -
-                              2 * (categories.length / 3).ceil(),
-                          (index) {
-                            final actualIndex =
-                                index + 2 * (categories.length / 3).ceil();
-                            if (actualIndex >= categories.length)
-                              return const SizedBox.shrink();
-                            final category = categories[actualIndex];
-                            return _buildMarketCategoryCard(
-                              context,
-                              category,
-                              l10n,
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
               // Optional: Banner or other sections below
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: Text(
-                    'كل المنتجات', // All Products
-                    style: const TextStyle(
-                      fontSize: 20,
-
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-
-              // Reuse the builder logic but for _allProducts (or a subset)
-              // Since logic below uses _filteredProducts which is initialized to _allProducts
-              // we can just reuse the same BlocBuilder logic or duplicate it here.
-              // To avoid code duplication and keep it clean, let's render the grid here too.
-              // But wait, the grid below uses BlocConsumer.
-              // Let's copy the BlocBuilder logic here to show the grid.
-              BlocBuilder<
-                MarketProductCustomerCubit,
-                MarketProductCustomerState
-              >(
-                builder: (context, state) {
-                  if (state is MarketProductCustomerLoaded) {
-                    final productsToShow =
-                        _allProducts; // Show everything on dashboard
-
-                    if (productsToShow.isEmpty)
-                      return const SliverToBoxAdapter(child: SizedBox.shrink());
-
-                    return SliverPadding(
-                      padding: const EdgeInsets.all(16),
-                      sliver: SliverGrid(
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              childAspectRatio: 0.68,
-                              crossAxisSpacing: 16,
-                              mainAxisSpacing: 16,
-                            ),
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          final product = productsToShow[index];
-                          return MarketProductCard(
-                            productId: product.id,
-                            productName: product.name,
-                            description: product.description,
-                            price: product.price,
-                            imageUrl: product.imageUrl,
-                            isAvailable: product.isAvailable,
-                            onAddToCart: () async {
-                              final productEntity = ProductEntity(
-                                id: product.id,
-                                name: product.name,
-                                description: product.description,
-                                price: product.price,
-                                imageUrl: product.imageUrl,
-                                isAvailable: product.isAvailable,
-                                restaurantId: product.restaurantId ?? 'market',
-                                createdAt: product.createdAt,
-                              );
-                              return await context.read<CartCubit>().addItem(
-                                productEntity,
-                                context: context,
-                              );
-                            },
-                            // No special promo label for regular list
-                          );
-                        }, childCount: productsToShow.length),
-                      ),
-                    );
-                  }
-                  // Loading state is handled by the main listener/overlay or effectively hidden here
-                  // until loaded to avoid double spinners if one plays top.
-                  // But usually good to show spinner if empty.
-                  if (state is MarketProductCustomerLoading &&
-                      _allProducts.isEmpty) {
-                    return const SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.all(32),
-                        child: Center(child: CircularProgressIndicator()),
-                      ),
-                    );
-                  }
-                  return const SliverToBoxAdapter(child: SizedBox.shrink());
-                },
-              ),
-
-              SliverToBoxAdapter(
-                child: SizedBox(height: 24.h),
-              ), // Bottom padding
             ],
 
             // 2. If Category Selected or Search -> Show Products Grid (Existing Design)
@@ -704,81 +509,6 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
           ],
         ),
       ), // Close BlocListener child
-    );
-  }
-
-  Widget _buildMarketCategoryCard(
-    BuildContext context,
-    String category,
-    AppLocalizations l10n,
-  ) {
-    final imagePath = MarketProductCategories.getCategoryImageUrl(
-      category,
-      l10n,
-    );
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedCategory = category;
-          _applyFilters();
-        });
-      },
-      child: Container(
-        width: 90.w,
-        margin: EdgeInsetsDirectional.only(end: 12.w),
-        child: Column(
-          children: [
-            Container(
-              height: 72.h,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF7F7F7),
-                borderRadius: BorderRadius.circular(20.r),
-                border: Border.all(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  width: 1,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.02),
-                    blurRadius: 6,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: Padding(
-                padding: EdgeInsets.all(8.r),
-                child: imagePath != null
-                    ? Image.asset(imagePath, fit: BoxFit.contain)
-                    : Icon(
-                        Icons.category,
-                        color: AppColors.primary.withOpacity(0.5),
-                        size: 30.w,
-                      ),
-              ),
-            ),
-            SizedBox(height: 6.h),
-            SizedBox(
-              height: 30.h,
-              child: Center(
-                child: Text(
-                  MarketProductCategories.getCategoryName(category, l10n),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: ResponsiveHelper.fontSize(9.5),
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                    height: 1.1,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 

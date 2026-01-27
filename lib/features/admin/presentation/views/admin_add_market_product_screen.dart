@@ -152,6 +152,7 @@ class _AdminAddMarketProductScreenState
           listener: (context, state) {
             if (state is MarketProductAdded) {
               context.showSuccessSnackBar(l10n.productAddedSuccessfully);
+              context.read<MarketProductCubit>().resetState();
               context.pop();
             } else if (state is MarketProductError) {
               context.showErrorSnackBar(state.message);

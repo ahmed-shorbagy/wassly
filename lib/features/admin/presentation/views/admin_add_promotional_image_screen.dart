@@ -150,6 +150,7 @@ class _AdminAddPromotionalImageScreenState
           listener: (context, state) {
             if (state is PromotionalImageAdded) {
               context.showSuccessSnackBar(l10n.adAddedSuccessfully);
+              context.read<AdManagementCubit>().resetState();
               context.pop();
             } else if (state is AdManagementError) {
               context.showErrorSnackBar(state.message);
