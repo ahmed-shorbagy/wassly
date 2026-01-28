@@ -559,5 +559,22 @@
   "startNewOrder": "بدء طلب جديد",
   "clearCartConfirmation": "لديك عناصر من مطعم آخر. هل تريد بدء طلب جديد ومسح السلة؟",
   "newOrder": "طلب جديد",
-  "cancelAction": "إلغاء"
+  "cancelAction": "إلغاء",
+  "reportIssue": "الإبلاغ عن مشكلة",
+  "subject": "الموضوع",
+  "submit": "إرسال",
+  "supportChat": "محادثة الدعم",
+  "typeMessage": "اكتب رسالة...",
+  "fieldRequired": "مطلوب",
+  "noMessages": "لا توجد رسائل بعد",
+  "retry": "إعادة المحاولة",
+  "management": "الإدارة",
+  "catalog": "الكتالوج",
+  "marketing": "التسويق",
+  "system": "النظام",
+  "restaurantCategories": "فئات المطاعم",
+  "articles": "المقالات",
+  "proTip": "نصيحة",
+  "proTipDescription": "استخدم القائمة (أعلى اليمين) للوصول إلى جميع أدوات الإدارة.",
+  "selectOptionFromDrawer": "اختر خياراً من القائمة الجانبية"
 }

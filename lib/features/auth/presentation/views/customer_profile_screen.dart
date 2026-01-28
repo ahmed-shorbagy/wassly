@@ -77,6 +77,13 @@ class CustomerProfileScreen extends StatelessWidget {
                       title: l10n.changePassword,
                       onTap: () => _showChangePasswordDialog(context, l10n),
                     ),
+                    const Divider(height: 1),
+                    _buildActionTile(
+                      context,
+                      icon: Icons.support_agent,
+                      title: l10n.supportChat,
+                      onTap: () => context.pushNamed('customer-support'),
+                    ),
                   ]),
                   ResponsiveHelper.spacing(height: 24),
 

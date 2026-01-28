@@ -17,6 +17,9 @@ import '../../features/partner/presentation/views/product_management_screen.dart
 import '../../features/admin/presentation/views/admin_add_product_screen.dart';
 import '../../features/admin/presentation/views/admin_edit_product_screen.dart';
 import '../../features/auth/presentation/views/customer_profile_screen.dart';
+import '../../features/support/presentation/views/customer_support_tickets_screen.dart';
+import '../../features/support/presentation/views/ticket_chat_screen.dart';
+import '../../features/support/presentation/views/create_ticket_screen.dart';
 import '../../features/partner/presentation/views/restaurant_orders_screen.dart';
 import '../../features/partner/presentation/views/restaurant_settings_screen.dart';
 import '../../features/drivers/presentation/views/driver_orders_screen.dart';
@@ -116,6 +119,29 @@ class AppRouter {
             path: 'profile',
             name: 'customer-profile',
             builder: (context, state) => const CustomerProfileScreen(),
+          ),
+          GoRoute(
+            path: 'support',
+            name: 'customer-support',
+            builder: (context, state) => const CustomerSupportTicketsScreen(),
+            routes: [
+              GoRoute(
+                path: 'chat/:ticketId',
+                name: 'customer-ticket-chat',
+                builder: (context, state) {
+                  final extras = state.extra as Map<String, dynamic>;
+                  return TicketChatScreen(extras: extras);
+                },
+              ),
+              GoRoute(
+                path: 'create',
+                name: 'customer-create-ticket',
+                builder: (context, state) {
+                  final extras = state.extra as Map<String, dynamic>;
+                  return CreateTicketScreen(extras: extras);
+                },
+              ),
+            ],
           ),
         ],
       ),

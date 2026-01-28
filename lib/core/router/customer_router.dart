@@ -8,6 +8,7 @@ import '../../features/restaurants/presentation/views/favorites_screen.dart';
 import '../../features/restaurants/presentation/views/restaurant_detail_screen.dart';
 import '../../features/restaurants/presentation/views/search_results_screen.dart';
 import '../../features/orders/presentation/views/cart_screen.dart';
+
 import '../../features/orders/presentation/views/checkout_screen.dart';
 import '../../features/orders/presentation/views/order_list_screen.dart';
 import '../../features/orders/presentation/views/order_detail_screen.dart';
@@ -16,6 +17,9 @@ import '../../features/auth/presentation/views/customer_profile_screen.dart';
 import '../../features/market_products/presentation/views/market_products_screen.dart';
 import '../../features/navigation/presentation/views/customer_navigation_shell.dart';
 import '../../features/delivery_address/presentation/views/address_book_screen.dart';
+import '../../features/support/presentation/views/create_ticket_screen.dart';
+import '../../features/support/presentation/views/customer_support_tickets_screen.dart';
+import '../../features/support/presentation/views/ticket_chat_screen.dart';
 
 class CustomerRouter {
   static final GlobalKey<NavigatorState> _rootNavigatorKey =
@@ -26,8 +30,6 @@ class CustomerRouter {
       GlobalKey<NavigatorState>(debugLabel: 'ordersBranch');
   static final GlobalKey<NavigatorState> _profileNavigatorKey =
       GlobalKey<NavigatorState>(debugLabel: 'profileBranch');
-  static final GlobalKey<NavigatorState> _payNavigatorKey =
-      GlobalKey<NavigatorState>(debugLabel: 'payBranch');
 
   static final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
@@ -95,16 +97,6 @@ class CustomerRouter {
               ),
             ],
           ),
-          StatefulShellBranch(
-            navigatorKey: _payNavigatorKey,
-            routes: [
-              GoRoute(
-                path: '/cart',
-                name: 'cart',
-                builder: (context, state) => const CartScreen(),
-              ),
-            ],
-          ),
         ],
       ),
       GoRoute(
@@ -133,6 +125,11 @@ class CustomerRouter {
         path: '/favorites',
         name: 'favorites',
         builder: (context, state) => const FavoritesScreen(),
+      ),
+      GoRoute(
+        path: '/cart',
+        name: 'cart',
+        builder: (context, state) => const CartScreen(),
       ),
       GoRoute(
         path: '/checkout',
@@ -181,6 +178,29 @@ class CustomerRouter {
         path: '/address-book',
         name: 'address-book',
         builder: (context, state) => const AddressBookScreen(),
+      ),
+      GoRoute(
+        path: '/support',
+        name: 'customer-support',
+        builder: (context, state) => const CustomerSupportTicketsScreen(),
+        routes: [
+          GoRoute(
+            path: 'chat/:ticketId',
+            name: 'customer-ticket-chat',
+            builder: (context, state) {
+              final extras = state.extra as Map<String, dynamic>;
+              return TicketChatScreen(extras: extras);
+            },
+          ),
+          GoRoute(
+            path: 'create',
+            name: 'customer-create-ticket',
+            builder: (context, state) {
+              final extras = state.extra as Map<String, dynamic>;
+              return CreateTicketScreen(extras: extras);
+            },
+          ),
+        ],
       ),
     ],
     errorBuilder: (context, state) => const ErrorScreen(),

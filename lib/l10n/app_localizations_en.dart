@@ -1614,4 +1614,56 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cancelAction => 'Cancel';
+
+  @override
+  String get reportIssue => 'Report Issue';
+
+  @override
+  String get subject => 'Subject';
+
+  @override
+  String get submit => 'Submit';
+
+  @override
+  String get supportChat => 'Support Chat';
+
+  @override
+  String get typeMessage => 'Type a message...';
+
+  @override
+  String get fieldRequired => 'Required';
+
+  @override
+  String get noMessages => 'No messages yet';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get management => 'Management';
+
+  @override
+  String get catalog => 'Catalog';
+
+  @override
+  String get marketing => 'Marketing';
+
+  @override
+  String get system => 'System';
+
+  @override
+  String get restaurantCategories => 'Restaurant Categories';
+
+  @override
+  String get articles => 'Articles';
+
+  @override
+  String get proTip => 'Pro Tip';
+
+  @override
+  String get proTipDescription =>
+      'Use the menu (top-left) to access all management tools.';
+
+  @override
+  String get selectOptionFromDrawer => 'Select an option from the drawer';
 }

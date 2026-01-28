@@ -67,23 +67,37 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
 
   void _filterRestaurants() {
     final query = _searchController.text.toLowerCase().trim();
+    final homeState = context.read<HomeCubit>().state;
+    final categories = homeState is HomeLoaded ? homeState.categories : [];
+
+    // Identify hidden categories (Markets)
+    final marketCategoryIds = categories
+        .where((c) => c.isMarket)
+        .map((c) => c.id)
+        .toSet();
+
+    // Base filter: Exclude markets
+    final baseRestaurants = _allRestaurants.where((restaurant) {
+      // If restaurant has ANY category that is a market category, exclude it
+      final isMarket = restaurant.categoryIds.any(
+        (id) => marketCategoryIds.contains(id),
+      );
+      return !isMarket;
+    }).toList();
+
     if (query.isEmpty) {
       setState(() {
-        _filteredRestaurants = List.from(_allRestaurants);
+        _filteredRestaurants = baseRestaurants;
       });
       return;
     }
 
     setState(() {
       _filteredRestaurants = SearchHelper.filterList(
-        items: _allRestaurants,
+        items: baseRestaurants, // Search only within non-market restaurants
         query: query,
         getSearchStrings: (restaurant) {
           // Resolve category names from IDs to allow searching by category name
-          final homeState = context.read<HomeCubit>().state;
-          final categories = homeState is HomeLoaded
-              ? homeState.categories
-              : [];
           final categoryNames = restaurant.categoryIds.map((cid) {
             final category = categories.where((c) => c.id == cid).firstOrNull;
             return category?.name ?? cid;
@@ -1465,6 +1479,18 @@ class _CombinedAppBar extends StatelessWidget {
                             ),
                           ),
                           const Text('✨', style: TextStyle(fontSize: 16)),
+                          SizedBox(width: 8.w),
+                          InkWell(
+                            onTap: () => context.pushNamed('cart'),
+                            child: Padding(
+                              padding: EdgeInsets.all(4.r),
+                              child: Icon(
+                                Icons.shopping_cart_outlined,
+                                color: Colors.white,
+                                size: ResponsiveHelper.iconSize(24),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),

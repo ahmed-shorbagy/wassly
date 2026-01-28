@@ -40,6 +40,8 @@ import '../../features/home/domain/entities/promotional_image_entity.dart';
 import '../../features/admin/presentation/views/admin_article_list_screen.dart';
 import '../../features/admin/presentation/views/admin_add_article_screen.dart';
 import '../../features/admin/presentation/views/admin_edit_article_screen.dart';
+import '../../features/admin/presentation/views/admin_support_tickets_screen.dart';
+import '../../features/support/presentation/views/ticket_chat_screen.dart';
 
 class AdminRouter {
   static final GoRouter router = GoRouter(
@@ -351,6 +353,22 @@ class AdminRouter {
                     },
                   ),
                 ],
+              ),
+            ],
+          ),
+          // Support Management
+          GoRoute(
+            path: 'support',
+            name: 'admin-support',
+            builder: (context, state) => const AdminSupportTicketsScreen(),
+            routes: [
+              GoRoute(
+                path: 'chat/:ticketId',
+                name: 'admin-ticket-chat',
+                builder: (context, state) {
+                  final extras = state.extra as Map<String, dynamic>;
+                  return TicketChatScreen(extras: extras);
+                },
               ),
             ],
           ),

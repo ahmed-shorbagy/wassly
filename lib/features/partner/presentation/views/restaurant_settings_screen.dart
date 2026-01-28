@@ -76,9 +76,7 @@ class _RestaurantSettingsScreenState extends State<RestaurantSettingsScreen> {
           }
 
           if (_restaurant == null) {
-            return Center(
-              child: Text(l10n.restaurantNotFound),
-            );
+            return Center(child: Text(l10n.restaurantNotFound));
           }
 
           return SingleChildScrollView(
@@ -135,7 +133,10 @@ class _RestaurantSettingsScreenState extends State<RestaurantSettingsScreen> {
                   child: Column(
                     children: [
                       ListTile(
-                        leading: const Icon(Icons.edit, color: AppColors.primary),
+                        leading: const Icon(
+                          Icons.edit,
+                          color: AppColors.primary,
+                        ),
                         title: Text(l10n.editRestaurant),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () {
@@ -145,8 +146,10 @@ class _RestaurantSettingsScreenState extends State<RestaurantSettingsScreen> {
                       ),
                       const Divider(height: 1),
                       ListTile(
-                        leading: const Icon(Icons.restaurant_menu,
-                            color: AppColors.primary),
+                        leading: const Icon(
+                          Icons.restaurant_menu,
+                          color: AppColors.primary,
+                        ),
                         title: Text(l10n.manageProducts),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () {
@@ -155,8 +158,10 @@ class _RestaurantSettingsScreenState extends State<RestaurantSettingsScreen> {
                       ),
                       const Divider(height: 1),
                       ListTile(
-                        leading: const Icon(Icons.receipt_long,
-                            color: AppColors.primary),
+                        leading: const Icon(
+                          Icons.receipt_long,
+                          color: AppColors.primary,
+                        ),
                         title: Text(l10n.restaurantOrders),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () {
@@ -203,8 +208,8 @@ class _RestaurantSettingsScreenState extends State<RestaurantSettingsScreen> {
                         subtitle: Text(
                           _restaurant!.isDiscountActive
                               ? _restaurant!.discountPercentage != null
-                                  ? '${_restaurant!.discountPercentage!.toStringAsFixed(0)}% ${l10n.off}'
-                                  : l10n.activeDiscount
+                                    ? '${_restaurant!.discountPercentage!.toStringAsFixed(0)}% ${l10n.off}'
+                                    : l10n.activeDiscount
                               : l10n.disableDiscount,
                         ),
                         trailing: const Icon(Icons.chevron_right),
@@ -214,6 +219,22 @@ class _RestaurantSettingsScreenState extends State<RestaurantSettingsScreen> {
                         },
                       ),
                     ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Support Helper
+                Card(
+                  child: ListTile(
+                    leading: const Icon(
+                      Icons.support_agent,
+                      color: AppColors.primary,
+                    ),
+                    title: Text(l10n.supportChat),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      context.pushNamed('restaurant-support');
+                    },
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -256,10 +277,7 @@ class _RestaurantSettingsScreenState extends State<RestaurantSettingsScreen> {
             children: [
               Text(
                 label,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textSecondary,
-                ),
+                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
               ),
               const SizedBox(height: 4),
               Text(
@@ -373,7 +391,9 @@ class _RestaurantSettingsScreenState extends State<RestaurantSettingsScreen> {
                     onTap: () async {
                       final date = await showDatePicker(
                         context: context,
-                        initialDate: endDate ?? DateTime.now().add(const Duration(days: 30)),
+                        initialDate:
+                            endDate ??
+                            DateTime.now().add(const Duration(days: 30)),
                         firstDate: DateTime.now(),
                         lastDate: DateTime.now().add(const Duration(days: 365)),
                       );
@@ -405,11 +425,13 @@ class _RestaurantSettingsScreenState extends State<RestaurantSettingsScreen> {
                 final model = RestaurantModel.fromEntity(restaurant);
                 final updatedModel = model.copyWith(
                   hasDiscount: hasDiscount,
-                  discountPercentage: hasDiscount &&
+                  discountPercentage:
+                      hasDiscount &&
                           discountPercentageController.text.isNotEmpty
                       ? double.tryParse(discountPercentageController.text)
                       : null,
-                  discountDescription: hasDiscount &&
+                  discountDescription:
+                      hasDiscount &&
                           discountDescriptionController.text.isNotEmpty
                       ? discountDescriptionController.text.trim()
                       : null,
@@ -418,10 +440,16 @@ class _RestaurantSettingsScreenState extends State<RestaurantSettingsScreen> {
                 );
                 final updatedRestaurant = updatedModel;
 
-                context.read<RestaurantCubit>().updateRestaurant(updatedRestaurant);
+                context.read<RestaurantCubit>().updateRestaurant(
+                  updatedRestaurant,
+                );
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('${l10n.discount} ${l10n.updatedSuccessfully}')),
+                  SnackBar(
+                    content: Text(
+                      '${l10n.discount} ${l10n.updatedSuccessfully}',
+                    ),
+                  ),
                 );
               },
               child: Text(l10n.save),
@@ -436,7 +464,9 @@ class _RestaurantSettingsScreenState extends State<RestaurantSettingsScreen> {
     final restaurant = _restaurant!;
     final l10n = AppLocalizations.of(context)!;
     final nameController = TextEditingController(text: restaurant.name);
-    final descriptionController = TextEditingController(text: restaurant.description);
+    final descriptionController = TextEditingController(
+      text: restaurant.description,
+    );
     final phoneController = TextEditingController(text: restaurant.phone);
     final emailController = TextEditingController(text: restaurant.email ?? '');
     final addressController = TextEditingController(text: restaurant.address);
@@ -610,7 +640,9 @@ class _RestaurantSettingsScreenState extends State<RestaurantSettingsScreen> {
               );
               final updatedRestaurant = updatedModel;
 
-              context.read<RestaurantCubit>().updateRestaurant(updatedRestaurant);
+              context.read<RestaurantCubit>().updateRestaurant(
+                updatedRestaurant,
+              );
               Navigator.of(context).pop();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(l10n.restaurantUpdatedSuccessfully)),
@@ -623,4 +655,3 @@ class _RestaurantSettingsScreenState extends State<RestaurantSettingsScreen> {
     );
   }
 }
-

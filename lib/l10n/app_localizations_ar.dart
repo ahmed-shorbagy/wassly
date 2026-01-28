@@ -1604,4 +1604,56 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get cancelAction => 'إلغاء';
+
+  @override
+  String get reportIssue => 'الإبلاغ عن مشكلة';
+
+  @override
+  String get subject => 'الموضوع';
+
+  @override
+  String get submit => 'إرسال';
+
+  @override
+  String get supportChat => 'محادثة الدعم';
+
+  @override
+  String get typeMessage => 'اكتب رسالة...';
+
+  @override
+  String get fieldRequired => 'مطلوب';
+
+  @override
+  String get noMessages => 'لا توجد رسائل بعد';
+
+  @override
+  String get retry => 'إعادة المحاولة';
+
+  @override
+  String get management => 'الإدارة';
+
+  @override
+  String get catalog => 'الكتالوج';
+
+  @override
+  String get marketing => 'التسويق';
+
+  @override
+  String get system => 'النظام';
+
+  @override
+  String get restaurantCategories => 'فئات المطاعم';
+
+  @override
+  String get articles => 'المقالات';
+
+  @override
+  String get proTip => 'نصيحة';
+
+  @override
+  String get proTipDescription =>
+      'استخدم القائمة (أعلى اليمين) للوصول إلى جميع أدوات الإدارة.';
+
+  @override
+  String get selectOptionFromDrawer => 'اختر خياراً من القائمة الجانبية';
 }

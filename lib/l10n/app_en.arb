@@ -577,5 +577,22 @@
   "startNewOrder": "Start New Order",
   "clearCartConfirmation": "You have items from another restaurant. Start a new order to clear the cart?",
   "newOrder": "New Order",
-  "cancelAction": "Cancel"
+  "cancelAction": "Cancel",
+  "reportIssue": "Report Issue",
+  "subject": "Subject",
+  "submit": "Submit",
+  "supportChat": "Support Chat",
+  "typeMessage": "Type a message...",
+  "fieldRequired": "Required",
+  "noMessages": "No messages yet",
+  "retry": "Retry",
+  "management": "Management",
+  "catalog": "Catalog",
+  "marketing": "Marketing",
+  "system": "System",
+  "restaurantCategories": "Restaurant Categories",
+  "articles": "Articles",
+  "proTip": "Pro Tip",
+  "proTipDescription": "Use the menu (top-left) to access all management tools.",
+  "selectOptionFromDrawer": "Select an option from the drawer"
 }

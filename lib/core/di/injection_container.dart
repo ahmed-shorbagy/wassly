@@ -60,6 +60,9 @@ import '../../features/delivery_address/presentation/cubits/delivery_address_cub
 import '../../features/articles/domain/repositories/article_repository.dart';
 import '../../features/articles/data/repositories/article_repository_impl.dart';
 import '../../features/articles/presentation/cubits/article_cubit.dart';
+import '../../features/support/domain/repositories/support_repository.dart';
+import '../../features/support/data/repositories/support_repository_impl.dart';
+import '../../features/support/presentation/cubits/support_cubit.dart';
 
 import '../network/network_info.dart';
 import '../network/supabase_service.dart';
@@ -91,6 +94,7 @@ class InjectionContainer {
   late final DriverRepository _driverRepository;
   late final DeliveryAddressRepository _deliveryAddressRepository;
   late final ArticleRepository _articleRepository;
+  late final SupportRepository _supportRepository;
   late final NotificationService _notificationService;
   late final NotificationSenderService _notificationSenderService;
 
@@ -166,6 +170,8 @@ class InjectionContainer {
     );
 
     _articleRepository = ArticleRepositoryImpl(firestore: _firestore);
+
+    _supportRepository = SupportRepositoryImpl(firestore: _firestore);
   }
 
   // Getters for accessing services from other parts of the app
@@ -277,6 +283,9 @@ class InjectionContainer {
       ),
       BlocProvider<ArticleCubit>(
         create: (_) => ArticleCubit(repository: _articleRepository),
+      ),
+      BlocProvider<SupportCubit>(
+        create: (_) => SupportCubit(_supportRepository),
       ),
     ];
   }

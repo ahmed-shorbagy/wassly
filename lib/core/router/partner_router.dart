@@ -14,6 +14,10 @@ import '../../features/partner/presentation/views/edit_category_screen.dart';
 import '../../features/orders/presentation/views/order_detail_screen.dart';
 import '../../features/drivers/presentation/views/driver_orders_screen.dart';
 import '../../features/auth/presentation/views/customer_profile_screen.dart';
+import '../../features/support/presentation/views/create_ticket_screen.dart';
+import '../../features/support/presentation/views/ticket_chat_screen.dart';
+import '../../features/partner/presentation/views/restaurant_support_tickets_screen.dart';
+import '../../features/support/domain/entities/ticket_message_entity.dart';
 
 class PartnerRouter {
   static final GoRouter router = GoRouter(
@@ -77,7 +81,9 @@ class PartnerRouter {
               // Get restaurantId from extra or path parameters
               String? restaurantId;
               if (state.extra is Map<String, dynamic>) {
-                restaurantId = (state.extra as Map<String, dynamic>)['restaurantId'] as String?;
+                restaurantId =
+                    (state.extra as Map<String, dynamic>)['restaurantId']
+                        as String?;
               }
               // If not in extra, try to get from parent route's extra
               if (restaurantId == null) {
@@ -94,7 +100,9 @@ class PartnerRouter {
                 builder: (context, state) {
                   String? restaurantId;
                   if (state.extra is Map<String, dynamic>) {
-                    restaurantId = (state.extra as Map<String, dynamic>)['restaurantId'] as String?;
+                    restaurantId =
+                        (state.extra as Map<String, dynamic>)['restaurantId']
+                            as String?;
                   }
                   if (restaurantId == null) {
                     return const ErrorScreen();
@@ -108,7 +116,9 @@ class PartnerRouter {
                 builder: (context, state) {
                   String? restaurantId;
                   if (state.extra is Map<String, dynamic>) {
-                    restaurantId = (state.extra as Map<String, dynamic>)['restaurantId'] as String?;
+                    restaurantId =
+                        (state.extra as Map<String, dynamic>)['restaurantId']
+                            as String?;
                   }
                   final categoryId = state.pathParameters['categoryId'] ?? '';
                   if (restaurantId == null || categoryId.isEmpty) {
@@ -121,6 +131,32 @@ class PartnerRouter {
                 },
               ),
             ],
+          ),
+          GoRoute(
+            path: 'support',
+            name: 'restaurant-support',
+            builder: (context, state) => const RestaurantSupportTicketsScreen(),
+            routes: [
+              GoRoute(
+                path: 'chat/:ticketId',
+                name: 'restaurant-ticket-chat',
+                builder: (context, state) {
+                  final extras = state.extra as Map<String, dynamic>;
+                  return TicketChatScreen(extras: extras);
+                },
+              ),
+            ],
+          ),
+          GoRoute(
+            path: 'create-ticket',
+            name: 'create-ticket',
+            builder: (context, state) {
+              final extras = state.extra as Map<String, dynamic>;
+              // Inject restaurant sender role
+              final newExtras = Map<String, dynamic>.from(extras);
+              newExtras['senderRole'] = SenderRole.restaurant;
+              return CreateTicketScreen(extras: newExtras);
+            },
           ),
         ],
       ),
@@ -204,4 +240,3 @@ class DriverProfileScreen extends StatelessWidget {
     return const CustomerProfileScreen();
   }
 }
-

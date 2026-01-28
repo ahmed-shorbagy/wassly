@@ -46,10 +46,33 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 return IconButton(
                   icon: const Icon(Icons.cancel_outlined),
                   onPressed: () => _showCancelDialog(context, state.order),
-                  tooltip: AppLocalizations.of(context)?.cancelOrder ?? 'إلغاء الطلب',
+                  tooltip:
+                      AppLocalizations.of(context)?.cancelOrder ??
+                      'إلغاء الطلب',
                 );
               }
               return const SizedBox.shrink();
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.support_agent),
+            tooltip:
+                AppLocalizations.of(context)?.reportIssue ?? 'Report Issue',
+            onPressed: () {
+              // We need access to the order object.
+              // Since we are in an action, we might not have it unless we query the state.
+              final state = context.read<OrderCubit>().state;
+              if (state is OrderLoaded) {
+                context.pushNamed(
+                  'create-ticket',
+                  extra: {
+                    'orderId': state.order.id,
+                    'orderNumber': state.order.id.substring(0, 8),
+                    'customerId': state.order.customerId,
+                    'restaurantId': state.order.restaurantId,
+                  },
+                );
+              }
             },
           ),
         ],
@@ -85,7 +108,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           }
 
           final l10n = AppLocalizations.of(context);
-          return Center(child: Text(l10n?.loadingOrder ?? 'جاري تحميل الطلب...'));
+          return Center(
+            child: Text(l10n?.loadingOrder ?? 'جاري تحميل الطلب...'),
+          );
         },
       ),
     );
@@ -175,11 +200,27 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     final l10n = AppLocalizations.of(context);
     final statuses = [
       (OrderStatus.pending, l10n?.orderPlaced ?? 'Order Placed', Icons.receipt),
-      (OrderStatus.accepted, l10n?.orderAccepted ?? 'Accepted', Icons.check_circle_outline),
-      (OrderStatus.preparing, l10n?.orderPreparing ?? 'Preparing', Icons.restaurant_menu),
+      (
+        OrderStatus.accepted,
+        l10n?.orderAccepted ?? 'Accepted',
+        Icons.check_circle_outline,
+      ),
+      (
+        OrderStatus.preparing,
+        l10n?.orderPreparing ?? 'Preparing',
+        Icons.restaurant_menu,
+      ),
       (OrderStatus.ready, l10n?.orderReady ?? 'Ready', Icons.shopping_bag),
-      (OrderStatus.pickedUp, l10n?.orderPickedUp ?? 'On the Way', Icons.delivery_dining),
-      (OrderStatus.delivered, l10n?.orderDelivered ?? 'Delivered', Icons.done_all),
+      (
+        OrderStatus.pickedUp,
+        l10n?.orderPickedUp ?? 'On the Way',
+        Icons.delivery_dining,
+      ),
+      (
+        OrderStatus.delivered,
+        l10n?.orderDelivered ?? 'Delivered',
+        Icons.done_all,
+      ),
     ];
 
     final currentIndex = statuses.indexWhere((s) => s.$1 == currentStatus);
@@ -203,11 +244,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     color: isActive ? AppColors.primary : AppColors.border,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    icon,
-                    color: Colors.white,
-                    size: 20,
-                  ),
+                  child: Icon(icon, color: Colors.white, size: 20),
                 ),
                 if (index < statuses.length - 1)
                   Container(
@@ -228,7 +265,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
-                  color: isActive ? AppColors.textPrimary : AppColors.textSecondary,
+                  color: isActive
+                      ? AppColors.textPrimary
+                      : AppColors.textSecondary,
                 ),
               ),
             ),
@@ -304,81 +343,80 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         children: [
           Text(
             AppLocalizations.of(context)?.orderItems ?? 'عناصر الطلب',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          ...order.items.map((item) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Item image
-                    if (item.imageUrl != null)
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: CachedNetworkImage(
-                          imageUrl: item.imageUrl!,
-                          width: 50,
-                          height: 50,
-                          fit: BoxFit.cover,
-                          errorWidget: (context, url, error) => Container(
-                            width: 50,
-                            height: 50,
-                            color: AppColors.surface,
-                            child: const Icon(Icons.fastfood, size: 20),
-                          ),
-                        ),
-                      )
-                    else
-                      Container(
+          ...order.items.map(
+            (item) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Item image
+                  if (item.imageUrl != null)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: CachedNetworkImage(
+                        imageUrl: item.imageUrl!,
                         width: 50,
                         height: 50,
-                        decoration: BoxDecoration(
+                        fit: BoxFit.cover,
+                        errorWidget: (context, url, error) => Container(
+                          width: 50,
+                          height: 50,
                           color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(8),
+                          child: const Icon(Icons.fastfood, size: 20),
                         ),
-                        child: const Icon(Icons.fastfood, size: 20),
                       ),
-                    const SizedBox(width: 12),
-
-                    // Item details
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            item.productName,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${item.quantity}x ${item.price.toStringAsFixed(2)} ${AppLocalizations.of(context)?.currencySymbol ?? 'ج.م'}',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
+                    )
+                  else
+                    Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(8),
                       ),
+                      child: const Icon(Icons.fastfood, size: 20),
                     ),
+                  const SizedBox(width: 12),
 
-                    // Item total
-                    Text(
-                      '${item.totalPrice.toStringAsFixed(2)} ${AppLocalizations.of(context)?.currencySymbol ?? 'ج.م'}',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  // Item details
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.productName,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${item.quantity}x ${item.price.toStringAsFixed(2)} ${AppLocalizations.of(context)?.currencySymbol ?? 'ج.م'}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              )),
+                  ),
+
+                  // Item total
+                  Text(
+                    '${item.totalPrice.toStringAsFixed(2)} ${AppLocalizations.of(context)?.currencySymbol ?? 'ج.م'}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -391,11 +429,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            AppLocalizations.of(context)?.deliveryInformation ?? 'معلومات التوصيل',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            AppLocalizations.of(context)?.deliveryInformation ??
+                'معلومات التوصيل',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           Row(
@@ -408,7 +444,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      AppLocalizations.of(context)?.deliveryAddress ?? 'عنوان التوصيل',
+                      AppLocalizations.of(context)?.deliveryAddress ??
+                          'عنوان التوصيل',
                       style: const TextStyle(
                         fontSize: 12,
                         color: AppColors.textSecondary,
@@ -469,10 +506,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        order.notes!,
-                        style: const TextStyle(fontSize: 16),
-                      ),
+                      Text(order.notes!, style: const TextStyle(fontSize: 16)),
                     ],
                   ),
                 ),
@@ -492,10 +526,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         children: [
           Text(
             AppLocalizations.of(context)?.orderSummary ?? 'ملخص الطلب',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           Row(
@@ -562,10 +593,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         children: [
           Text(
             AppLocalizations.of(context)?.driverInformation ?? 'معلومات السائق',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           Row(
@@ -585,7 +613,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      order.driverName ?? (AppLocalizations.of(context)?.driver ?? 'السائق'),
+                      order.driverName ??
+                          (AppLocalizations.of(context)?.driver ?? 'السائق'),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -614,7 +643,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       } else {
                         final l10n = AppLocalizations.of(context);
                         context.showErrorSnackBar(
-                          l10n?.cannotOpenPhoneApp ?? 'لا يمكن فتح تطبيق الهاتف',
+                          l10n?.cannotOpenPhoneApp ??
+                              'لا يمكن فتح تطبيق الهاتف',
                         );
                       }
                     } catch (e) {
@@ -680,9 +710,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               Navigator.of(dialogContext).pop();
               context.read<OrderCubit>().cancelOrder(order.id);
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
             child: Text(l10n?.yesCancel ?? 'نعم، إلغاء'),
           ),
         ],
@@ -690,4 +718,3 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     );
   }
 }
-

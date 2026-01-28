@@ -10,10 +10,7 @@ import '../cubit/customer_navigation_cubit.dart';
 class CustomerNavigationShell extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
-  const CustomerNavigationShell({
-    super.key,
-    required this.navigationShell,
-  });
+  const CustomerNavigationShell({super.key, required this.navigationShell});
 
   @override
   Widget build(BuildContext context) {
@@ -72,11 +69,6 @@ class CustomerNavigationShell extends StatelessWidget {
                     activeIcon: Icon(Icons.person),
                     label: l10n.navProfile,
                   ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.payment_outlined),
-                    activeIcon: Icon(Icons.payment),
-                    label: l10n.navPay,
-                  ),
                 ],
               ),
             );
@@ -86,4 +78,3 @@ class CustomerNavigationShell extends StatelessWidget {
     );
   }
 }
-

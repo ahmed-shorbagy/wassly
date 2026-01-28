@@ -217,108 +217,6 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
               ),
             ),
 
-            // Horizontal Category Chip Filter (shown when viewing products)
-            if (showProductList)
-              SliverToBoxAdapter(
-                child: SizedBox(
-                  height: 90.h,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    physics: const BouncingScrollPhysics(),
-                    itemCount: categories.length,
-                    itemBuilder: (context, index) {
-                      final category = categories[index];
-                      final isSelected = _selectedCategory == category;
-                      final categoryName =
-                          MarketProductCategories.getCategoryName(
-                            category,
-                            l10n,
-                          );
-
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _selectedCategory = category;
-                            _applyFilters();
-                          });
-                        },
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 50.w,
-                              height: 50.w,
-                              margin: EdgeInsetsDirectional.only(end: 10.w),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white,
-                                border: Border.all(
-                                  color: isSelected
-                                      ? AppColors.primary
-                                      : Colors.transparent,
-                                  width: 2,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.05),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: ClipOval(
-                                child: Padding(
-                                  padding: EdgeInsets.all(
-                                    isSelected ? 2.0 : 0.0,
-                                  ), // Gap for border
-                                  child: ClipOval(
-                                    child: Image.asset(
-                                      MarketProductCategories.getCategoryImageUrl(
-                                            category,
-                                            l10n,
-                                          ) ??
-                                          'assets/images/logo.jpeg',
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) => Icon(
-                                            Icons.image_not_supported_outlined,
-                                            size: 24.w,
-                                            color: AppColors.textSecondary
-                                                .withOpacity(0.3),
-                                          ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 4.h),
-                            SizedBox(
-                              width: 60.w, // Slightly wider for text
-                              child: Text(
-                                categoryName,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 10.sp,
-                                  fontWeight: isSelected
-                                      ? FontWeight.bold
-                                      : FontWeight.w500,
-                                  color: isSelected
-                                      ? AppColors.primary
-                                      : AppColors.textPrimary,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-
             // Market Banners Carousel
             if (_selectedCategory == null && _searchController.text.isEmpty)
               SliverToBoxAdapter(
@@ -406,6 +304,72 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
                   },
                 ),
               ),
+
+            // Horizontal Category Chip Filter (3 Rows, Always shown)
+            SliverToBoxAdapter(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Row 1
+                    Row(
+                      children: List.generate((categories.length / 3).ceil(), (
+                        index,
+                      ) {
+                        final category = categories[index];
+                        return _buildMarketCategoryCard(
+                          context,
+                          category,
+                          l10n,
+                        );
+                      }),
+                    ),
+                    SizedBox(height: 12.h),
+                    // Row 2
+                    Row(
+                      children: List.generate((categories.length / 3).ceil(), (
+                        index,
+                      ) {
+                        final actualIndex =
+                            index + (categories.length / 3).ceil();
+                        if (actualIndex >= categories.length) {
+                          return const SizedBox.shrink();
+                        }
+                        final category = categories[actualIndex];
+                        return _buildMarketCategoryCard(
+                          context,
+                          category,
+                          l10n,
+                        );
+                      }),
+                    ),
+                    SizedBox(height: 12.h),
+                    // Row 3
+                    Row(
+                      children: List.generate(
+                        categories.length - 2 * (categories.length / 3).ceil(),
+                        (index) {
+                          final actualIndex =
+                              index + 2 * (categories.length / 3).ceil();
+                          if (actualIndex >= categories.length) {
+                            return const SizedBox.shrink();
+                          }
+                          final category = categories[actualIndex];
+                          return _buildMarketCategoryCard(
+                            context,
+                            category,
+                            l10n,
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
 
             // 1. If NO Category Selected and NO Search -> Show Dashboard (Banners, Top Products, Categories)
             if (!showProductList) ...[
@@ -586,6 +550,93 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
         }
         return const SliverToBoxAdapter(child: SizedBox.shrink());
       },
+    );
+  }
+
+  Widget _buildMarketCategoryCard(
+    BuildContext context,
+    String category,
+    AppLocalizations l10n,
+  ) {
+    final isSelected = _selectedCategory == category;
+    final categoryName = MarketProductCategories.getCategoryName(
+      category,
+      l10n,
+    );
+    final imagePath = MarketProductCategories.getCategoryImageUrl(
+      category,
+      l10n,
+    );
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedCategory = category;
+          _applyFilters();
+        });
+      },
+      child: Container(
+        width: 110.w,
+        margin: EdgeInsetsDirectional.only(end: 12.w),
+        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary : Colors.white,
+          borderRadius: BorderRadius.circular(12.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 6,
+              offset: const Offset(0, 3),
+            ),
+          ],
+          border: isSelected
+              ? Border.all(color: AppColors.primary, width: 1)
+              : null,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 32.w,
+              height: 32.w,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+              child: ClipOval(
+                child: imagePath != null
+                    ? Image.asset(
+                        imagePath,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Icon(
+                          Icons.category,
+                          size: 18.w,
+                          color: AppColors.primary,
+                        ),
+                      )
+                    : Icon(
+                        Icons.category,
+                        size: 18.w,
+                        color: AppColors.primary,
+                      ),
+              ),
+            ),
+            SizedBox(width: 8.w),
+            Expanded(
+              child: Text(
+                categoryName,
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.bold,
+                  color: isSelected ? Colors.white : AppColors.textPrimary,
+                  height: 1.1,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
