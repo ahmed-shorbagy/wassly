@@ -7,7 +7,10 @@ class TicketEntity extends Equatable {
   final String orderId;
   final String orderNumber;
   final String customerId;
+
   final String restaurantId;
+  final String? driverId;
+  final String? marketId;
   final TicketStatus status;
   final String subject;
   final DateTime createdAt;
@@ -19,6 +22,8 @@ class TicketEntity extends Equatable {
     required this.orderNumber,
     required this.customerId,
     required this.restaurantId,
+    this.driverId,
+    this.marketId,
     required this.status,
     required this.subject,
     required this.createdAt,
@@ -32,6 +37,8 @@ class TicketEntity extends Equatable {
     orderNumber,
     customerId,
     restaurantId,
+    driverId,
+    marketId,
     status,
     subject,
     createdAt,

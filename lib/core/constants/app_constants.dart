@@ -6,6 +6,7 @@ class AppConstants {
   // User Types
   static const String userTypeCustomer = 'customer';
   static const String userTypeRestaurant = 'restaurant';
+  static const String userTypeMarket = 'market';
   static const String userTypeDriver = 'driver';
   static const String userTypeAdmin = 'admin';
 

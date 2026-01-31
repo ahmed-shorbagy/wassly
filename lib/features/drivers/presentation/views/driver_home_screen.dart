@@ -7,6 +7,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/cubits/auth_cubit.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../../../orders/presentation/cubits/order_cubit.dart';
+import '../../../orders/domain/repositories/order_repository.dart';
 
 class DriverHomeScreen extends StatefulWidget {
   const DriverHomeScreen({super.key});
@@ -27,7 +28,13 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     _loadDriverData();
   }
 
-  void _loadDriverData() {
+  // Stats state
+  double _todayEarnings = 0;
+  int _todayDeliveries = 0;
+
+  // ... (existing methods)
+
+  Future<void> _loadDriverData() async {
     final authState = context.read<AuthCubit>().state;
     if (authState is AuthAuthenticated) {
       setState(() {
@@ -37,127 +44,90 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
       });
       // Load available orders
       context.read<OrderCubit>().listenToAvailableOrders();
+      // Load stats
+      _calculateStats();
     }
   }
 
-  void _toggleOnlineStatus(bool value) {
-    setState(() {
-      _isOnline = value;
-      AppLogger.logInfo('Driver ${_isOnline ? "went online" : "went offline"}');
-    });
-    if (_isOnline) {
-      context.read<OrderCubit>().listenToAvailableOrders();
-    }
-  }
+  Future<void> _calculateStats() async {
+    if (_driverId == null) return;
+    try {
+      // Use repository directly to avoid messing with OrderCubit state (which tracks available orders)
+      final repo = context.read<OrderRepository>();
+      final result = await repo.getDriverOrders(_driverId!);
 
-  Future<void> _acceptOrder(OrderEntity order) async {
-    if (_driverId == null || _driverName == null || _driverPhone == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Driver information not available')),
-      );
-      return;
-    }
+      result.fold(
+        (failure) =>
+            AppLogger.logError('Failed to load stats', error: failure.message),
+        (orders) {
+          final now = DateTime.now();
+          final today = DateTime(now.year, now.month, now.day);
 
-    AppLogger.logInfo('Driver accepting order: ${order.id}');
-    await context.read<OrderCubit>().assignDriverToOrder(
-          order.id,
-          _driverId!,
-          _driverName!,
-          _driverPhone!,
-        );
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Order accepted! Navigate to pickup location.'),
-          backgroundColor: AppColors.success,
-        ),
+          final todayOrders = orders.where((o) {
+            if (o.status != OrderStatus.delivered) return false;
+            // Use updatedAt for completion time
+            return o.updatedAt.isAfter(today);
+          }).toList();
+
+          if (mounted) {
+            setState(() {
+              _todayDeliveries = todayOrders.length;
+              _todayEarnings = todayOrders.fold(
+                0.0,
+                (sum, order) => sum + order.totalAmount,
+              );
+            });
+          }
+        },
       );
+    } catch (e) {
+      AppLogger.logError('Error calculating stats', error: e);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.driver),
+        title: const Text('Driver Dashboard'),
         actions: [
-          // Online/Offline Toggle
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            margin: const EdgeInsets.only(right: 8),
-            decoration: BoxDecoration(
-              color: _isOnline
-                  ? AppColors.success.withValues(alpha: 0.2)
-                  : AppColors.error.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: _isOnline ? AppColors.success : AppColors.error,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  _isOnline ? 'Online' : 'Offline',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: _isOnline ? AppColors.success : AppColors.error,
-                  ),
-                ),
-                Switch(
-                  value: _isOnline,
-                  onChanged: _toggleOnlineStatus,
-                  activeTrackColor: AppColors.success.withValues(alpha: 0.5),
-                  activeThumbColor: AppColors.success,
-                ),
-              ],
-            ),
+          Row(
+            children: [
+              Text(
+                _isOnline ? 'Online' : 'Offline',
+                style: const TextStyle(fontSize: 14),
+              ),
+              Switch(
+                value: _isOnline,
+                onChanged: (value) {
+                  setState(() {
+                    _isOnline = value;
+                  });
+                  if (value) {
+                    _loadDriverData();
+                  }
+                },
+                activeThumbColor: Colors.white,
+                activeTrackColor: AppColors.success,
+              ),
+            ],
           ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              AppLogger.logAuth('Driver logging out');
-              context.read<AuthCubit>().logout();
-            },
-          ),
+          const SizedBox(width: 16),
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: () async {
-          _loadDriverData();
-        },
+        onRefresh: _loadDriverData,
         child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(16),
+          physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Status Card
-              _buildStatusCard(),
-
+              if (l10n != null) _buildTodaysStats(l10n),
               const SizedBox(height: 24),
-
-              // Today's Stats
-              _buildTodaysStats(l10n),
-
+              if (l10n != null) _buildAvailableOrdersSection(l10n),
               const SizedBox(height: 24),
-
-              // Available Orders
-              _buildAvailableOrdersSection(l10n),
-
-              const SizedBox(height: 24),
-
-              // Quick Actions
-              _buildQuickActions(l10n),
+              if (l10n != null) _buildQuickActions(l10n),
             ],
           ),
         ),
@@ -165,67 +135,40 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     );
   }
 
-  Widget _buildStatusCard() {
-    return Card(
-      color: _isOnline
-          ? AppColors.success.withValues(alpha: 0.1)
-          : AppColors.error.withValues(alpha: 0.1),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: BlocBuilder<AuthCubit, AuthState>(
-          builder: (context, state) {
-            if (state is AuthAuthenticated) {
-              return Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: _isOnline
-                          ? AppColors.success.withValues(alpha: 0.2)
-                          : AppColors.error.withValues(alpha: 0.2),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      _isOnline ? Icons.delivery_dining : Icons.car_repair,
-                      size: 36,
-                      color: _isOnline ? AppColors.success : AppColors.error,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Welcome, ${state.user.name}!',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          _isOnline
-                              ? 'You are online and available for deliveries'
-                              : 'Go online to start receiving orders',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: _isOnline
-                                ? AppColors.success
-                                : AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            }
-            return const Text('Welcome to Driver Dashboard');
-          },
+  Future<void> _acceptOrder(OrderEntity order) async {
+    if (_driverId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Driver profile not loaded')),
+      );
+      return;
+    }
+
+    try {
+      final repo = context.read<OrderRepository>();
+      final result = await repo.assignDriverToOrder(
+        order.id,
+        _driverId!,
+        _driverName ?? 'Unknown Driver',
+        _driverPhone ?? '',
+      );
+
+      result.fold(
+        (failure) => ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to accept order: ${failure.message}')),
         ),
-      ),
-    );
+        (_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Order accepted successfully')),
+          );
+          // Refresh lists
+          _loadDriverData();
+        },
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+    }
   }
 
   Widget _buildTodaysStats(AppLocalizations l10n) {
@@ -242,7 +185,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
             Expanded(
               child: _StatCard(
                 title: 'Deliveries',
-                value: '0',
+                value: '$_todayDeliveries',
                 icon: Icons.delivery_dining,
                 color: AppColors.primary,
               ),
@@ -251,7 +194,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
             Expanded(
               child: _StatCard(
                 title: 'Earnings',
-                value: '0 ${l10n.currencySymbol}',
+                value:
+                    '${_todayEarnings.toStringAsFixed(2)} ${l10n.currencySymbol}',
                 icon: Icons.attach_money,
                 color: AppColors.success,
               ),
@@ -260,7 +204,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
             Expanded(
               child: _StatCard(
                 title: 'Rating',
-                value: '5.0',
+                value: '5.0', // Placeholder for now
                 icon: Icons.star,
                 color: Colors.amber,
               ),
@@ -308,9 +252,11 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
 
               if (state is OrdersLoaded) {
                 final availableOrders = state.orders
-                    .where((o) =>
-                        o.status == OrderStatus.ready &&
-                        (o.driverId == null || o.driverId!.isEmpty))
+                    .where(
+                      (o) =>
+                          o.status == OrderStatus.ready &&
+                          (o.driverId == null || o.driverId!.isEmpty),
+                    )
                     .toList();
 
                 if (availableOrders.isEmpty) {
@@ -341,7 +287,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                         const SizedBox(height: 8),
                         ElevatedButton(
                           onPressed: () {
-                            context.read<OrderCubit>().listenToAvailableOrders();
+                            context
+                                .read<OrderCubit>()
+                                .listenToAvailableOrders();
                           },
                           child: const Text('Retry'),
                         ),
@@ -372,10 +320,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
             const SizedBox(height: 16),
             const Text(
               'Go Online to Receive Orders',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
@@ -403,10 +348,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
             const SizedBox(height: 16),
             const Text(
               'No Available Orders',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
@@ -438,10 +380,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                     color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(
-                    Icons.restaurant,
-                    color: AppColors.primary,
-                  ),
+                  child: const Icon(Icons.restaurant, color: AppColors.primary),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -489,7 +428,11 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
             const Divider(height: 24),
             Row(
               children: [
-                Icon(Icons.person_outline, size: 16, color: AppColors.textSecondary),
+                Icon(
+                  Icons.person_outline,
+                  size: 16,
+                  color: AppColors.textSecondary,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -502,7 +445,11 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
             const SizedBox(height: 8),
             Row(
               children: [
-                Icon(Icons.location_on_outlined, size: 16, color: AppColors.textSecondary),
+                Icon(
+                  Icons.location_on_outlined,
+                  size: 16,
+                  color: AppColors.textSecondary,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -590,7 +537,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
               color: AppColors.info,
               onTap: () {
                 AppLogger.logNavigation('Navigating to driver profile');
-                context.push('/driver/profile');
+                context.push('/profile');
               },
             ),
           ],

@@ -37,17 +37,26 @@ class _PartnerSplashScreenState extends State<PartnerSplashScreen> {
       listener: (context, state) {
         if (state is AuthAuthenticated) {
           final userType = state.user.userType;
-          AppLogger.logAuth('User authenticated: ${state.user.name} ($userType)');
+          AppLogger.logAuth(
+            'User authenticated: ${state.user.name} ($userType)',
+          );
 
           // Route based on user type
           if (userType == AppConstants.userTypeRestaurant) {
-            AppLogger.logNavigation('Restaurant user, navigating to restaurant home');
+            AppLogger.logNavigation(
+              'Restaurant user, navigating to restaurant home',
+            );
             context.pushReplacement('/restaurant');
+          } else if (userType == AppConstants.userTypeMarket) {
+            AppLogger.logNavigation('Market user, navigating to market home');
+            context.pushReplacement('/market');
           } else if (userType == AppConstants.userTypeDriver) {
             AppLogger.logNavigation('Driver user, navigating to driver home');
             context.pushReplacement('/driver');
           } else {
-            AppLogger.logWarning('Non-partner user trying to access partner app');
+            AppLogger.logWarning(
+              'Non-partner user trying to access partner app',
+            );
             _showAccessDenied(context, userType);
           }
         } else if (state is AuthUnauthenticated) {
@@ -78,9 +87,7 @@ class _PartnerSplashScreenState extends State<PartnerSplashScreen> {
                 },
               ),
               const SizedBox(height: 24),
-              const CircularProgressIndicator(
-                color: AppColors.primary,
-              ),
+              const CircularProgressIndicator(color: AppColors.primary),
             ],
           ),
         ),
@@ -91,9 +98,11 @@ class _PartnerSplashScreenState extends State<PartnerSplashScreen> {
   void _showAccessDenied(BuildContext context, String userType) {
     String message;
     if (userType == AppConstants.userTypeCustomer) {
-      message = 'This app is for restaurant partners and drivers. Please use the customer app.';
+      message =
+          'This app is for restaurant partners and drivers. Please use the customer app.';
     } else {
-      message = 'You do not have access to this app. Please login with a valid partner account.';
+      message =
+          'You do not have access to this app. Please login with a valid partner account.';
     }
 
     showDialog(
@@ -116,4 +125,3 @@ class _PartnerSplashScreenState extends State<PartnerSplashScreen> {
     );
   }
 }
-

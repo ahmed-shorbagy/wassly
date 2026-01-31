@@ -4,10 +4,16 @@ import '../../features/auth/presentation/views/partner_splash_screen.dart';
 import '../../features/auth/presentation/views/login_screen.dart';
 import '../../features/auth/presentation/views/signup_screen.dart';
 import '../../features/restaurants/presentation/views/restaurant_home_screen.dart';
-import '../../features/restaurants/presentation/views/driver_home_screen.dart';
+import '../../features/drivers/presentation/views/driver_home_screen.dart';
 import '../../features/partner/presentation/views/restaurant_orders_screen.dart';
 import '../../features/partner/presentation/views/restaurant_settings_screen.dart';
+
 import '../../features/partner/presentation/views/product_management_screen.dart';
+import '../../features/partner/presentation/views/market_orders_screen.dart';
+import '../../features/partner/presentation/views/market_products_screen.dart';
+import '../../features/partner/presentation/views/market_home_screen.dart';
+import '../../features/partner/presentation/views/user_profile_screen.dart';
+import '../../features/reviews/presentation/views/partner_reviews_screen.dart';
 import '../../features/partner/presentation/views/category_list_screen.dart';
 import '../../features/partner/presentation/views/add_category_screen.dart';
 import '../../features/partner/presentation/views/edit_category_screen.dart';
@@ -16,7 +22,7 @@ import '../../features/drivers/presentation/views/driver_orders_screen.dart';
 import '../../features/auth/presentation/views/customer_profile_screen.dart';
 import '../../features/support/presentation/views/create_ticket_screen.dart';
 import '../../features/support/presentation/views/ticket_chat_screen.dart';
-import '../../features/partner/presentation/views/restaurant_support_tickets_screen.dart';
+import '../../features/partner/presentation/views/partner_support_screen.dart';
 import '../../features/support/domain/entities/ticket_message_entity.dart';
 
 class PartnerRouter {
@@ -73,6 +79,11 @@ class PartnerRouter {
             path: 'settings',
             name: 'restaurant-settings',
             builder: (context, state) => const RestaurantSettingsScreen(),
+          ),
+          GoRoute(
+            path: 'reviews',
+            name: 'restaurant-reviews',
+            builder: (context, state) => const PartnerReviewsScreen(),
           ),
           GoRoute(
             path: 'categories',
@@ -132,11 +143,25 @@ class PartnerRouter {
               ),
             ],
           ),
+          // Restaurant Support
           GoRoute(
             path: 'support',
             name: 'restaurant-support',
-            builder: (context, state) => const RestaurantSupportTicketsScreen(),
+            builder: (context, state) => const PartnerSupportScreen(
+              supportType: PartnerSupportType.restaurant,
+            ),
             routes: [
+              GoRoute(
+                path: 'create-ticket',
+                name: 'restaurant-create-ticket',
+                builder: (context, state) {
+                  final extras = state.extra as Map<String, dynamic>;
+                  // Inject restaurant sender role
+                  final newExtras = Map<String, dynamic>.from(extras);
+                  newExtras['senderRole'] = SenderRole.restaurant;
+                  return CreateTicketScreen(extras: newExtras);
+                },
+              ),
               GoRoute(
                 path: 'chat/:ticketId',
                 name: 'restaurant-ticket-chat',
@@ -147,20 +172,17 @@ class PartnerRouter {
               ),
             ],
           ),
-          GoRoute(
-            path: 'create-ticket',
-            name: 'create-ticket',
-            builder: (context, state) {
-              final extras = state.extra as Map<String, dynamic>;
-              // Inject restaurant sender role
-              final newExtras = Map<String, dynamic>.from(extras);
-              newExtras['senderRole'] = SenderRole.restaurant;
-              return CreateTicketScreen(extras: newExtras);
-            },
-          ),
         ],
       ),
 
+      // Profile Route (Shared)
+      GoRoute(
+        path: '/profile',
+        name: 'partner-profile',
+        builder: (context, state) => const UserProfileScreen(),
+      ),
+
+      // Driver Routes
       // Driver Routes
       GoRoute(
         path: '/driver',
@@ -184,6 +206,82 @@ class PartnerRouter {
             path: 'profile',
             name: 'driver-profile',
             builder: (context, state) => const DriverProfileScreen(),
+          ),
+          GoRoute(
+            path: 'support',
+            name: 'driver-support',
+            builder: (context, state) => const PartnerSupportScreen(
+              supportType: PartnerSupportType.driver,
+            ),
+            routes: [
+              GoRoute(
+                path: 'create-ticket',
+                name: 'driver-create-ticket',
+                builder: (context, state) => CreateTicketScreen(
+                  extras: state.extra as Map<String, dynamic>,
+                ),
+              ),
+              GoRoute(
+                path: 'chat/:ticketId',
+                name: 'driver-ticket-chat',
+                builder: (context, state) => TicketChatScreen(
+                  extras: state.extra as Map<String, dynamic>,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+
+      // Market Routes
+      GoRoute(
+        path: '/market',
+        name: 'market',
+        builder: (context, state) => const MarketHomeScreen(),
+        routes: [
+          GoRoute(
+            path: 'orders',
+            name: 'market-orders',
+            builder: (context, state) => const MarketOrdersScreen(),
+          ),
+          GoRoute(
+            path: 'products',
+            name: 'market-products',
+            builder: (context, state) => const MarketProductsScreen(),
+          ),
+          GoRoute(
+            path: 'settings',
+            name: 'market-settings',
+            builder: (context, state) =>
+                const RestaurantSettingsScreen(), // Keep settings shared for now
+          ),
+          GoRoute(
+            path: 'reviews',
+            name: 'market-reviews',
+            builder: (context, state) => const PartnerReviewsScreen(),
+          ),
+          GoRoute(
+            path: 'support',
+            name: 'market-support',
+            builder: (context, state) => const PartnerSupportScreen(
+              supportType: PartnerSupportType.market,
+            ),
+            routes: [
+              GoRoute(
+                path: 'create-ticket',
+                name: 'market-create-ticket',
+                builder: (context, state) => CreateTicketScreen(
+                  extras: state.extra as Map<String, dynamic>,
+                ),
+              ),
+              GoRoute(
+                path: 'chat/:ticketId',
+                name: 'market-ticket-chat',
+                builder: (context, state) => TicketChatScreen(
+                  extras: state.extra as Map<String, dynamic>,
+                ),
+              ),
+            ],
           ),
         ],
       ),

@@ -26,7 +26,9 @@ class SupportCubit extends Cubit<SupportState> {
     required String orderId,
     required String orderNumber,
     required String customerId,
-    required String restaurantId,
+    String? restaurantId,
+    String? driverId,
+    String? marketId,
     required String subject,
     required String initialMessage,
     SenderRole senderRole = SenderRole.customer,
@@ -42,7 +44,9 @@ class SupportCubit extends Cubit<SupportState> {
         orderId: orderId,
         orderNumber: orderNumber,
         customerId: customerId,
-        restaurantId: restaurantId,
+        restaurantId: restaurantId ?? '',
+        driverId: driverId,
+        marketId: marketId,
         status: TicketStatus.open,
         subject: subject,
         createdAt: now,
@@ -56,7 +60,9 @@ class SupportCubit extends Cubit<SupportState> {
       final messageId = const Uuid().v4();
       final message = TicketMessageEntity(
         id: messageId,
-        senderId: senderRole == SenderRole.customer ? customerId : restaurantId,
+        senderId: senderRole == SenderRole.customer
+            ? customerId
+            : (restaurantId ?? driverId ?? marketId ?? ''),
         senderRole: senderRole,
         content: initialMessage,
         createdAt: now,
@@ -88,6 +94,30 @@ class SupportCubit extends Cubit<SupportState> {
     _ticketsSubscription?.cancel();
     _ticketsSubscription = _repository
         .getTicketsForRestaurant(restaurantId)
+        .listen(
+          (tickets) => emit(TicketsLoaded(tickets)),
+          onError: (e) => emit(SupportError(e.toString())),
+        );
+  }
+
+  // Load Driver Tickets
+  void loadDriverTickets(String driverId) {
+    emit(SupportLoading());
+    _ticketsSubscription?.cancel();
+    _ticketsSubscription = _repository
+        .getTicketsForDriver(driverId)
+        .listen(
+          (tickets) => emit(TicketsLoaded(tickets)),
+          onError: (e) => emit(SupportError(e.toString())),
+        );
+  }
+
+  // Load Market Tickets
+  void loadMarketTickets(String marketId) {
+    emit(SupportLoading());
+    _ticketsSubscription?.cancel();
+    _ticketsSubscription = _repository
+        .getTicketsForMarket(marketId)
         .listen(
           (tickets) => emit(TicketsLoaded(tickets)),
           onError: (e) => emit(SupportError(e.toString())),

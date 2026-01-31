@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-enum SenderRole { customer, admin, restaurant }
+enum SenderRole { customer, admin, restaurant, driver, market }
 
 class TicketMessageEntity extends Equatable {
   final String id;

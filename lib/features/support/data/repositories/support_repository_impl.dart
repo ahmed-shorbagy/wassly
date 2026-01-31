@@ -49,6 +49,34 @@ class SupportRepositoryImpl implements SupportRepository {
   }
 
   @override
+  Stream<List<TicketEntity>> getTicketsForDriver(String driverId) {
+    return _firestore
+        .collection('support_tickets')
+        .where('driverId', isEqualTo: driverId)
+        .orderBy('lastMessageAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .map((doc) => TicketModel.fromSnapshot(doc))
+              .toList();
+        });
+  }
+
+  @override
+  Stream<List<TicketEntity>> getTicketsForMarket(String marketId) {
+    return _firestore
+        .collection('support_tickets')
+        .where('marketId', isEqualTo: marketId)
+        .orderBy('lastMessageAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .map((doc) => TicketModel.fromSnapshot(doc))
+              .toList();
+        });
+  }
+
+  @override
   Stream<List<TicketEntity>> getAllTickets() {
     return _firestore
         .collection('support_tickets')

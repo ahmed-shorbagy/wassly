@@ -78,7 +78,17 @@ class _LoginScreenState extends State<LoginScreen> {
     if (state is AuthAuthenticated) {
       AppLogger.logNavigation('User authenticated, navigating to home');
       AppLogger.logInfo('User type: ${state.user.userType}');
-      context.pushReplacement('/home');
+
+      final userType = state.user.userType;
+      if (userType == 'restaurant') {
+        context.pushReplacement('/restaurant');
+      } else if (userType == 'market') {
+        context.pushReplacement('/market');
+      } else if (userType == 'driver') {
+        context.pushReplacement('/driver');
+      } else {
+        context.pushReplacement('/home');
+      }
     } else if (state is AuthPasswordResetSent) {
       final l10n = AppLocalizations.of(context);
       context.showSuccessSnackBar(

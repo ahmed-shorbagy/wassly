@@ -4,26 +4,27 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../auth/presentation/cubits/auth_cubit.dart';
-import '../cubits/restaurant_cubit.dart';
+import '../../../restaurants/presentation/cubits/restaurant_cubit.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../shared/widgets/language_toggle_button.dart';
+
 import '../../../orders/presentation/cubits/order_cubit.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 
-class RestaurantHomeScreen extends StatelessWidget {
-  const RestaurantHomeScreen({super.key});
+class MarketHomeScreen extends StatelessWidget {
+  const MarketHomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Restaurant Dashboard'),
+        title: const Text('Market Dashboard'),
         actions: [
           const LanguageToggleButton(),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
-              AppLogger.logAuth('Restaurant owner logging out');
+              AppLogger.logAuth('Market owner logging out');
               context.read<AuthCubit>().logout();
             },
           ),
@@ -34,7 +35,7 @@ class RestaurantHomeScreen extends StatelessWidget {
           if (state is RestaurantsLoaded && state.restaurants.isNotEmpty) {
             final restaurantId = state.restaurants.first.id;
             AppLogger.logInfo(
-              'Subscribing to restaurant topic: restaurant_$restaurantId',
+              'Subscribing to market topic: restaurant_$restaurantId',
             );
             InjectionContainer().notificationService.subscribeToTopic(
               'restaurant_$restaurantId',
@@ -50,7 +51,7 @@ class RestaurantHomeScreen extends StatelessWidget {
             children: [
               // Welcome Card
               Card(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: Colors.blue.withValues(alpha: 0.1),
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: BlocBuilder<AuthCubit, AuthState>(
@@ -68,7 +69,7 @@ class RestaurantHomeScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Manage your restaurant orders and menu',
+                              'Manage your market inventory and orders',
                               style: TextStyle(
                                 fontSize: 16,
                                 color: AppColors.textSecondary,
@@ -77,7 +78,7 @@ class RestaurantHomeScreen extends StatelessWidget {
                           ],
                         );
                       }
-                      return const Text('Welcome to Restaurant Dashboard');
+                      return const Text('Welcome to Market Dashboard');
                     },
                   ),
                 ),
@@ -126,7 +127,7 @@ class RestaurantHomeScreen extends StatelessWidget {
                         child: _StatCard(
                           title: 'Active Orders',
                           value: activeCount.toString(),
-                          icon: Icons.restaurant_menu,
+                          icon: Icons.shopping_bag,
                           color: AppColors.info,
                         ),
                       ),
@@ -157,32 +158,26 @@ class RestaurantHomeScreen extends StatelessWidget {
                     icon: Icons.receipt_long,
                     color: AppColors.primary,
                     onTap: () {
-                      AppLogger.logNavigation(
-                        'Navigating to restaurant orders',
-                      );
-                      context.push('/restaurant/orders');
+                      AppLogger.logNavigation('Navigating to market orders');
+                      context.push('/market/orders');
                     },
                   ),
                   _ActionCard(
                     title: 'Manage Products',
-                    icon: Icons.restaurant,
+                    icon: Icons.inventory_2,
                     color: AppColors.success,
                     onTap: () {
-                      AppLogger.logNavigation(
-                        'Navigating to restaurant products',
-                      );
-                      context.push('/restaurant/products');
+                      AppLogger.logNavigation('Navigating to market products');
+                      context.push('/market/products');
                     },
                   ),
                   _ActionCard(
-                    title: 'Restaurant Settings',
+                    title: 'Market Settings',
                     icon: Icons.settings,
                     color: AppColors.secondary,
                     onTap: () {
-                      AppLogger.logNavigation(
-                        'Navigating to restaurant settings',
-                      );
-                      context.push('/restaurant/settings');
+                      AppLogger.logNavigation('Navigating to market settings');
+                      context.push('/market/settings');
                     },
                   ),
                   _ActionCard(
@@ -195,102 +190,6 @@ class RestaurantHomeScreen extends StatelessWidget {
                     },
                   ),
                 ],
-              ),
-
-              const SizedBox(height: 24),
-
-              // My Restaurant Info
-              BlocBuilder<RestaurantCubit, RestaurantState>(
-                builder: (context, state) {
-                  if (state is! RestaurantsLoaded) {
-                    // Load restaurants if not loaded
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      context.read<RestaurantCubit>().getAllRestaurants();
-                    });
-                    return const SizedBox.shrink();
-                  }
-
-                  if (state.restaurants.isNotEmpty) {
-                    final restaurant = state.restaurants.first;
-                    return Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'My Restaurant',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.restaurant,
-                                  color: AppColors.primary,
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    restaurant.name,
-                                    style: const TextStyle(fontSize: 16),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.location_on,
-                                  color: AppColors.secondary,
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    restaurant.address,
-                                    style: TextStyle(
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: restaurant.isOpen
-                                        ? AppColors.success
-                                        : AppColors.error,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    restaurant.isOpen ? 'Open' : 'Closed',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
               ),
             ],
           ),
