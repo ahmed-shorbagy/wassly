@@ -118,9 +118,11 @@ class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
     required double minOrderAmount,
     required int estimatedDeliveryTime,
     File? commercialRegistrationPhotoFile,
+    String? userType,
   }) async {
     try {
-      AppLogger.logInfo('Creating restaurant: $name');
+      final finalUserType = userType ?? AppConstants.userTypeRestaurant;
+      AppLogger.logInfo('Creating $finalUserType: $name');
       AppLogger.logInfo('Email to Auth: "$email"');
       AppLogger.logInfo('Password length to Auth: ${password.length}');
 
@@ -159,7 +161,7 @@ class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
           'email': email,
           'name': name,
           'phone': phone,
-          'userType': AppConstants.userTypeRestaurant,
+          'userType': finalUserType,
           'createdAt': FieldValue.serverTimestamp(),
           'isActive': true,
           'tempPassword':

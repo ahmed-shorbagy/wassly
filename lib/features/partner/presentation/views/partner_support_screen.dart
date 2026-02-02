@@ -98,7 +98,7 @@ class _PartnerSupportScreenState extends State<PartnerSupportScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(l10n?.noOrdersFound ?? 'No tickets found'),
+                    Text(l10n?.noTicketsFound ?? 'No tickets found'),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () => _navigateToCreateTicket(),

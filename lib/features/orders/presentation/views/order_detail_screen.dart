@@ -164,8 +164,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.primary.withValues(alpha: 0.1),
-            AppColors.primaryLight.withValues(alpha: 0.1),
+            AppColors.primary.withOpacity(0.1),
+            AppColors.primaryLight.withOpacity(0.1),
           ],
         ),
       ),

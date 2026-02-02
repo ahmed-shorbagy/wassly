@@ -53,6 +53,8 @@ class AdminRouter {
         name: 'splash',
         builder: (context, state) => const AdminSplashScreen(),
       ),
+      // Home Redirect
+      GoRoute(path: '/home', redirect: (context, state) => '/admin'),
 
       // Admin Routes - Nested structure for proper navigation stack
       GoRoute(

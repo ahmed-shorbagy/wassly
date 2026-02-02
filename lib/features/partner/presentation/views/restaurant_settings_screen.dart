@@ -68,7 +68,7 @@ class _RestaurantSettingsScreenState extends State<RestaurantSettingsScreen> {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: _loadRestaurant,
-                    child: const Text('Retry'),
+                    child: Text(l10n.retry),
                   ),
                 ],
               ),
@@ -335,7 +335,7 @@ class _RestaurantSettingsScreenState extends State<RestaurantSettingsScreen> {
                     controller: discountPercentageController,
                     decoration: InputDecoration(
                       labelText: l10n.discountPercentage,
-                      hintText: 'e.g., 20 for 20%',
+                      hintText: l10n.discountPercentageHint,
                       prefixIcon: const Icon(Icons.percent),
                       suffixText: '%',
                     ),
@@ -360,7 +360,7 @@ class _RestaurantSettingsScreenState extends State<RestaurantSettingsScreen> {
                     subtitle: Text(
                       startDate != null
                           ? DateFormat('yyyy-MM-dd').format(startDate!)
-                          : 'No start date',
+                          : l10n.noStartDate,
                     ),
                     trailing: const Icon(Icons.calendar_today),
                     onTap: () async {
@@ -385,7 +385,7 @@ class _RestaurantSettingsScreenState extends State<RestaurantSettingsScreen> {
                     subtitle: Text(
                       endDate != null
                           ? DateFormat('yyyy-MM-dd').format(endDate!)
-                          : 'No end date',
+                          : l10n.noEndDate,
                     ),
                     trailing: const Icon(Icons.calendar_today),
                     onTap: () async {

@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_strings.dart';
+import '../../../../core/utils/extensions.dart';
 import '../../../../core/utils/validators.dart';
 
 class LoginPasswordFieldWidget extends StatefulWidget {
   final TextEditingController controller;
 
-  const LoginPasswordFieldWidget({
-    super.key,
-    required this.controller,
-  });
+  const LoginPasswordFieldWidget({super.key, required this.controller});
 
   @override
   State<LoginPasswordFieldWidget> createState() =>
@@ -25,7 +22,7 @@ class _LoginPasswordFieldWidgetState extends State<LoginPasswordFieldWidget> {
       obscureText: _obscurePassword,
       validator: Validators.validatePassword,
       decoration: InputDecoration(
-        labelText: AppStrings.password,
+        labelText: context.l10n.password,
         prefixIcon: const Icon(Icons.lock_outlined),
         suffixIcon: IconButton(
           icon: Icon(
@@ -41,4 +38,3 @@ class _LoginPasswordFieldWidgetState extends State<LoginPasswordFieldWidget> {
     );
   }
 }
-

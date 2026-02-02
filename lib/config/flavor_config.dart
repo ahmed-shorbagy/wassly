@@ -1,6 +1,6 @@
 enum Flavor { customer, partner, admin }
 
-enum AppType { customer, restaurant, driver, admin }
+enum AppType { customer, restaurant, driver, admin, market }
 
 class FlavorConfig {
   final Flavor flavor;
@@ -52,7 +52,7 @@ class FlavorConfig {
             secondaryColor: 0xFF1565C0, // Dark Blue
             isDark: false,
           ),
-          supportedTypes: [AppType.restaurant, AppType.driver],
+          supportedTypes: [AppType.restaurant, AppType.driver, AppType.market],
         );
         break;
 

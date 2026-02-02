@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/utils/extensions.dart';
 
 class LoginHeaderWidget extends StatelessWidget {
   const LoginHeaderWidget({super.key});
@@ -16,15 +17,12 @@ class LoginHeaderWidget extends StatelessWidget {
             shape: BoxShape.circle,
           ),
           padding: const EdgeInsets.all(10),
-          child: Image.asset(
-            'assets/images/logo.jpeg',
-            fit: BoxFit.contain,
-          ),
+          child: Image.asset('assets/images/logo.jpeg', fit: BoxFit.contain),
         ),
         const SizedBox(height: 18),
         // Welcome Text
-        const Text(
-          'أهلاً بك',
+        Text(
+          context.l10n.welcome,
           textAlign: TextAlign.center,
           style: TextStyle(
             color: Colors.white,
@@ -34,16 +32,12 @@ class LoginHeaderWidget extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         // Subtitle
-        const Text(
-          'سجّل دخولك للمتابعة',
+        Text(
+          context.l10n.loginToContinue,
           textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-          ),
+          style: TextStyle(color: Colors.white, fontSize: 14),
         ),
       ],
     );
   }
 }
-

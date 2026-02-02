@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/utils/extensions.dart';
@@ -78,8 +77,8 @@ class _SignupScreenState extends State<SignupScreen> {
                     ],
                   ),
                   const SizedBox(height: 18),
-                  const Text(
-                    'حساب جديد',
+                  Text(
+                    context.l10n.newAccount,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
@@ -88,10 +87,10 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  const Text(
-                    'انضم إلى وصلي الآن',
+                  Text(
+                    context.l10n.joinWasslyNow,
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white, fontSize: 14),
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
                   ),
                   const SizedBox(height: 20),
                   Container(
@@ -118,7 +117,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           controller: _nameController,
                           validator: Validators.validateName,
                           decoration: InputDecoration(
-                            labelText: AppStrings.fullName,
+                            labelText: context.l10n.fullName,
                             prefixIcon: const Icon(Icons.person_outlined),
                           ),
                         ),
@@ -130,7 +129,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           keyboardType: TextInputType.emailAddress,
                           validator: Validators.validateEmail,
                           decoration: InputDecoration(
-                            labelText: AppStrings.email,
+                            labelText: context.l10n.email,
                             prefixIcon: const Icon(Icons.email_outlined),
                           ),
                         ),
@@ -142,14 +141,14 @@ class _SignupScreenState extends State<SignupScreen> {
                           showDropdownIcon: false,
                           disableLengthCheck: false,
                           decoration: InputDecoration(
-                            labelText: AppStrings.phoneNumber,
+                            labelText: context.l10n.phoneNumber,
                             prefixIcon: const Icon(Icons.phone_outlined),
                             counterText: '',
                           ),
                           autovalidateMode: AutovalidateMode.onUserInteraction,
                           validator: (phone) {
                             if (phone == null)
-                              return AppStrings.pleaseEnterPhoneNumber;
+                              return context.l10n.pleaseEnterPhoneNumber;
                             // Egyptian mobile numbers are 10 national digits (without +20) and start with 10/11/12/15
                             final national = phone.number;
                             final validPrefix =
@@ -158,7 +157,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                 national.startsWith('12') ||
                                 national.startsWith('15');
                             if (!validPrefix || national.length != 10) {
-                              return AppStrings.pleaseEnterValidPhoneNumber;
+                              return context.l10n.pleaseEnterValidPhoneNumber;
                             }
                             return null;
                           },
@@ -180,7 +179,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           obscureText: _obscurePassword,
                           validator: Validators.validatePassword,
                           decoration: InputDecoration(
-                            labelText: AppStrings.password,
+                            labelText: context.l10n.password,
                             prefixIcon: const Icon(Icons.lock_outlined),
                             suffixIcon: IconButton(
                               icon: Icon(
@@ -208,7 +207,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                 _passwordController.text,
                               ),
                           decoration: InputDecoration(
-                            labelText: AppStrings.confirmPassword,
+                            labelText: context.l10n.confirmPassword,
                             prefixIcon: const Icon(Icons.lock_outlined),
                             suffixIcon: IconButton(
                               icon: Icon(
@@ -255,7 +254,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: const Text(AppStrings.signup),
+                          child: Text(context.l10n.signup),
                         ),
                       );
                     },
@@ -269,7 +268,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text(
-                          AppStrings.alreadyHaveAccount,
+                          context.l10n.alreadyHaveAccount,
                           style: const TextStyle(color: Colors.white),
                         ),
                         TextButton(
@@ -277,7 +276,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           style: TextButton.styleFrom(
                             foregroundColor: Colors.white,
                           ),
-                          child: const Text(AppStrings.login),
+                          child: Text(context.l10n.login),
                         ),
                       ],
                     ),

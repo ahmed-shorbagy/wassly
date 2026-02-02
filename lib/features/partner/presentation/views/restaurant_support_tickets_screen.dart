@@ -88,9 +88,7 @@ class _RestaurantSupportTicketsScreenState
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        l10n.noOrdersFound,
-                      ), // Reuse string or "No tickets found"
+                      Text(l10n.noTicketsFound),
                       const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: () =>

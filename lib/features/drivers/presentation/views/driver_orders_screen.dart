@@ -99,15 +99,11 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen>
                     controller: _tabController,
                     children: [
                       _buildActiveOrders(
-                        driverOrders
-                            .where((o) => o.isActive)
-                            .toList(),
+                        driverOrders.where((o) => o.isActive).toList(),
                         l10n,
                       ),
                       _buildOrderHistory(
-                        driverOrders
-                            .where((o) => !o.isActive)
-                            .toList(),
+                        driverOrders.where((o) => !o.isActive).toList(),
                         l10n,
                       ),
                     ],
@@ -129,7 +125,7 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen>
             Icon(
               Icons.delivery_dining,
               size: 64,
-              color: AppColors.textSecondary.withValues(alpha: 0.5),
+              color: AppColors.textSecondary.withOpacity(0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -162,7 +158,7 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen>
             Icon(
               Icons.history,
               size: 64,
-              color: AppColors.textSecondary.withValues(alpha: 0.5),
+              color: AppColors.textSecondary.withOpacity(0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -225,7 +221,9 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen>
                           ),
                         ),
                         Text(
-                          DateFormat('MMM dd, yyyy • HH:mm').format(order.createdAt),
+                          DateFormat(
+                            'MMM dd, yyyy • HH:mm',
+                          ).format(order.createdAt),
                           style: TextStyle(
                             fontSize: 12,
                             color: AppColors.textSecondary,
@@ -235,7 +233,10 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen>
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: _getStatusColor(order.status),
                       borderRadius: BorderRadius.circular(20),
@@ -267,9 +268,9 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen>
                     ElevatedButton(
                       onPressed: () {
                         context.read<OrderCubit>().updateOrderStatus(
-                              order.id,
-                              OrderStatus.pickedUp,
-                            );
+                          order.id,
+                          OrderStatus.pickedUp,
+                        );
                         if (mounted) {
                           context.showSuccessSnackBar('Order picked up');
                         }
@@ -280,9 +281,9 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen>
                     ElevatedButton(
                       onPressed: () {
                         context.read<OrderCubit>().updateOrderStatus(
-                              order.id,
-                              OrderStatus.delivered,
-                            );
+                          order.id,
+                          OrderStatus.delivered,
+                        );
                         if (mounted) {
                           context.showSuccessSnackBar('Order delivered');
                         }
@@ -315,4 +316,3 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen>
     }
   }
 }
-

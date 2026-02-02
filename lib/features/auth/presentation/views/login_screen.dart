@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../../../config/flavor_config.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/utils/extensions.dart';
 import '../../../../core/utils/logger.dart';
-import '../../../../l10n/app_localizations.dart';
 import '../cubits/auth_cubit.dart';
 import '../widgets/login_header_widget.dart';
 import '../widgets/login_form_card_widget.dart';
@@ -80,21 +80,32 @@ class _LoginScreenState extends State<LoginScreen> {
       AppLogger.logInfo('User type: ${state.user.userType}');
 
       final userType = state.user.userType;
+
+      // Handle navigation based on user type and app flavor
       if (userType == 'restaurant') {
         context.pushReplacement('/restaurant');
       } else if (userType == 'market') {
         context.pushReplacement('/market');
       } else if (userType == 'driver') {
         context.pushReplacement('/driver');
+      } else if (userType == 'admin') {
+        context.pushReplacement('/admin');
       } else {
-        context.pushReplacement('/home');
+        // Default navigation for customers or other types
+        if (FlavorConfig.instance.isCustomerApp()) {
+          // In customer-specific app, /home is the main route (from CustomerRouter)
+          context.pushReplacement('/home');
+        } else if (FlavorConfig.instance.isPartnerApp()) {
+          // In partner app, customers shouldn't be here, but let's avoid Page Not Found
+          // by showing them their profile or a message (PartnerRouter has /profile)
+          context.pushReplacement('/profile');
+        } else {
+          // In the general AppRouter, /customer is the entry point
+          context.pushReplacement('/customer');
+        }
       }
     } else if (state is AuthPasswordResetSent) {
-      final l10n = AppLocalizations.of(context);
-      context.showSuccessSnackBar(
-        l10n?.passwordResetEmailSent ??
-            'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني',
-      );
+      context.showSuccessSnackBar(context.l10n.passwordResetEmailSent);
     } else if (state is AuthError) {
       AppLogger.logError('Login error displayed to user: ${state.message}');
       context.showErrorSnackBar(state.message);

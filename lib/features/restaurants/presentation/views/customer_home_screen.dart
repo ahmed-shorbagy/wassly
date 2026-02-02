@@ -856,7 +856,6 @@ class _MarketProductCategoriesSectionState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
 
     // Prepare display items: Fixed + Market Categories
     final List<Map<String, dynamic>> displayItems = [];
@@ -942,7 +941,7 @@ class _MarketProductCategoriesSectionState
       children: [
         // Header
         Text(
-          isArabic ? "اكتشف " : "Discover Wassly",
+          l10n.discoverWassly,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../l10n/app_localizations.dart';
 import '../../../../core/utils/extensions.dart';
 
 class LoginSocialButtonsWidget extends StatelessWidget {
@@ -7,22 +6,20 @@ class LoginSocialButtonsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-
     return Column(
       children: [
         // Divider with "or" text
-        const Row(
+        Row(
           children: [
-            Expanded(child: Divider()),
+            const Expanded(child: Divider()),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
-                'أو',
-                style: TextStyle(color: Colors.grey),
+                context.l10n.or,
+                style: const TextStyle(color: Colors.grey),
               ),
             ),
-            Expanded(child: Divider()),
+            const Expanded(child: Divider()),
           ],
         ),
         const SizedBox(height: 12),
@@ -32,10 +29,7 @@ class LoginSocialButtonsWidget extends StatelessWidget {
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: () {
-                  context.showInfoSnackBar(
-                    l10n?.socialLoginComingSoon ??
-                        'تسجيل الدخول عبر وسائل التواصل الاجتماعي قريباً',
-                  );
+                  context.showInfoSnackBar(context.l10n.socialLoginComingSoon);
                 },
                 icon: const Icon(Icons.g_mobiledata, size: 22),
                 label: const Text('Google'),
@@ -51,10 +45,7 @@ class LoginSocialButtonsWidget extends StatelessWidget {
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: () {
-                  context.showInfoSnackBar(
-                    l10n?.socialLoginComingSoon ??
-                        'تسجيل الدخول عبر وسائل التواصل الاجتماعي قريباً',
-                  );
+                  context.showInfoSnackBar(context.l10n.socialLoginComingSoon);
                 },
                 icon: const Icon(Icons.facebook, size: 20),
                 label: const Text('Facebook'),
@@ -72,4 +63,3 @@ class LoginSocialButtonsWidget extends StatelessWidget {
     );
   }
 }
-

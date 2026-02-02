@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 
 extension StringExtensions on String {
   String capitalize() {
@@ -49,6 +50,8 @@ extension BuildContextExtensions on BuildContext {
   void showInfoSnackBar(String message) {
     showSnackBar(message, backgroundColor: Colors.blue);
   }
+
+  AppLocalizations get l10n => AppLocalizations.of(this)!;
 }
 
 extension DateTimeExtensions on DateTime {

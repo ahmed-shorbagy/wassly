@@ -3313,6 +3313,552 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select an option from the drawer'**
   String get selectOptionFromDrawer;
+
+  /// No description provided for @joinAsPartner.
+  ///
+  /// In en, this message translates to:
+  /// **'Join as Partner'**
+  String get joinAsPartner;
+
+  /// No description provided for @startGrowingWithWassly.
+  ///
+  /// In en, this message translates to:
+  /// **'Start growing with Wassly'**
+  String get startGrowingWithWassly;
+
+  /// No description provided for @fullNameStoreName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name / Store Name'**
+  String get fullNameStoreName;
+
+  /// No description provided for @businessDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Business Documents'**
+  String get businessDocuments;
+
+  /// No description provided for @storeLogoOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Store Logo / Cover (Optional)'**
+  String get storeLogoOptional;
+
+  /// No description provided for @vehicleInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Info'**
+  String get vehicleInfo;
+
+  /// No description provided for @motorcycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Motorcycle'**
+  String get motorcycle;
+
+  /// No description provided for @car.
+  ///
+  /// In en, this message translates to:
+  /// **'Car'**
+  String get car;
+
+  /// No description provided for @bicycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bicycle'**
+  String get bicycle;
+
+  /// No description provided for @signUpAsPartner.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Up as Partner'**
+  String get signUpAsPartner;
+
+  /// No description provided for @pleaseUploadAllDriverDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Please upload all required driver documents'**
+  String get pleaseUploadAllDriverDocuments;
+
+  /// No description provided for @pleaseUploadCommercialRegistration.
+  ///
+  /// In en, this message translates to:
+  /// **'Please upload commercial registration photo'**
+  String get pleaseUploadCommercialRegistration;
+
+  /// No description provided for @marketRegisteredSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Market registered successfully!'**
+  String get marketRegisteredSuccessfully;
+
+  /// No description provided for @driverRegisteredWaitingApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver registered successfully! Please wait for admin approval.'**
+  String get driverRegisteredWaitingApproval;
+
+  /// No description provided for @photoAttached.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo Attached'**
+  String get photoAttached;
+
+  /// No description provided for @alreadyHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account?'**
+  String get alreadyHaveAccount;
+
+  /// No description provided for @driverDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver Documents'**
+  String get driverDocuments;
+
+  /// No description provided for @newAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'New Account'**
+  String get newAccount;
+
+  /// No description provided for @joinWasslyNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Join Wassly Now'**
+  String get joinWasslyNow;
+
+  /// No description provided for @discoverWassly.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover Wassly'**
+  String get discoverWassly;
+
+  /// No description provided for @restaurantDashboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant Dashboard'**
+  String get restaurantDashboardTitle;
+
+  /// No description provided for @driverDashboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver Dashboard'**
+  String get driverDashboardTitle;
+
+  /// No description provided for @marketDashboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Market Dashboard'**
+  String get marketDashboardTitle;
+
+  /// No description provided for @welcomeName.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome, {name}!'**
+  String welcomeName(String name);
+
+  /// No description provided for @manageRestaurantSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your restaurant orders and menu'**
+  String get manageRestaurantSubtitle;
+
+  /// No description provided for @manageMarketSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your market inventory and orders'**
+  String get manageMarketSubtitle;
+
+  /// No description provided for @welcomeToRestaurantDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Restaurant Dashboard'**
+  String get welcomeToRestaurantDashboard;
+
+  /// No description provided for @welcomeToMarketDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Market Dashboard'**
+  String get welcomeToMarketDashboard;
+
+  /// No description provided for @quickStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Stats'**
+  String get quickStats;
+
+  /// No description provided for @viewOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'View Orders'**
+  String get viewOrders;
+
+  /// No description provided for @restaurantSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant Settings'**
+  String get restaurantSettings;
+
+  /// No description provided for @marketSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Market Settings'**
+  String get marketSettings;
+
+  /// No description provided for @myRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'My Restaurant'**
+  String get myRestaurant;
+
+  /// No description provided for @myMarket.
+  ///
+  /// In en, this message translates to:
+  /// **'My Market'**
+  String get myMarket;
+
+  /// No description provided for @myMarketLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'My Market'**
+  String get myMarketLabel;
+
+  /// No description provided for @newPartnerType.
+  ///
+  /// In en, this message translates to:
+  /// **'New {type}'**
+  String newPartnerType(String type);
+
+  /// No description provided for @signupAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Signup Address'**
+  String get signupAddress;
+
+  /// No description provided for @continueText.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueText;
+
+  /// No description provided for @completeSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Setup'**
+  String get completeSetup;
+
+  /// No description provided for @restaurantImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant Image'**
+  String get restaurantImage;
+
+  /// No description provided for @contactAndLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact & Location'**
+  String get contactAndLocation;
+
+  /// No description provided for @accountPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Password'**
+  String get accountPassword;
+
+  /// No description provided for @tellUsAboutRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us about your restaurant'**
+  String get tellUsAboutRestaurant;
+
+  /// No description provided for @restaurantNameAsterisk.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant Name *'**
+  String get restaurantNameAsterisk;
+
+  /// No description provided for @restaurantNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Mario\'s Pizza'**
+  String get restaurantNameHint;
+
+  /// No description provided for @nameAtLeast3Chars.
+  ///
+  /// In en, this message translates to:
+  /// **'Name must be at least 3 characters'**
+  String get nameAtLeast3Chars;
+
+  /// No description provided for @descriptionAsterisk.
+  ///
+  /// In en, this message translates to:
+  /// **'Description *'**
+  String get descriptionAsterisk;
+
+  /// No description provided for @descriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe your cuisine and specialties'**
+  String get descriptionHint;
+
+  /// No description provided for @descriptionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Description is required'**
+  String get descriptionRequired;
+
+  /// No description provided for @descriptionAtLeast10Chars.
+  ///
+  /// In en, this message translates to:
+  /// **'Description must be at least 10 characters'**
+  String get descriptionAtLeast10Chars;
+
+  /// No description provided for @whatCuisineDoYouServe.
+  ///
+  /// In en, this message translates to:
+  /// **'What type of cuisine do you serve?'**
+  String get whatCuisineDoYouServe;
+
+  /// No description provided for @noCategoriesSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'No categories selected'**
+  String get noCategoriesSelected;
+
+  /// No description provided for @select.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get select;
+
+  /// No description provided for @selectAtLeastOneCategoryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least one category to help customers find your restaurant'**
+  String get selectAtLeastOneCategoryHint;
+
+  /// No description provided for @noCategoriesAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No categories available'**
+  String get noCategoriesAvailable;
+
+  /// No description provided for @addBeautifulRestaurantImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a beautiful image of your restaurant'**
+  String get addBeautifulRestaurantImage;
+
+  /// No description provided for @recommendedImageSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended: 1200x600px'**
+  String get recommendedImageSize;
+
+  /// No description provided for @imageSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Image selected'**
+  String get imageSelected;
+
+  /// No description provided for @howReachYou.
+  ///
+  /// In en, this message translates to:
+  /// **'How can customers reach you?'**
+  String get howReachYou;
+
+  /// No description provided for @emailAddressAsterisk.
+  ///
+  /// In en, this message translates to:
+  /// **'Email Address *'**
+  String get emailAddressAsterisk;
+
+  /// No description provided for @restaurantEmailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'restaurant@example.com'**
+  String get restaurantEmailHint;
+
+  /// No description provided for @phoneNumberAsterisk.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone Number *'**
+  String get phoneNumberAsterisk;
+
+  /// No description provided for @phoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'+1 (555) 123-4567'**
+  String get phoneHint;
+
+  /// No description provided for @fullAddressAsterisk.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Address *'**
+  String get fullAddressAsterisk;
+
+  /// No description provided for @addressHint.
+  ///
+  /// In en, this message translates to:
+  /// **'123 Main St, City, State, ZIP'**
+  String get addressHint;
+
+  /// No description provided for @completeAddressRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a complete address'**
+  String get completeAddressRequired;
+
+  /// No description provided for @updateDetailsFromProfileHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You can update these details anytime from your profile settings.'**
+  String get updateDetailsFromProfileHint;
+
+  /// No description provided for @createPasswordForRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a password for your restaurant account'**
+  String get createPasswordForRestaurant;
+
+  /// No description provided for @passwordAsterisk.
+  ///
+  /// In en, this message translates to:
+  /// **'Password *'**
+  String get passwordAsterisk;
+
+  /// No description provided for @passwordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a secure password'**
+  String get passwordHint;
+
+  /// No description provided for @confirmPasswordAsterisk.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Password *'**
+  String get confirmPasswordAsterisk;
+
+  /// No description provided for @confirmPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm your password'**
+  String get confirmPasswordHint;
+
+  /// No description provided for @passwordSecureHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This password will be used to log into your restaurant account. Make sure to keep it secure.'**
+  String get passwordSecureHint;
+
+  /// No description provided for @imageSelectedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Image selected successfully'**
+  String get imageSelectedSuccessfully;
+
+  /// No description provided for @myProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'My Products'**
+  String get myProducts;
+
+  /// No description provided for @availabilityUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Availability updated'**
+  String get availabilityUpdated;
+
+  /// No description provided for @addFirstProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Add First Product'**
+  String get addFirstProduct;
+
+  /// No description provided for @areYouSureDeleteProductWithName.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{name}\"? This action cannot be undone.'**
+  String areYouSureDeleteProductWithName(String name);
+
+  /// No description provided for @restaurantIdNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant ID not found'**
+  String get restaurantIdNotFound;
+
+  /// No description provided for @error.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get error;
+
+  /// No description provided for @invalidPhoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid phone number'**
+  String get invalidPhoneNumber;
+
+  /// No description provided for @refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refresh;
+
+  /// No description provided for @unknownCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Category'**
+  String get unknownCategory;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @discountPercentageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., 20 for 20%'**
+  String get discountPercentageHint;
+
+  /// No description provided for @noStartDate.
+  ///
+  /// In en, this message translates to:
+  /// **'No start date'**
+  String get noStartDate;
+
+  /// No description provided for @noEndDate.
+  ///
+  /// In en, this message translates to:
+  /// **'No end date'**
+  String get noEndDate;
+
+  /// No description provided for @noTicketsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No tickets found'**
+  String get noTicketsFound;
+
+  /// No description provided for @userNotAuthenticated.
+  ///
+  /// In en, this message translates to:
+  /// **'User not authenticated'**
+  String get userNotAuthenticated;
+
+  /// No description provided for @notProvided.
+  ///
+  /// In en, this message translates to:
+  /// **'Not provided'**
+  String get notProvided;
+
+  /// No description provided for @name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get name;
 }
 
 class _AppLocalizationsDelegate

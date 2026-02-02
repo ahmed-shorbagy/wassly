@@ -7,7 +7,7 @@ import '../../features/auth/presentation/views/signup_screen.dart';
 import '../../features/restaurants/presentation/views/customer_home_screen.dart';
 import '../../features/restaurants/presentation/views/restaurant_detail_screen.dart';
 import '../../features/restaurants/presentation/views/restaurant_home_screen.dart';
-import '../../features/restaurants/presentation/views/driver_home_screen.dart';
+import '../../features/drivers/presentation/views/driver_home_screen.dart';
 import '../../features/restaurants/presentation/cubits/restaurant_cubit.dart';
 import '../../features/orders/presentation/views/cart_screen.dart';
 import '../../features/orders/presentation/views/checkout_screen.dart';
@@ -24,6 +24,14 @@ import '../../features/partner/presentation/views/restaurant_orders_screen.dart'
 import '../../features/partner/presentation/views/restaurant_settings_screen.dart';
 import '../../features/drivers/presentation/views/driver_orders_screen.dart';
 import '../../features/auth/presentation/cubits/auth_cubit.dart';
+import '../../features/restaurants/presentation/views/favorites_screen.dart';
+import '../../features/restaurants/presentation/views/search_results_screen.dart';
+import '../../features/orders/presentation/views/order_summary_screen.dart';
+import '../../features/market_products/presentation/views/market_products_screen.dart';
+import '../../features/delivery_address/presentation/views/address_book_screen.dart';
+import '../../features/partner/presentation/views/partner_support_screen.dart';
+import '../../features/support/domain/entities/ticket_message_entity.dart';
+import '../../features/restaurants/domain/entities/restaurant_entity.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -48,6 +56,8 @@ class AppRouter {
         builder: (context, state) => const SignupScreen(),
       ),
 
+      // Home Redirection
+      GoRoute(path: '/home', redirect: (context, state) => '/customer'),
       // Customer Routes
       GoRoute(
         path: '/customer',
@@ -73,6 +83,45 @@ class AppRouter {
             builder: (context, state) => const CartScreen(),
           ),
           GoRoute(
+            path: 'favorites',
+            name: 'customer-favorites',
+            builder: (context, state) => const FavoritesScreen(),
+          ),
+          GoRoute(
+            path: 'search',
+            name: 'customer-search',
+            builder: (context, state) {
+              final query = state.uri.queryParameters['q'] ?? '';
+              final filterType = state.uri.queryParameters['filterType'];
+              final restaurants = state.extra as List?;
+              return SearchResultsScreen(
+                initialQuery: query,
+                initialRestaurants: restaurants?.cast(),
+                filterType: filterType,
+              );
+            },
+          ),
+          GoRoute(
+            path: 'market-products',
+            name: 'customer-market-products',
+            builder: (context, state) {
+              final restaurantId = state.uri.queryParameters['restaurantId'];
+              final restaurantName =
+                  state.uri.queryParameters['restaurantName'];
+              final category = state.uri.queryParameters['category'];
+              return MarketProductsScreen(
+                restaurantId: restaurantId,
+                restaurantName: restaurantName,
+                initialCategory: category,
+              );
+            },
+          ),
+          GoRoute(
+            path: 'address-book',
+            name: 'customer-address-book',
+            builder: (context, state) => const AddressBookScreen(),
+          ),
+          GoRoute(
             path: 'checkout',
             name: 'customer-checkout',
             builder: (context, state) {
@@ -80,8 +129,8 @@ class AppRouter {
                   state.uri.queryParameters['restaurantId'] ?? '';
               // Get restaurant from cubit or pass as extra
               final restaurant = state.extra;
-              if (restaurant != null) {
-                return CheckoutScreen(restaurant: restaurant as dynamic);
+              if (restaurant is RestaurantEntity) {
+                return CheckoutScreen(restaurant: restaurant);
               }
               // Fallback: fetch restaurant by ID
               return FutureBuilder(
@@ -93,7 +142,9 @@ class AppRouter {
                     );
                   }
                   if (snapshot.hasData) {
-                    return CheckoutScreen(restaurant: snapshot.data as dynamic);
+                    return CheckoutScreen(
+                      restaurant: snapshot.data as RestaurantEntity,
+                    );
                   }
                   return const Scaffold(
                     body: Center(child: Text('Restaurant not found')),
@@ -113,6 +164,14 @@ class AppRouter {
             builder: (context, state) {
               final orderId = state.pathParameters['id'] ?? '';
               return OrderDetailScreen(orderId: orderId);
+            },
+          ),
+          GoRoute(
+            path: 'order-summary/:id',
+            name: 'customer-order-summary',
+            builder: (context, state) {
+              final orderId = state.pathParameters['id'] ?? '';
+              return OrderSummaryScreen(orderId: orderId);
             },
           ),
           GoRoute(
@@ -166,6 +225,33 @@ class AppRouter {
             },
           ),
           GoRoute(
+            path: 'support',
+            name: 'restaurant-support',
+            builder: (context, state) => const PartnerSupportScreen(
+              supportType: PartnerSupportType.restaurant,
+            ),
+            routes: [
+              GoRoute(
+                path: 'chat/:ticketId',
+                name: 'restaurant-ticket-chat-sub',
+                builder: (context, state) {
+                  final extras = state.extra as Map<String, dynamic>;
+                  return TicketChatScreen(extras: extras);
+                },
+              ),
+              GoRoute(
+                path: 'create',
+                name: 'restaurant-create-ticket',
+                builder: (context, state) {
+                  final extras = state.extra as Map<String, dynamic>;
+                  final newExtras = Map<String, dynamic>.from(extras);
+                  newExtras['senderRole'] = SenderRole.restaurant;
+                  return CreateTicketScreen(extras: newExtras);
+                },
+              ),
+            ],
+          ),
+          GoRoute(
             path: 'products',
             name: 'restaurant-products',
             builder: (context, state) {
@@ -189,7 +275,7 @@ class AppRouter {
                       );
                     }
                     if (snapshot.hasData && snapshot.data != null) {
-                      final restaurant = snapshot.data as dynamic;
+                      final restaurant = snapshot.data as RestaurantEntity;
                       return AdminAddProductScreen(restaurantId: restaurant.id);
                     }
                     return const Scaffold(
@@ -218,7 +304,7 @@ class AppRouter {
                       );
                     }
                     if (snapshot.hasData && snapshot.data != null) {
-                      final restaurant = snapshot.data as dynamic;
+                      final restaurant = snapshot.data as RestaurantEntity;
                       return AdminEditProductScreen(
                         restaurantId: restaurant.id,
                         productId: productId,
@@ -264,6 +350,33 @@ class AppRouter {
             path: 'profile',
             name: 'driver-profile',
             builder: (context, state) => const CustomerProfileScreen(),
+          ),
+          GoRoute(
+            path: 'support',
+            name: 'driver-support',
+            builder: (context, state) => const PartnerSupportScreen(
+              supportType: PartnerSupportType.driver,
+            ),
+            routes: [
+              GoRoute(
+                path: 'chat/:ticketId',
+                name: 'driver-ticket-chat',
+                builder: (context, state) {
+                  final extras = state.extra as Map<String, dynamic>;
+                  return TicketChatScreen(extras: extras);
+                },
+              ),
+              GoRoute(
+                path: 'create',
+                name: 'driver-create-ticket',
+                builder: (context, state) {
+                  final extras = state.extra as Map<String, dynamic>;
+                  final newExtras = Map<String, dynamic>.from(extras);
+                  newExtras['senderRole'] = SenderRole.driver;
+                  return CreateTicketScreen(extras: newExtras);
+                },
+              ),
+            ],
           ),
         ],
       ),

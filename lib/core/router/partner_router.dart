@@ -2,7 +2,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import '../../features/auth/presentation/views/partner_splash_screen.dart';
 import '../../features/auth/presentation/views/login_screen.dart';
-import '../../features/auth/presentation/views/signup_screen.dart';
+import '../../features/auth/presentation/views/partner_signup_screen.dart';
 import '../../features/restaurants/presentation/views/restaurant_home_screen.dart';
 import '../../features/drivers/presentation/views/driver_home_screen.dart';
 import '../../features/partner/presentation/views/restaurant_orders_screen.dart';
@@ -24,10 +24,30 @@ import '../../features/support/presentation/views/create_ticket_screen.dart';
 import '../../features/support/presentation/views/ticket_chat_screen.dart';
 import '../../features/partner/presentation/views/partner_support_screen.dart';
 import '../../features/support/domain/entities/ticket_message_entity.dart';
+import '../../features/partner/presentation/views/add_product_screen.dart';
+import '../../features/partner/presentation/views/edit_product_screen.dart';
+
+import 'dart:async';
+import '../../features/auth/presentation/cubits/auth_cubit.dart';
+import '../../core/di/injection_container.dart';
 
 class PartnerRouter {
   static final GoRouter router = GoRouter(
     initialLocation: '/splash',
+    refreshListenable: AuthRefreshStream(InjectionContainer().authCubit.stream),
+    redirect: (context, state) {
+      final authState = InjectionContainer().authCubit.state;
+      final isLoggingIn = state.uri.toString() == '/login';
+      final isSigningUp = state.uri.toString() == '/signup';
+      final isSplash = state.uri.toString() == '/splash';
+
+      if (authState is AuthUnauthenticated) {
+        if (!isLoggingIn && !isSigningUp && !isSplash) {
+          return '/login';
+        }
+      }
+      return null;
+    },
     routes: [
       // Splash Screen
       GoRoute(
@@ -45,8 +65,10 @@ class PartnerRouter {
       GoRoute(
         path: '/signup',
         name: 'signup',
-        builder: (context, state) => const SignupScreen(),
+        builder: (context, state) => const PartnerSignupScreen(),
       ),
+      // Home Redirect
+      GoRoute(path: '/home', redirect: (context, state) => '/profile'),
 
       // Restaurant Routes
       GoRoute(
@@ -74,6 +96,24 @@ class PartnerRouter {
               // Restaurant ID will be fetched from auth state in the screen
               return const RestaurantProductsScreen();
             },
+            routes: [
+              GoRoute(
+                path: 'add',
+                name: 'restaurant-add-product',
+                builder: (context, state) =>
+                    const AddProductScreen(), // You'll need to define this or verify import
+              ),
+              GoRoute(
+                path: 'edit/:productId',
+                name: 'restaurant-edit-product',
+                builder: (context, state) {
+                  final productId = state.pathParameters['productId'] ?? '';
+                  return EditProductScreen(
+                    productId: productId,
+                  ); // You'll need to define this or verify import
+                },
+              ),
+            ],
           ),
           GoRoute(
             path: 'settings',
@@ -288,6 +328,23 @@ class PartnerRouter {
     ],
     errorBuilder: (context, state) => const ErrorScreen(),
   );
+}
+
+class AuthRefreshStream extends ChangeNotifier {
+  late final StreamSubscription<dynamic> _subscription;
+
+  AuthRefreshStream(Stream<dynamic> stream) {
+    notifyListeners();
+    _subscription = stream.asBroadcastStream().listen(
+      (dynamic _) => notifyListeners(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
 }
 
 // Placeholder screens

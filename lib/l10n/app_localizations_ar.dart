@@ -1656,4 +1656,289 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get selectOptionFromDrawer => 'اختر خياراً من القائمة الجانبية';
+
+  @override
+  String get joinAsPartner => 'انضم كشريك';
+
+  @override
+  String get startGrowingWithWassly => 'ابدأ النمو مع وصلي';
+
+  @override
+  String get fullNameStoreName => 'الاسم الكامل / اسم المتجر';
+
+  @override
+  String get businessDocuments => 'وثائق العمل';
+
+  @override
+  String get storeLogoOptional => 'شعار المتجر / الغلاف (اختياري)';
+
+  @override
+  String get vehicleInfo => 'معلومات المركبة';
+
+  @override
+  String get motorcycle => 'دراجة نارية';
+
+  @override
+  String get car => 'سيارة';
+
+  @override
+  String get bicycle => 'دراجة';
+
+  @override
+  String get signUpAsPartner => 'تسجيل كشريك';
+
+  @override
+  String get pleaseUploadAllDriverDocuments =>
+      'يرجى تحميل جميع وثائق السائق المطلوبة';
+
+  @override
+  String get pleaseUploadCommercialRegistration =>
+      'يرجى تحميل صورة السجل التجاري';
+
+  @override
+  String get marketRegisteredSuccessfully => 'تم تسجيل المتجر بنجاح!';
+
+  @override
+  String get driverRegisteredWaitingApproval =>
+      'تم تسجيل السائق بنجاح! يرجى انتظار موافقة المسؤول.';
+
+  @override
+  String get photoAttached => 'تم إرفاق الصورة';
+
+  @override
+  String get alreadyHaveAccount => 'هل لديك حساب بالفعل؟';
+
+  @override
+  String get driverDocuments => 'وثائق السائق';
+
+  @override
+  String get newAccount => 'حساب جديد';
+
+  @override
+  String get joinWasslyNow => 'انضم إلى وصلي الآن';
+
+  @override
+  String get discoverWassly => 'اكتشف وصلي';
+
+  @override
+  String get restaurantDashboardTitle => 'لوحة تحكم المطعم';
+
+  @override
+  String get driverDashboardTitle => 'لوحة تحكم السائق';
+
+  @override
+  String get marketDashboardTitle => 'لوحة تحكم المتجر';
+
+  @override
+  String welcomeName(String name) {
+    return 'أهلاً بك، $name!';
+  }
+
+  @override
+  String get manageRestaurantSubtitle => 'إدارة طلبات المطعـم والقائمـة';
+
+  @override
+  String get manageMarketSubtitle => 'إدارة مخزون المتجر والطلبات';
+
+  @override
+  String get welcomeToRestaurantDashboard => 'مرحباً بكم في لوحة تحكم المطعم';
+
+  @override
+  String get welcomeToMarketDashboard => 'مرحباً بكم في لوحة تحكم المتجر';
+
+  @override
+  String get quickStats => 'إحصائيات سريعة';
+
+  @override
+  String get viewOrders => 'عرض الطلبات';
+
+  @override
+  String get restaurantSettings => 'إعدادات المطعم';
+
+  @override
+  String get marketSettings => 'إعدادات المتجر';
+
+  @override
+  String get myRestaurant => 'مطعمي';
+
+  @override
+  String get myMarket => 'متجري';
+
+  @override
+  String get myMarketLabel => 'متجري';
+
+  @override
+  String newPartnerType(String type) {
+    return '$type جديد';
+  }
+
+  @override
+  String get signupAddress => 'عنوان التسجيل';
+
+  @override
+  String get continueText => 'استمرار';
+
+  @override
+  String get completeSetup => 'إكمال الإعداد';
+
+  @override
+  String get restaurantImage => 'صورة المطعم';
+
+  @override
+  String get contactAndLocation => 'الاتصال والموقع';
+
+  @override
+  String get accountPassword => 'كلمة مرور الحساب';
+
+  @override
+  String get tellUsAboutRestaurant => 'أخبرنا عن مطعمك';
+
+  @override
+  String get restaurantNameAsterisk => 'اسم المطعم *';
+
+  @override
+  String get restaurantNameHint => 'مثال: ماريو بيتزا';
+
+  @override
+  String get nameAtLeast3Chars => 'يجب أن يكون الاسم 3 أحرف على الأقل';
+
+  @override
+  String get descriptionAsterisk => 'الوصف *';
+
+  @override
+  String get descriptionHint => 'صف مأكولاتك وتخصصاتك';
+
+  @override
+  String get descriptionRequired => 'الوصف مطلوب';
+
+  @override
+  String get descriptionAtLeast10Chars => 'يجب أن يكون الوصف 10 أحرف على الأقل';
+
+  @override
+  String get whatCuisineDoYouServe => 'ما نوع المأكولات التي تقدمها؟';
+
+  @override
+  String get noCategoriesSelected => 'لم يتم اختيار فئات';
+
+  @override
+  String get select => 'اختيار';
+
+  @override
+  String get selectAtLeastOneCategoryHint =>
+      'اختر فئة واحدة على الأقل لمساعدة العملاء في العثور على مطعمك';
+
+  @override
+  String get noCategoriesAvailable => 'لا توجد فئات متاحة';
+
+  @override
+  String get addBeautifulRestaurantImage => 'أضف صورة جميلة لمطعمك';
+
+  @override
+  String get recommendedImageSize => 'الموصى به: 1200x600 بكسل';
+
+  @override
+  String get imageSelected => 'تم اختيار الصورة';
+
+  @override
+  String get howReachYou => 'كيف يمكن للعملاء الوصول إليك؟';
+
+  @override
+  String get emailAddressAsterisk => 'عنوان البريد الإلكتروني *';
+
+  @override
+  String get restaurantEmailHint => 'restaurant@example.com';
+
+  @override
+  String get phoneNumberAsterisk => 'رقم الهاتف *';
+
+  @override
+  String get phoneHint => '+1 (555) 123-4567';
+
+  @override
+  String get fullAddressAsterisk => 'العنوان الكامل *';
+
+  @override
+  String get addressHint => '123 شارع النيل، القاهرة';
+
+  @override
+  String get completeAddressRequired => 'يرجى إدخال عنوان كامل';
+
+  @override
+  String get updateDetailsFromProfileHint =>
+      'يمكنك تحديث هذه التفاصيل في أي وقت من إعدادات ملفك الشخصي.';
+
+  @override
+  String get createPasswordForRestaurant => 'أنشئ كلمة مرور لحساب مطعمك';
+
+  @override
+  String get passwordAsterisk => 'كلمة المرور *';
+
+  @override
+  String get passwordHint => 'أدخل كلمة مرور آمنة';
+
+  @override
+  String get confirmPasswordAsterisk => 'تأكيد كلمة المرور *';
+
+  @override
+  String get confirmPasswordHint => 'أكد كلمة المرور الخاصة بك';
+
+  @override
+  String get passwordSecureHint =>
+      'سيتم استخدام كلمة المرور هذه لتسجيل الدخول إلى حساب مطعمك. تأكد من الحفاظ على أمنها.';
+
+  @override
+  String get imageSelectedSuccessfully => 'تم اختيار الصورة بنجاح';
+
+  @override
+  String get myProducts => 'منتجاتي';
+
+  @override
+  String get availabilityUpdated => 'تم تحديث التوفر';
+
+  @override
+  String get addFirstProduct => 'أضف المنتج الأول';
+
+  @override
+  String areYouSureDeleteProductWithName(String name) {
+    return 'هل أنت متأكد أنك تريد حذف \"$name\"؟ لا يمكن التراجع عن هذا الإجراء.';
+  }
+
+  @override
+  String get restaurantIdNotFound => 'معرف المطعم غير موجود';
+
+  @override
+  String get error => 'خطأ';
+
+  @override
+  String get invalidPhoneNumber => 'رقم هاتف غير صالح';
+
+  @override
+  String get refresh => 'تحديث';
+
+  @override
+  String get unknownCategory => 'فئة غير معروفة';
+
+  @override
+  String get delete => 'حذف';
+
+  @override
+  String get discountPercentageHint => 'مثال: 20 لـ 20%';
+
+  @override
+  String get noStartDate => 'لا يوجد تاريخ بدء';
+
+  @override
+  String get noEndDate => 'لا يوجد تاريخ انتهاء';
+
+  @override
+  String get noTicketsFound => 'لم يتم العثور على تذاكر';
+
+  @override
+  String get userNotAuthenticated => 'المستخدم غير مسجل';
+
+  @override
+  String get notProvided => 'غير متوفر';
+
+  @override
+  String get name => 'الاسم';
 }

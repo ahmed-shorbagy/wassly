@@ -9,6 +9,7 @@ import '../../features/auth/domain/usecases/logout_usecase.dart';
 import '../../features/auth/domain/usecases/get_current_user_usecase.dart';
 import '../../features/auth/domain/usecases/reset_password_usecase.dart';
 import '../../features/auth/presentation/cubits/auth_cubit.dart';
+import '../../features/auth/presentation/cubits/partner_signup_cubit.dart';
 import '../../features/restaurants/data/repositories/restaurant_repository_impl.dart';
 import '../../features/restaurants/domain/repositories/restaurant_repository.dart';
 import '../../features/restaurants/domain/repositories/favorites_repository.dart';
@@ -97,6 +98,7 @@ class InjectionContainer {
   late final SupportRepository _supportRepository;
   late final NotificationService _notificationService;
   late final NotificationSenderService _notificationSenderService;
+  late final AuthCubit _authCubit;
 
   Future<void> init() async {
     // Services - Initialize these early as they are dependencies for repositories
@@ -172,6 +174,16 @@ class InjectionContainer {
     _articleRepository = ArticleRepositoryImpl(firestore: _firestore);
 
     _supportRepository = SupportRepositoryImpl(firestore: _firestore);
+
+    // Blocs/Cubits - Initialize singletons
+    _authCubit = AuthCubit(
+      loginUseCase: LoginUseCase(_authRepository),
+      signupUseCase: SignupUseCase(_authRepository),
+      logoutUseCase: LogoutUseCase(_authRepository),
+      getCurrentUserUseCase: GetCurrentUserUseCase(_authRepository),
+      resetPasswordUseCase: ResetPasswordUseCase(_authRepository),
+      repository: _authRepository,
+    );
   }
 
   // Getters for accessing services from other parts of the app
@@ -180,18 +192,17 @@ class InjectionContainer {
   NotificationService get notificationService => _notificationService;
   NotificationSenderService get notificationSenderService =>
       _notificationSenderService;
+  AuthCubit get authCubit => _authCubit;
 
   List<BlocProvider> getBlocProviders() {
     return [
       BlocProvider<LocaleCubit>(create: (_) => LocaleCubit()..load()),
-      BlocProvider<AuthCubit>(
-        create: (_) => AuthCubit(
-          loginUseCase: LoginUseCase(_authRepository),
-          signupUseCase: SignupUseCase(_authRepository),
-          logoutUseCase: LogoutUseCase(_authRepository),
-          getCurrentUserUseCase: GetCurrentUserUseCase(_authRepository),
-          resetPasswordUseCase: ResetPasswordUseCase(_authRepository),
-          repository: _authRepository,
+      BlocProvider<AuthCubit>(create: (_) => _authCubit),
+      BlocProvider<PartnerSignupCubit>(
+        create: (_) => PartnerSignupCubit(
+          authRepository: _authRepository,
+          restaurantOwnerRepository: _restaurantOwnerRepository,
+          driverRepository: _driverRepository,
         ),
       ),
       BlocProvider<RestaurantCubit>(

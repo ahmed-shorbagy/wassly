@@ -12,6 +12,7 @@ import '../../../restaurants/presentation/cubits/restaurant_cubit.dart';
 import '../../../restaurants/presentation/cubits/food_category_cubit.dart';
 import '../../../auth/presentation/cubits/auth_cubit.dart';
 import '../cubits/product_management_cubit.dart';
+import '../../../../core/utils/logger.dart';
 
 class ProductManagementScreen extends StatefulWidget {
   const ProductManagementScreen({super.key});
@@ -34,7 +35,9 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
   void _loadRestaurantAndProducts() {
     final authState = context.read<AuthCubit>().state;
     if (authState is AuthAuthenticated) {
-      context.read<RestaurantCubit>().getRestaurantByOwnerId(authState.user.id);
+      // Fallback: Fetch all restaurants and find match client-side
+      // because getRestaurantByOwnerId is failing for some users
+      context.read<RestaurantCubit>().getAllRestaurants();
     }
   }
 
@@ -54,83 +57,149 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
         }
       },
       child: Scaffold(
-      appBar: AppBar(
-        title: const Text('My Products'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
+        appBar: AppBar(
+          title: Text(context.l10n.myProducts),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () {
+                if (_restaurantId != null) {
+                  _loadProducts(_restaurantId!);
+                } else {
+                  _loadRestaurantAndProducts();
+                }
+              },
+              tooltip: context.l10n.refresh,
+            ),
+          ],
+        ),
+        body: BlocConsumer<ProductManagementCubit, ProductManagementState>(
+          listener: (context, state) {
+            if (state is ProductDeleted) {
+              context.showSuccessSnackBar(
+                context.l10n.productDeletedSuccessfully,
+              );
               if (_restaurantId != null) {
                 _loadProducts(_restaurantId!);
-              } else {
-                _loadRestaurantAndProducts();
               }
-            },
-            tooltip: 'Refresh',
-          ),
-        ],
-      ),
-      body: BlocConsumer<ProductManagementCubit, ProductManagementState>(
-        listener: (context, state) {
-          if (state is ProductDeleted) {
-            context.showSuccessSnackBar('Product deleted successfully');
-            if (_restaurantId != null) {
-              _loadProducts(_restaurantId!);
+            } else if (state is ProductAvailabilityToggled) {
+              context.showSuccessSnackBar(context.l10n.availabilityUpdated);
+              if (_restaurantId != null) {
+                _loadProducts(_restaurantId!);
+              }
+            } else if (state is ProductManagementError) {
+              context.showErrorSnackBar(state.message);
             }
-          } else if (state is ProductAvailabilityToggled) {
-            context.showSuccessSnackBar('Availability updated');
-            if (_restaurantId != null) {
-              _loadProducts(_restaurantId!);
-            }
-          } else if (state is ProductManagementError) {
-            context.showErrorSnackBar(state.message);
-          }
-        },
-        builder: (context, managementState) {
-          return BlocConsumer<RestaurantCubit, RestaurantState>(
-            listener: (context, state) {
-              if (state is RestaurantLoaded) {
-                setState(() {
-                  _restaurantId = state.restaurant.id;
-                });
-                _loadProducts(state.restaurant.id);
-              }
-            },
-            builder: (context, state) {
-              if (state is RestaurantLoading) {
-                return const LoadingWidget();
-              }
+          },
+          builder: (context, managementState) {
+            return BlocConsumer<RestaurantCubit, RestaurantState>(
+              listener: (context, state) {
+                if (state is RestaurantLoaded) {
+                  setState(() {
+                    _restaurantId = state.restaurant.id;
+                  });
+                  _loadProducts(state.restaurant.id);
+                } else if (state is RestaurantsLoaded) {
+                  final authState = context.read<AuthCubit>().state;
+                  if (authState is AuthAuthenticated) {
+                    AppLogger.logInfo(
+                      'DEBUG: Checking for owner match. User: ${authState.user.id}',
+                    );
+                    for (var r in state.restaurants) {
+                      AppLogger.logInfo(
+                        'DEBUG: Restaurant: ${r.name}, Owner: ${r.ownerId}',
+                      );
+                    }
 
-              if (state is RestaurantError) {
-                return ErrorDisplayWidget(
-                  message: state.message,
-                  onRetry: _loadRestaurantAndProducts,
-                );
-              }
-
-              if (state is RestaurantLoaded && _restaurantId == null) {
-                // Restaurant loaded but products not yet loaded
-                return const LoadingWidget();
-              }
-
-              if (state is ProductsLoaded) {
-                if (state.products.isEmpty) {
-                  return _buildEmptyState();
+                    try {
+                      final myRestaurant = state.restaurants.firstWhere(
+                        (r) => r.ownerId == authState.user.id,
+                      );
+                      setState(() {
+                        _restaurantId = myRestaurant.id;
+                      });
+                      _loadProducts(myRestaurant.id);
+                    } catch (_) {
+                      AppLogger.logWarning(
+                        'DEBUG: No matching restaurant found for user in list of ${state.restaurants.length}',
+                      );
+                    }
+                  }
                 }
-                return _buildProductList(state.products);
-              }
+              },
+              builder: (context, state) {
+                if (state is RestaurantLoading) {
+                  return const LoadingWidget();
+                }
 
-              return _buildEmptyState();
-            },
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _navigateToAddProduct(),
-        icon: const Icon(Icons.add),
-        label: const Text('Add Product'),
-        backgroundColor: Colors.green,
-      ),
+                if (state is RestaurantError) {
+                  return ErrorDisplayWidget(
+                    message: state.message,
+                    onRetry: _loadRestaurantAndProducts,
+                  );
+                }
+
+                if (state is RestaurantLoaded && _restaurantId == null) {
+                  // Restaurant loaded but products not yet loaded
+                  return const LoadingWidget();
+                }
+
+                // Show specific error if no restaurant found after loading
+                if (state is RestaurantsLoaded && _restaurantId == null) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.store,
+                            size: 80,
+                            color: AppColors.textSecondary,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No Market Found',
+                            style: Theme.of(context).textTheme.headlineSmall,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Your account is not linked to any market.',
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'User ID: ${context.read<AuthCubit>().state is AuthAuthenticated ? (context.read<AuthCubit>().state as AuthAuthenticated).user.id : "Unknown"}',
+                            textAlign: TextAlign.center,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                if (state is ProductsLoaded) {
+                  if (state.products.isEmpty) {
+                    return _buildEmptyState();
+                  }
+                  return _buildProductList(state.products);
+                }
+
+                return _buildEmptyState();
+              },
+            );
+          },
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () => _navigateToAddProduct(),
+          icon: const Icon(Icons.add),
+          label: Text(context.l10n.addProduct),
+          backgroundColor: Colors.green,
+        ),
       ),
     );
   }
@@ -232,7 +301,8 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                       const SizedBox(height: 4),
 
                       // Category
-                      if (product.categoryId != null || product.category != null)
+                      if (product.categoryId != null ||
+                          product.category != null)
                         Builder(
                           builder: (context) {
                             String categoryName = product.category ?? '';
@@ -245,7 +315,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                               } catch (e) {
                                 // Category not found, use fallback
                                 if (categoryName.isEmpty) {
-                                  categoryName = 'Unknown Category';
+                                  categoryName = context.l10n.unknownCategory;
                                 }
                               }
                             }
@@ -258,7 +328,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                                       vertical: 4,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: Colors.orange.withValues(alpha: 0.1),
+                                      color: Colors.orange.withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(
@@ -318,7 +388,9 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                         activeThumbColor: Colors.green,
                       ),
                       Text(
-                        product.isAvailable ? 'Available' : 'Unavailable',
+                        product.isAvailable
+                            ? context.l10n.productAvailable
+                            : context.l10n.productUnavailable,
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -335,14 +407,14 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                 IconButton(
                   icon: const Icon(Icons.edit, color: Colors.blue),
                   onPressed: () => _navigateToEditProduct(product),
-                  tooltip: 'Edit',
+                  tooltip: context.l10n.edit,
                 ),
 
                 // Delete Button
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
                   onPressed: () => _showDeleteDialog(product),
-                  tooltip: 'Delete',
+                  tooltip: context.l10n.delete,
                 ),
               ],
             ),
@@ -362,16 +434,16 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
             Icon(
               Icons.restaurant_menu,
               size: 100,
-              color: AppColors.textSecondary.withValues(alpha: 0.3),
+              color: AppColors.textSecondary.withOpacity(0.3),
             ),
             const SizedBox(height: 24),
-            const Text(
-              'No Products Yet',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            Text(
+              context.l10n.noProductsYet,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             Text(
-              'Start building your menu by adding your first product',
+              context.l10n.startByAddingYourFirstProduct,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
             ),
@@ -379,7 +451,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
             ElevatedButton.icon(
               onPressed: () => _navigateToAddProduct(),
               icon: const Icon(Icons.add),
-              label: const Text('Add First Product'),
+              label: Text(context.l10n.addFirstProduct),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
                 padding: const EdgeInsets.symmetric(
@@ -405,14 +477,14 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Product'),
+        title: Text(context.l10n.deleteProduct),
         content: Text(
-          'Are you sure you want to delete "${product.name}"? This action cannot be undone.',
+          context.l10n.areYouSureDeleteProductWithName(product.name),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -420,7 +492,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
               context.read<ProductManagementCubit>().deleteProduct(product.id);
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-            child: const Text('Delete'),
+            child: Text(context.l10n.delete),
           ),
         ],
       ),
@@ -429,7 +501,8 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
 
   void _navigateToAddProduct() {
     if (_restaurantId == null) {
-      context.showErrorSnackBar('Restaurant ID not found');
+      _loadRestaurantAndProducts();
+      context.showInfoSnackBar('Loading data, please try again...');
       return;
     }
     context.push('/restaurant/products/add');
@@ -437,7 +510,8 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
 
   void _navigateToEditProduct(ProductEntity product) {
     if (_restaurantId == null) {
-      context.showErrorSnackBar('Restaurant ID not found');
+      _loadRestaurantAndProducts();
+      context.showInfoSnackBar('Loading data, please try again...');
       return;
     }
     context.push('/restaurant/products/edit/${product.id}');

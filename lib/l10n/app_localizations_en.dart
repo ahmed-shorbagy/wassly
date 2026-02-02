@@ -1666,4 +1666,293 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get selectOptionFromDrawer => 'Select an option from the drawer';
+
+  @override
+  String get joinAsPartner => 'Join as Partner';
+
+  @override
+  String get startGrowingWithWassly => 'Start growing with Wassly';
+
+  @override
+  String get fullNameStoreName => 'Full Name / Store Name';
+
+  @override
+  String get businessDocuments => 'Business Documents';
+
+  @override
+  String get storeLogoOptional => 'Store Logo / Cover (Optional)';
+
+  @override
+  String get vehicleInfo => 'Vehicle Info';
+
+  @override
+  String get motorcycle => 'Motorcycle';
+
+  @override
+  String get car => 'Car';
+
+  @override
+  String get bicycle => 'Bicycle';
+
+  @override
+  String get signUpAsPartner => 'Sign Up as Partner';
+
+  @override
+  String get pleaseUploadAllDriverDocuments =>
+      'Please upload all required driver documents';
+
+  @override
+  String get pleaseUploadCommercialRegistration =>
+      'Please upload commercial registration photo';
+
+  @override
+  String get marketRegisteredSuccessfully => 'Market registered successfully!';
+
+  @override
+  String get driverRegisteredWaitingApproval =>
+      'Driver registered successfully! Please wait for admin approval.';
+
+  @override
+  String get photoAttached => 'Photo Attached';
+
+  @override
+  String get alreadyHaveAccount => 'Already have an account?';
+
+  @override
+  String get driverDocuments => 'Driver Documents';
+
+  @override
+  String get newAccount => 'New Account';
+
+  @override
+  String get joinWasslyNow => 'Join Wassly Now';
+
+  @override
+  String get discoverWassly => 'Discover Wassly';
+
+  @override
+  String get restaurantDashboardTitle => 'Restaurant Dashboard';
+
+  @override
+  String get driverDashboardTitle => 'Driver Dashboard';
+
+  @override
+  String get marketDashboardTitle => 'Market Dashboard';
+
+  @override
+  String welcomeName(String name) {
+    return 'Welcome, $name!';
+  }
+
+  @override
+  String get manageRestaurantSubtitle =>
+      'Manage your restaurant orders and menu';
+
+  @override
+  String get manageMarketSubtitle => 'Manage your market inventory and orders';
+
+  @override
+  String get welcomeToRestaurantDashboard => 'Welcome to Restaurant Dashboard';
+
+  @override
+  String get welcomeToMarketDashboard => 'Welcome to Market Dashboard';
+
+  @override
+  String get quickStats => 'Quick Stats';
+
+  @override
+  String get viewOrders => 'View Orders';
+
+  @override
+  String get restaurantSettings => 'Restaurant Settings';
+
+  @override
+  String get marketSettings => 'Market Settings';
+
+  @override
+  String get myRestaurant => 'My Restaurant';
+
+  @override
+  String get myMarket => 'My Market';
+
+  @override
+  String get myMarketLabel => 'My Market';
+
+  @override
+  String newPartnerType(String type) {
+    return 'New $type';
+  }
+
+  @override
+  String get signupAddress => 'Signup Address';
+
+  @override
+  String get continueText => 'Continue';
+
+  @override
+  String get completeSetup => 'Complete Setup';
+
+  @override
+  String get restaurantImage => 'Restaurant Image';
+
+  @override
+  String get contactAndLocation => 'Contact & Location';
+
+  @override
+  String get accountPassword => 'Account Password';
+
+  @override
+  String get tellUsAboutRestaurant => 'Tell us about your restaurant';
+
+  @override
+  String get restaurantNameAsterisk => 'Restaurant Name *';
+
+  @override
+  String get restaurantNameHint => 'e.g., Mario\'s Pizza';
+
+  @override
+  String get nameAtLeast3Chars => 'Name must be at least 3 characters';
+
+  @override
+  String get descriptionAsterisk => 'Description *';
+
+  @override
+  String get descriptionHint => 'Describe your cuisine and specialties';
+
+  @override
+  String get descriptionRequired => 'Description is required';
+
+  @override
+  String get descriptionAtLeast10Chars =>
+      'Description must be at least 10 characters';
+
+  @override
+  String get whatCuisineDoYouServe => 'What type of cuisine do you serve?';
+
+  @override
+  String get noCategoriesSelected => 'No categories selected';
+
+  @override
+  String get select => 'Select';
+
+  @override
+  String get selectAtLeastOneCategoryHint =>
+      'Select at least one category to help customers find your restaurant';
+
+  @override
+  String get noCategoriesAvailable => 'No categories available';
+
+  @override
+  String get addBeautifulRestaurantImage =>
+      'Add a beautiful image of your restaurant';
+
+  @override
+  String get recommendedImageSize => 'Recommended: 1200x600px';
+
+  @override
+  String get imageSelected => 'Image selected';
+
+  @override
+  String get howReachYou => 'How can customers reach you?';
+
+  @override
+  String get emailAddressAsterisk => 'Email Address *';
+
+  @override
+  String get restaurantEmailHint => 'restaurant@example.com';
+
+  @override
+  String get phoneNumberAsterisk => 'Phone Number *';
+
+  @override
+  String get phoneHint => '+1 (555) 123-4567';
+
+  @override
+  String get fullAddressAsterisk => 'Full Address *';
+
+  @override
+  String get addressHint => '123 Main St, City, State, ZIP';
+
+  @override
+  String get completeAddressRequired => 'Please enter a complete address';
+
+  @override
+  String get updateDetailsFromProfileHint =>
+      'You can update these details anytime from your profile settings.';
+
+  @override
+  String get createPasswordForRestaurant =>
+      'Create a password for your restaurant account';
+
+  @override
+  String get passwordAsterisk => 'Password *';
+
+  @override
+  String get passwordHint => 'Enter a secure password';
+
+  @override
+  String get confirmPasswordAsterisk => 'Confirm Password *';
+
+  @override
+  String get confirmPasswordHint => 'Confirm your password';
+
+  @override
+  String get passwordSecureHint =>
+      'This password will be used to log into your restaurant account. Make sure to keep it secure.';
+
+  @override
+  String get imageSelectedSuccessfully => 'Image selected successfully';
+
+  @override
+  String get myProducts => 'My Products';
+
+  @override
+  String get availabilityUpdated => 'Availability updated';
+
+  @override
+  String get addFirstProduct => 'Add First Product';
+
+  @override
+  String areYouSureDeleteProductWithName(String name) {
+    return 'Are you sure you want to delete \"$name\"? This action cannot be undone.';
+  }
+
+  @override
+  String get restaurantIdNotFound => 'Restaurant ID not found';
+
+  @override
+  String get error => 'Error';
+
+  @override
+  String get invalidPhoneNumber => 'Invalid phone number';
+
+  @override
+  String get refresh => 'Refresh';
+
+  @override
+  String get unknownCategory => 'Unknown Category';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get discountPercentageHint => 'e.g., 20 for 20%';
+
+  @override
+  String get noStartDate => 'No start date';
+
+  @override
+  String get noEndDate => 'No end date';
+
+  @override
+  String get noTicketsFound => 'No tickets found';
+
+  @override
+  String get userNotAuthenticated => 'User not authenticated';
+
+  @override
+  String get notProvided => 'Not provided';
+
+  @override
+  String get name => 'Name';
 }

@@ -90,9 +90,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen>
           }
 
           if (_restaurantId == null) {
-            return Center(
-              child: Text(l10n.restaurantNotFound),
-            );
+            return Center(child: Text(l10n.restaurantNotFound));
           }
 
           return BlocBuilder<OrderCubit, OrderState>(
@@ -155,10 +153,12 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen>
 
   Widget _buildActiveOrders(List<OrderEntity> orders, AppLocalizations l10n) {
     final activeOrders = orders
-        .where((order) =>
-            order.status == OrderStatus.accepted ||
-            order.status == OrderStatus.preparing ||
-            order.status == OrderStatus.ready)
+        .where(
+          (order) =>
+              order.status == OrderStatus.accepted ||
+              order.status == OrderStatus.preparing ||
+              order.status == OrderStatus.ready,
+        )
         .toList();
 
     if (activeOrders.isEmpty) {
@@ -184,9 +184,11 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen>
 
   Widget _buildOrderHistory(List<OrderEntity> orders, AppLocalizations l10n) {
     final historyOrders = orders
-        .where((order) =>
-            order.status == OrderStatus.delivered ||
-            order.status == OrderStatus.cancelled)
+        .where(
+          (order) =>
+              order.status == OrderStatus.delivered ||
+              order.status == OrderStatus.cancelled,
+        )
         .toList();
 
     if (historyOrders.isEmpty) {
@@ -204,7 +206,11 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen>
         padding: const EdgeInsets.all(16),
         itemCount: historyOrders.length,
         itemBuilder: (context, index) {
-          return _buildOrderCard(historyOrders[index], l10n, showActions: false);
+          return _buildOrderCard(
+            historyOrders[index],
+            l10n,
+            showActions: false,
+          );
         },
       ),
     );
@@ -245,7 +251,9 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen>
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          DateFormat('MMM dd, yyyy • HH:mm').format(order.createdAt),
+                          DateFormat(
+                            'MMM dd, yyyy • HH:mm',
+                          ).format(order.createdAt),
                           style: TextStyle(
                             fontSize: 12,
                             color: AppColors.textSecondary,
@@ -268,7 +276,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen>
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
+                      color: AppColors.primary.withOpacity(0.1),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.person, color: AppColors.primary),
@@ -310,33 +318,37 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen>
                 ),
               ),
               const SizedBox(height: 8),
-              ...order.items.take(2).map((item) => Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: Row(
-                      children: [
-                        Text(
-                          '${item.quantity}x ',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: AppColors.textSecondary,
+              ...order.items
+                  .take(2)
+                  .map(
+                    (item) => Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Row(
+                        children: [
+                          Text(
+                            '${item.quantity}x ',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            item.productName,
-                            style: const TextStyle(fontSize: 14),
+                          Expanded(
+                            child: Text(
+                              item.productName,
+                              style: const TextStyle(fontSize: 14),
+                            ),
                           ),
-                        ),
-                        Text(
-                          '${item.totalPrice.toStringAsFixed(2)} ${AppLocalizations.of(context)?.currencySymbol ?? 'ج.م'}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                          Text(
+                            '${item.totalPrice.toStringAsFixed(2)} ${AppLocalizations.of(context)?.currencySymbol ?? 'ج.م'}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  )),
+                  ),
               if (order.items.length > 2)
                 Padding(
                   padding: const EdgeInsets.only(top: 4),
@@ -466,27 +478,21 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen>
         );
       case OrderStatus.accepted:
         return ElevatedButton(
-          onPressed: () => _updateOrderStatus(order, OrderStatus.preparing, l10n),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.orange,
-          ),
+          onPressed: () =>
+              _updateOrderStatus(order, OrderStatus.preparing, l10n),
+          style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
           child: Text(l10n.startPreparing),
         );
       case OrderStatus.preparing:
         return ElevatedButton(
           onPressed: () => _updateOrderStatus(order, OrderStatus.ready, l10n),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.success,
-          ),
+          style: ElevatedButton.styleFrom(backgroundColor: AppColors.success),
           child: Text(l10n.markAsReady),
         );
       case OrderStatus.ready:
         return Text(
           l10n.waitingForDriver,
-          style: TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 12,
-          ),
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
         );
       default:
         return const SizedBox.shrink();
@@ -495,9 +501,9 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen>
 
   Future<void> _acceptOrder(OrderEntity order, AppLocalizations l10n) async {
     await context.read<OrderCubit>().updateOrderStatus(
-          order.id,
-          OrderStatus.accepted,
-        );
+      order.id,
+      OrderStatus.accepted,
+    );
     if (mounted) {
       context.showSuccessSnackBar(l10n.orderAccepted);
     }
@@ -516,9 +522,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen>
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
             child: Text(l10n.reject),
           ),
         ],
@@ -527,9 +531,9 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen>
 
     if (confirmed == true && mounted) {
       await context.read<OrderCubit>().updateOrderStatus(
-            order.id,
-            OrderStatus.cancelled,
-          );
+        order.id,
+        OrderStatus.cancelled,
+      );
       if (mounted) {
         context.showSuccessSnackBar(l10n.orderRejected);
       }
@@ -562,24 +566,18 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen>
             Icon(
               icon,
               size: 80,
-              color: AppColors.textSecondary.withValues(alpha: 0.5),
+              color: AppColors.textSecondary.withOpacity(0.5),
             ),
             const SizedBox(height: 24),
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
             ),
           ],
         ),
@@ -587,4 +585,3 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen>
     );
   }
 }
-

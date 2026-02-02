@@ -57,11 +57,16 @@ class _RestaurantOnboardingScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Restaurant Setup'), elevation: 0),
+      appBar: AppBar(
+        title: Text(context.l10n.restaurantDashboardTitle),
+        elevation: 0,
+      ),
       body: BlocConsumer<RestaurantOnboardingCubit, RestaurantOnboardingState>(
         listener: (context, state) {
           if (state is RestaurantOnboardingSuccess) {
-            context.showSuccessSnackBar('Restaurant created successfully!');
+            context.showSuccessSnackBar(
+              context.l10n.restaurantCreatedSuccessfully,
+            );
             context.go('/restaurant');
           } else if (state is RestaurantOnboardingError) {
             context.showErrorSnackBar(state.message);
@@ -69,7 +74,7 @@ class _RestaurantOnboardingScreenState
         },
         builder: (context, state) {
           if (state is RestaurantOnboardingLoading) {
-            return const LoadingWidget(message: 'Creating your restaurant...');
+            return LoadingWidget(message: context.l10n.creatingRestaurant);
           }
 
           return Form(
@@ -88,7 +93,7 @@ class _RestaurantOnboardingScreenState
                         Expanded(
                           child: ElevatedButton(
                             onPressed: details.onStepContinue,
-                            child: const Text('Continue'),
+                            child: Text(context.l10n.continueText),
                           ),
                         ),
                       if (_currentStep == 4)
@@ -99,9 +104,9 @@ class _RestaurantOnboardingScreenState
                               backgroundColor: Colors.green,
                               padding: const EdgeInsets.symmetric(vertical: 16),
                             ),
-                            child: const Text(
-                              'Complete Setup',
-                              style: TextStyle(
+                            child: Text(
+                              context.l10n.completeSetup,
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -112,7 +117,7 @@ class _RestaurantOnboardingScreenState
                         const SizedBox(width: 12),
                         OutlinedButton(
                           onPressed: details.onStepCancel,
-                          child: const Text('Back'),
+                          child: Text(context.l10n.back),
                         ),
                       ],
                     ],
@@ -121,7 +126,7 @@ class _RestaurantOnboardingScreenState
               },
               steps: [
                 Step(
-                  title: const Text('Basic Information'),
+                  title: Text(context.l10n.basicInformation),
                   content: _buildBasicInfoStep(),
                   isActive: _currentStep >= 0,
                   state: _currentStep > 0
@@ -129,7 +134,7 @@ class _RestaurantOnboardingScreenState
                       : StepState.indexed,
                 ),
                 Step(
-                  title: const Text('Categories'),
+                  title: Text(context.l10n.categories),
                   content: _buildCategoriesStep(),
                   isActive: _currentStep >= 1,
                   state: _currentStep > 1
@@ -137,7 +142,7 @@ class _RestaurantOnboardingScreenState
                       : StepState.indexed,
                 ),
                 Step(
-                  title: const Text('Restaurant Image'),
+                  title: Text(context.l10n.restaurantImage),
                   content: _buildImageStep(),
                   isActive: _currentStep >= 2,
                   state: _currentStep > 2
@@ -145,7 +150,7 @@ class _RestaurantOnboardingScreenState
                       : StepState.indexed,
                 ),
                 Step(
-                  title: const Text('Contact & Location'),
+                  title: Text(context.l10n.contactAndLocation),
                   content: _buildContactStep(),
                   isActive: _currentStep >= 3,
                   state: _currentStep > 3
@@ -153,7 +158,7 @@ class _RestaurantOnboardingScreenState
                       : StepState.indexed,
                 ),
                 Step(
-                  title: const Text('Account Password'),
+                  title: Text(context.l10n.accountPassword),
                   content: _buildPasswordStep(),
                   isActive: _currentStep >= 4,
                   state: StepState.indexed,
@@ -170,24 +175,24 @@ class _RestaurantOnboardingScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Tell us about your restaurant',
-          style: TextStyle(fontSize: 16, color: Colors.grey),
+        Text(
+          context.l10n.tellUsAboutRestaurant,
+          style: const TextStyle(fontSize: 16, color: Colors.grey),
         ),
         const SizedBox(height: 24),
         TextFormField(
           controller: _nameController,
-          decoration: const InputDecoration(
-            labelText: 'Restaurant Name *',
-            hintText: 'e.g., Mario\'s Pizza',
-            prefixIcon: Icon(Icons.restaurant),
+          decoration: InputDecoration(
+            labelText: context.l10n.restaurantNameAsterisk,
+            hintText: context.l10n.restaurantNameHint,
+            prefixIcon: const Icon(Icons.restaurant),
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return 'Restaurant name is required';
+              return context.l10n.pleaseEnterRestaurantName;
             }
             if (value.trim().length < 3) {
-              return 'Name must be at least 3 characters';
+              return context.l10n.nameAtLeast3Chars;
             }
             return null;
           },
@@ -195,18 +200,18 @@ class _RestaurantOnboardingScreenState
         const SizedBox(height: 16),
         TextFormField(
           controller: _descriptionController,
-          decoration: const InputDecoration(
-            labelText: 'Description *',
-            hintText: 'Describe your cuisine and specialties',
-            prefixIcon: Icon(Icons.description),
+          decoration: InputDecoration(
+            labelText: context.l10n.descriptionAsterisk,
+            hintText: context.l10n.descriptionHint,
+            prefixIcon: const Icon(Icons.description),
           ),
           maxLines: 3,
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return 'Description is required';
+              return context.l10n.descriptionRequired;
             }
             if (value.trim().length < 10) {
-              return 'Description must be at least 10 characters';
+              return context.l10n.descriptionAtLeast10Chars;
             }
             return null;
           },
@@ -219,9 +224,9 @@ class _RestaurantOnboardingScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'What type of cuisine do you serve?',
-          style: TextStyle(fontSize: 16, color: Colors.grey),
+        Text(
+          context.l10n.whatCuisineDoYouServe,
+          style: const TextStyle(fontSize: 16, color: Colors.grey),
         ),
         const SizedBox(height: 24),
         const SizedBox(height: 24),
@@ -236,15 +241,15 @@ class _RestaurantOnboardingScreenState
               children: [
                 const Icon(Icons.category, color: Colors.grey),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'No categories selected',
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                    context.l10n.noCategoriesSelected,
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                 ),
                 OutlinedButton(
                   onPressed: _showCategoryPicker,
-                  child: const Text('Select'),
+                  child: Text(context.l10n.select),
                 ),
               ],
             ),
@@ -272,16 +277,16 @@ class _RestaurantOnboardingScreenState
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
-                              'Selected Categories:',
-                              style: TextStyle(
+                            Text(
+                              context.l10n.selectedCategories,
+                              style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
                             TextButton(
                               onPressed: _showCategoryPicker,
-                              child: const Text('Edit'),
+                              child: Text(context.l10n.edit),
                             ),
                           ],
                         ),
@@ -294,7 +299,7 @@ class _RestaurantOnboardingScreenState
                               (c) => c.id == categoryId,
                               orElse: () => RestaurantCategoryEntity(
                                 id: categoryId,
-                                name: 'Unknown',
+                                name: context.l10n.unknownCategory,
                                 imageUrl: '',
                                 isActive: true,
                                 displayOrder: 0,
@@ -334,7 +339,7 @@ class _RestaurantOnboardingScreenState
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Select at least one category to help customers find your restaurant',
+                  context.l10n.selectAtLeastOneCategoryHint,
                   style: TextStyle(fontSize: 12, color: Colors.blue.shade700),
                 ),
               ),
@@ -360,12 +365,12 @@ class _RestaurantOnboardingScreenState
 
               if (state is AdminRestaurantCategoryError) {
                 return AlertDialog(
-                  title: const Text('Error'),
+                  title: Text(context.l10n.error),
                   content: Text(state.message),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('OK'),
+                      child: Text(context.l10n.ok),
                     ),
                   ],
                 );
@@ -376,12 +381,12 @@ class _RestaurantOnboardingScreenState
                 return StatefulBuilder(
                   builder: (context, setStateDialog) {
                     return AlertDialog(
-                      title: const Text('Select Categories'),
+                      title: Text(context.l10n.selectCategories),
                       content: SizedBox(
                         width: double.maxFinite,
                         child: categories.isEmpty
-                            ? const Center(
-                                child: Text('No categories available'),
+                            ? Center(
+                                child: Text(context.l10n.noCategoriesAvailable),
                               )
                             : ListView.builder(
                                 shrinkWrap: true,
@@ -413,7 +418,7 @@ class _RestaurantOnboardingScreenState
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context),
-                          child: const Text('Done'),
+                          child: Text(context.l10n.done),
                         ),
                       ],
                     );
@@ -430,9 +435,9 @@ class _RestaurantOnboardingScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Add a beautiful image of your restaurant',
-          style: TextStyle(fontSize: 16, color: Colors.grey),
+        Text(
+          context.l10n.addBeautifulRestaurantImage,
+          style: const TextStyle(fontSize: 16, color: Colors.grey),
         ),
         const SizedBox(height: 24),
         Center(
@@ -490,7 +495,7 @@ class _RestaurantOnboardingScreenState
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Tap to add restaurant image',
+                          context.l10n.tapToUploadRestaurantImage,
                           style: TextStyle(
                             fontSize: 16,
                             color: AppColors.textSecondary,
@@ -498,7 +503,7 @@ class _RestaurantOnboardingScreenState
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Recommended: 1200x600px',
+                          context.l10n.recommendedImageSize,
                           style: TextStyle(
                             fontSize: 12,
                             color: AppColors.textHint,
@@ -517,8 +522,8 @@ class _RestaurantOnboardingScreenState
               const Icon(Icons.check_circle, color: Colors.green, size: 20),
               const SizedBox(width: 8),
               Text(
-                'Image selected',
-                style: TextStyle(
+                context.l10n.imageSelected,
+                style: const TextStyle(
                   color: Colors.green,
                   fontWeight: FontWeight.w600,
                 ),
@@ -534,25 +539,25 @@ class _RestaurantOnboardingScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'How can customers reach you?',
-          style: TextStyle(fontSize: 16, color: Colors.grey),
+        Text(
+          context.l10n.howReachYou,
+          style: const TextStyle(fontSize: 16, color: Colors.grey),
         ),
         const SizedBox(height: 24),
         TextFormField(
           controller: _emailController,
-          decoration: const InputDecoration(
-            labelText: 'Email Address *',
-            hintText: 'restaurant@example.com',
-            prefixIcon: Icon(Icons.email),
+          decoration: InputDecoration(
+            labelText: context.l10n.emailAddressAsterisk,
+            hintText: context.l10n.restaurantEmailHint,
+            prefixIcon: const Icon(Icons.email),
           ),
           keyboardType: TextInputType.emailAddress,
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return 'Email is required';
+              return context.l10n.pleaseEnterEmail;
             }
             if (!value.isValidEmail) {
-              return 'Please enter a valid email';
+              return context.l10n.pleaseEnterValidEmail;
             }
             return null;
           },
@@ -560,18 +565,18 @@ class _RestaurantOnboardingScreenState
         const SizedBox(height: 16),
         TextFormField(
           controller: _phoneController,
-          decoration: const InputDecoration(
-            labelText: 'Phone Number *',
-            hintText: '+1 (555) 123-4567',
-            prefixIcon: Icon(Icons.phone),
+          decoration: InputDecoration(
+            labelText: context.l10n.phoneNumberAsterisk,
+            hintText: context.l10n.phoneHint,
+            prefixIcon: const Icon(Icons.phone),
           ),
           keyboardType: TextInputType.phone,
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return 'Phone number is required';
+              return context.l10n.phoneNumberRequired;
             }
             if (value.trim().length < 10) {
-              return 'Please enter a valid phone number';
+              return context.l10n.invalidPhoneNumber;
             }
             return null;
           },
@@ -579,18 +584,18 @@ class _RestaurantOnboardingScreenState
         const SizedBox(height: 16),
         TextFormField(
           controller: _addressController,
-          decoration: const InputDecoration(
-            labelText: 'Full Address *',
-            hintText: '123 Main St, City, State, ZIP',
-            prefixIcon: Icon(Icons.location_on),
+          decoration: InputDecoration(
+            labelText: context.l10n.fullAddressAsterisk,
+            hintText: context.l10n.addressHint,
+            prefixIcon: const Icon(Icons.location_on),
           ),
           maxLines: 2,
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return 'Address is required';
+              return context.l10n.addressRequired;
             }
             if (value.trim().length < 10) {
-              return 'Please enter a complete address';
+              return context.l10n.completeAddressRequired;
             }
             return null;
           },
@@ -609,7 +614,7 @@ class _RestaurantOnboardingScreenState
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'You can update these details anytime from your profile settings.',
+                  context.l10n.updateDetailsFromProfileHint,
                   style: TextStyle(fontSize: 14, color: Colors.green.shade700),
                 ),
               ),
@@ -624,17 +629,17 @@ class _RestaurantOnboardingScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Create a password for your restaurant account',
-          style: TextStyle(fontSize: 16, color: Colors.grey),
+        Text(
+          context.l10n.createPasswordForRestaurant,
+          style: const TextStyle(fontSize: 16, color: Colors.grey),
         ),
         const SizedBox(height: 24),
         TextFormField(
           controller: _passwordController,
           obscureText: _obscurePassword,
           decoration: InputDecoration(
-            labelText: 'Password *',
-            hintText: 'Enter a secure password',
+            labelText: context.l10n.passwordAsterisk,
+            hintText: context.l10n.passwordHint,
             prefixIcon: const Icon(Icons.lock),
             suffixIcon: IconButton(
               icon: Icon(
@@ -649,10 +654,10 @@ class _RestaurantOnboardingScreenState
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return 'Password is required';
+              return context.l10n.pleaseEnterPassword;
             }
             if (value.length < 6) {
-              return 'Password must be at least 6 characters';
+              return context.l10n.passwordMustBeAtLeast6Characters;
             }
             return null;
           },
@@ -662,8 +667,8 @@ class _RestaurantOnboardingScreenState
           controller: _confirmPasswordController,
           obscureText: _obscureConfirmPassword,
           decoration: InputDecoration(
-            labelText: 'Confirm Password *',
-            hintText: 'Confirm your password',
+            labelText: context.l10n.confirmPasswordAsterisk,
+            hintText: context.l10n.confirmPasswordHint,
             prefixIcon: const Icon(Icons.lock_outline),
             suffixIcon: IconButton(
               icon: Icon(
@@ -680,10 +685,10 @@ class _RestaurantOnboardingScreenState
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return 'Please confirm your password';
+              return context.l10n.pleaseConfirmPassword;
             }
             if (value != _passwordController.text) {
-              return 'Passwords do not match';
+              return context.l10n.passwordsDoNotMatch;
             }
             return null;
           },
@@ -702,7 +707,7 @@ class _RestaurantOnboardingScreenState
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'This password will be used to log into your restaurant account. Make sure to keep it secure.',
+                  context.l10n.passwordSecureHint,
                   style: TextStyle(fontSize: 14, color: Colors.blue.shade700),
                 ),
               ),
@@ -727,11 +732,11 @@ class _RestaurantOnboardingScreenState
         setState(() {
           _selectedImage = image;
         });
-        context.showSuccessSnackBar('Image selected successfully');
+        context.showSuccessSnackBar(context.l10n.imageSelectedSuccessfully);
       }
     } catch (e) {
       if (mounted) {
-        context.showErrorSnackBar('Failed to pick image: $e');
+        context.showErrorSnackBar(context.l10n.failedToPickImage(e.toString()));
       }
     }
   }
@@ -745,7 +750,7 @@ class _RestaurantOnboardingScreenState
       }
     } else if (_currentStep == 1) {
       if (_selectedCategoryIds.isEmpty) {
-        context.showErrorSnackBar('Please select at least one category');
+        context.showErrorSnackBar(context.l10n.selectAtLeastOneCategoryHint);
         return;
       }
       setState(() {
@@ -753,7 +758,7 @@ class _RestaurantOnboardingScreenState
       });
     } else if (_currentStep == 2) {
       if (_selectedImage == null) {
-        context.showErrorSnackBar('Please select a restaurant image');
+        context.showErrorSnackBar(context.l10n.pleaseSelectImage);
         return;
       }
       setState(() {
@@ -782,7 +787,7 @@ class _RestaurantOnboardingScreenState
     }
 
     if (_selectedImage == null) {
-      context.showErrorSnackBar('Please select a restaurant image');
+      context.showErrorSnackBar(context.l10n.pleaseSelectImage);
       setState(() {
         _currentStep = 2;
       });
@@ -790,7 +795,7 @@ class _RestaurantOnboardingScreenState
     }
 
     if (_selectedCategoryIds.isEmpty) {
-      context.showErrorSnackBar('Please select at least one category');
+      context.showErrorSnackBar(context.l10n.selectAtLeastOneCategoryHint);
       setState(() {
         _currentStep = 1;
       });

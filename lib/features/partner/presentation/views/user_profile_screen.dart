@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/extensions.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../auth/presentation/cubits/auth_cubit.dart';
 
@@ -11,7 +11,7 @@ class UserProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('My Profile')),
+      appBar: AppBar(title: Text(context.l10n.myProfile)),
       body: BlocBuilder<AuthCubit, AuthState>(
         builder: (context, state) {
           if (state is AuthAuthenticated) {
@@ -34,9 +34,24 @@ class UserProfileScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  _buildProfileItem(Icons.person, 'Name', user.name),
-                  _buildProfileItem(Icons.email, 'Email', user.email),
-                  _buildProfileItem(Icons.phone, 'Phone', user.phone),
+                  _buildProfileItem(
+                    context,
+                    Icons.person,
+                    context.l10n.name,
+                    user.name,
+                  ),
+                  _buildProfileItem(
+                    context,
+                    Icons.email,
+                    context.l10n.email,
+                    user.email,
+                  ),
+                  _buildProfileItem(
+                    context,
+                    Icons.phone,
+                    context.l10n.phoneNumber,
+                    user.phone,
+                  ),
                   // Add more fields if necessary
                   const SizedBox(height: 32),
                   SizedBox(
@@ -47,7 +62,7 @@ class UserProfileScreen extends StatelessWidget {
                         context.read<AuthCubit>().logout();
                       },
                       icon: const Icon(Icons.logout),
-                      label: const Text('Logout'),
+                      label: Text(context.l10n.logout),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.error,
                         foregroundColor: Colors.white,
@@ -59,13 +74,18 @@ class UserProfileScreen extends StatelessWidget {
               ),
             );
           }
-          return const Center(child: Text('User not authenticated'));
+          return Center(child: Text(context.l10n.userNotAuthenticated));
         },
       ),
     );
   }
 
-  Widget _buildProfileItem(IconData icon, String label, String value) {
+  Widget _buildProfileItem(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value,
+  ) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       child: ListTile(
@@ -75,7 +95,7 @@ class UserProfileScreen extends StatelessWidget {
           style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
         ),
         subtitle: Text(
-          value.isNotEmpty ? value : 'Not provided',
+          value.isNotEmpty ? value : context.l10n.notProvided,
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ),

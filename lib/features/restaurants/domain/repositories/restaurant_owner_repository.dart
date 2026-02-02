@@ -20,7 +20,7 @@ abstract class RestaurantOwnerRepository {
   /// Pick an image from gallery or camera
   Future<Either<Failure, XFile?>> pickImage(ImageSource source);
 
-  /// Create a new restaurant (Admin use)
+  /// Create a new restaurant (Admin or Signup use)
   Future<Either<Failure, String>> createRestaurant({
     required String name,
     required String description,
@@ -34,8 +34,8 @@ abstract class RestaurantOwnerRepository {
     required double deliveryFee,
     required double minOrderAmount,
     required int estimatedDeliveryTime,
-    File?
-    commercialRegistrationPhotoFile, // Optional photo file for commercial registration
+    File? commercialRegistrationPhotoFile,
+    String? userType, // Optional user type (restaurant, market)
   });
 
   /// Update restaurant information

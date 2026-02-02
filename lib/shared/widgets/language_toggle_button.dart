@@ -3,7 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/localization/locale_cubit.dart';
 
 class LanguageToggleButton extends StatelessWidget {
-  const LanguageToggleButton({super.key});
+  final Color? color;
+  const LanguageToggleButton({super.key, this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +15,7 @@ class LanguageToggleButton extends StatelessWidget {
           tooltip: isArabic ? 'English' : 'العربية',
           icon: Text(
             isArabic ? 'En' : 'ع',
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(fontWeight: FontWeight.bold, color: color),
           ),
           onPressed: () => context.read<LocaleCubit>().toggle(),
         );
@@ -22,5 +23,3 @@ class LanguageToggleButton extends StatelessWidget {
     );
   }
 }
-
-
