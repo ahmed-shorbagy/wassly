@@ -129,16 +129,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get creatingRestaurant => 'Creating your restaurant...';
 
   @override
-  String get restaurantCreatedSuccessfully =>
-      'Restaurant created successfully!';
+  String get restaurantCreatedSuccessfully => 'Restaurant created successfully';
 
   @override
   String get provideCredentialsToRestaurant =>
-      'Please provide these credentials to the restaurant owner:';
+      'Please provide these credentials to the restaurant:';
 
   @override
   String get restaurantCanChangePasswordAfterLogin =>
-      'Note: Restaurant owner can change password after first login.';
+      'The restaurant can change their password after their first login.';
 
   @override
   String failedToPickImage(String error) {
@@ -1955,4 +1954,448 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get name => 'Name';
+
+  @override
+  String get online => 'Online';
+
+  @override
+  String get offline => 'Offline';
+
+  @override
+  String get statusUpdated => 'Status updated';
+
+  @override
+  String get deletedSuccessfully => 'Deleted successfully';
+
+  @override
+  String get createMarket => 'Create Market';
+
+  @override
+  String get discountOn => 'Discount ON';
+
+  @override
+  String get discountOff => 'Discount OFF';
+
+  @override
+  String get noMarketsYet => 'No Markets Yet';
+
+  @override
+  String get noRestaurantsYet => 'No Restaurants Yet';
+
+  @override
+  String get startByCreatingFirstMarket =>
+      'Start by creating your first market';
+
+  @override
+  String get startByCreatingFirstRestaurant =>
+      'Start by creating your first restaurant';
+
+  @override
+  String get deleteRestaurant => 'Delete Restaurant';
+
+  @override
+  String deleteRestaurantConfirm(String name) {
+    return 'Are you sure you want to delete \"$name\"? This action cannot be undone and will also delete all associated products.';
+  }
+
+  @override
+  String get seedMarketsTitle => 'Seed Markets';
+
+  @override
+  String get seedMarketsConfirm =>
+      'This will create several default markets for testing. Continue?';
+
+  @override
+  String get seedingMarkets => 'Seeding markets...';
+
+  @override
+  String get marketsSeededSuccessfully => 'Markets seeded successfully!';
+
+  @override
+  String failedToSeedMarkets(String error) {
+    return 'Failed to seed markets: $error';
+  }
+
+  @override
+  String get seed => 'Seed';
+
+  @override
+  String get searchHint => 'Search...';
+
+  @override
+  String get noResultsFound => 'No results found';
+
+  @override
+  String categoriesLabel(String categories) {
+    return 'Categories: $categories';
+  }
+
+  @override
+  String get noCategories => 'No categories';
+
+  @override
+  String get youAreOnline => 'You are Online';
+
+  @override
+  String get youAreOffline => 'You are Offline';
+
+  @override
+  String get waitingForOrders => 'Waiting for orders...';
+
+  @override
+  String get goOnlineToAcceptOrders => 'Go online to accept orders';
+
+  @override
+  String get activeOrder => 'Active Order';
+
+  @override
+  String get availableOrders => 'Available Orders';
+
+  @override
+  String get scanningArea => 'Scanning area...';
+
+  @override
+  String get noOrdersNearby => 'No orders nearby yet';
+
+  @override
+  String get earnings => 'Earnings';
+
+  @override
+  String get deliveries => 'Deliveries';
+
+  @override
+  String get history => 'History';
+
+  @override
+  String get toCustomer => 'To Customer';
+
+  @override
+  String get toRestaurant => 'To Restaurant';
+
+  @override
+  String get dropoff => 'Dropoff';
+
+  @override
+  String get swipeToComplete => 'Swipe to Complete';
+
+  @override
+  String get confirmPickup => 'Confirm Pickup';
+
+  @override
+  String get orderAcceptedExclamation => 'Order Accepted!';
+
+  @override
+  String get failedToAcceptOrder => 'Failed to accept order';
+
+  @override
+  String get orderDeliveredSuccessfully => 'Order Delivered! Great job.';
+
+  @override
+  String get failedToUpdateStatus => 'Failed to update status';
+
+  @override
+  String get noReviewsYet => 'No reviews yet';
+
+  @override
+  String get productNotFound => 'Product not found';
+
+  @override
+  String get loadingRestaurantData => 'Loading restaurant data...';
+
+  @override
+  String get pageNotFound => 'Page Not Found';
+
+  @override
+  String get goToHome => 'Go to Home';
+
+  @override
+  String get pleaseLogin => 'Please login';
+
+  @override
+  String get errorScreen => 'Error Screen';
+
+  @override
+  String get addArticle => 'Add Article';
+
+  @override
+  String get editArticle => 'Edit Article';
+
+  @override
+  String get articleCreated => 'Article created successfully';
+
+  @override
+  String get failedToUploadImage => 'Failed to upload image';
+
+  @override
+  String errorOccurred(String error) {
+    return 'An error occurred: $error';
+  }
+
+  @override
+  String get noDriversYet => 'No drivers yet';
+
+  @override
+  String get tapToAddImage => 'Tap to add image';
+
+  @override
+  String get titleLabel => 'Title *';
+
+  @override
+  String get titleHint => 'Enter title';
+
+  @override
+  String get titleRequired => 'Title is required';
+
+  @override
+  String get contentLabel => 'Content *';
+
+  @override
+  String get contentHint => 'Enter content';
+
+  @override
+  String get contentRequired => 'Content is required';
+
+  @override
+  String get authorLabel => 'Author';
+
+  @override
+  String get authorHint => 'Enter author name';
+
+  @override
+  String get publishArticle => 'Publish Article';
+
+  @override
+  String get articleVisible => 'Article will be visible to users';
+
+  @override
+  String get articleSavedAsDraft => 'Article will be saved as draft';
+
+  @override
+  String get saveArticle => 'Save Article';
+
+  @override
+  String get userManagement => 'User Management';
+
+  @override
+  String get driverManagement => 'Driver Management';
+
+  @override
+  String get searchUsersHint => 'Search users...';
+
+  @override
+  String get searchDriversHint => 'Search drivers...';
+
+  @override
+  String get searchOrdersHint => 'Search orders...';
+
+  @override
+  String get noUsersFound => 'No users found';
+
+  @override
+  String get noDriversFound => 'No drivers found';
+
+  @override
+  String get addDriver => 'Add Driver';
+
+  @override
+  String get addFirstDriver => 'Add First Driver';
+
+  @override
+  String get driverDeletedSuccessfully => 'Driver deleted successfully';
+
+  @override
+  String get seedMarkets => 'Seed Markets';
+
+  @override
+  String get restaurantManagement => 'Restaurant Management';
+
+  @override
+  String get reviews => 'Reviews';
+
+  @override
+  String orderNumber(String number) {
+    return 'Order #$number';
+  }
+
+  @override
+  String get orderManagement => 'Order Management';
+
+  @override
+  String get editDriver => 'Edit Driver';
+
+  @override
+  String get deleteDriver => 'Delete Driver';
+
+  @override
+  String get driverNotFound => 'Driver not found';
+
+  @override
+  String get noRecentOrders => 'No recent orders';
+
+  @override
+  String get language => 'Language';
+
+  @override
+  String get notifications => 'Notifications';
+
+  @override
+  String get appVersion => 'App Version';
+
+  @override
+  String get totalRevenue => 'Total Revenue';
+
+  @override
+  String get recentActivity => 'Recent Activity';
+
+  @override
+  String get recentOrders => 'Recent Orders';
+
+  @override
+  String get appSettings => 'App Settings';
+
+  @override
+  String get about => 'About';
+
+  @override
+  String get adminPanel => 'Admin Panel';
+
+  @override
+  String get adminPanelSubtitle => 'Full access without authentication';
+
+  @override
+  String get helpSupport => 'Help & Support';
+
+  @override
+  String get marketCategory => 'Market Category';
+
+  @override
+  String get marketName => 'Market Name';
+
+  @override
+  String get tapToUploadMarketImage => 'Tap to upload market image';
+
+  @override
+  String get creatingMarket => 'Creating Market...';
+
+  @override
+  String get marketCreatedSuccessfully => 'Market created successfully';
+
+  @override
+  String get provideCredentialsToMarket =>
+      'Please provide these credentials to the market owner:';
+
+  @override
+  String get marketCanChangePasswordAfterLogin =>
+      'The market owner can change their password after logging in.';
+
+  @override
+  String get areYouSureDeleteCategoryGeneric =>
+      'Are you sure you want to delete this category?';
+
+  @override
+  String totalAmountLabel(String amount) {
+    return 'Total: $amount';
+  }
+
+  @override
+  String get pickUp => 'Pick Up';
+
+  @override
+  String get markDelivered => 'Mark Delivered';
+
+  @override
+  String get orderPickedUpSuccess => 'Order picked up';
+
+  @override
+  String get orderDeliveredSuccess => 'Order delivered';
+
+  @override
+  String get deleteArticle => 'Delete Article';
+
+  @override
+  String get updateArticle => 'Update Article';
+
+  @override
+  String get driverAccountStatus => 'Driver account status';
+
+  @override
+  String get driverUpdatedSuccessfully => 'Driver updated successfully';
+
+  @override
+  String tapToUpload(String label) {
+    return 'Tap to upload $label';
+  }
+
+  @override
+  String get restaurantAccountStatus => 'Restaurant account status';
+
+  @override
+  String get emailLabel => 'Email:';
+
+  @override
+  String get passwordLabel => 'Password:';
+
+  @override
+  String get selectProductToLink => 'Select a product to link';
+
+  @override
+  String get noLinkedProduct => 'No linked product';
+
+  @override
+  String get discountImage => 'Discount Image';
+
+  @override
+  String get linkedProduct => 'Linked Product';
+
+  @override
+  String get tapToUploadDiscountImage => 'Tap to upload discount image';
+
+  @override
+  String get unknown => 'Unknown';
+
+  @override
+  String get picked_up => 'Picked Up';
+
+  @override
+  String get customer => 'Customer';
+
+  @override
+  String get displayOrderHelper => 'Lower numbers appear first';
+
+  @override
+  String get pleaseEnterOrder => 'Please enter order';
+
+  @override
+  String get pleaseEnterValidNumber => 'Please enter a valid number';
+
+  @override
+  String get adminRole => 'Administrator';
+
+  @override
+  String get restaurantRole => 'Restaurant';
+
+  @override
+  String get driverRole => 'Driver';
+
+  @override
+  String get customerRole => 'Customer';
+
+  @override
+  String get areYouSureDeleteDriver =>
+      'Are you sure you want to delete this driver?';
+
+  @override
+  String get statusLabel => 'Status';
+
+  @override
+  String get updateDriver => 'Update Driver';
+
+  @override
+  String get takeBreakOrGoOnline =>
+      'Take a break or go online\nto start earning';
+
+  @override
+  String estEarnings(String amount, String currency) {
+    return 'Est. Earnings: $amount $currency';
+  }
 }

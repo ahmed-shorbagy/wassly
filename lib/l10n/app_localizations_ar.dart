@@ -129,15 +129,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get creatingRestaurant => 'جاري إنشاء المطعم...';
 
   @override
-  String get restaurantCreatedSuccessfully => 'تم إنشاء المطعم بنجاح!';
+  String get restaurantCreatedSuccessfully => 'تم إنشاء المطعم بنجاح';
 
   @override
   String get provideCredentialsToRestaurant =>
-      'يرجى توفير هذه البيانات للمالك:';
+      'يرجى تزويد المطعم ببيانات الاعتماد هذه:';
 
   @override
   String get restaurantCanChangePasswordAfterLogin =>
-      'ملاحظة: يمكن للمالك تغيير كلمة المرور بعد أول تسجيل دخول.';
+      'يمكن للمطعم تغيير كلمة المرور بعد تسجيل الدخول لأول مرة.';
 
   @override
   String failedToPickImage(String error) {
@@ -640,13 +640,13 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get pending => 'معلق';
+  String get pending => 'قيد الانتظار';
 
   @override
   String get accepted => 'مقبول';
 
   @override
-  String get preparing => 'قيد التحضير';
+  String get preparing => 'جاري التحضير';
 
   @override
   String get ready => 'جاهز';
@@ -655,10 +655,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get onTheWay => 'في الطريق';
 
   @override
-  String get delivered => 'تم التسليم';
+  String get delivered => 'تم التوصيل';
 
   @override
-  String get cancelled => 'ملغي';
+  String get cancelled => 'ملغى';
 
   @override
   String get orderPending => 'معلق';
@@ -1095,13 +1095,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addCategory => 'إضافة فئة';
 
   @override
-  String get editCategory => 'تعديل فئة';
+  String get editCategory => 'تعديل الفئة';
 
   @override
   String get updateCategory => 'تحديث فئة';
 
   @override
-  String get deleteCategory => 'حذف فئة';
+  String get deleteCategory => 'حذف الفئة';
 
   @override
   String get categoryName => 'اسم الفئة';
@@ -1916,7 +1916,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get refresh => 'تحديث';
 
   @override
-  String get unknownCategory => 'فئة غير معروفة';
+  String get unknownCategory => 'تصنيف غير معروف';
 
   @override
   String get delete => 'حذف';
@@ -1941,4 +1941,445 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get name => 'الاسم';
+
+  @override
+  String get online => 'متصل';
+
+  @override
+  String get offline => 'غير متصل';
+
+  @override
+  String get statusUpdated => 'تم تحديث الحالة';
+
+  @override
+  String get deletedSuccessfully => 'تم الحذف بنجاح';
+
+  @override
+  String get createMarket => 'إنشاء سوق';
+
+  @override
+  String get discountOn => 'الخصم نشط';
+
+  @override
+  String get discountOff => 'الخصم غير نشط';
+
+  @override
+  String get noMarketsYet => 'لا توجد متاجر بعد';
+
+  @override
+  String get noRestaurantsYet => 'لا توجد مطاعم بعد';
+
+  @override
+  String get startByCreatingFirstMarket => 'ابدأ بإنشاء متجرك الأول';
+
+  @override
+  String get startByCreatingFirstRestaurant => 'ابدأ بإنشاء مطعمك الأول';
+
+  @override
+  String get deleteRestaurant => 'حذف المطعم';
+
+  @override
+  String deleteRestaurantConfirm(String name) {
+    return 'هل أنت متأكد من حذف \"$name\"؟ لا يمكن التراجع عن هذا الإجراء وسيؤدي أيضاً لحذف جميع المنتجات المرتبطة.';
+  }
+
+  @override
+  String get seedMarketsTitle => 'بذر الأسواق';
+
+  @override
+  String get seedMarketsConfirm =>
+      'سيؤدي هذا إلى إنشاء عدة متاجر افتراضية للاختبار. هل تريد المتابعة؟';
+
+  @override
+  String get seedingMarkets => 'جاري بذر الأسواق...';
+
+  @override
+  String get marketsSeededSuccessfully => 'تم بذر الأسواق بنجاح!';
+
+  @override
+  String failedToSeedMarkets(String error) {
+    return 'فشل بذر الأسواق: $error';
+  }
+
+  @override
+  String get seed => 'بذر';
+
+  @override
+  String get searchHint => 'بحث...';
+
+  @override
+  String get noResultsFound => 'لم يتم العثور على نتائج';
+
+  @override
+  String categoriesLabel(String categories) {
+    return 'الفئات: $categories';
+  }
+
+  @override
+  String get noCategories => 'لا توجد فئات';
+
+  @override
+  String get youAreOnline => 'أنت متصل الآن';
+
+  @override
+  String get youAreOffline => 'أنت غير متصل';
+
+  @override
+  String get waitingForOrders => 'في انتظار الطلبات...';
+
+  @override
+  String get goOnlineToAcceptOrders => 'اتصل بالإنترنت لقبول الطلبات';
+
+  @override
+  String get activeOrder => 'الطلب النشط';
+
+  @override
+  String get availableOrders => 'الطلبات المتاحة';
+
+  @override
+  String get scanningArea => 'جاري مسح المنطقة...';
+
+  @override
+  String get noOrdersNearby => 'لا توجد طلبات قريبة بعد';
+
+  @override
+  String get earnings => 'الأرباح';
+
+  @override
+  String get deliveries => 'التوصيلات';
+
+  @override
+  String get history => 'السجل';
+
+  @override
+  String get toCustomer => 'إلى العميل';
+
+  @override
+  String get toRestaurant => 'إلى المطعم';
+
+  @override
+  String get dropoff => 'التسليم';
+
+  @override
+  String get swipeToComplete => 'اسحب للإكمال';
+
+  @override
+  String get confirmPickup => 'تأكيد الاستلام';
+
+  @override
+  String get orderAcceptedExclamation => 'تم قبول الطلب!';
+
+  @override
+  String get failedToAcceptOrder => 'فشل في قبول الطلب';
+
+  @override
+  String get orderDeliveredSuccessfully => 'تم توصيل الطلب! عمل رائع.';
+
+  @override
+  String get failedToUpdateStatus => 'فشل في تحديث الحالة';
+
+  @override
+  String get noReviewsYet => 'لا توجد تقييمات بعد';
+
+  @override
+  String get productNotFound => 'المنتج غير موجود';
+
+  @override
+  String get loadingRestaurantData => 'جاري تحميل بيانات المطعم...';
+
+  @override
+  String get pageNotFound => 'الصفحة غير موجودة';
+
+  @override
+  String get goToHome => 'الذهاب للرئيسية';
+
+  @override
+  String get pleaseLogin => 'يرجى تسجيل الدخول';
+
+  @override
+  String get errorScreen => 'شاشة خطأ';
+
+  @override
+  String get addArticle => 'إضافة مقال';
+
+  @override
+  String get editArticle => 'تعديل المقال';
+
+  @override
+  String get articleCreated => 'تم إنشاء المقال بنجاح';
+
+  @override
+  String get failedToUploadImage => 'فشل في رفع الصورة';
+
+  @override
+  String errorOccurred(String error) {
+    return 'حدث خطأ: $error';
+  }
+
+  @override
+  String get noDriversYet => 'لا يوجد سائقون بعد';
+
+  @override
+  String get tapToAddImage => 'اضغط لإضافة صورة';
+
+  @override
+  String get titleLabel => 'العنوان *';
+
+  @override
+  String get titleHint => 'أدخل العنوان';
+
+  @override
+  String get titleRequired => 'العنوان مطلوب';
+
+  @override
+  String get contentLabel => 'المحتوى *';
+
+  @override
+  String get contentHint => 'أدخل المحتوى';
+
+  @override
+  String get contentRequired => 'المحتوى مطلوب';
+
+  @override
+  String get authorLabel => 'الكاتب';
+
+  @override
+  String get authorHint => 'أدخل اسم الكاتب';
+
+  @override
+  String get publishArticle => 'نشر المقال';
+
+  @override
+  String get articleVisible => 'سيكون المقال مرئياً للمستخدمين';
+
+  @override
+  String get articleSavedAsDraft => 'سيتم حفظ المقال كمسودة';
+
+  @override
+  String get saveArticle => 'حفظ المقال';
+
+  @override
+  String get userManagement => 'إدارة المستخدمين';
+
+  @override
+  String get driverManagement => 'إدارة السائقين';
+
+  @override
+  String get searchUsersHint => 'البحث عن مستخدمين...';
+
+  @override
+  String get searchDriversHint => 'البحث عن سائقين...';
+
+  @override
+  String get searchOrdersHint => 'البحث عن طلبات...';
+
+  @override
+  String get noUsersFound => 'لم يتم العثور على مستخدمين';
+
+  @override
+  String get noDriversFound => 'لم يتم العثور على سائقين';
+
+  @override
+  String get addDriver => 'إضافة سائق';
+
+  @override
+  String get addFirstDriver => 'إضافة أول سائق';
+
+  @override
+  String get driverDeletedSuccessfully => 'تم حذف السائق بنجاح';
+
+  @override
+  String get seedMarkets => 'بذر الأسواق';
+
+  @override
+  String get restaurantManagement => 'إدارة المطاعم';
+
+  @override
+  String get reviews => 'التقييمات';
+
+  @override
+  String orderNumber(String number) {
+    return 'طلب رقم $number';
+  }
+
+  @override
+  String get orderManagement => 'إدارة الطلبات';
+
+  @override
+  String get editDriver => 'تعديل السائق';
+
+  @override
+  String get deleteDriver => 'حذف السائق';
+
+  @override
+  String get driverNotFound => 'لم يتم العثور على السائق';
+
+  @override
+  String get noRecentOrders => 'لا توجد طلبات حديثة';
+
+  @override
+  String get language => 'اللغة';
+
+  @override
+  String get notifications => 'الإشعارات';
+
+  @override
+  String get appVersion => 'إصدار التطبيق';
+
+  @override
+  String get totalRevenue => 'إجمالي الإيرادات';
+
+  @override
+  String get recentActivity => 'النشاط الأخير';
+
+  @override
+  String get recentOrders => 'الطلبات الأخيرة';
+
+  @override
+  String get appSettings => 'إعدادات التطبيق';
+
+  @override
+  String get about => 'حول';
+
+  @override
+  String get adminPanel => 'لوحة المسؤول';
+
+  @override
+  String get adminPanelSubtitle => 'وصول كامل بدون مصادقة';
+
+  @override
+  String get helpSupport => 'المساعدة والدعم';
+
+  @override
+  String get marketCategory => 'فئة السوق';
+
+  @override
+  String get marketName => 'اسم السوق';
+
+  @override
+  String get tapToUploadMarketImage => 'اضغط لرفع صورة السوق';
+
+  @override
+  String get creatingMarket => 'جاري إنشاء السوق...';
+
+  @override
+  String get marketCreatedSuccessfully => 'تم إنشاء السوق بنجاح';
+
+  @override
+  String get provideCredentialsToMarket =>
+      'يرجى تزويد مالك السوق ببيانات الاعتماد هذه:';
+
+  @override
+  String get marketCanChangePasswordAfterLogin =>
+      'يمكن لمالك السوق تغيير كلمة المرور بعد تسجيل الدخول.';
+
+  @override
+  String get areYouSureDeleteCategoryGeneric =>
+      'هل أنت متأكد من حذف هذه الفئة؟';
+
+  @override
+  String totalAmountLabel(String amount) {
+    return 'الإجمالي: $amount';
+  }
+
+  @override
+  String get pickUp => 'استلام';
+
+  @override
+  String get markDelivered => 'إتمام التوصيل';
+
+  @override
+  String get orderPickedUpSuccess => 'تم استلام الطلب';
+
+  @override
+  String get orderDeliveredSuccess => 'تم توصيل الطلب';
+
+  @override
+  String get deleteArticle => 'حذف المقال';
+
+  @override
+  String get updateArticle => 'تحديث المقال';
+
+  @override
+  String get driverAccountStatus => 'حالة حساب السائق';
+
+  @override
+  String get driverUpdatedSuccessfully => 'تم تحديث السائق بنجاح';
+
+  @override
+  String tapToUpload(String label) {
+    return 'اضغط لرفع $label';
+  }
+
+  @override
+  String get restaurantAccountStatus => 'حالة حساب المطعم';
+
+  @override
+  String get emailLabel => 'البريد الإلكتروني:';
+
+  @override
+  String get passwordLabel => 'كلمة المرور:';
+
+  @override
+  String get selectProductToLink => 'اختر منتجاً لربطه';
+
+  @override
+  String get noLinkedProduct => 'لا يوجد منتج مرتبط';
+
+  @override
+  String get discountImage => 'صورة الخصم';
+
+  @override
+  String get linkedProduct => 'المنتج المرتبط';
+
+  @override
+  String get tapToUploadDiscountImage => 'اضغط لرفع صورة الخصم';
+
+  @override
+  String get unknown => 'غير معروف';
+
+  @override
+  String get picked_up => 'تم الاستلام';
+
+  @override
+  String get customer => 'عميل';
+
+  @override
+  String get displayOrderHelper => 'الأرقام الأقل تظهر أولاً';
+
+  @override
+  String get pleaseEnterOrder => 'الرجاء إدخال الترتيب';
+
+  @override
+  String get pleaseEnterValidNumber => 'الرجاء إدخال رقم صحيح';
+
+  @override
+  String get adminRole => 'مدير النظام';
+
+  @override
+  String get restaurantRole => 'مطعم';
+
+  @override
+  String get driverRole => 'سائق';
+
+  @override
+  String get customerRole => 'عميل';
+
+  @override
+  String get areYouSureDeleteDriver => 'هل أنت متأكد من حذف هذا السائق؟';
+
+  @override
+  String get statusLabel => 'الحالة';
+
+  @override
+  String get updateDriver => 'تحديث السائق';
+
+  @override
+  String get takeBreakOrGoOnline =>
+      'خذ قسطاً من الراحة أو اذهب للنشاط\nللبدء في كسب المال';
+
+  @override
+  String estEarnings(String amount, String currency) {
+    return 'الأرباح المتوقعة: $amount $currency';
+  }
 }

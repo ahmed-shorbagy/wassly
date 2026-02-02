@@ -41,7 +41,9 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
   }
 
   void _loadCategories() {
-    context.read<FoodCategoryCubit>().loadRestaurantCategories(widget.restaurantId);
+    context.read<FoodCategoryCubit>().loadRestaurantCategories(
+      widget.restaurantId,
+    );
   }
 
   @override
@@ -52,7 +54,9 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
   }
 
   void _loadProducts() {
-    context.read<AdminProductCubit>().loadRestaurantProducts(widget.restaurantId);
+    context.read<AdminProductCubit>().loadRestaurantProducts(
+      widget.restaurantId,
+    );
   }
 
   void _filterProducts() {
@@ -64,7 +68,8 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
         _filteredProducts = _allProducts.where((product) {
           final nameMatch = product.name.toLowerCase().contains(query);
           final descMatch = product.description.toLowerCase().contains(query);
-          final categoryMatch = product.category?.toLowerCase().contains(query) ?? false;
+          final categoryMatch =
+              product.category?.toLowerCase().contains(query) ?? false;
           // Also search in category names from database
           bool categoryNameMatch = false;
           if (product.categoryId != null) {
@@ -88,30 +93,30 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-        appBar: AppBar(
-          title: Text('${l10n.restaurantProducts} - ${widget.restaurantName}'),
-          backgroundColor: Colors.purple,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.category),
-              onPressed: () {
-                context.push(
-                  '/admin/restaurants/${widget.restaurantId}/categories',
-                );
-              },
-              tooltip: l10n.foodCategories,
-            ),
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: () {
-                _loadProducts();
-                _loadCategories();
-              },
-              tooltip: l10n.edit,
-            ),
-          ],
-        ),
-        body: Column(
+      appBar: AppBar(
+        title: Text('${l10n.restaurantProducts} - ${widget.restaurantName}'),
+        backgroundColor: Colors.purple,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.category),
+            onPressed: () {
+              context.push(
+                '/admin/restaurants/${widget.restaurantId}/categories',
+              );
+            },
+            tooltip: l10n.foodCategories,
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              _loadProducts();
+              _loadCategories();
+            },
+            tooltip: l10n.edit,
+          ),
+        ],
+      ),
+      body: Column(
         children: [
           // Search Bar
           Padding(
@@ -154,83 +159,92 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                 }
               },
               child: BlocConsumer<AdminProductCubit, AdminProductState>(
-              listener: (context, state) {
-                if (state is AdminProductAdded) {
-                  context.showSuccessSnackBar(l10n.productAddedSuccessfully);
-                  _loadProducts();
-                } else if (state is AdminProductUpdated) {
-                  context.showSuccessSnackBar(l10n.productUpdatedSuccessfully);
-                  _loadProducts();
-                } else if (state is AdminProductDeleted) {
-                  context.showSuccessSnackBar(l10n.productDeletedSuccessfully);
-                  _loadProducts();
-                } else if (state is AdminProductError) {
-                  context.showErrorSnackBar(state.message);
-                } else if (state is AdminProductLoaded) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (mounted) {
-                      setState(() {
-                        _allProducts = state.products;
-                        _filteredProducts = _allProducts;
-                      });
-                      _filterProducts(); // Apply current search filter
-                    }
-                  });
-                }
-              },
-              builder: (context, state) {
-                if (state is AdminProductLoading) {
-                  return LoadingWidget(message: l10n.creatingProduct);
-                }
+                listener: (context, state) {
+                  if (state is AdminProductAdded) {
+                    context.showSuccessSnackBar(l10n.productAddedSuccessfully);
+                    _loadProducts();
+                  } else if (state is AdminProductUpdated) {
+                    context.showSuccessSnackBar(
+                      l10n.productUpdatedSuccessfully,
+                    );
+                    _loadProducts();
+                  } else if (state is AdminProductDeleted) {
+                    context.showSuccessSnackBar(
+                      l10n.productDeletedSuccessfully,
+                    );
+                    _loadProducts();
+                  } else if (state is AdminProductError) {
+                    context.showErrorSnackBar(state.message);
+                  } else if (state is AdminProductLoaded) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) {
+                        setState(() {
+                          _allProducts = state.products;
+                          _filteredProducts = _allProducts;
+                        });
+                        _filterProducts(); // Apply current search filter
+                      }
+                    });
+                  }
+                },
+                builder: (context, state) {
+                  if (state is AdminProductLoading) {
+                    return LoadingWidget(message: l10n.creatingProduct);
+                  }
 
-                if (state is AdminProductError) {
-                  return ErrorDisplayWidget(
-                    message: state.message,
-                    onRetry: _loadProducts,
-                  );
-                }
-
-                if (state is AdminProductLoaded) {
-                  // Use filtered list for display
-                  final displayList = _filteredProducts.isEmpty && _searchController.text.isEmpty
-                      ? state.products
-                      : _filteredProducts;
-                  
-                  if (displayList.isEmpty && _searchController.text.isNotEmpty) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(32),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.search_off,
-                              size: 64,
-                              color: AppColors.textSecondary.withValues(alpha: 0.5),
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              l10n.noProductsFound,
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                  if (state is AdminProductError) {
+                    return ErrorDisplayWidget(
+                      message: state.message,
+                      onRetry: _loadProducts,
                     );
                   }
-                  
-                  if (displayList.isEmpty) {
-                    return _buildEmptyState(l10n);
-                  }
-                  return _buildProductList(displayList, l10n);
-                }
 
-                return _buildEmptyState(l10n);
-              },
-            ),
+                  if (state is AdminProductLoaded) {
+                    // Use filtered list for display
+                    final displayList =
+                        _filteredProducts.isEmpty &&
+                            _searchController.text.isEmpty
+                        ? state.products
+                        : _filteredProducts;
+
+                    if (displayList.isEmpty &&
+                        _searchController.text.isNotEmpty) {
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(32),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.search_off,
+                                size: 64,
+                                color: AppColors.textSecondary.withValues(
+                                  alpha: 0.5,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                l10n.noProductsFound,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+
+                    if (displayList.isEmpty) {
+                      return _buildEmptyState(l10n);
+                    }
+                    return _buildProductList(displayList, l10n);
+                  }
+
+                  return _buildEmptyState(l10n);
+                },
+              ),
             ),
           ),
         ],
@@ -246,7 +260,10 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
     );
   }
 
-  Widget _buildProductList(List<ProductEntity> products, AppLocalizations l10n) {
+  Widget _buildProductList(
+    List<ProductEntity> products,
+    AppLocalizations l10n,
+  ) {
     return RefreshIndicator(
       onRefresh: () async => _loadProducts(),
       child: ListView.builder(
@@ -336,7 +353,8 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                       const SizedBox(height: 8),
 
                       // Category
-                      if (product.categoryId != null || product.category != null)
+                      if (product.categoryId != null ||
+                          product.category != null)
                         Builder(
                           builder: (context) {
                             String categoryName = product.category ?? '';
@@ -349,7 +367,7 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                               } catch (e) {
                                 // Category not found, use fallback
                                 if (categoryName.isEmpty) {
-                                  categoryName = 'Unknown Category';
+                                  categoryName = l10n.unknownCategory;
                                 }
                               }
                             }
@@ -360,7 +378,9 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.primary.withValues(alpha: 0.1),
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.1,
+                                  ),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
@@ -380,7 +400,7 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
 
                       // Price
                       Text(
-                        '${product.price.toStringAsFixed(2)} ${l10n.required}',
+                        '${product.price.toStringAsFixed(2)} ${l10n.currency}',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -412,10 +432,8 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                     children: [
                       Switch(
                         value: product.isAvailable,
-                        onChanged: (value) => _toggleAvailability(
-                          product.id,
-                          value,
-                        ),
+                        onChanged: (value) =>
+                            _toggleAvailability(product.id, value),
                         activeThumbColor: Colors.green,
                       ),
                       Text(
@@ -445,7 +463,7 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
                   onPressed: () => _showDeleteDialog(product, l10n),
-                  tooltip: l10n.edit,
+                  tooltip: l10n.delete,
                 ),
               ],
             ),
@@ -518,12 +536,12 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.editProduct),
+        title: Text(l10n.deleteProduct),
         content: Text(l10n.areYouSureDeleteProduct),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text(l10n.done),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -534,11 +552,10 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
               );
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-            child: Text(l10n.editProduct),
+            child: Text(l10n.delete),
           ),
         ],
       ),
     );
   }
 }
-

@@ -11,14 +11,12 @@ class AnalyticsScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Analytics'),
+        title: Text(l10n.analytics),
         backgroundColor: Colors.purple,
         foregroundColor: Colors.white,
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('orders')
-            .snapshots(),
+        stream: FirebaseFirestore.instance.collection('orders').snapshots(),
         builder: (context, ordersSnapshot) {
           return StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
@@ -60,25 +58,25 @@ class AnalyticsScreen extends StatelessWidget {
                           childAspectRatio: 1.5,
                           children: [
                             _buildStatCard(
-                              'Total Orders',
+                              l10n.allOrders,
                               ordersCount.toString(),
                               Icons.receipt_long,
                               Colors.blue,
                             ),
                             _buildStatCard(
-                              'Total Restaurants',
+                              l10n.restaurants,
                               restaurantsCount.toString(),
                               Icons.restaurant,
                               Colors.orange,
                             ),
                             _buildStatCard(
-                              'Total Users',
+                              l10n.userManagement,
                               usersCount.toString(),
                               Icons.people,
                               Colors.green,
                             ),
                             _buildStatCard(
-                              'Total Revenue',
+                              l10n.totalRevenue,
                               '${totalRevenue.toStringAsFixed(2)} ${l10n.currencySymbol}',
                               Icons.attach_money,
                               Colors.purple,
@@ -86,9 +84,9 @@ class AnalyticsScreen extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 24),
-                        const Text(
-                          'Recent Activity',
-                          style: TextStyle(
+                        Text(
+                          l10n.recentActivity,
+                          style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
@@ -101,9 +99,9 @@ class AnalyticsScreen extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'Recent Orders',
-                                  style: TextStyle(
+                                Text(
+                                  l10n.recentOrders,
+                                  style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -111,19 +109,24 @@ class AnalyticsScreen extends StatelessWidget {
                                 const SizedBox(height: 8),
                                 if (ordersSnapshot.hasData &&
                                     ordersSnapshot.data!.docs.isNotEmpty)
-                                  ...ordersSnapshot.data!.docs.take(5).map((doc) {
+                                  ...ordersSnapshot.data!.docs.take(5).map((
+                                    doc,
+                                  ) {
                                     final data =
                                         doc.data() as Map<String, dynamic>;
                                     return ListTile(
                                       dense: true,
                                       title: Text(
-                                        data['restaurantName'] ?? 'Unknown',
+                                        data['restaurantName'] ?? l10n.unknown,
                                       ),
                                       subtitle: Text(
                                         '${data['totalAmount'] ?? 0.0} ${l10n.currencySymbol}',
                                       ),
                                       trailing: Text(
-                                        data['status'] ?? 'pending',
+                                        _getLocalizedStatus(
+                                          data['status'] ?? 'pending',
+                                          l10n,
+                                        ),
                                         style: TextStyle(
                                           color: AppColors.textSecondary,
                                           fontSize: 12,
@@ -132,7 +135,7 @@ class AnalyticsScreen extends StatelessWidget {
                                     );
                                   })
                                 else
-                                  const Text('No recent orders'),
+                                  Text(l10n.noRecentOrders),
                               ],
                             ),
                           ),
@@ -147,6 +150,28 @@ class AnalyticsScreen extends StatelessWidget {
         },
       ),
     );
+  }
+
+  String _getLocalizedStatus(String status, AppLocalizations l10n) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return l10n.pending;
+      case 'accepted':
+        return l10n.accepted;
+      case 'preparing':
+        return l10n.preparing;
+      case 'ready':
+        return l10n.ready;
+      case 'picked_up':
+      case 'pickedup':
+        return l10n.picked_up;
+      case 'delivered':
+        return l10n.delivered;
+      case 'cancelled':
+        return l10n.cancelled;
+      default:
+        return status;
+    }
   }
 
   Widget _buildStatCard(
@@ -175,10 +200,7 @@ class AnalyticsScreen extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               title,
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
           ],
@@ -187,4 +209,3 @@ class AnalyticsScreen extends StatelessWidget {
     );
   }
 }
-

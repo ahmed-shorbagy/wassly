@@ -11,6 +11,7 @@ import '../../../../shared/widgets/loading_widget.dart';
 import '../../../articles/presentation/cubits/article_cubit.dart';
 import '../../../articles/presentation/cubits/article_state.dart';
 import '../../../articles/domain/entities/article_entity.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class AdminAddArticleScreen extends StatefulWidget {
   const AdminAddArticleScreen({super.key});
@@ -38,6 +39,7 @@ class _AdminAddArticleScreenState extends State<AdminAddArticleScreen> {
   }
 
   Future<void> _pickImage() async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       final ImagePicker picker = ImagePicker();
       final XFile? image = await picker.pickImage(
@@ -52,10 +54,14 @@ class _AdminAddArticleScreenState extends State<AdminAddArticleScreen> {
       }
     } catch (e) {
       if (mounted) {
-        context.showErrorSnackBar('Failed to pick image: $e');
+        context.showErrorSnackBar(l10n.failedToPickImage(e.toString()));
       }
     }
   }
+
+  // Need to add failedToPickImage to arb if not exists, but for now I'll use a generic error or add it later.
+  // Actually I'll use a generic error for now or add it to ARB.
+  // I'll add 'failedToPickImage' and 'failedToUploadImage' to ARB.
 
   Future<String?> _uploadImage() async {
     if (_selectedImage == null) return null;
@@ -106,16 +112,17 @@ class _AdminAddArticleScreenState extends State<AdminAddArticleScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Article'),
+        title: Text(l10n.addArticle),
         backgroundColor: Colors.purple,
         actions: [
           BlocListener<ArticleCubit, ArticleState>(
             listener: (context, state) {
               if (state is ArticleLoaded && _isLoading) {
                 setState(() => _isLoading = false);
-                context.showSuccessSnackBar('Article created successfully');
+                context.showSuccessSnackBar(l10n.articleCreated);
                 context.read<ArticleCubit>().resetState();
                 context.pop();
               } else if (state is ArticleError && _isLoading) {
@@ -178,13 +185,13 @@ class _AdminAddArticleScreenState extends State<AdminAddArticleScreen> {
                     // Title
                     TextFormField(
                       controller: _titleController,
-                      decoration: const InputDecoration(
-                        labelText: 'Title *',
-                        hintText: 'Enter article title',
+                      decoration: InputDecoration(
+                        labelText: l10n.titleLabel,
+                        hintText: l10n.titleHint,
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Title is required';
+                          return l10n.titleRequired;
                         }
                         return null;
                       },
@@ -194,9 +201,9 @@ class _AdminAddArticleScreenState extends State<AdminAddArticleScreen> {
                     // Author
                     TextFormField(
                       controller: _authorController,
-                      decoration: const InputDecoration(
-                        labelText: 'Author',
-                        hintText: 'Enter author name (optional)',
+                      decoration: InputDecoration(
+                        labelText: l10n.authorLabel,
+                        hintText: l10n.authorHint,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -204,14 +211,14 @@ class _AdminAddArticleScreenState extends State<AdminAddArticleScreen> {
                     // Content
                     TextFormField(
                       controller: _contentController,
-                      decoration: const InputDecoration(
-                        labelText: 'Content *',
-                        hintText: 'Enter article content',
+                      decoration: InputDecoration(
+                        labelText: l10n.contentLabel,
+                        hintText: l10n.contentHint,
                       ),
                       maxLines: 10,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Content is required';
+                          return l10n.contentRequired;
                         }
                         return null;
                       },
@@ -220,11 +227,11 @@ class _AdminAddArticleScreenState extends State<AdminAddArticleScreen> {
 
                     // Published Toggle
                     SwitchListTile(
-                      title: const Text('Publish Article'),
+                      title: Text(l10n.publishArticle),
                       subtitle: Text(
                         _isPublished
-                            ? 'Article will be visible on the website'
-                            : 'Article will be saved as draft',
+                            ? l10n.articleVisible
+                            : l10n.articleSavedAsDraft,
                       ),
                       value: _isPublished,
                       onChanged: (value) {
@@ -239,7 +246,7 @@ class _AdminAddArticleScreenState extends State<AdminAddArticleScreen> {
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
-                      child: const Text('Save Article'),
+                      child: Text(l10n.saveArticle),
                     ),
                   ],
                 ),

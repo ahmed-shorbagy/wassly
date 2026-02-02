@@ -706,5 +706,250 @@
   "noTicketsFound": "No tickets found",
   "userNotAuthenticated": "User not authenticated",
   "notProvided": "Not provided",
-  "name": "Name"
+  "name": "Name",
+  "online": "Online",
+  "offline": "Offline",
+  "statusUpdated": "Status updated",
+  "deletedSuccessfully": "Deleted successfully",
+  "createMarket": "Create Market",
+  "discountOn": "Discount ON",
+  "discountOff": "Discount OFF",
+  "noMarketsYet": "No Markets Yet",
+  "noRestaurantsYet": "No Restaurants Yet",
+  "startByCreatingFirstMarket": "Start by creating your first market",
+  "startByCreatingFirstRestaurant": "Start by creating your first restaurant",
+  "deleteRestaurant": "Delete Restaurant",
+  "deleteRestaurantConfirm": "Are you sure you want to delete \"{name}\"? This action cannot be undone and will also delete all associated products.",
+  "@deleteRestaurantConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "seedMarketsTitle": "Seed Markets",
+  "seedMarketsConfirm": "This will create several default markets for testing. Continue?",
+  "seedingMarkets": "Seeding markets...",
+  "marketsSeededSuccessfully": "Markets seeded successfully!",
+  "failedToSeedMarkets": "Failed to seed markets: {error}",
+  "@failedToSeedMarkets": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "seed": "Seed",
+  "searchHint": "Search...",
+  "noResultsFound": "No results found",
+  "categoriesLabel": "Categories: {categories}",
+  "@categoriesLabel": {
+    "placeholders": {
+      "categories": {
+        "type": "String"
+      }
+    }
+  },
+  "noCategories": "No categories",
+  "youAreOnline": "You are Online",
+  "youAreOffline": "You are Offline",
+  "waitingForOrders": "Waiting for orders...",
+  "goOnlineToAcceptOrders": "Go online to accept orders",
+  "activeOrder": "Active Order",
+  "availableOrders": "Available Orders",
+  "scanningArea": "Scanning area...",
+  "noOrdersNearby": "No orders nearby yet",
+  "earnings": "Earnings",
+  "deliveries": "Deliveries",
+  "history": "History",
+  "toCustomer": "To Customer",
+  "toRestaurant": "To Restaurant",
+  "dropoff": "Dropoff",
+  "swipeToComplete": "Swipe to Complete",
+  "confirmPickup": "Confirm Pickup",
+  "orderAcceptedExclamation": "Order Accepted!",
+  "failedToAcceptOrder": "Failed to accept order",
+  "orderDeliveredSuccessfully": "Order Delivered! Great job.",
+  "failedToUpdateStatus": "Failed to update status",
+  "noReviewsYet": "No reviews yet",
+  "productNotFound": "Product not found",
+  "loadingRestaurantData": "Loading restaurant data...",
+  "pageNotFound": "Page Not Found",
+  "goToHome": "Go to Home",
+  "pleaseLogin": "Please login",
+  "errorScreen": "Error Screen",
+  "addArticle": "Add Article",
+  "editArticle": "Edit Article",
+  "articleCreated": "Article created successfully",
+  "failedToUploadImage": "Failed to upload image",
+  "errorOccurred": "An error occurred: {error}",
+  "@errorOccurred": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noDriversYet": "No drivers yet",
+  "tapToAddImage": "Tap to add image",
+  "titleLabel": "Title *",
+  "titleHint": "Enter title",
+  "titleRequired": "Title is required",
+  "contentLabel": "Content *",
+  "contentHint": "Enter content",
+  "contentRequired": "Content is required",
+  "authorLabel": "Author",
+  "authorHint": "Enter author name",
+  "publishArticle": "Publish Article",
+  "articleVisible": "Article will be visible to users",
+  "articleSavedAsDraft": "Article will be saved as draft",
+  "saveArticle": "Save Article",
+  "userManagement": "User Management",
+  "driverManagement": "Driver Management",
+  "searchUsersHint": "Search users...",
+  "searchDriversHint": "Search drivers...",
+  "searchOrdersHint": "Search orders...",
+  "noUsersFound": "No users found",
+  "noDriversFound": "No drivers found",
+  "addDriver": "Add Driver",
+  "addFirstDriver": "Add First Driver",
+  "driverDeletedSuccessfully": "Driver deleted successfully",
+  "seedMarkets": "Seed Markets",
+  "restaurantManagement": "Restaurant Management",
+  "reviews": "Reviews",
+  "orderNumber": "Order #{number}",
+  "orderManagement": "Order Management",
+  "editDriver": "Edit Driver",
+  "deleteDriver": "Delete Driver",
+  "driverNotFound": "Driver not found",
+  "noRecentOrders": "No recent orders",
+  "language": "Language",
+  "notifications": "Notifications",
+  "appVersion": "App Version",
+  "allOrders": "All Orders",
+  "totalRevenue": "Total Revenue",
+  "recentActivity": "Recent Activity",
+  "recentOrders": "Recent Orders",
+  "appSettings": "App Settings",
+  "about": "About",
+  "adminPanel": "Admin Panel",
+  "adminPanelSubtitle": "Full access without authentication",
+  "helpSupport": "Help & Support",
+  "deleteCategory": "Delete Category",
+  "restaurantCategories": "Restaurant Categories",
+  "marketCategory": "Market Category",
+  "createMarket": "Create Market",
+  "marketName": "Market Name",
+  "tapToUploadMarketImage": "Tap to upload market image",
+  "creatingMarket": "Creating Market...",
+  "marketCreatedSuccessfully": "Market created successfully",
+  "provideCredentialsToMarket": "Please provide these credentials to the market owner:",
+  "marketCanChangePasswordAfterLogin": "The market owner can change their password after logging in.",
+  "areYouSureDeleteCategoryGeneric": "Are you sure you want to delete this category?",
+  "@orderNumber": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "totalAmountLabel": "Total: {amount}",
+  "@totalAmountLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "pickUp": "Pick Up",
+  "markDelivered": "Mark Delivered",
+  "orderPickedUpSuccess": "Order picked up",
+  "orderDeliveredSuccess": "Order delivered",
+  "editRestaurant": "Edit Restaurant",
+  "createRestaurant": "Create Restaurant",
+  "articles": "Articles",
+  "deleteArticle": "Delete Article",
+  "publishArticle": "Publish Article",
+  "updateArticle": "Update Article",
+  "selectImageSource": "Select Image Source",
+  "camera": "Camera",
+  "gallery": "Gallery",
+  "retry": "Retry",
+  "editDriver": "Edit Driver",
+  "deleteDriver": "Delete Driver",
+  "driverAccountStatus": "Driver account status",
+  "basicInformation": "Basic Information",
+  "contactInformation": "Contact Information",
+  "deliverySettings": "Delivery Settings",
+  "personalInformation": "Personal Information",
+  "licenseInformation": "License Information",
+  "vehicleInformation": "Vehicle Information",
+  "fullName": "Full Name",
+  "personalPhoto": "Personal Photo",
+  "driverLicense": "Driver License",
+  "vehicleLicense": "Vehicle License",
+  "vehiclePhoto": "Vehicle Photo",
+  "driverUpdatedSuccessfully": "Driver updated successfully",
+  "tapToUpload": "Tap to upload {label}",
+  "@tapToUpload": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "restaurantAccountStatus": "Restaurant account status",
+  "error": "Error",
+  "noCategoriesAvailable": "No categories available",
+  "emailLabel": "Email:",
+  "passwordLabel": "Password:",
+  "restaurantUpdatedSuccessfully": "Restaurant updated successfully",
+  "restaurantCreatedSuccessfully": "Restaurant created successfully",
+  "provideCredentialsToRestaurant": "Please provide these credentials to the restaurant:",
+  "restaurantCanChangePasswordAfterLogin": "The restaurant can change their password after their first login.",
+  "selectProductToLink": "Select a product to link",
+  "noLinkedProduct": "No linked product",
+  "discountImage": "Discount Image",
+  "linkedProduct": "Linked Product",
+  "tapToUploadDiscountImage": "Tap to upload discount image",
+  "unknown": "Unknown",
+  "pending": "Pending",
+  "accepted": "Accepted",
+  "preparing": "Preparing",
+  "ready": "Ready",
+  "picked_up": "Picked Up",
+  "delivered": "Delivered",
+  "cancelled": "Cancelled",
+  "active": "Active",
+  "items": "items",
+  "customer": "Customer",
+  "editCategory": "Edit Category",
+  "addCategory": "Add Category",
+  "tapToAddImage": "Tap to add image",
+  "categoryName": "Category Name",
+  "pleaseEnterCategoryName": "Please enter category name",
+  "displayOrder": "Display Order",
+  "displayOrderHelper": "Lower numbers appear first",
+  "pleaseEnterOrder": "Please enter order",
+  "pleaseEnterValidNumber": "Please enter a valid number",
+  "adminRole": "Administrator",
+  "restaurantRole": "Restaurant",
+  "driverRole": "Driver",
+  "customerRole": "Customer",
+  "unknownCategory": "Unknown Category",
+  "areYouSureDeleteDriver": "Are you sure you want to delete this driver?",
+  "statusLabel": "Status",
+  "updateDriver": "Update Driver",
+  "takeBreakOrGoOnline": "Take a break or go online\nto start earning",
+  "estEarnings": "Est. Earnings: {amount} {currency}",
+  "@estEarnings": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "currency": {
+        "type": "String"
+      }
+    }
+  }
 }

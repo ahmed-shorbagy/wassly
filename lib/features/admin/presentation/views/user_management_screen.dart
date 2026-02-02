@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -27,7 +26,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('User Management'),
+        title: Text(l10n.userManagement),
         backgroundColor: Colors.purple,
         foregroundColor: Colors.white,
       ),
@@ -39,7 +38,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Search users...',
+                hintText: l10n.searchUsersHint,
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -62,7 +61,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
 
                 if (snapshot.hasError) {
                   return Center(
-                    child: Text('Error: ${snapshot.error}'),
+                    child: Text(l10n.errorOccurred(snapshot.error.toString())),
                   );
                 }
 
@@ -77,9 +76,9 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                           color: AppColors.textSecondary.withValues(alpha: 0.5),
                         ),
                         const SizedBox(height: 16),
-                        const Text(
-                          'No users found',
-                          style: TextStyle(
+                        Text(
+                          l10n.noUsersFound,
+                          style: const TextStyle(
                             fontSize: 18,
                             color: AppColors.textSecondary,
                           ),
@@ -95,9 +94,15 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                     ? users
                     : users.where((doc) {
                         final data = doc.data() as Map<String, dynamic>;
-                        final name = (data['name'] ?? '').toString().toLowerCase();
-                        final email = (data['email'] ?? '').toString().toLowerCase();
-                        final phone = (data['phone'] ?? '').toString().toLowerCase();
+                        final name = (data['name'] ?? '')
+                            .toString()
+                            .toLowerCase();
+                        final email = (data['email'] ?? '')
+                            .toString()
+                            .toLowerCase();
+                        final phone = (data['phone'] ?? '')
+                            .toString()
+                            .toLowerCase();
                         return name.contains(query) ||
                             email.contains(query) ||
                             phone.contains(query);
@@ -115,11 +120,12 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                         leading: CircleAvatar(
                           backgroundColor: AppColors.primary,
                           child: Text(
-                            (data['name'] ?? 'U')[0].toUpperCase(),
+                            (data['name'] ?? l10n.nA.substring(0, 1))[0]
+                                .toUpperCase(),
                             style: const TextStyle(color: Colors.white),
                           ),
                         ),
-                        title: Text(data['name'] ?? 'Unknown'),
+                        title: Text(data['name'] ?? l10n.nA),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -128,10 +134,15 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                             const SizedBox(height: 4),
                             Chip(
                               label: Text(
-                                data['userType'] ?? 'customer',
+                                _getLocalizedRole(
+                                  data['userType'] ?? 'customer',
+                                  l10n,
+                                ),
                                 style: const TextStyle(fontSize: 10),
                               ),
-                              backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                              backgroundColor: AppColors.primary.withValues(
+                                alpha: 0.1,
+                              ),
                             ),
                           ],
                         ),
@@ -152,5 +163,18 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
       ),
     );
   }
-}
 
+  String _getLocalizedRole(String role, AppLocalizations l10n) {
+    switch (role.toLowerCase()) {
+      case 'admin':
+        return l10n.adminRole;
+      case 'restaurant':
+        return l10n.restaurantRole;
+      case 'driver':
+        return l10n.driverRole;
+      case 'customer':
+      default:
+        return l10n.customerRole;
+    }
+  }
+}

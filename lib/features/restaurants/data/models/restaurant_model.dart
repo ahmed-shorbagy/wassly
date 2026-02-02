@@ -172,6 +172,7 @@ class RestaurantModel extends RestaurantEntity {
     return RestaurantModel.fromJson({...data, 'id': doc.id});
   }
 
+  @override
   RestaurantModel copyWith({
     String? id,
     String? ownerId,

@@ -74,7 +74,8 @@ class _AdminAddEditRestaurantCategoryScreenState
       );
     } else {
       if (_selectedImage == null) {
-        context.showErrorSnackBar('Please select an image'); // TODO: Localize
+        final l10n = AppLocalizations.of(context)!;
+        context.showErrorSnackBar(l10n.pleaseSelectImage);
         return;
       }
       context.read<AdminRestaurantCategoryCubit>().createCategory(
@@ -92,7 +93,7 @@ class _AdminAddEditRestaurantCategoryScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditing ? 'Edit Category' : 'Add Category'),
+        title: Text(_isEditing ? l10n.editCategory : l10n.addCategory),
         backgroundColor: Colors.purple,
       ),
       body:
@@ -148,16 +149,18 @@ class _AdminAddEditRestaurantCategoryScreenState
                                 )
                               : Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
-                                  children: const [
-                                    Icon(
+                                  children: [
+                                    const Icon(
                                       Icons.add_a_photo,
                                       size: 50,
                                       color: Colors.grey,
                                     ),
-                                    SizedBox(height: 8),
+                                    const SizedBox(height: 8),
                                     Text(
-                                      'Tap to add image',
-                                      style: TextStyle(color: Colors.grey),
+                                      l10n.tapToAddImage,
+                                      style: const TextStyle(
+                                        color: Colors.grey,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -166,13 +169,13 @@ class _AdminAddEditRestaurantCategoryScreenState
                       const SizedBox(height: 24),
                       TextFormField(
                         controller: _nameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Category Name',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          labelText: l10n.categoryName,
+                          border: const OutlineInputBorder(),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter category name';
+                            return l10n.pleaseEnterCategoryName;
                           }
                           return null;
                         },
@@ -180,18 +183,18 @@ class _AdminAddEditRestaurantCategoryScreenState
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _displayOrderController,
-                        decoration: const InputDecoration(
-                          labelText: 'Display Order',
-                          border: OutlineInputBorder(),
-                          helperText: 'Lower numbers appear first',
+                        decoration: InputDecoration(
+                          labelText: l10n.displayOrder,
+                          border: const OutlineInputBorder(),
+                          helperText: l10n.displayOrderHelper,
                         ),
                         keyboardType: TextInputType.number,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter order';
+                            return l10n.pleaseEnterOrder;
                           }
                           if (int.tryParse(value) == null) {
-                            return 'Please enter a valid number';
+                            return l10n.pleaseEnterValidNumber;
                           }
                           return null;
                         },
@@ -206,7 +209,7 @@ class _AdminAddEditRestaurantCategoryScreenState
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
                         child: Text(
-                          _isEditing ? 'Update Category' : 'Create Category',
+                          _isEditing ? l10n.editCategory : l10n.addCategory,
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,

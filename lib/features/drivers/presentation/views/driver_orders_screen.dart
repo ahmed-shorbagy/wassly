@@ -53,7 +53,7 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Orders'),
+        title: Text(l10n.navOrders),
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.white,
@@ -82,7 +82,7 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen>
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: _loadDriverAndOrders,
-                          child: const Text('Retry'),
+                          child: Text(l10n.retry),
                         ),
                       ],
                     ),
@@ -214,7 +214,9 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen>
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Order #${order.id.substring(0, 8).toUpperCase()}',
+                          l10n.orderNumber(
+                            order.id.substring(0, 8).toUpperCase(),
+                          ),
                           style: TextStyle(
                             fontSize: 12,
                             color: AppColors.textSecondary,
@@ -257,7 +259,9 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Total: ${order.totalAmount.toStringAsFixed(2)} ${AppLocalizations.of(context)?.currencySymbol ?? 'ج.م'}',
+                    l10n.totalAmountLabel(
+                      '${order.totalAmount.toStringAsFixed(2)} ${l10n.currencySymbol}',
+                    ),
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -272,10 +276,12 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen>
                           OrderStatus.pickedUp,
                         );
                         if (mounted) {
-                          context.showSuccessSnackBar('Order picked up');
+                          context.showSuccessSnackBar(
+                            l10n.orderPickedUpSuccess,
+                          );
                         }
                       },
-                      child: const Text('Pick Up'),
+                      child: Text(l10n.pickUp),
                     )
                   else if (showActions && order.status == OrderStatus.pickedUp)
                     ElevatedButton(
@@ -285,10 +291,12 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen>
                           OrderStatus.delivered,
                         );
                         if (mounted) {
-                          context.showSuccessSnackBar('Order delivered');
+                          context.showSuccessSnackBar(
+                            l10n.orderDeliveredSuccess,
+                          );
                         }
                       },
-                      child: const Text('Mark Delivered'),
+                      child: Text(l10n.markDelivered),
                     ),
                 ],
               ),

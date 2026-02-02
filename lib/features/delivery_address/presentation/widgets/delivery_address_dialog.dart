@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../cubits/delivery_address_cubit.dart';
-import '../views/address_book_screen.dart';
 import 'add_edit_address_dialog.dart';
 
 class DeliveryAddressDialog extends StatelessWidget {

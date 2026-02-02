@@ -26,8 +26,8 @@ class AdminSettingsScreen extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Text(
-                    'App Settings',
-                    style: TextStyle(
+                    l10n.appSettings,
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: AppColors.primary,
@@ -37,7 +37,7 @@ class AdminSettingsScreen extends StatelessWidget {
                 const Divider(height: 1),
                 ListTile(
                   leading: const Icon(Icons.language, color: AppColors.primary),
-                  title: const Text('Language'),
+                  title: Text(l10n.language),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
                     // Navigate to language settings
@@ -45,8 +45,11 @@ class AdminSettingsScreen extends StatelessWidget {
                 ),
                 const Divider(height: 1),
                 ListTile(
-                  leading: const Icon(Icons.notifications, color: AppColors.primary),
-                  title: const Text('Notifications'),
+                  leading: const Icon(
+                    Icons.notifications,
+                    color: AppColors.primary,
+                  ),
+                  title: Text(l10n.notifications),
                   trailing: Switch(
                     value: true,
                     onChanged: (value) {
@@ -67,8 +70,8 @@ class AdminSettingsScreen extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Text(
-                    'About',
-                    style: TextStyle(
+                    l10n.about,
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: AppColors.primary,
@@ -76,21 +79,24 @@ class AdminSettingsScreen extends StatelessWidget {
                   ),
                 ),
                 const Divider(height: 1),
-                const ListTile(
-                  leading: Icon(Icons.info, color: AppColors.primary),
-                  title: Text('App Version'),
-                  subtitle: Text('1.0.0'),
+                ListTile(
+                  leading: const Icon(Icons.info, color: AppColors.primary),
+                  title: Text(l10n.appVersion),
+                  subtitle: const Text('1.0.0'),
                 ),
                 const Divider(height: 1),
                 ListTile(
-                  leading: const Icon(Icons.admin_panel_settings, color: AppColors.primary),
-                  title: const Text('Admin Panel'),
-                  subtitle: const Text('Full access without authentication'),
+                  leading: const Icon(
+                    Icons.admin_panel_settings,
+                    color: AppColors.primary,
+                  ),
+                  title: Text(l10n.adminPanel),
+                  subtitle: Text(l10n.adminPanelSubtitle),
                 ),
                 const Divider(height: 1),
                 ListTile(
                   leading: const Icon(Icons.help, color: AppColors.primary),
-                  title: const Text('Help & Support'),
+                  title: Text(l10n.helpSupport),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
                     // Navigate to help

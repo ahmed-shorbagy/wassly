@@ -83,7 +83,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Order Management'),
+          title: Text(l10n.orderManagement),
           backgroundColor: Colors.purple,
           bottom: TabBar(
             controller: _tabController,
@@ -92,7 +92,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
             labelColor: Colors.white,
             unselectedLabelColor: Colors.white70,
             tabs: [
-              const Tab(text: 'All Orders'),
+              Tab(text: l10n.allOrders),
               Tab(text: l10n.pendingOrders),
               Tab(text: l10n.activeOrders),
               Tab(text: l10n.orderHistory),
@@ -102,7 +102,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
             IconButton(
               icon: const Icon(Icons.refresh),
               onPressed: _loadAllOrders,
-              tooltip: 'Refresh',
+              tooltip: l10n.refresh,
             ),
           ],
         ),
@@ -119,7 +119,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
                     _filterOrders();
                   },
                   decoration: InputDecoration(
-                    hintText: 'Search orders...',
+                    hintText: l10n.searchOrdersHint,
                     prefixIcon: const Icon(Icons.search),
                     suffixIcon: _searchController.text.isNotEmpty
                         ? IconButton(
@@ -191,6 +191,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
   }
 
   Widget _buildOrdersList(List<OrderEntity> orders) {
+    final l10n = AppLocalizations.of(context)!;
     if (orders.isEmpty) {
       return Center(
         child: Column(
@@ -202,9 +203,12 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
               color: AppColors.textSecondary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'No orders found',
-              style: TextStyle(fontSize: 18, color: AppColors.textSecondary),
+            Text(
+              l10n.noOrdersFound,
+              style: const TextStyle(
+                fontSize: 18,
+                color: AppColors.textSecondary,
+              ),
             ),
           ],
         ),
@@ -224,6 +228,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
   }
 
   Widget _buildOrderCard(OrderEntity order) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -284,16 +289,18 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Order #${order.id.substring(0, 8).toUpperCase()}',
+                          l10n.orderNumber(
+                            order.id.substring(0, 8).toUpperCase(),
+                          ),
                           style: TextStyle(
                             fontSize: 12,
                             color: AppColors.textSecondary,
                           ),
                         ),
                         Text(
-                          DateFormat(
-                            'MMM dd, yyyy • HH:mm',
-                          ).format(order.createdAt),
+                          DateFormat.yMMMd(
+                            Localizations.localeOf(context).toString(),
+                          ).add_Hm().format(order.createdAt),
                           style: TextStyle(
                             fontSize: 12,
                             color: AppColors.textSecondary,
@@ -303,7 +310,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
                     ),
                   ),
                   // Status Badge
-                  _buildStatusBadge(order.status),
+                  _buildStatusBadge(order.status, l10n),
                 ],
               ),
               const Divider(height: 24),
@@ -342,7 +349,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    '${order.items.length} ${AppLocalizations.of(context)!.items}',
+                    '${order.items.length} ${l10n.items}',
                     style: TextStyle(
                       fontSize: 14,
                       color: AppColors.textSecondary,
@@ -356,7 +363,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Total: ${order.totalAmount.toStringAsFixed(2)} ${AppLocalizations.of(context)?.currencySymbol ?? 'ج.م'}',
+                    l10n.totalAmountLabel(order.totalAmount.toStringAsFixed(2)),
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -367,7 +374,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
                     onPressed: () {
                       context.push('/admin/orders/${order.id}');
                     },
-                    child: const Text('View Details'),
+                    child: Text(l10n.viewDetails),
                   ),
                 ],
               ),
@@ -378,7 +385,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
     );
   }
 
-  Widget _buildStatusBadge(OrderStatus status) {
+  Widget _buildStatusBadge(OrderStatus status, AppLocalizations l10n) {
     Color backgroundColor;
     IconData icon;
 
@@ -419,7 +426,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
           Icon(icon, size: 14, color: Colors.white),
           const SizedBox(width: 4),
           Text(
-            status.name.toUpperCase(),
+            _getLocalizedStatus(status, l10n),
             style: const TextStyle(
               color: Colors.white,
               fontSize: 10,
@@ -429,5 +436,24 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
         ],
       ),
     );
+  }
+
+  String _getLocalizedStatus(OrderStatus status, AppLocalizations l10n) {
+    switch (status) {
+      case OrderStatus.pending:
+        return l10n.pending;
+      case OrderStatus.accepted:
+        return l10n.accepted;
+      case OrderStatus.preparing:
+        return l10n.preparing;
+      case OrderStatus.ready:
+        return l10n.ready;
+      case OrderStatus.pickedUp:
+        return l10n.picked_up;
+      case OrderStatus.delivered:
+        return l10n.delivered;
+      case OrderStatus.cancelled:
+        return l10n.cancelled;
+    }
   }
 }

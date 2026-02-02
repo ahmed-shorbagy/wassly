@@ -11,7 +11,6 @@ import '../../../../core/utils/extensions.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../../../../shared/widgets/back_button_handler.dart';
 import '../cubits/admin_cubit.dart';
-// import '../cubits/admin_restaurant_category_cubit.dart'; // Not needed as we use fixed categories
 
 class AdminCreateMarketScreen extends StatefulWidget {
   const AdminCreateMarketScreen({super.key});
@@ -47,7 +46,6 @@ class _AdminCreateMarketScreenState extends State<AdminCreateMarketScreen> {
   @override
   void initState() {
     super.initState();
-    // No need to load categories from DB
   }
 
   @override
@@ -77,7 +75,6 @@ class _AdminCreateMarketScreenState extends State<AdminCreateMarketScreen> {
           l10n,
         ),
       },
-      // Add more if needed or allow all MarketProductCategories
     ];
   }
 
@@ -143,7 +140,6 @@ class _AdminCreateMarketScreenState extends State<AdminCreateMarketScreen> {
   }
 
   Future<void> _pickLocation() async {
-    // For now, use a default location (Cairo, Egypt)
     setState(() {
       _selectedLocation = const LatLng(30.0444, 31.2357);
     });
@@ -181,7 +177,6 @@ class _AdminCreateMarketScreenState extends State<AdminCreateMarketScreen> {
                           _selectedCategoryIds.remove(catId);
                         }
                       });
-                      // Also update the main screen state
                       setState(() {});
                     },
                   );
@@ -222,7 +217,6 @@ class _AdminCreateMarketScreenState extends State<AdminCreateMarketScreen> {
       return;
     }
 
-    // Validate password match
     if (_passwordController.text != _confirmPasswordController.text) {
       context.showErrorSnackBar(l10n.passwordsDoNotMatch);
       return;
@@ -235,7 +229,6 @@ class _AdminCreateMarketScreenState extends State<AdminCreateMarketScreen> {
       phone: _phoneController.text.trim(),
       email: _emailController.text.trim(),
       password: _passwordController.text.trim(),
-      // Use the selected market category IDs directly
       categoryIds: _selectedCategoryIds,
       location: _selectedLocation!,
       imageFile: _selectedImage!,
@@ -264,45 +257,36 @@ class _AdminCreateMarketScreenState extends State<AdminCreateMarketScreen> {
     return UnsavedChangesHandler(
       hasUnsavedChanges: _hasUnsavedChanges,
       child: Scaffold(
-        appBar: AppBar(title: const Text('Create Market')), // localized title?
+        appBar: AppBar(title: Text(l10n.createMarket)),
         body: BlocConsumer<AdminCubit, AdminState>(
           listener: (context, state) {
             if (state is RestaurantCreatedSuccess) {
-              // Show credentials dialog
               showDialog(
                 context: context,
                 barrierDismissible: false,
                 builder: (dialogContext) => AlertDialog(
-                  title: Text(
-                    l10n.restaurantCreatedSuccessfully.replaceAll(
-                      'Restaurant',
-                      'Market',
-                    ),
-                  ), // Text replacement hack or new key
+                  title: Text(l10n.marketCreatedSuccessfully),
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        l10n.provideCredentialsToRestaurant.replaceAll(
-                          'Restaurant',
-                          'Market',
-                        ),
+                        l10n.provideCredentialsToMarket,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 16),
-                      _buildCredentialRow('Email:', _emailController.text),
+                      _buildCredentialRow(
+                        '${l10n.email}:',
+                        _emailController.text,
+                      ),
                       const SizedBox(height: 8),
                       _buildCredentialRow(
-                        'Password:',
+                        '${l10n.password}:',
                         _passwordController.text,
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        l10n.restaurantCanChangePasswordAfterLogin.replaceAll(
-                          'Restaurant',
-                          'Market',
-                        ),
+                        l10n.marketCanChangePasswordAfterLogin,
                         style: const TextStyle(
                           fontSize: 12,
                           fontStyle: FontStyle.italic,
@@ -316,7 +300,7 @@ class _AdminCreateMarketScreenState extends State<AdminCreateMarketScreen> {
                       onPressed: () {
                         Navigator.pop(dialogContext);
                         context.read<AdminCubit>().resetState();
-                        context.go('/admin/restaurants'); // Go to list
+                        context.go('/admin/restaurants');
                       },
                       child: Text(l10n.ok),
                     ),
@@ -329,7 +313,7 @@ class _AdminCreateMarketScreenState extends State<AdminCreateMarketScreen> {
           },
           builder: (context, state) {
             if (state is AdminLoading) {
-              return LoadingWidget(message: 'Creating Market...');
+              return LoadingWidget(message: l10n.creatingMarket);
             }
 
             return Form(
@@ -339,23 +323,18 @@ class _AdminCreateMarketScreenState extends State<AdminCreateMarketScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Image Upload Section
                     _buildImageUploadSection(l10n),
                     const SizedBox(height: 24),
 
-                    // Basic Information
                     _buildSectionTitle(l10n.basicInformation),
                     const SizedBox(height: 12),
                     _buildTextField(
                       controller: _nameController,
-                      label: 'Market Name', // Localize
+                      label: l10n.marketName,
                       icon: Icons.store_mall_directory,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return l10n.pleaseEnterRestaurantName.replaceAll(
-                            'Restaurant',
-                            'Market',
-                          );
+                          return l10n.fieldRequired;
                         }
                         return null;
                       },
@@ -375,7 +354,6 @@ class _AdminCreateMarketScreenState extends State<AdminCreateMarketScreen> {
                     ),
                     const SizedBox(height: 24),
 
-                    // Contact Information
                     _buildSectionTitle(l10n.contactInformation),
                     const SizedBox(height: 12),
                     _buildTextField(
@@ -452,13 +430,11 @@ class _AdminCreateMarketScreenState extends State<AdminCreateMarketScreen> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    // Commercial Registration Photo
                     _buildSectionTitle(l10n.commercialRegistrationPhoto),
                     const SizedBox(height: 12),
                     _buildCommercialRegistrationPhotoSection(l10n),
                     const SizedBox(height: 24),
 
-                    // Location
                     _buildSectionTitle(l10n.location),
                     const SizedBox(height: 12),
                     _buildTextField(
@@ -477,13 +453,11 @@ class _AdminCreateMarketScreenState extends State<AdminCreateMarketScreen> {
                     _buildLocationPicker(l10n),
                     const SizedBox(height: 24),
 
-                    // Categories - Market Specific
-                    _buildSectionTitle('Market Category'), // Localize
+                    _buildSectionTitle(l10n.marketCategory),
                     const SizedBox(height: 12),
                     _buildCategorySelector(l10n),
                     const SizedBox(height: 24),
 
-                    // Delivery Settings
                     _buildSectionTitle(l10n.deliverySettings),
                     const SizedBox(height: 12),
                     Row(
@@ -543,11 +517,10 @@ class _AdminCreateMarketScreenState extends State<AdminCreateMarketScreen> {
                     ),
                     const SizedBox(height: 32),
 
-                    // Submit Button
                     ElevatedButton(
                       onPressed: _submitForm,
                       child: Text(
-                        'Create Market', // Localize
+                        l10n.createMarket,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -625,7 +598,7 @@ class _AdminCreateMarketScreenState extends State<AdminCreateMarketScreen> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      'Tap to upload market image', // Localize
+                      l10n.tapToUploadMarketImage,
                       style: const TextStyle(
                         fontSize: 16,
                         color: Colors.grey,

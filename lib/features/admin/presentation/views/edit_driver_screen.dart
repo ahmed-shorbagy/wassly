@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/extensions.dart';
 import '../../../../shared/widgets/loading_widget.dart';
@@ -76,6 +77,7 @@ class _EditDriverScreenState extends State<EditDriverScreen> {
   }
 
   Future<void> _pickImage(ImageSource source, String type) async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       final image = await _imagePicker.pickImage(
         source: source,
@@ -103,21 +105,22 @@ class _EditDriverScreenState extends State<EditDriverScreen> {
         });
       }
     } catch (e) {
-      context.showErrorSnackBar('Failed to pick image: $e');
+      context.showErrorSnackBar(l10n.failedToPickImage(e.toString()));
     }
   }
 
   void _showImageSourceDialog(String type) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Image Source'),
+        title: Text(l10n.selectImageSource),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: const Text('Camera'),
+              title: Text(l10n.camera),
               onTap: () {
                 Navigator.pop(context);
                 _pickImage(ImageSource.camera, type);
@@ -125,7 +128,7 @@ class _EditDriverScreenState extends State<EditDriverScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('Gallery'),
+              title: Text(l10n.gallery),
               onTap: () {
                 Navigator.pop(context);
                 _pickImage(ImageSource.gallery, type);
@@ -177,11 +180,13 @@ class _EditDriverScreenState extends State<EditDriverScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return UnsavedChangesHandler(
       hasUnsavedChanges: _hasUnsavedChanges,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Edit Driver'),
+          title: Text(l10n.editDriver),
           backgroundColor: Colors.purple,
           actions: [
             if (_driver != null)
@@ -191,25 +196,25 @@ class _EditDriverScreenState extends State<EditDriverScreen> {
                   showDialog(
                     context: context,
                     builder: (context) => AlertDialog(
-                      title: const Text('Delete Driver'),
-                      content: const Text(
-                        'Are you sure you want to delete this driver? This action cannot be undone.',
-                      ),
+                      title: Text(l10n.deleteDriver),
+                      content: Text(l10n.areYouSureDeleteDriver),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context),
-                          child: const Text('Cancel'),
+                          child: Text(l10n.cancel),
                         ),
                         ElevatedButton(
                           onPressed: () {
                             Navigator.pop(context);
-                            context.read<DriverCubit>().deleteDriver(widget.driverId);
+                            context.read<DriverCubit>().deleteDriver(
+                              widget.driverId,
+                            );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.error,
                             foregroundColor: Colors.white,
                           ),
-                          child: const Text('Delete'),
+                          child: Text(l10n.delete),
                         ),
                       ],
                     ),
@@ -223,10 +228,10 @@ class _EditDriverScreenState extends State<EditDriverScreen> {
             if (state is DriverLoaded) {
               _loadDriverData(state.driver);
             } else if (state is DriverUpdated) {
-              context.showSuccessSnackBar('Driver updated successfully');
+              context.showSuccessSnackBar(l10n.driverUpdatedSuccessfully);
               context.go('/admin/drivers');
             } else if (state is DriverDeleted) {
-              context.showSuccessSnackBar('Driver deleted successfully');
+              context.showSuccessSnackBar(l10n.driverDeletedSuccessfully);
               context.go('/admin/drivers');
             } else if (state is DriverError) {
               context.showErrorSnackBar(state.message);
@@ -246,9 +251,11 @@ class _EditDriverScreenState extends State<EditDriverScreen> {
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () {
-                        context.read<DriverCubit>().getDriverById(widget.driverId);
+                        context.read<DriverCubit>().getDriverById(
+                          widget.driverId,
+                        );
                       },
-                      child: const Text('Retry'),
+                      child: Text(l10n.retry),
                     ),
                   ],
                 ),
@@ -256,7 +263,7 @@ class _EditDriverScreenState extends State<EditDriverScreen> {
             }
 
             if (_driver == null) {
-              return const Center(child: Text('Driver not found'));
+              return Center(child: Text(l10n.driverNotFound));
             }
 
             return Form(
@@ -265,25 +272,26 @@ class _EditDriverScreenState extends State<EditDriverScreen> {
                 padding: const EdgeInsets.all(16),
                 children: [
                   // Personal Information Section
-                  _buildSectionTitle('Personal Information'),
+                  _buildSectionTitle(l10n.personalInformation),
                   const SizedBox(height: 12),
-                  
+
                   // Personal Image
                   _buildImageUploadSection(
-                    'Personal Photo',
+                    l10n.personalPhoto,
                     _personalImage,
                     _driver!.personalImageUrl,
                     (source) => _pickImage(source, 'personal'),
+                    l10n,
                   ),
                   const SizedBox(height: 16),
 
                   _buildTextField(
                     controller: _nameController,
-                    label: 'Full Name',
+                    label: l10n.fullName,
                     icon: Icons.person,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Please enter full name';
+                        return l10n.pleaseEnterFullName;
                       }
                       return null;
                     },
@@ -291,15 +299,15 @@ class _EditDriverScreenState extends State<EditDriverScreen> {
                   const SizedBox(height: 16),
                   _buildTextField(
                     controller: _emailController,
-                    label: 'Email',
+                    label: l10n.email,
                     icon: Icons.email,
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Please enter email';
+                        return l10n.pleaseEnterEmail;
                       }
                       if (!value.isValidEmail) {
-                        return 'Please enter valid email';
+                        return l10n.pleaseEnterValidEmail;
                       }
                       return null;
                     },
@@ -307,12 +315,12 @@ class _EditDriverScreenState extends State<EditDriverScreen> {
                   const SizedBox(height: 16),
                   _buildTextField(
                     controller: _phoneController,
-                    label: 'Phone Number',
+                    label: l10n.phoneNumber,
                     icon: Icons.phone,
                     keyboardType: TextInputType.phone,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Please enter phone number';
+                        return l10n.pleaseEnterPhoneNumber;
                       }
                       return null;
                     },
@@ -320,12 +328,12 @@ class _EditDriverScreenState extends State<EditDriverScreen> {
                   const SizedBox(height: 16),
                   _buildTextField(
                     controller: _addressController,
-                    label: 'Address',
+                    label: l10n.address,
                     icon: Icons.location_on,
                     maxLines: 2,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Please enter address';
+                        return l10n.pleaseEnterAddress;
                       }
                       return null;
                     },
@@ -333,48 +341,51 @@ class _EditDriverScreenState extends State<EditDriverScreen> {
                   const SizedBox(height: 24),
 
                   // License Information Section
-                  _buildSectionTitle('License Information'),
+                  _buildSectionTitle(l10n.licenseInformation),
                   const SizedBox(height: 12),
-                  
+
                   // Driver License
                   _buildImageUploadSection(
-                    'Driver License',
+                    l10n.driverLicense,
                     _driverLicenseImage,
                     _driver!.driverLicenseUrl,
                     (source) => _pickImage(source, 'driverLicense'),
+                    l10n,
                   ),
                   const SizedBox(height: 24),
 
                   // Vehicle Information Section
-                  _buildSectionTitle('Vehicle Information'),
+                  _buildSectionTitle(l10n.vehicleInformation),
                   const SizedBox(height: 12),
-                  
+
                   // Vehicle License
                   _buildImageUploadSection(
-                    'Vehicle License',
+                    l10n.vehicleLicense,
                     _vehicleLicenseImage,
                     _driver!.vehicleLicenseUrl,
                     (source) => _pickImage(source, 'vehicleLicense'),
+                    l10n,
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Vehicle Photo
                   _buildImageUploadSection(
-                    'Vehicle Photo',
+                    l10n.vehiclePhoto,
                     _vehiclePhotoImage,
                     _driver!.vehiclePhotoUrl,
                     (source) => _pickImage(source, 'vehiclePhoto'),
+                    l10n,
                   ),
                   const SizedBox(height: 16),
 
                   _buildDropdownField(
                     controller: _vehicleTypeController,
-                    label: 'Vehicle Type',
+                    label: l10n.vehicleType,
                     icon: Icons.directions_car,
                     items: _vehicleTypes,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please select vehicle type';
+                        return l10n.pleaseSelectVehicleType;
                       }
                       return null;
                     },
@@ -382,11 +393,11 @@ class _EditDriverScreenState extends State<EditDriverScreen> {
                   const SizedBox(height: 16),
                   _buildTextField(
                     controller: _vehicleModelController,
-                    label: 'Vehicle Model',
+                    label: l10n.vehicleModel,
                     icon: Icons.directions_car,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Please enter vehicle model';
+                        return l10n.pleaseEnterVehicleModel;
                       }
                       return null;
                     },
@@ -394,11 +405,11 @@ class _EditDriverScreenState extends State<EditDriverScreen> {
                   const SizedBox(height: 16),
                   _buildTextField(
                     controller: _vehicleColorController,
-                    label: 'Vehicle Color',
+                    label: l10n.vehicleColor,
                     icon: Icons.color_lens,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Please enter vehicle color';
+                        return l10n.pleaseEnterVehicleColor;
                       }
                       return null;
                     },
@@ -406,11 +417,11 @@ class _EditDriverScreenState extends State<EditDriverScreen> {
                   const SizedBox(height: 16),
                   _buildTextField(
                     controller: _vehiclePlateController,
-                    label: 'Vehicle Plate Number',
+                    label: l10n.vehiclePlateNumber,
                     icon: Icons.confirmation_number,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Please enter vehicle plate number';
+                        return l10n.pleaseEnterVehiclePlateNumber;
                       }
                       return null;
                     },
@@ -418,11 +429,11 @@ class _EditDriverScreenState extends State<EditDriverScreen> {
                   const SizedBox(height: 24),
 
                   // Status Section
-                  _buildSectionTitle('Status'),
+                  _buildSectionTitle(l10n.statusLabel),
                   const SizedBox(height: 12),
                   SwitchListTile(
-                    title: const Text('Active'),
-                    subtitle: const Text('Driver account status'),
+                    title: Text(l10n.active),
+                    subtitle: Text(l10n.driverAccountStatus),
                     value: _isActive,
                     onChanged: (value) {
                       setState(() {
@@ -442,9 +453,9 @@ class _EditDriverScreenState extends State<EditDriverScreen> {
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
                       ),
-                      child: const Text(
-                        'Update Driver',
-                        style: TextStyle(
+                      child: Text(
+                        l10n.updateDriver,
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -477,6 +488,7 @@ class _EditDriverScreenState extends State<EditDriverScreen> {
     File? newImage,
     String? existingImageUrl,
     Function(ImageSource) onPickImage,
+    AppLocalizations l10n,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -519,13 +531,13 @@ class _EditDriverScreenState extends State<EditDriverScreen> {
                         ),
                         onPressed: () {
                           setState(() {
-                            if (label == 'Personal Photo') {
+                            if (label == l10n.personalPhoto) {
                               _personalImage = null;
-                            } else if (label == 'Driver License') {
+                            } else if (label == l10n.driverLicense) {
                               _driverLicenseImage = null;
-                            } else if (label == 'Vehicle License') {
+                            } else if (label == l10n.vehicleLicense) {
                               _vehicleLicenseImage = null;
-                            } else if (label == 'Vehicle Photo') {
+                            } else if (label == l10n.vehiclePhoto) {
                               _vehiclePhotoImage = null;
                             }
                           });
@@ -538,80 +550,84 @@ class _EditDriverScreenState extends State<EditDriverScreen> {
                       child: ElevatedButton.icon(
                         onPressed: () {
                           String type = 'personal';
-                          if (label == 'Driver License') type = 'driverLicense';
-                          if (label == 'Vehicle License') type = 'vehicleLicense';
-                          if (label == 'Vehicle Photo') type = 'vehiclePhoto';
+                          if (label == l10n.driverLicense)
+                            type = 'driverLicense';
+                          if (label == l10n.vehicleLicense)
+                            type = 'vehicleLicense';
+                          if (label == l10n.vehiclePhoto) type = 'vehiclePhoto';
                           _showImageSourceDialog(type);
                         },
                         icon: const Icon(Icons.edit),
-                        label: const Text('Change'),
+                        label: Text(l10n.change),
                       ),
                     ),
                   ],
                 )
               : existingImageUrl != null && existingImageUrl.isNotEmpty
-                  ? Stack(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: CachedNetworkImage(
-                            imageUrl: existingImageUrl,
-                            width: double.infinity,
-                            height: 150,
-                            fit: BoxFit.cover,
-                            errorWidget: (context, url, error) => Container(
-                              color: AppColors.surface,
-                              child: const Icon(Icons.error),
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 8,
-                          right: 8,
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              String type = 'personal';
-                              if (label == 'Driver License') type = 'driverLicense';
-                              if (label == 'Vehicle License') type = 'vehicleLicense';
-                              if (label == 'Vehicle Photo') type = 'vehiclePhoto';
-                              _showImageSourceDialog(type);
-                            },
-                            icon: const Icon(Icons.edit),
-                            label: const Text('Change'),
-                          ),
-                        ),
-                      ],
-                    )
-                  : InkWell(
-                      onTap: () {
-                        String type = 'personal';
-                        if (label == 'Driver License') type = 'driverLicense';
-                        if (label == 'Vehicle License') type = 'vehicleLicense';
-                        if (label == 'Vehicle Photo') type = 'vehiclePhoto';
-                        _showImageSourceDialog(type);
-                      },
+              ? Stack(
+                  children: [
+                    ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.add_photo_alternate,
-                              size: 40,
-                              color: Colors.grey,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Tap to upload $label',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
+                      child: CachedNetworkImage(
+                        imageUrl: existingImageUrl,
+                        width: double.infinity,
+                        height: 150,
+                        fit: BoxFit.cover,
+                        errorWidget: (context, url, error) => Container(
+                          color: AppColors.surface,
+                          child: const Icon(Icons.error),
                         ),
                       ),
                     ),
+                    Positioned(
+                      bottom: 8,
+                      right: 8,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          String type = 'personal';
+                          if (label == l10n.driverLicense)
+                            type = 'driverLicense';
+                          if (label == l10n.vehicleLicense)
+                            type = 'vehicleLicense';
+                          if (label == l10n.vehiclePhoto) type = 'vehiclePhoto';
+                          _showImageSourceDialog(type);
+                        },
+                        icon: const Icon(Icons.edit),
+                        label: Text(l10n.change),
+                      ),
+                    ),
+                  ],
+                )
+              : InkWell(
+                  onTap: () {
+                    String type = 'personal';
+                    if (label == l10n.driverLicense) type = 'driverLicense';
+                    if (label == l10n.vehicleLicense) type = 'vehicleLicense';
+                    if (label == l10n.vehiclePhoto) type = 'vehiclePhoto';
+                    _showImageSourceDialog(type);
+                  },
+                  borderRadius: BorderRadius.circular(12),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.add_photo_alternate,
+                          size: 40,
+                          color: Colors.grey,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          l10n.tapToUpload(label),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
         ),
       ],
     );
@@ -654,7 +670,7 @@ class _EditDriverScreenState extends State<EditDriverScreen> {
     String? Function(String?)? validator,
   }) {
     return DropdownButtonFormField<String>(
-      value: controller.text.isEmpty ? null : controller.text,
+      initialValue: controller.text.isEmpty ? null : controller.text,
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon, color: AppColors.primary),
@@ -681,4 +697,3 @@ class _EditDriverScreenState extends State<EditDriverScreen> {
     );
   }
 }
-

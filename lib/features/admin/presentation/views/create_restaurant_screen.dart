@@ -136,7 +136,7 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
 
               if (state is AdminRestaurantCategoryError) {
                 return AlertDialog(
-                  title: const Text('Error'),
+                  title: Text(l10n.error),
                   content: Text(state.message),
                   actions: [
                     TextButton(
@@ -157,7 +157,7 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                       content: SizedBox(
                         width: double.maxFinite,
                         child: categories.isEmpty
-                            ? Center(child: Text('No categories available'))
+                            ? Center(child: Text(l10n.noCategoriesAvailable))
                             : ListView.builder(
                                 shrinkWrap: true,
                                 itemCount: categories.length,
@@ -283,10 +283,13 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 16),
-                      _buildCredentialRow('Email:', _emailController.text),
+                      _buildCredentialRow(
+                        l10n.emailLabel,
+                        _emailController.text,
+                      ),
                       const SizedBox(height: 8),
                       _buildCredentialRow(
-                        'Password:',
+                        l10n.passwordLabel,
                         _passwordController.text,
                       ),
                       const SizedBox(height: 16),
@@ -771,7 +774,7 @@ class _CreateRestaurantScreenState extends State<CreateRestaurantScreen> {
                                 (c) => c.id == categoryId,
                                 orElse: () => RestaurantCategoryEntity(
                                   id: categoryId,
-                                  name: 'Unknown',
+                                  name: l10n.unknown,
                                   imageUrl: '',
                                   isActive: true,
                                   displayOrder: 0,

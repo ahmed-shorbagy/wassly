@@ -30,7 +30,7 @@ class _AdminRestaurantCategoriesScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Restaurant Categories'), // TODO: Localize
+        title: Text(l10n.restaurantCategories),
         backgroundColor: Colors.purple,
       ),
       floatingActionButton: FloatingActionButton(
@@ -150,15 +150,16 @@ class _AdminRestaurantCategoriesScreenState
   }
 
   void _showDeleteConfirmation(BuildContext context, String categoryId) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Category'),
-        content: const Text('Are you sure you want to delete this category?'),
+        title: Text(l10n.deleteCategory),
+        content: Text(l10n.areYouSureDeleteCategoryGeneric),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -167,7 +168,7 @@ class _AdminRestaurantCategoriesScreenState
                 categoryId,
               );
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),

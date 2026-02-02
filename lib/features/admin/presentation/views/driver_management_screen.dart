@@ -66,6 +66,7 @@ class _DriverManagementScreenState extends State<DriverManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) async {
@@ -78,18 +79,18 @@ class _DriverManagementScreenState extends State<DriverManagementScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Driver Management'),
+          title: Text(l10n.driverManagement),
           backgroundColor: Colors.purple,
           actions: [
             IconButton(
               icon: const Icon(Icons.add),
               onPressed: () => context.push('/admin/drivers/create'),
-              tooltip: 'Add Driver',
+              tooltip: l10n.addDriver,
             ),
             IconButton(
               icon: const Icon(Icons.refresh),
               onPressed: _loadDrivers,
-              tooltip: 'Refresh',
+              tooltip: l10n.refresh,
             ),
           ],
         ),
@@ -106,7 +107,7 @@ class _DriverManagementScreenState extends State<DriverManagementScreen> {
                     _filterDrivers();
                   },
                   decoration: InputDecoration(
-                    hintText: 'Search drivers...',
+                    hintText: l10n.searchDriversHint,
                     prefixIcon: const Icon(Icons.search),
                     suffixIcon: _searchController.text.isNotEmpty
                         ? IconButton(
@@ -138,7 +139,7 @@ class _DriverManagementScreenState extends State<DriverManagementScreen> {
                   } else if (state is DriverError) {
                     context.showErrorSnackBar(state.message);
                   } else if (state is DriverDeleted) {
-                    context.showSuccessSnackBar('Driver deleted successfully');
+                    context.showSuccessSnackBar(l10n.driverDeletedSuccessfully);
                   }
                 },
                 builder: (context, state) {
@@ -154,38 +155,7 @@ class _DriverManagementScreenState extends State<DriverManagementScreen> {
                   }
 
                   if (_filteredDrivers.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.delivery_dining,
-                            size: 64,
-                            color: AppColors.textSecondary.withValues(
-                              alpha: 0.5,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            _searchController.text.isNotEmpty
-                                ? 'No drivers found'
-                                : 'No drivers yet',
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          if (_searchController.text.isEmpty)
-                            ElevatedButton.icon(
-                              onPressed: () =>
-                                  context.push('/admin/drivers/create'),
-                              icon: const Icon(Icons.add),
-                              label: const Text('Add First Driver'),
-                            ),
-                        ],
-                      ),
-                    );
+                    return _buildEmptyState();
                   }
 
                   return RefreshIndicator(
@@ -208,7 +178,41 @@ class _DriverManagementScreenState extends State<DriverManagementScreen> {
     );
   }
 
+  Widget _buildEmptyState() {
+    final l10n = AppLocalizations.of(context)!;
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.delivery_dining,
+            size: 64,
+            color: AppColors.textSecondary.withValues(alpha: 0.5),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            _searchController.text.isNotEmpty
+                ? l10n.noDriversFound
+                : l10n.noDriversYet,
+            style: const TextStyle(
+              fontSize: 18,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          if (_searchController.text.isEmpty)
+            ElevatedButton.icon(
+              onPressed: () => context.push('/admin/drivers/create'),
+              icon: const Icon(Icons.add),
+              label: Text(l10n.addFirstDriver),
+            ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildDriverCard(BuildContext context, DriverEntity driver) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -277,7 +281,7 @@ class _DriverManagementScreenState extends State<DriverManagementScreen> {
                     if (driver.vehicleModel != null) ...[
                       const SizedBox(height: 4),
                       Text(
-                        '${driver.vehicleModel} • ${driver.vehiclePlateNumber ?? AppLocalizations.of(context)!.nA}',
+                        '${driver.vehicleModel} • ${driver.vehiclePlateNumber ?? l10n.nA}',
                         style: TextStyle(
                           fontSize: 12,
                           color: AppColors.textSecondary,
@@ -302,7 +306,7 @@ class _DriverManagementScreenState extends State<DriverManagementScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      driver.isActive ? 'Active' : 'Inactive',
+                      driver.isActive ? l10n.active : l10n.inactive,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 10,
@@ -321,7 +325,7 @@ class _DriverManagementScreenState extends State<DriverManagementScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      driver.isOnline ? 'Online' : 'Offline',
+                      driver.isOnline ? l10n.online : l10n.offline,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 10,

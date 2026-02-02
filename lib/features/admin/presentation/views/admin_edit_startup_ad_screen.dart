@@ -267,7 +267,7 @@ class _AdminEditStartupAdScreenState extends State<AdminEditStartupAdScreen> {
 
                     // Restaurant Selector
                     DropdownButtonFormField<String>(
-                      value: _selectedRestaurantId,
+                      initialValue: _selectedRestaurantId,
                       decoration: InputDecoration(
                         labelText: 'Select Restaurant',
                         border: OutlineInputBorder(

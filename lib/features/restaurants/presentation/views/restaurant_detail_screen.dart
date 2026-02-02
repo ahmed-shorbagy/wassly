@@ -416,8 +416,9 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
                             })
                             .whereType<String>()
                             .toList();
-                        if (names.isNotEmpty)
+                        if (names.isNotEmpty) {
                           categoriesText = names.join(' • ');
+                        }
                       }
                       return Text(
                         categoriesText,

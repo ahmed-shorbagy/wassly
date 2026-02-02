@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../features/auth/presentation/cubits/auth_cubit.dart';
 import '../../../../features/support/domain/entities/ticket_entity.dart';
@@ -31,12 +30,18 @@ class _AdminSupportTicketsScreenState extends State<AdminSupportTicketsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.supportChat), // Or "Support Tickets"
+        title: Text(l10n.supportChat),
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => context.pop(),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/admin');
+            }
+          },
         ),
         titleTextStyle: const TextStyle(
           color: Colors.black,
@@ -53,9 +58,7 @@ class _AdminSupportTicketsScreenState extends State<AdminSupportTicketsScreen> {
           } else if (state is TicketsLoaded) {
             final tickets = state.tickets;
             if (tickets.isEmpty) {
-              return Center(
-                child: Text(l10n.noOrdersFound),
-              ); // Reuse string or add new
+              return Center(child: Text(l10n.noOrdersFound));
             }
 
             return ListView.separated(
@@ -152,9 +155,10 @@ class _AdminSupportTicketsScreenState extends State<AdminSupportTicketsScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Date formatting
                   Text(
-                    DateFormat('MMM d, h:mm a').format(ticket.lastMessageAt),
+                    DateFormat.yMMMd(
+                      Localizations.localeOf(context).languageCode,
+                    ).add_jm().format(ticket.lastMessageAt),
                     style: TextStyle(color: Colors.grey[500], fontSize: 12),
                   ),
                   const Icon(

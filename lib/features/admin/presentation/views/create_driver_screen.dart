@@ -576,10 +576,12 @@ class _CreateDriverScreenState extends State<CreateDriverScreen> {
                       child: ElevatedButton.icon(
                         onPressed: () {
                           String type = 'personal';
-                          if (label == l10n.driverLicense)
+                          if (label == l10n.driverLicense) {
                             type = 'driverLicense';
-                          if (label == l10n.vehicleLicense)
+                          }
+                          if (label == l10n.vehicleLicense) {
                             type = 'vehicleLicense';
+                          }
                           if (label == l10n.vehiclePhoto) type = 'vehiclePhoto';
                           _showImageSourceDialog(type);
                         },

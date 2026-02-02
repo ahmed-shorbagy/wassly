@@ -231,7 +231,7 @@ class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
 
               if (state is AdminRestaurantCategoryError) {
                 return AlertDialog(
-                  title: const Text('Error'),
+                  title: Text(l10n.error),
                   content: Text(state.message),
                   actions: [
                     TextButton(
@@ -252,9 +252,7 @@ class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
                       content: SizedBox(
                         width: double.maxFinite,
                         child: categories.isEmpty
-                            ? const Center(
-                                child: Text('No categories available'),
-                              )
+                            ? Center(child: Text(l10n.noCategoriesAvailable))
                             : ListView.builder(
                                 shrinkWrap: true,
                                 itemCount: categories.length,
@@ -958,7 +956,7 @@ class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
                                 (c) => c.id == categoryId,
                                 orElse: () => RestaurantCategoryEntity(
                                   id: categoryId,
-                                  name: 'Unknown',
+                                  name: l10n.unknown,
                                   imageUrl: '',
                                   isActive: true,
                                   displayOrder: 0,
@@ -1150,7 +1148,7 @@ class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
 
             // Discount Image
             Text(
-              'Discount Image (${l10n.optional})',
+              '${l10n.discountImage} (${l10n.optional})',
               style: const TextStyle(
                 fontWeight: FontWeight.w600,
                 color: AppColors.textSecondary,
@@ -1162,7 +1160,7 @@ class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
 
             // Target Product (Optional)
             Text(
-              'Linked Product (Optional)',
+              '${l10n.linkedProduct} (${l10n.optional})',
               // TODO: Add localization key for 'Linked Product'
               style: const TextStyle(
                 fontWeight: FontWeight.w600,
@@ -1182,12 +1180,12 @@ class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
                         horizontal: 16,
                         vertical: 12,
                       ),
-                      hintText: 'Select a product to link',
+                      hintText: l10n.selectProductToLink,
                     ),
                     items: [
-                      const DropdownMenuItem<String>(
+                      DropdownMenuItem<String>(
                         value: null,
-                        child: Text('No linked product'),
+                        child: Text(l10n.noLinkedProduct),
                       ),
                       ..._products.map((product) {
                         return DropdownMenuItem<String>(
@@ -1282,7 +1280,7 @@ class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          '${l10n.discount} ${l10n.active}',
+                          '${l10n.discount} : ${l10n.active}',
                           style: const TextStyle(
                             color: AppColors.success,
                             fontWeight: FontWeight.w600,
@@ -1386,7 +1384,7 @@ class _EditRestaurantScreenState extends State<EditRestaurantScreen> {
             const Icon(Icons.add_photo_alternate, size: 60, color: Colors.grey),
             const SizedBox(height: 12),
             Text(
-              'Tap to upload discount image',
+              l10n.tapToUploadDiscountImage,
               // Use hardcoded string as 'tapToUploadDiscountImage' key doesn't exist
               style: const TextStyle(
                 fontSize: 16,

@@ -64,6 +64,7 @@ class DriverRepositoryImpl implements DriverRepository {
     }
   }
 
+  @override
   Future<Either<Failure, DriverEntity>> addDriverWithImages({
     required DriverEntity driver,
     required File personalImageFile,
@@ -103,7 +104,7 @@ class DriverRepositoryImpl implements DriverRepository {
         String? vehicleLicenseUrl;
         String? vehiclePhotoUrl;
 
-        await personalImageResult.fold(
+        personalImageResult.fold(
           (failure) => Left(failure),
           (url) async {
             personalImageUrl = url;
@@ -111,7 +112,7 @@ class DriverRepositoryImpl implements DriverRepository {
           },
         );
 
-        await driverLicenseResult.fold(
+        driverLicenseResult.fold(
           (failure) => Left(failure),
           (url) async {
             driverLicenseUrl = url;
@@ -119,7 +120,7 @@ class DriverRepositoryImpl implements DriverRepository {
           },
         );
 
-        await vehicleLicenseResult.fold(
+        vehicleLicenseResult.fold(
           (failure) => Left(failure),
           (url) async {
             vehicleLicenseUrl = url;
@@ -127,7 +128,7 @@ class DriverRepositoryImpl implements DriverRepository {
           },
         );
 
-        await vehiclePhotoResult.fold(
+        vehiclePhotoResult.fold(
           (failure) => Left(failure),
           (url) async {
             vehiclePhotoUrl = url;

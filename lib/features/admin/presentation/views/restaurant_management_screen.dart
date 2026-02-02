@@ -104,28 +104,27 @@ class _RestaurantManagementScreenState extends State<RestaurantManagementScreen>
   }
 
   Future<void> _seedMarkets(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Seed Markets'),
-        content: const Text(
-          'This will create several default markets for testing. Continue?',
-        ),
+        title: Text(l10n.seedMarketsTitle),
+        content: Text(l10n.seedMarketsConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Seed'),
+            child: Text(l10n.seed),
           ),
         ],
       ),
     );
 
     if (confirmed == true && mounted) {
-      context.showInfoSnackBar('Seeding markets...');
+      context.showInfoSnackBar(l10n.seedingMarkets);
       try {
         await MarketSeedingService.seedDefaultMarkets(
           context.read<AdminCubit>(),
@@ -133,12 +132,12 @@ class _RestaurantManagementScreenState extends State<RestaurantManagementScreen>
           AppLocalizations.of(context)!,
         );
         if (mounted) {
-          context.showSuccessSnackBar('Markets seeded successfully!');
+          context.showSuccessSnackBar(l10n.marketsSeededSuccessfully);
           _loadRestaurants();
         }
       } catch (e) {
         if (mounted) {
-          context.showErrorSnackBar('Failed to seed markets: $e');
+          context.showErrorSnackBar(l10n.failedToSeedMarkets(e.toString()));
         }
       }
     }
@@ -164,18 +163,18 @@ class _RestaurantManagementScreenState extends State<RestaurantManagementScreen>
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Restaurant Management'),
+          title: Text(l10n.restaurantManagement),
           backgroundColor: Colors.purple,
           actions: [
             IconButton(
               icon: const Icon(Icons.auto_awesome),
               onPressed: () => _seedMarkets(context),
-              tooltip: 'Seed Markets',
+              tooltip: l10n.seedMarketsTitle,
             ),
             IconButton(
               icon: const Icon(Icons.refresh),
               onPressed: _loadRestaurants,
-              tooltip: 'Refresh',
+              tooltip: l10n.refresh,
             ),
           ],
           bottom: TabBar(
@@ -185,10 +184,7 @@ class _RestaurantManagementScreenState extends State<RestaurantManagementScreen>
             indicatorColor: Colors.white,
             tabs: [
               Tab(text: l10n.restaurants, icon: const Icon(Icons.restaurant)),
-              Tab(
-                text: l10n.markets ?? 'Markets',
-                icon: const Icon(Icons.storefront),
-              ),
+              Tab(text: l10n.markets, icon: const Icon(Icons.storefront)),
             ],
             onTap: (_) {
               // Trigger filter update on tap as well to be safe
@@ -210,7 +206,7 @@ class _RestaurantManagementScreenState extends State<RestaurantManagementScreen>
                     _filterRestaurants();
                   },
                   decoration: InputDecoration(
-                    hintText: 'Search...',
+                    hintText: l10n.searchHint,
                     prefixIcon: const Icon(Icons.search),
                     suffixIcon: _searchController.text.isNotEmpty
                         ? IconButton(
@@ -244,10 +240,13 @@ class _RestaurantManagementScreenState extends State<RestaurantManagementScreen>
                     child: BlocConsumer<AdminCubit, AdminState>(
                       listener: (context, state) {
                         if (state is RestaurantStatusUpdated) {
-                          context.showSuccessSnackBar('Status updated');
+                          context.showSuccessSnackBar(l10n.statusUpdated);
                           _loadRestaurants();
+                        } else if (state is RestaurantStatusUpdated) {
+                          // Wait, the previous block was also RestaurantStatusUpdated?
+                          // Let's check RestaurantDeletedSuccess.
                         } else if (state is RestaurantDeletedSuccess) {
-                          context.showSuccessSnackBar('Deleted successfully');
+                          context.showSuccessSnackBar(l10n.deletedSuccessfully);
                           _loadRestaurants();
                         } else if (state is AdminError) {
                           context.showErrorSnackBar(state.message);
@@ -329,7 +328,9 @@ class _RestaurantManagementScreenState extends State<RestaurantManagementScreen>
                     : '/admin/restaurants/create',
               ),
               icon: Icon(isMarketTab ? Icons.storefront : Icons.add),
-              label: Text(isMarketTab ? 'Create Market' : 'Create Restaurant'),
+              label: Text(
+                isMarketTab ? l10n.createMarket : l10n.createRestaurant,
+              ),
               backgroundColor: isMarketTab ? Colors.teal : Colors.purple,
             );
           },
@@ -339,6 +340,7 @@ class _RestaurantManagementScreenState extends State<RestaurantManagementScreen>
   }
 
   Widget _buildNoSearchResults() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -352,7 +354,7 @@ class _RestaurantManagementScreenState extends State<RestaurantManagementScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              'No results found',
+              l10n.noResultsFound,
               style: TextStyle(fontSize: 18, color: AppColors.textSecondary),
             ),
           ],
@@ -363,10 +365,10 @@ class _RestaurantManagementScreenState extends State<RestaurantManagementScreen>
 
   Widget _buildEmptyTabState(AppLocalizations l10n) {
     final isMarketTab = _tabController.index == 1;
-    final message = isMarketTab ? 'No Markets Yet' : 'No Restaurants Yet';
+    final message = isMarketTab ? l10n.noMarketsYet : l10n.noRestaurantsYet;
     final subMessage = isMarketTab
-        ? 'Start by creating your first market'
-        : 'Start by creating your first restaurant';
+        ? l10n.startByCreatingFirstMarket
+        : l10n.startByCreatingFirstRestaurant;
 
     return Center(
       child: Padding(
@@ -410,6 +412,7 @@ class _RestaurantManagementScreenState extends State<RestaurantManagementScreen>
   }
 
   Widget _buildRestaurantCard(RestaurantEntity restaurant) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -504,7 +507,7 @@ class _RestaurantManagementScreenState extends State<RestaurantManagementScreen>
                         AdminRestaurantCategoryState
                       >(
                         builder: (context, state) {
-                          String categoriesText = 'No categories';
+                          String categoriesText = l10n.noCategories;
                           if (state is AdminRestaurantCategoriesLoaded) {
                             final names = restaurant.categoryIds
                                 .map((id) {
@@ -527,8 +530,9 @@ class _RestaurantManagementScreenState extends State<RestaurantManagementScreen>
                                 .toList();
 
                             if (names.isNotEmpty) {
-                              categoriesText =
-                                  'Categories: ${names.join(', ')}';
+                              categoriesText = l10n.categoriesLabel(
+                                names.join(', '),
+                              );
                             }
                           }
 
@@ -621,7 +625,7 @@ class _RestaurantManagementScreenState extends State<RestaurantManagementScreen>
                           ),
                           Flexible(
                             child: Text(
-                              restaurant.isOpen ? 'Open' : 'Closed',
+                              restaurant.isOpen ? l10n.open : l10n.closed,
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -649,8 +653,8 @@ class _RestaurantManagementScreenState extends State<RestaurantManagementScreen>
                           Flexible(
                             child: Text(
                               restaurant.hasDiscount
-                                  ? 'Discount ON'
-                                  : 'Discount OFF',
+                                  ? l10n.discountOn
+                                  : l10n.discountOff,
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -674,21 +678,21 @@ class _RestaurantManagementScreenState extends State<RestaurantManagementScreen>
                     IconButton(
                       icon: const Icon(Icons.fastfood, color: Colors.orange),
                       onPressed: () => _navigateToProducts(restaurant),
-                      tooltip: 'Products',
+                      tooltip: l10n.products,
                     ),
 
                     // Edit Button
                     IconButton(
                       icon: const Icon(Icons.edit, color: Colors.blue),
                       onPressed: () => _navigateToEdit(restaurant),
-                      tooltip: 'Edit',
+                      tooltip: l10n.edit,
                     ),
 
                     // Delete Button
                     IconButton(
                       icon: const Icon(Icons.delete, color: Colors.red),
                       onPressed: () => _showDeleteDialog(restaurant),
-                      tooltip: 'Delete',
+                      tooltip: l10n.delete,
                     ),
                   ],
                 ),
@@ -701,6 +705,7 @@ class _RestaurantManagementScreenState extends State<RestaurantManagementScreen>
   }
 
   Widget _buildEmptyState() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -713,13 +718,13 @@ class _RestaurantManagementScreenState extends State<RestaurantManagementScreen>
               color: AppColors.textSecondary.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 24),
-            const Text(
-              'No Restaurants Yet',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            Text(
+              l10n.noRestaurantsYet,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             Text(
-              'Start by creating your first restaurant',
+              l10n.startByCreatingFirstRestaurant,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
             ),
@@ -727,7 +732,7 @@ class _RestaurantManagementScreenState extends State<RestaurantManagementScreen>
             ElevatedButton.icon(
               onPressed: () => context.push('/admin/restaurants/create'),
               icon: const Icon(Icons.add),
-              label: const Text('Create Restaurant'),
+              label: Text(l10n.createRestaurant),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.purple,
                 padding: const EdgeInsets.symmetric(
@@ -765,17 +770,16 @@ class _RestaurantManagementScreenState extends State<RestaurantManagementScreen>
   }
 
   void _showDeleteDialog(RestaurantEntity restaurant) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Restaurant'),
-        content: Text(
-          'Are you sure you want to delete "${restaurant.name}"? This action cannot be undone and will also delete all associated products.',
-        ),
+        title: Text(l10n.deleteRestaurant),
+        content: Text(l10n.deleteRestaurantConfirm(restaurant.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -783,7 +787,7 @@ class _RestaurantManagementScreenState extends State<RestaurantManagementScreen>
               context.read<AdminCubit>().deleteRestaurant(restaurant.id);
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),

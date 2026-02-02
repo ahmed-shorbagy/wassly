@@ -147,8 +147,9 @@ class _SignupScreenState extends State<SignupScreen> {
                           ),
                           autovalidateMode: AutovalidateMode.onUserInteraction,
                           validator: (phone) {
-                            if (phone == null)
+                            if (phone == null) {
                               return context.l10n.pleaseEnterPhoneNumber;
+                            }
                             // Egyptian mobile numbers are 10 national digits (without +20) and start with 10/11/12/15
                             final national = phone.number;
                             final validPrefix =

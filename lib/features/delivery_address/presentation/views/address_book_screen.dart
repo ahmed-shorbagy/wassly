@@ -16,7 +16,7 @@ class AddressBookScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('سجل العناوين'), // Address Book
+        title: Text(l10n.addressBook), // Address Book
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -49,14 +49,17 @@ class AddressBookScreen extends StatelessWidget {
                 itemCount: addresses.length,
                 itemBuilder: (context, index) {
                   final address = addresses[index];
-                  final isSelected = selectedAddress != null && 
+                  final isSelected =
+                      selectedAddress != null &&
                       selectedAddress.id == address.id;
-                  
+
                   return _AddressCard(
                     address: address,
                     isSelected: isSelected,
                     onTap: () {
-                      context.read<DeliveryAddressCubit>().selectAddress(address.id);
+                      context.read<DeliveryAddressCubit>().selectAddress(
+                        address.id,
+                      );
                     },
                     onEdit: () {
                       _showEditAddressDialog(context, address);
@@ -73,7 +76,7 @@ class AddressBookScreen extends StatelessWidget {
           if (state is DeliveryAddressSelected) {
             // Fallback to showing selected address only
             return Center(
-              child: const Text('لا توجد عناوين'), // No addresses found
+              child: Text(l10n.noAddressesFound), // No addresses found
             );
           }
 
@@ -86,9 +89,9 @@ class AddressBookScreen extends StatelessWidget {
         },
         backgroundColor: AppColors.primary,
         icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text(
-          'إضافة عنوان', // Add Address
-          style: TextStyle(color: Colors.white),
+        label: Text(
+          l10n.addAddress, // Add Address
+          style: const TextStyle(color: Colors.white),
         ),
       ),
     );
@@ -99,15 +102,11 @@ class AddressBookScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.location_off,
-            size: 80,
-            color: AppColors.textSecondary,
-          ),
+          Icon(Icons.location_off, size: 80, color: AppColors.textSecondary),
           const SizedBox(height: 16),
           Text(
-            'لا توجد عناوين', // No addresses found
-            style: TextStyle(
+            l10n.noAddressesFound, // No addresses found
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
@@ -115,8 +114,8 @@ class AddressBookScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'أضف عنوانك الأول للبدء', // Add your first address
-            style: TextStyle(
+            l10n.addYourFirstAddress, // Add your first address
+            style: const TextStyle(
               fontSize: 14,
               color: AppColors.textSecondary,
             ),
@@ -128,14 +127,11 @@ class AddressBookScreen extends StatelessWidget {
               _showAddAddressDialog(context);
             },
             icon: const Icon(Icons.add),
-            label: const Text('إضافة عنوان'), // Add Address
+            label: Text(l10n.addAddress), // Add Address
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 12,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
           ),
         ],
@@ -150,10 +146,7 @@ class AddressBookScreen extends StatelessWidget {
     );
   }
 
-  void _showEditAddressDialog(
-    BuildContext context,
-    address,
-  ) {
+  void _showEditAddressDialog(BuildContext context, address) {
     showDialog(
       context: context,
       builder: (context) => AddEditAddressDialog(address: address),
@@ -168,8 +161,8 @@ class AddressBookScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('حذف العنوان'), // Delete Address
-        content: const Text('هل أنت متأكد من حذف هذا العنوان؟'), // Delete confirmation
+        title: Text(l10n.deleteAddress), // Delete Address
+        content: Text(l10n.deleteAddressConfirm), // Delete confirmation
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -180,10 +173,8 @@ class AddressBookScreen extends StatelessWidget {
               context.read<DeliveryAddressCubit>().deleteAddress(address.id);
               Navigator.of(context).pop();
             },
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
-            ),
-            child: const Text('حذف'), // Delete
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: Text(l10n.delete), // Delete
           ),
         ],
       ),
@@ -230,11 +221,7 @@ class _AddressCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(
-                    Icons.location_on,
-                    color: AppColors.primary,
-                    size: 24,
-                  ),
+                  Icon(Icons.location_on, color: AppColors.primary, size: 24),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -300,10 +287,8 @@ class _AddressCard extends StatelessWidget {
                   TextButton.icon(
                     onPressed: onDelete,
                     icon: const Icon(Icons.delete, size: 18),
-                    label: const Text('حذف'), // Delete
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.red,
-                    ),
+                    label: Text(l10n.delete), // Delete
+                    style: TextButton.styleFrom(foregroundColor: Colors.red),
                   ),
                 ],
               ),
@@ -314,4 +299,3 @@ class _AddressCard extends StatelessWidget {
     );
   }
 }
-

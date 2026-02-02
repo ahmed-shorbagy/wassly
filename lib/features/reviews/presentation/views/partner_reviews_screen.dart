@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/review_entity.dart';
 import 'package:intl/intl.dart';
 

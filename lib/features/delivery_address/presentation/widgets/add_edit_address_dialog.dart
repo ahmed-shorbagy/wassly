@@ -241,7 +241,7 @@ class _AddEditAddressDialogState extends State<AddEditAddressDialog> {
                     _isDefault = value;
                   });
                 },
-                activeColor: AppColors.primary,
+                activeThumbColor: AppColors.primary,
               ),
               const SizedBox(height: 24),
               // Action Buttons
