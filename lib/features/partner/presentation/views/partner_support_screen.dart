@@ -9,6 +9,7 @@ import '../../../../features/support/domain/entities/ticket_entity.dart';
 import '../../../../features/support/domain/entities/ticket_message_entity.dart';
 import '../../../../features/support/presentation/cubits/support_cubit.dart';
 import '../../../../features/support/presentation/cubits/support_state.dart';
+import '../../../../features/restaurants/presentation/cubits/restaurant_cubit.dart';
 
 // Enum to define which partner type is viewing
 enum PartnerSupportType { restaurant, driver, market }
@@ -35,18 +36,24 @@ class _PartnerSupportScreenState extends State<PartnerSupportScreen> {
   }
 
   void _loadTickets() {
-    // If partnerId is passed, use it. Otherwise try to get from Auth state.
-    // Ideally partnerId is passed from the route.
+    String? id = widget.partnerId;
 
-    if (widget.partnerId != null) {
-      _loadByRole(widget.partnerId!);
-      return;
+    if (id == null && widget.supportType == PartnerSupportType.restaurant) {
+      final restaurantState = context.read<RestaurantCubit>().state;
+      if (restaurantState is RestaurantLoaded) {
+        id = restaurantState.restaurant.id;
+      }
     }
 
-    // Fallback using AuthCubit (assumes user.id is the partner id for now)
-    final authState = context.read<AuthCubit>().state;
-    if (authState is AuthAuthenticated) {
-      _loadByRole(authState.user.id);
+    if (id == null) {
+      final authState = context.read<AuthCubit>().state;
+      if (authState is AuthAuthenticated) {
+        id = authState.user.id;
+      }
+    }
+
+    if (id != null) {
+      _loadByRole(id);
     }
   }
 
@@ -100,10 +107,11 @@ class _PartnerSupportScreenState extends State<PartnerSupportScreen> {
                   children: [
                     Text(l10n?.noTicketsFound ?? 'No tickets found'),
                     const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () => _navigateToCreateTicket(),
-                      child: Text(l10n?.reportIssue ?? 'Report Issue'),
-                    ),
+                    if (widget.supportType != PartnerSupportType.restaurant)
+                      ElevatedButton(
+                        onPressed: () => _navigateToCreateTicket(),
+                        child: Text(l10n?.reportIssue ?? 'Report Issue'),
+                      ),
                   ],
                 ),
               );
@@ -123,10 +131,12 @@ class _PartnerSupportScreenState extends State<PartnerSupportScreen> {
           }
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToCreateTicket(),
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: widget.supportType == PartnerSupportType.restaurant
+          ? null
+          : FloatingActionButton(
+              onPressed: () => _navigateToCreateTicket(),
+              child: const Icon(Icons.add),
+            ),
     );
   }
 

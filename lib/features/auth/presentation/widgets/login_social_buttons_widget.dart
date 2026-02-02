@@ -41,22 +41,6 @@ class LoginSocialButtonsWidget extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () {
-                  context.showInfoSnackBar(context.l10n.socialLoginComingSoon);
-                },
-                icon: const Icon(Icons.facebook, size: 20),
-                label: const Text('Facebook'),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(44),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
       ],

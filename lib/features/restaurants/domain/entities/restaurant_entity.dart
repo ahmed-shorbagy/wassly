@@ -68,6 +68,65 @@ class RestaurantEntity extends Equatable {
     return true;
   }
 
+  RestaurantEntity copyWith({
+    String? id,
+    String? ownerId,
+    String? name,
+    String? description,
+    String? imageUrl,
+    String? address,
+    String? phone,
+    String? email,
+    List<String>? categoryIds,
+    Map<String, dynamic>? location,
+    bool? isOpen,
+    double? rating,
+    int? totalReviews,
+    double? deliveryFee,
+    double? minOrderAmount,
+    int? estimatedDeliveryTime,
+    String? commercialRegistrationPhotoUrl,
+    bool? hasDiscount,
+    double? discountPercentage,
+    String? discountDescription,
+    DateTime? discountStartDate,
+    DateTime? discountEndDate,
+    String? discountImageUrl,
+    String? discountTargetProductId,
+    DateTime? createdAt,
+  }) {
+    return RestaurantEntity(
+      id: id ?? this.id,
+      ownerId: ownerId ?? this.ownerId,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      imageUrl: imageUrl ?? this.imageUrl,
+      address: address ?? this.address,
+      phone: phone ?? this.phone,
+      email: email ?? this.email,
+      categoryIds: categoryIds ?? this.categoryIds,
+      location: location ?? this.location,
+      isOpen: isOpen ?? this.isOpen,
+      rating: rating ?? this.rating,
+      totalReviews: totalReviews ?? this.totalReviews,
+      deliveryFee: deliveryFee ?? this.deliveryFee,
+      minOrderAmount: minOrderAmount ?? this.minOrderAmount,
+      estimatedDeliveryTime:
+          estimatedDeliveryTime ?? this.estimatedDeliveryTime,
+      commercialRegistrationPhotoUrl:
+          commercialRegistrationPhotoUrl ?? this.commercialRegistrationPhotoUrl,
+      hasDiscount: hasDiscount ?? this.hasDiscount,
+      discountPercentage: discountPercentage ?? this.discountPercentage,
+      discountDescription: discountDescription ?? this.discountDescription,
+      discountStartDate: discountStartDate ?? this.discountStartDate,
+      discountEndDate: discountEndDate ?? this.discountEndDate,
+      discountImageUrl: discountImageUrl ?? this.discountImageUrl,
+      discountTargetProductId:
+          discountTargetProductId ?? this.discountTargetProductId,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
   @override
   List<Object?> get props => [
     id,

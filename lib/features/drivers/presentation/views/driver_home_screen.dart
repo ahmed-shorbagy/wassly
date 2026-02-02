@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/logger.dart';
 
+import '../../../../shared/widgets/language_toggle_button.dart';
+
 import '../../../auth/presentation/cubits/auth_cubit.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../../../orders/presentation/cubits/order_cubit.dart';
@@ -79,10 +81,19 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     }
   }
 
+  void _toggleStatus(bool isOnline) {
+    setState(() {
+      _isOnline = isOnline;
+    });
+    if (isOnline) {
+      _loadDriverData();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Colors.grey[50],
       body: RefreshIndicator(
         onRefresh: _loadDriverData,
         child: SingleChildScrollView(
@@ -92,16 +103,28 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
             children: [
               _buildHeader(context),
               Padding(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const SizedBox(height: 24),
+                    _buildStatusSection(context),
+                    const SizedBox(height: 24),
                     _buildQuickStats(context),
                     const SizedBox(height: 32),
+                    Text(
+                      'Quick Actions',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1E293B),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildActionGrid(context),
+                    const SizedBox(height: 32),
                     _buildAvailableOrdersSection(context),
-                    const SizedBox(height: 32),
-                    _buildQuickActions(context),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 40),
                   ],
                 ),
               ),
@@ -121,11 +144,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
         bottom: 32,
       ),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppColors.primary, AppColors.primary.withOpacity(0.8)],
-        ),
+        color: AppColors.primary,
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(30),
           bottomRight: Radius.circular(30),
@@ -144,41 +163,25 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                context.l10n.driverDashboardTitle ?? 'Driver Dashboard',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
                 ),
+                child: const LanguageToggleButton(color: Colors.white),
               ),
-              Row(
-                children: [
-                  Text(
-                    _isOnline ? 'Online' : 'Offline',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Switch(
-                    value: _isOnline,
-                    onChanged: (value) {
-                      setState(() {
-                        _isOnline = value;
-                      });
-                      if (value) {
-                        _loadDriverData();
-                      }
-                    },
-                    activeThumbColor: Colors.white,
-                    activeTrackColor: Colors.white.withOpacity(0.3),
-                    inactiveThumbColor: Colors.white.withOpacity(0.5),
-                    inactiveTrackColor: Colors.black.withOpacity(0.1),
-                  ),
-                ],
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.logout, color: Colors.white),
+                  onPressed: () {
+                    AppLogger.logAuth('Driver logging out');
+                    context.read<AuthCubit>().logout();
+                  },
+                ),
               ),
             ],
           ),
@@ -186,30 +189,53 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
           BlocBuilder<AuthCubit, AuthState>(
             builder: (context, state) {
               String name = '';
+              String email = '';
               if (state is AuthAuthenticated) {
                 name = state.user.name.split(' ').first;
+                email = state.user.email;
               }
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              return Row(
                 children: [
-                  Text(
-                    name.isNotEmpty
-                        ? context.l10n.welcomeName(name)
-                        : 'Driver Dashboard',
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                  Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
+                    child: CircleAvatar(
+                      radius: 28,
+                      backgroundColor: Colors.white.withOpacity(0.2),
+                      child: Text(
+                        name.isNotEmpty ? name[0].toUpperCase() : 'D',
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    _isOnline
-                        ? 'Looking for orders nearby...'
-                        : 'Currently offline. Go online to start earning.',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white.withOpacity(0.9),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          context.l10n.welcomeName(name),
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          email.isNotEmpty ? email : 'Driver Account',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.white.withOpacity(0.9),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -221,41 +247,156 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     );
   }
 
+  Widget _buildStatusSection(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: _isOnline
+                  ? Colors.green.withOpacity(0.1)
+                  : Colors.red.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.directions_car_filled_rounded,
+              color: _isOnline ? Colors.green : Colors.red,
+              size: 30,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _isOnline ? 'You are Online' : 'You are Offline',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: _isOnline ? Colors.green : Colors.red,
+                  ),
+                ),
+                Text(
+                  _isOnline
+                      ? 'You can receive new orders'
+                      : 'Go online to start earning',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Transform.scale(
+            scale: 0.8,
+            child: Switch(
+              value: _isOnline,
+              onChanged: _toggleStatus,
+              activeThumbColor: Colors.green,
+              activeTrackColor: Colors.green.withOpacity(0.2),
+              inactiveThumbColor: Colors.grey,
+              inactiveTrackColor: Colors.grey.withOpacity(0.2),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildQuickStats(BuildContext context) {
     return Row(
       children: [
         Expanded(
           child: _StatCard(
-            title: 'Deliveries',
+            title: 'Today\'s Deliveries',
             value: '$_todayDeliveries',
-            icon: Icons.delivery_dining_outlined,
-            color: AppColors.primary,
+            icon: Icons.local_shipping_rounded,
+            color: const Color(0xFF3B82F6), // Blue
+            bgColor: const Color(0xFFEFF6FF),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 16),
         Expanded(
           child: _StatCard(
-            title: 'Earnings',
+            title: 'Today\'s Earnings',
             value:
                 '${_todayEarnings.toStringAsFixed(1)} ${context.l10n.currencySymbol}',
-            icon: Icons.account_balance_wallet_outlined,
-            color: AppColors.success,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _StatCard(
-            title: 'Rating',
-            value: '5.0',
-            icon: Icons.star_outline_rounded,
-            color: Colors.amber,
+            icon: Icons.account_balance_wallet_rounded,
+            color: const Color(0xFF10B981), // Emerald
+            bgColor: const Color(0xFFECFDF5),
           ),
         ),
       ],
     );
   }
 
+  Widget _buildActionGrid(BuildContext context) {
+    final actions = [
+      _ActionItem(
+        title: context.l10n.orders,
+        icon: Icons.receipt_long_rounded,
+        color: Colors.blue,
+        onTap: () => context.push('/driver/orders'),
+        isPrimary: true,
+      ),
+      _ActionItem(
+        title: context.l10n.profile,
+        icon: Icons.person_rounded,
+        color: Colors.indigo,
+        onTap: () => context.push('/driver/profile'),
+      ),
+      _ActionItem(
+        title: 'Support', // Localize if possible
+        icon: Icons.headset_mic_rounded,
+        color: Colors.pink,
+        onTap: () => context.push('/driver/support'),
+      ),
+      _ActionItem(
+        title:
+            'Settings', // Placeholder, using restaurant one for now if shared or just placeholder
+        icon: Icons.settings_rounded,
+        color: Colors.grey,
+        onTap: () {
+          // context.push('/driver/settings');
+        },
+      ),
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Wrap(
+          spacing: 16,
+          runSpacing: 16,
+          children: actions.map((action) {
+            final width = (constraints.maxWidth - 16) / 2;
+            return SizedBox(
+              width: width,
+              child: _ActionCard(item: action),
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+
   Widget _buildAvailableOrdersSection(BuildContext context) {
+    if (!_isOnline) return const SizedBox.shrink();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -263,7 +404,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              _isOnline ? 'Available Orders' : 'Recent Orders',
+              'Available Orders',
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -277,80 +418,38 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
           ],
         ),
         const SizedBox(height: 16),
-        if (!_isOnline)
-          _buildOfflineState()
-        else
-          BlocBuilder<OrderCubit, OrderState>(
-            builder: (context, state) {
-              if (state is OrderLoading) {
-                return const Center(child: CircularProgressIndicator());
+        BlocBuilder<OrderCubit, OrderState>(
+          builder: (context, state) {
+            if (state is OrderLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (state is OrdersLoaded) {
+              final availableOrders = state.orders
+                  .where(
+                    (o) =>
+                        o.status == OrderStatus.ready &&
+                        (o.driverId == null || o.driverId!.isEmpty),
+                  )
+                  .toList();
+
+              if (availableOrders.isEmpty) {
+                return _buildNoOrdersState();
               }
 
-              if (state is OrdersLoaded) {
-                final availableOrders = state.orders
-                    .where(
-                      (o) =>
-                          o.status == OrderStatus.ready &&
-                          (o.driverId == null || o.driverId!.isEmpty),
-                    )
-                    .toList();
+              return ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: availableOrders.length.clamp(0, 3),
+                itemBuilder: (context, index) =>
+                    _buildOrderCard(availableOrders[index]),
+              );
+            }
 
-                if (availableOrders.isEmpty) {
-                  return _buildNoOrdersState();
-                }
-
-                return ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: availableOrders.length.clamp(0, 3),
-                  itemBuilder: (context, index) =>
-                      _buildOrderCard(availableOrders[index]),
-                );
-              }
-
-              return _buildNoOrdersState();
-            },
-          ),
+            return _buildNoOrdersState();
+          },
+        ),
       ],
-    );
-  }
-
-  Widget _buildOfflineState() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.grey.withOpacity(0.05)),
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.05),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.power_settings_new,
-              size: 48,
-              color: AppColors.textSecondary.withOpacity(0.5),
-            ),
-          ),
-          const SizedBox(height: 24),
-          const Text(
-            'You are Offline',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Go online to see available orders in your area',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.textSecondary),
-          ),
-        ],
-      ),
     );
   }
 
@@ -516,44 +615,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     );
   }
 
-  Widget _buildQuickActions(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Quick Actions',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1E293B),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _ActionCard(
-                title: context.l10n.orders,
-                icon: Icons.receipt_long_rounded,
-                color: AppColors.primary,
-                onTap: () => context.push('/driver/orders'),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _ActionCard(
-                title: context.l10n.profile,
-                icon: Icons.person_outline_rounded,
-                color: AppColors.info,
-                onTap: () => context.push('/profile'),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
   Future<void> _acceptOrder(OrderEntity order) async {
     if (_driverId == null) {
       context.showErrorSnackBar('Driver profile not loaded');
@@ -589,12 +650,14 @@ class _StatCard extends StatelessWidget {
   final String value;
   final IconData icon;
   final Color color;
+  final Color bgColor;
 
   const _StatCard({
     required this.title,
     required this.value,
     required this.icon,
     required this.color,
+    required this.bgColor,
   });
 
   @override
@@ -602,33 +665,38 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: bgColor,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: color, size: 24),
-          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(height: 16),
           Text(
             value,
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 28,
               fontWeight: FontWeight.bold,
               color: color,
+              height: 1,
             ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 4),
           Text(
             title,
-            style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+            style: TextStyle(
+              fontSize: 13,
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),
@@ -636,18 +704,26 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-class _ActionCard extends StatelessWidget {
+class _ActionItem {
   final String title;
   final IconData icon;
   final Color color;
   final VoidCallback onTap;
+  final bool isPrimary;
 
-  const _ActionCard({
+  _ActionItem({
     required this.title,
     required this.icon,
     required this.color,
     required this.onTap,
+    this.isPrimary = false,
   });
+}
+
+class _ActionCard extends StatelessWidget {
+  final _ActionItem item;
+
+  const _ActionCard({required this.item});
 
   @override
   Widget build(BuildContext context) {
@@ -658,36 +734,40 @@ class _ActionCard extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: onTap,
+          onTap: item.onTap,
           borderRadius: BorderRadius.circular(20),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: item.color.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(icon, color: color, size: 28),
+                  child: Icon(item.icon, color: item.color, size: 32),
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  title,
+                  item.title,
                   style: const TextStyle(
                     fontSize: 14,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                     color: Color(0xFF1E293B),
                   ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

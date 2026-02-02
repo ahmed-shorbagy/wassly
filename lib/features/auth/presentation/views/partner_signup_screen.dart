@@ -75,6 +75,36 @@ class _PartnerSignupScreenState extends State<PartnerSignupScreen> {
     return null;
   }
 
+  Future<void> _showImageSourceSelection(Function(File) onImageSelected) async {
+    await showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: Text(context.l10n.camera ?? 'Camera'),
+              onTap: () async {
+                Navigator.pop(context);
+                final file = await _pickImage(ImageSource.camera);
+                if (file != null) onImageSelected(file);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: Text(context.l10n.gallery ?? 'Gallery'),
+              onTap: () async {
+                Navigator.pop(context);
+                final file = await _pickImage(ImageSource.gallery);
+                if (file != null) onImageSelected(file);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _signup() {
     if (!_formKey.currentState!.validate()) return;
 
@@ -406,19 +436,17 @@ class _PartnerSignupScreenState extends State<PartnerSignupScreen> {
         _buildImagePicker(
           label: context.l10n.commercialRegistrationPhoto,
           file: _commercialRegistration,
-          onTap: () async {
-            final file = await _pickImage(ImageSource.camera);
-            if (file != null) setState(() => _commercialRegistration = file);
-          },
+          onTap: () => _showImageSourceSelection((file) {
+            setState(() => _commercialRegistration = file);
+          }),
         ),
         const SizedBox(height: 16),
         _buildImagePicker(
           label: context.l10n.storeLogoOptional,
           file: _restaurantImage,
-          onTap: () async {
-            final file = await _pickImage(ImageSource.gallery);
-            if (file != null) setState(() => _restaurantImage = file);
-          },
+          onTap: () => _showImageSourceSelection((file) {
+            setState(() => _restaurantImage = file);
+          }),
         ),
       ],
     );
@@ -475,34 +503,30 @@ class _PartnerSignupScreenState extends State<PartnerSignupScreen> {
             _buildSmallImagePicker(
               label: context.l10n.personalPhoto,
               file: _personalImage,
-              onTap: () async {
-                final file = await _pickImage(ImageSource.camera);
-                if (file != null) setState(() => _personalImage = file);
-              },
+              onTap: () => _showImageSourceSelection((file) {
+                setState(() => _personalImage = file);
+              }),
             ),
             _buildSmallImagePicker(
               label: context.l10n.driverLicense,
               file: _driverLicense,
-              onTap: () async {
-                final file = await _pickImage(ImageSource.camera);
-                if (file != null) setState(() => _driverLicense = file);
-              },
+              onTap: () => _showImageSourceSelection((file) {
+                setState(() => _driverLicense = file);
+              }),
             ),
             _buildSmallImagePicker(
               label: context.l10n.vehicleLicense,
               file: _vehicleLicense,
-              onTap: () async {
-                final file = await _pickImage(ImageSource.camera);
-                if (file != null) setState(() => _vehicleLicense = file);
-              },
+              onTap: () => _showImageSourceSelection((file) {
+                setState(() => _vehicleLicense = file);
+              }),
             ),
             _buildSmallImagePicker(
               label: context.l10n.vehiclePhoto,
               file: _vehiclePhoto,
-              onTap: () async {
-                final file = await _pickImage(ImageSource.camera);
-                if (file != null) setState(() => _vehiclePhoto = file);
-              },
+              onTap: () => _showImageSourceSelection((file) {
+                setState(() => _vehiclePhoto = file);
+              }),
             ),
           ],
         ),

@@ -9,8 +9,9 @@ class PartnerReviewsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Temporary mock data
-    final reviews = List.generate(10, (index) => ReviewEntity.mock(index));
+    // Real data integration pending
+    final List<ReviewEntity> reviews = [];
+
     // final l10n = AppLocalizations.of(context);
 
     // If l10n is failing to load (e.g. during dev), handle gracefully or ensure it's loaded
