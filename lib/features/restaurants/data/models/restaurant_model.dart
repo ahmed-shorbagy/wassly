@@ -28,6 +28,7 @@ class RestaurantModel extends RestaurantEntity {
     super.discountImageUrl,
     super.discountTargetProductId,
     required super.createdAt,
+    super.isApproved,
   });
 
   factory RestaurantModel.fromJson(Map<String, dynamic> json) {
@@ -98,6 +99,7 @@ class RestaurantModel extends RestaurantEntity {
       createdAt: json['createdAt'] != null
           ? (json['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
+      isApproved: json['isApproved'] ?? false,
     );
   }
 
@@ -128,6 +130,7 @@ class RestaurantModel extends RestaurantEntity {
       discountImageUrl: entity.discountImageUrl,
       discountTargetProductId: entity.discountTargetProductId,
       createdAt: entity.createdAt,
+      isApproved: entity.isApproved,
     );
   }
 
@@ -162,6 +165,7 @@ class RestaurantModel extends RestaurantEntity {
       'discountImageUrl': discountImageUrl,
       'discountTargetProductId': discountTargetProductId,
       'createdAt': Timestamp.fromDate(createdAt),
+      'isApproved': isApproved,
     };
   }
 
@@ -199,6 +203,7 @@ class RestaurantModel extends RestaurantEntity {
     String? discountImageUrl,
     String? discountTargetProductId,
     DateTime? createdAt,
+    bool? isApproved,
   }) {
     return RestaurantModel(
       id: id ?? this.id,
@@ -229,6 +234,7 @@ class RestaurantModel extends RestaurantEntity {
       discountTargetProductId:
           discountTargetProductId ?? this.discountTargetProductId,
       createdAt: createdAt ?? this.createdAt,
+      isApproved: isApproved ?? this.isApproved,
     );
   }
 }

@@ -163,7 +163,7 @@ class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
           'phone': phone,
           'userType': finalUserType,
           'createdAt': FieldValue.serverTimestamp(),
-          'isActive': true,
+          'isActive': false, // Requires admin approval
           'tempPassword':
               password, // Temporary storage for admin password updates
           // Note: In production, encrypt this field or use Cloud Function with Admin SDK
@@ -258,6 +258,7 @@ class RestaurantOwnerRepositoryImpl implements RestaurantOwnerRepository {
         'rating': 0.0,
         'totalReviews': 0,
         'createdAt': FieldValue.serverTimestamp(),
+        'isApproved': false, // Requires admin approval
         if (commercialRegistrationPhotoUrl != null)
           'commercialRegistrationPhotoUrl': commercialRegistrationPhotoUrl,
       };

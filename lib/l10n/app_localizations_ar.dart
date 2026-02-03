@@ -2382,4 +2382,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String estEarnings(String amount, String currency) {
     return 'الأرباح المتوقعة: $amount $currency';
   }
+
+  @override
+  String get pendingApprovals => 'الموافقات المعلقة';
 }

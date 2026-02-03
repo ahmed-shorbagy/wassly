@@ -4699,6 +4699,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Est. Earnings: {amount} {currency}'**
   String estEarnings(String amount, String currency);
+
+  /// No description provided for @pendingApprovals.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Approvals'**
+  String get pendingApprovals;
 }
 
 class _AppLocalizationsDelegate

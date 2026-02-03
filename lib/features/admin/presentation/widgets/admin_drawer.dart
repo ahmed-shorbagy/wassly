@@ -39,6 +39,12 @@ class AdminDrawer extends StatelessWidget {
                 ),
                 _buildDrawerItem(
                   context,
+                  icon: Icons.approval,
+                  title: l10n.pendingApprovals,
+                  route: '/admin/approvals',
+                ),
+                _buildDrawerItem(
+                  context,
                   icon: Icons.shopping_bag,
                   title: l10n.orders,
                   route: '/admin/orders',

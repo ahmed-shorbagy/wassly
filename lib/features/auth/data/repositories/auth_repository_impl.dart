@@ -40,6 +40,13 @@ class AuthRepositoryImpl implements AuthRepository {
               .get();
 
           if (userDoc.exists) {
+            if (userDoc.data()?['isActive'] == false) {
+              return const Left(
+                AuthFailure(
+                  'Your account is pending admin approval. Please wait.',
+                ),
+              );
+            }
             final userModel = UserModel.fromJson({
               'id': userCredential.user!.uid,
               ...userDoc.data()!,

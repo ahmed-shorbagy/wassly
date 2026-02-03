@@ -42,6 +42,7 @@ import '../../features/admin/presentation/views/admin_add_article_screen.dart';
 import '../../features/admin/presentation/views/admin_edit_article_screen.dart';
 import '../../features/admin/presentation/views/admin_support_tickets_screen.dart';
 import '../../features/support/presentation/views/ticket_chat_screen.dart';
+import '../../features/admin/presentation/views/admin_pending_partners_screen.dart';
 
 class AdminRouter {
   static final GoRouter router = GoRouter(
@@ -73,6 +74,12 @@ class AdminRouter {
             path: 'users',
             name: 'users',
             builder: (context, state) => const UserManagementScreen(),
+          ),
+          // Pending Approvals
+          GoRoute(
+            path: 'approvals',
+            name: 'approvals',
+            builder: (context, state) => const AdminPendingPartnersScreen(),
           ),
           // Restaurants - Nested routes
           GoRoute(

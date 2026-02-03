@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../../core/utils/logger.dart';
@@ -389,6 +390,98 @@ class AdminCubit extends Cubit<AdminState> {
     } catch (e) {
       AppLogger.logError('Error deleting restaurant', error: e);
       emit(const AdminError('Failed to delete restaurant'));
+    }
+  }
+
+  Future<void> getPendingPartners() async {
+    try {
+      emit(AdminLoading());
+      AppLogger.logInfo('Fetching pending partners...');
+
+      // Get users with isActive = false
+      final usersSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('isActive', isEqualTo: false)
+          .where('userType', whereIn: ['restaurant', 'market', 'driver'])
+          .get();
+
+      final List<Map<String, dynamic>> pending = [];
+
+      for (var userDoc in usersSnapshot.docs) {
+        final userData = userDoc.data();
+        final userType = userData['userType'];
+        final userId = userDoc.id;
+
+        if (userType == 'restaurant' || userType == 'market') {
+          final resSnapshot = await FirebaseFirestore.instance
+              .collection('restaurants')
+              .where('ownerId', isEqualTo: userId)
+              .get();
+          if (resSnapshot.docs.isNotEmpty) {
+            pending.add({
+              'user': userData,
+              'details': resSnapshot.docs.first.data(),
+              'id': resSnapshot.docs.first.id,
+              'type': userType,
+            });
+          }
+        } else if (userType == 'driver') {
+          final driverSnapshot = await FirebaseFirestore.instance
+              .collection('drivers')
+              .where('userId', isEqualTo: userId)
+              .get();
+          if (driverSnapshot.docs.isNotEmpty) {
+            pending.add({
+              'user': userData,
+              'details': driverSnapshot.docs.first.data(),
+              'id': driverSnapshot.docs.first.id,
+              'type': 'driver',
+            });
+          }
+        }
+      }
+
+      emit(PendingPartnersLoaded(pending));
+    } catch (e) {
+      AppLogger.logError('Error fetching pending partners', error: e);
+      emit(AdminError('Failed to fetch pending partners: $e'));
+    }
+  }
+
+  Future<void> approvePartner(
+    String userId,
+    String detailId,
+    String type,
+  ) async {
+    try {
+      emit(AdminLoading());
+      AppLogger.logInfo('Approving partner: $userId');
+
+      // 1. Update user document
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
+        'isActive': true,
+      });
+
+      // 2. Update detail document
+      if (type == 'restaurant' || type == 'market') {
+        await FirebaseFirestore.instance
+            .collection('restaurants')
+            .doc(detailId)
+            .update({'isApproved': true});
+      } else if (type == 'driver') {
+        await FirebaseFirestore.instance
+            .collection('drivers')
+            .doc(detailId)
+            .update({'isActive': true});
+      }
+
+      AppLogger.logSuccess('Partner approved successfully');
+      emit(PartnerApprovedSuccess());
+      // Refresh list
+      getPendingPartners();
+    } catch (e) {
+      AppLogger.logError('Error approving partner', error: e);
+      emit(AdminError('Failed to approve partner: $e'));
     }
   }
 

@@ -44,6 +44,18 @@ class AdminProductsLoaded extends AdminState {
   List<Object?> get props => [products];
 }
 
+class PendingPartnersLoaded extends AdminState {
+  final List<dynamic>
+  pendingPartners; // Can be RestaurantEntity or DriverEntity
+
+  const PendingPartnersLoaded(this.pendingPartners);
+
+  @override
+  List<Object?> get props => [pendingPartners];
+}
+
+class PartnerApprovedSuccess extends AdminState {}
+
 class AdminError extends AdminState {
   final String message;
 

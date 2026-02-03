@@ -26,6 +26,7 @@ class RestaurantEntity extends Equatable {
   final String? discountImageUrl;
   final String? discountTargetProductId;
   final DateTime createdAt;
+  final bool isApproved;
 
   const RestaurantEntity({
     required this.id,
@@ -53,6 +54,7 @@ class RestaurantEntity extends Equatable {
     this.discountImageUrl,
     this.discountTargetProductId,
     required this.createdAt,
+    this.isApproved = false,
   });
 
   /// Check if discount is currently active
@@ -94,6 +96,7 @@ class RestaurantEntity extends Equatable {
     String? discountImageUrl,
     String? discountTargetProductId,
     DateTime? createdAt,
+    bool? isApproved,
   }) {
     return RestaurantEntity(
       id: id ?? this.id,
@@ -124,6 +127,7 @@ class RestaurantEntity extends Equatable {
       discountTargetProductId:
           discountTargetProductId ?? this.discountTargetProductId,
       createdAt: createdAt ?? this.createdAt,
+      isApproved: isApproved ?? this.isApproved,
     );
   }
 
@@ -154,5 +158,6 @@ class RestaurantEntity extends Equatable {
     discountImageUrl,
     discountTargetProductId,
     createdAt,
+    isApproved,
   ];
 }
