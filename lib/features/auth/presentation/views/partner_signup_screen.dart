@@ -496,39 +496,36 @@ class _PartnerSignupScreenState extends State<PartnerSignupScreen> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
-        Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: [
-            _buildSmallImagePicker(
-              label: context.l10n.personalPhoto,
-              file: _personalImage,
-              onTap: () => _showImageSourceSelection((file) {
-                setState(() => _personalImage = file);
-              }),
-            ),
-            _buildSmallImagePicker(
-              label: context.l10n.driverLicense,
-              file: _driverLicense,
-              onTap: () => _showImageSourceSelection((file) {
-                setState(() => _driverLicense = file);
-              }),
-            ),
-            _buildSmallImagePicker(
-              label: context.l10n.vehicleLicense,
-              file: _vehicleLicense,
-              onTap: () => _showImageSourceSelection((file) {
-                setState(() => _vehicleLicense = file);
-              }),
-            ),
-            _buildSmallImagePicker(
-              label: context.l10n.vehiclePhoto,
-              file: _vehiclePhoto,
-              onTap: () => _showImageSourceSelection((file) {
-                setState(() => _vehiclePhoto = file);
-              }),
-            ),
-          ],
+        _buildImagePicker(
+          label: context.l10n.personalPhoto,
+          file: _personalImage,
+          onTap: () => _showImageSourceSelection((file) {
+            setState(() => _personalImage = file);
+          }),
+        ),
+        const SizedBox(height: 12),
+        _buildImagePicker(
+          label: context.l10n.driverLicense,
+          file: _driverLicense,
+          onTap: () => _showImageSourceSelection((file) {
+            setState(() => _driverLicense = file);
+          }),
+        ),
+        const SizedBox(height: 12),
+        _buildImagePicker(
+          label: context.l10n.vehicleLicense,
+          file: _vehicleLicense,
+          onTap: () => _showImageSourceSelection((file) {
+            setState(() => _vehicleLicense = file);
+          }),
+        ),
+        const SizedBox(height: 12),
+        _buildImagePicker(
+          label: context.l10n.vehiclePhoto,
+          file: _vehiclePhoto,
+          onTap: () => _showImageSourceSelection((file) {
+            setState(() => _vehiclePhoto = file);
+          }),
         ),
       ],
     );
@@ -572,54 +569,6 @@ class _PartnerSignupScreenState extends State<PartnerSignupScreen> {
                   fit: BoxFit.cover,
                 ),
               ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSmallImagePicker({
-    required String label,
-    required File? file,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        width: 140,
-        height: 140,
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade300),
-          borderRadius: BorderRadius.circular(12),
-          color: file != null
-              ? Colors.green.withOpacity(0.05)
-              : Colors.transparent,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (file != null)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.file(
-                  file,
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                ),
-              )
-            else
-              const Icon(
-                Icons.add_a_photo_outlined,
-                size: 40,
-                color: Colors.grey,
-              ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
-            ),
           ],
         ),
       ),
