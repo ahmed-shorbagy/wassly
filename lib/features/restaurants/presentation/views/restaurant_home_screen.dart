@@ -298,7 +298,7 @@ class _RestaurantHomeScreenState extends State<RestaurantHomeScreen> {
                       ? 'You are accepting orders'
                       : 'You are currently offline',
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: 14,
                     color: AppColors.textSecondary,
                   ),
                 ),
@@ -306,16 +306,29 @@ class _RestaurantHomeScreenState extends State<RestaurantHomeScreen> {
             ),
           ),
           if (_myRestaurant != null)
-            Transform.scale(
-              scale: 0.8,
-              child: Switch(
-                value: isOpen,
-                onChanged: _toggleStatus,
-                activeThumbColor: Colors.green,
-                activeTrackColor: Colors.green.withOpacity(0.2),
-                inactiveThumbColor: Colors.grey,
-                inactiveTrackColor: Colors.grey.withOpacity(0.2),
-              ),
+            Column(
+              children: [
+                Transform.scale(
+                  scale: 1.2,
+                  child: Switch(
+                    value: isOpen,
+                    onChanged: _toggleStatus,
+                    activeThumbColor: Colors.green,
+                    activeTrackColor: Colors.green.withOpacity(0.2),
+                    inactiveThumbColor: Colors.grey,
+                    inactiveTrackColor: Colors.grey.withOpacity(0.2),
+                  ),
+                ),
+                Text(
+                  isOpen ? 'ONLINE' : 'OFFLINE',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: isOpen ? Colors.green : Colors.grey,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              ],
             ),
         ],
       ),
@@ -340,31 +353,61 @@ class _RestaurantHomeScreenState extends State<RestaurantHomeScreen> {
                     o.status == OrderStatus.ready,
               )
               .length;
+
+          // Calculate today's earnings
+          final now = DateTime.now();
+          final todayOrders = state.orders.where(
+            (o) =>
+                o.createdAt.year == now.year &&
+                o.createdAt.month == now.month &&
+                o.createdAt.day == now.day &&
+                o.status != OrderStatus.cancelled,
+          );
+          double earnings = 0;
+          for (var o in todayOrders) {
+            earnings += o.totalAmount;
+          }
+
+          return Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: _StatCard(
+                      title: context.l10n.pendingOrders,
+                      value: pendingCount.toString(),
+                      icon: Icons.notifications_active_rounded,
+                      color: const Color(0xFFFF9F1C),
+                      bgColor: const Color(0xFFFFF4E5),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _StatCard(
+                      title: context.l10n.activeOrders,
+                      value: activeCount.toString(),
+                      icon: Icons.soup_kitchen_rounded,
+                      color: const Color(0xFF2EC4B6),
+                      bgColor: const Color(0xFFE8F9F8),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _StatCard(
+                title: 'Total Earnings Today',
+                value:
+                    '${earnings.toStringAsFixed(2)} ${context.l10n.currency}',
+                icon: Icons.account_balance_wallet_rounded,
+                color: Colors.blue,
+                bgColor: Colors.blue.withOpacity(0.05),
+                isFullWidth: true,
+              ),
+            ],
+          );
         }
 
-        return Row(
-          children: [
-            Expanded(
-              child: _StatCard(
-                title: context.l10n.pendingOrders,
-                value: pendingCount.toString(),
-                icon: Icons.notifications_active_rounded,
-                color: const Color(0xFFFF9F1C), // Orange
-                bgColor: const Color(0xFFFFF4E5),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _StatCard(
-                title: context.l10n.activeOrders,
-                value: activeCount.toString(),
-                icon: Icons.soup_kitchen_rounded,
-                color: const Color(0xFF2EC4B6), // Teal
-                bgColor: const Color(0xFFE8F9F8),
-              ),
-            ),
-          ],
-        );
+        return const SizedBox.shrink();
       },
     );
   }
@@ -453,6 +496,7 @@ class _StatCard extends StatelessWidget {
   final IconData icon;
   final Color color;
   final Color bgColor;
+  final bool isFullWidth;
 
   const _StatCard({
     required this.title,
@@ -460,11 +504,13 @@ class _StatCard extends StatelessWidget {
     required this.icon,
     required this.color,
     required this.bgColor,
+    this.isFullWidth = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: isFullWidth ? double.infinity : null,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: bgColor,

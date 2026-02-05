@@ -386,12 +386,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
   Widget _buildActiveOrderCard(OrderEntity order) {
     return GestureDetector(
       onTap: () {
-        // Navigate to details to complete actions
-        // context.push('/driver/order/${order.id}');
-        // For now, implementing basic actions here would require a lot of state management duplication
-        // Ideally we push to a dedicated OrderDetailsScreen.
-        // Assuming we have one, or repurposing a simple details view.
-        // Let's assume we can navigate to list for now or expand this card.
+        context.pushNamed(
+          'driver-order-detail',
+          pathParameters: {'id': order.id},
+        );
       },
       child: Container(
         decoration: BoxDecoration(
@@ -805,9 +803,16 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
           onTap: () => context.push('/driver/profile'),
         ),
         _QuickAction(
+          icon: Icons.headset_mic_rounded,
+          label: context.l10n.supportChat,
+          onTap: () => context.push('/driver/support'),
+        ),
+        _QuickAction(
           icon: Icons.settings_rounded,
           label: context.l10n.settings,
-          onTap: () {},
+          onTap: () {
+            context.push('/driver/profile'); // Driver profile has settings
+          },
         ),
       ],
     );
