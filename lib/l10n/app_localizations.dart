@@ -1472,11 +1472,41 @@ abstract class AppLocalizations {
   /// **'Order status updated'**
   String get orderStatusUpdated;
 
+  /// No description provided for @marketOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Market Orders'**
+  String get marketOrders;
+
   /// No description provided for @marketProducts.
   ///
   /// In en, this message translates to:
   /// **'Market Products'**
   String get marketProducts;
+
+  /// No description provided for @selectPartnerTypeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How do you want to partner with us?'**
+  String get selectPartnerTypeTitle;
+
+  /// No description provided for @manageRestaurantSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your restaurant orders and menu'**
+  String get manageRestaurantSubtitle;
+
+  /// No description provided for @manageMarketSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your market inventory and orders'**
+  String get manageMarketSubtitle;
+
+  /// No description provided for @driverSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliver orders and earn money'**
+  String get driverSubtitle;
 
   /// No description provided for @noMarketProducts.
   ///
@@ -3457,18 +3487,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Welcome, {name}!'**
   String welcomeName(String name);
-
-  /// No description provided for @manageRestaurantSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Manage your restaurant orders and menu'**
-  String get manageRestaurantSubtitle;
-
-  /// No description provided for @manageMarketSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Manage your market inventory and orders'**
-  String get manageMarketSubtitle;
 
   /// No description provided for @welcomeToRestaurantDashboard.
   ///

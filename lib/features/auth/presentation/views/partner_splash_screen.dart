@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/logger.dart';
@@ -26,9 +27,23 @@ class _PartnerSplashScreenState extends State<PartnerSplashScreen> {
     });
   }
 
-  void _checkAuth() {
-    AppLogger.logAuth('Checking current user from partner splash screen');
-    context.read<AuthCubit>().getCurrentUser();
+  Future<void> _checkAuth() async {
+    // Check if partner type is selected
+    final prefs = await SharedPreferences.getInstance();
+    final partnerType = prefs.getString('partner_type');
+
+    if (partnerType == null) {
+      if (mounted) {
+        AppLogger.logInfo('No partner type selected, navigating to selection');
+        context.pushReplacement('/partner-type-selection');
+      }
+      return;
+    }
+
+    if (mounted) {
+      AppLogger.logAuth('Checking current user from partner splash screen');
+      context.read<AuthCubit>().getCurrentUser();
+    }
   }
 
   @override

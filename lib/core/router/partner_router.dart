@@ -27,6 +27,8 @@ import '../../features/support/domain/entities/ticket_message_entity.dart';
 import '../../features/partner/presentation/views/add_product_screen.dart';
 import '../../features/partner/presentation/views/edit_product_screen.dart';
 
+import '../../features/auth/presentation/views/partner_type_selection_screen.dart';
+
 import 'dart:async';
 import '../../features/auth/presentation/cubits/auth_cubit.dart';
 import '../../core/di/injection_container.dart';
@@ -54,6 +56,11 @@ class PartnerRouter {
         path: '/splash',
         name: 'splash',
         builder: (context, state) => const PartnerSplashScreen(),
+      ),
+      GoRoute(
+        path: '/partner-type-selection',
+        name: 'partner-type-selection',
+        builder: (context, state) => const PartnerTypeSelectionScreen(),
       ),
 
       // Authentication Routes
@@ -288,6 +295,21 @@ class PartnerRouter {
             path: 'products',
             name: 'market-products',
             builder: (context, state) => const MarketProductsScreen(),
+            routes: [
+              GoRoute(
+                path: 'add',
+                name: 'market-add-product',
+                builder: (context, state) => const AddProductScreen(),
+              ),
+              GoRoute(
+                path: 'edit/:productId',
+                name: 'market-edit-product',
+                builder: (context, state) {
+                  final productId = state.pathParameters['productId'] ?? '';
+                  return EditProductScreen(productId: productId);
+                },
+              ),
+            ],
           ),
           GoRoute(
             path: 'settings',

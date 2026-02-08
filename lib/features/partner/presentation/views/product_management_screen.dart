@@ -15,7 +15,9 @@ import '../cubits/product_management_cubit.dart';
 import '../../../../core/utils/logger.dart';
 
 class ProductManagementScreen extends StatefulWidget {
-  const ProductManagementScreen({super.key});
+  final bool isMarket;
+
+  const ProductManagementScreen({super.key, this.isMarket = false});
 
   @override
   State<ProductManagementScreen> createState() =>
@@ -505,7 +507,11 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
       context.showInfoSnackBar('Loading data, please try again...');
       return;
     }
-    context.push('/restaurant/products/add');
+    if (widget.isMarket) {
+      context.push('/market/products/add');
+    } else {
+      context.push('/restaurant/products/add');
+    }
   }
 
   void _navigateToEditProduct(ProductEntity product) {
@@ -514,6 +520,10 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
       context.showInfoSnackBar('Loading data, please try again...');
       return;
     }
-    context.push('/restaurant/products/edit/${product.id}');
+    if (widget.isMarket) {
+      context.push('/market/products/edit/${product.id}');
+    } else {
+      context.push('/restaurant/products/edit/${product.id}');
+    }
   }
 }

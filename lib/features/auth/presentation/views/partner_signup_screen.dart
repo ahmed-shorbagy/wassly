@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/utils/extensions.dart';
@@ -21,14 +22,36 @@ class PartnerSignupScreen extends StatefulWidget {
 
 class _PartnerSignupScreenState extends State<PartnerSignupScreen> {
   final _formKey = GlobalKey<FormState>();
+
+  // Persistent Partner Type
+  bool _isPartnerTypeFixed = false;
+
+  String _selectedPartnerType = AppConstants.userTypeRestaurant;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPartnerType();
+  }
+
+  Future<void> _loadPartnerType() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedType = prefs.getString('partner_type');
+    if (savedType != null) {
+      if (mounted) {
+        setState(() {
+          _selectedPartnerType = savedType;
+          _isPartnerTypeFixed = true;
+        });
+      }
+    }
+  }
+
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-
-  // Partner Type
-  String _selectedPartnerType = AppConstants.userTypeRestaurant;
 
   // Restaurant/Market Specific
   File? _restaurantImage;
@@ -203,8 +226,10 @@ class _PartnerSignupScreenState extends State<PartnerSignupScreen> {
                       const SizedBox(height: 20),
 
                       // Selection of Partner Type
-                      _buildPartnerTypeSelection(),
-                      const SizedBox(height: 20),
+                      if (!_isPartnerTypeFixed) ...[
+                        _buildPartnerTypeSelection(),
+                        const SizedBox(height: 20),
+                      ],
 
                       Container(
                         decoration: BoxDecoration(
@@ -306,6 +331,8 @@ class _PartnerSignupScreenState extends State<PartnerSignupScreen> {
   }
 
   Widget _buildPartnerTypeSelection() {
+    if (_isPartnerTypeFixed) return const SizedBox.shrink();
+
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(

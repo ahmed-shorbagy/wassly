@@ -716,7 +716,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orderStatusUpdated => 'Order status updated';
 
   @override
+  String get marketOrders => 'Market Orders';
+
+  @override
   String get marketProducts => 'Market Products';
+
+  @override
+  String get selectPartnerTypeTitle => 'How do you want to partner with us?';
+
+  @override
+  String get manageRestaurantSubtitle =>
+      'Manage your restaurant orders and menu';
+
+  @override
+  String get manageMarketSubtitle => 'Manage your market inventory and orders';
+
+  @override
+  String get driverSubtitle => 'Deliver orders and earn money';
 
   @override
   String get noMarketProducts => 'No Market Products';
@@ -1742,13 +1758,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String welcomeName(String name) {
     return 'Welcome, $name!';
   }
-
-  @override
-  String get manageRestaurantSubtitle =>
-      'Manage your restaurant orders and menu';
-
-  @override
-  String get manageMarketSubtitle => 'Manage your market inventory and orders';
 
   @override
   String get welcomeToRestaurantDashboard => 'Welcome to Restaurant Dashboard';

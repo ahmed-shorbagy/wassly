@@ -712,7 +712,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get orderStatusUpdated => 'تم تحديث حالة الطلب';
 
   @override
+  String get marketOrders => 'طلبات المتجر';
+
+  @override
   String get marketProducts => 'منتجات الماركت';
+
+  @override
+  String get selectPartnerTypeTitle => 'كيف تود أن تشاركنا؟';
+
+  @override
+  String get manageRestaurantSubtitle => 'إدارة طلبات المطعـم والقائمـة';
+
+  @override
+  String get manageMarketSubtitle => 'إدارة مخزون المتجر والطلبات';
+
+  @override
+  String get driverSubtitle => 'وصل الطلبات واكسب المال';
 
   @override
   String get noMarketProducts => 'لا توجد منتجات سوق';
@@ -1733,12 +1748,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String welcomeName(String name) {
     return 'أهلاً بك، $name!';
   }
-
-  @override
-  String get manageRestaurantSubtitle => 'إدارة طلبات المطعـم والقائمـة';
-
-  @override
-  String get manageMarketSubtitle => 'إدارة مخزون المتجر والطلبات';
 
   @override
   String get welcomeToRestaurantDashboard => 'مرحباً بكم في لوحة تحكم المطعم';

@@ -7,6 +7,6 @@ class MarketProductsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Wrapper for ProductManagementScreen
-    return const ProductManagementScreen();
+    return const ProductManagementScreen(isMarket: true);
   }
 }

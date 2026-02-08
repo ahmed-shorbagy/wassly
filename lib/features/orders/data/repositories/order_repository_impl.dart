@@ -401,6 +401,20 @@ class OrderRepositoryImpl implements OrderRepository {
         // Don't fail the usecase just because notification failed
       }
 
+      // Send Notification to Drivers (When order is Ready)
+      if (status == OrderStatus.ready) {
+        try {
+          await notificationSenderService.sendNotificationToTopic(
+            topic: 'drivers', // Or a more specific topic like 'drivers_city'
+            title: 'New Order Available! 📦',
+            body: 'A new order is ready for pickup.',
+            data: {'orderId': orderId},
+          );
+        } catch (e) {
+          AppLogger.logError('Failed to send driver notification', error: e);
+        }
+      }
+
       return const Right(null);
     } on FirebaseException catch (e) {
       AppLogger.logError('Firebase error updating order status', error: e);
@@ -425,9 +439,34 @@ class OrderRepositoryImpl implements OrderRepository {
         'driverId': driverId,
         'driverName': driverName,
         'driverPhone': driverPhone,
-        'status': 'pickedUp',
+        // Status remains as is (likely 'ready' or 'accepted'), driver must pick it up manually
+        // 'status': 'pickedUp',
         'updatedAt': FieldValue.serverTimestamp(),
       });
+
+      // Notify Restaurant that driver is assigned
+      try {
+        final orderDoc = await firestore
+            .collection('orders')
+            .doc(orderId)
+            .get();
+        if (orderDoc.exists) {
+          final restaurantId = orderDoc.data()?['restaurantId'] as String?;
+          if (restaurantId != null) {
+            await notificationSenderService.sendNotificationToTopic(
+              topic: 'restaurant_$restaurantId',
+              title: 'Driver Assigned 🚚',
+              body: '$driverName will pick up the order.',
+              data: {'orderId': orderId, 'driverId': driverId},
+            );
+          }
+        }
+      } catch (e) {
+        AppLogger.logError(
+          'Failed to send driver assigned notification',
+          error: e,
+        );
+      }
 
       AppLogger.logSuccess('Driver assigned successfully');
       return const Right(null);

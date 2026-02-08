@@ -9,6 +9,6 @@ class MarketOrdersScreen extends StatelessWidget {
     // Reusing the logic but effectively wrapping it to potentially override strings/theme
     // For now, it's a direct wrapper, but having this file allows us to distinctively route
     // and potentially customize the "RestaurantOrdersScreen" to say "Market Orders" via l10n overrides in future
-    return const RestaurantOrdersScreen();
+    return const RestaurantOrdersScreen(isMarket: true);
   }
 }

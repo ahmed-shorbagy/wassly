@@ -13,7 +13,9 @@ import '../../../orders/domain/entities/order_entity.dart';
 import '../../../orders/presentation/cubits/order_cubit.dart';
 
 class RestaurantOrdersScreen extends StatefulWidget {
-  const RestaurantOrdersScreen({super.key});
+  final bool isMarket;
+
+  const RestaurantOrdersScreen({super.key, this.isMarket = false});
 
   @override
   State<RestaurantOrdersScreen> createState() => _RestaurantOrdersScreenState();
@@ -55,7 +57,9 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.restaurantOrders),
+        title: Text(
+          widget.isMarket ? l10n.marketOrders : l10n.restaurantOrders,
+        ),
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.white,
