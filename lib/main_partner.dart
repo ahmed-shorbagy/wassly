@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'config/flavor_config.dart';
 import 'firebase_options.dart';
 import 'core/router/partner_router.dart';
@@ -13,6 +14,7 @@ import 'core/di/injection_container.dart';
 import 'core/utils/logger.dart';
 import 'l10n/app_localizations.dart';
 import 'core/localization/locale_cubit.dart';
+import 'features/orders/domain/repositories/order_repository.dart';
 import 'shared/widgets/back_button_handler.dart';
 
 void main() async {
@@ -77,22 +79,37 @@ class ToOrderPartnerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: InjectionContainer().getBlocProviders(),
-      child: BlocBuilder<LocaleCubit, LocaleState>(
-        builder: (context, localeState) {
-          return BackButtonHandler(
-            child: MaterialApp.router(
-              title: FlavorConfig.instance.appName,
-              theme: PartnerTheme.lightTheme,
-              routerConfig: PartnerRouter.router,
-              debugShowCheckedModeBanner: false,
-              locale: localeState.locale,
-              supportedLocales: AppLocalizations.supportedLocales,
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-            ),
-          );
-        },
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider<OrderRepository>.value(
+          value: InjectionContainer().orderRepository,
+        ),
+      ],
+      child: MultiBlocProvider(
+        providers: InjectionContainer().getBlocProviders(),
+        child: BlocBuilder<LocaleCubit, LocaleState>(
+          builder: (context, localeState) {
+            return ScreenUtilInit(
+              designSize: const Size(375, 812), // iPhone X design size
+              minTextAdapt: true,
+              splitScreenMode: true,
+              builder: (context, child) {
+                return BackButtonHandler(
+                  child: MaterialApp.router(
+                    title: FlavorConfig.instance.appName,
+                    theme: PartnerTheme.lightTheme,
+                    routerConfig: PartnerRouter.router,
+                    debugShowCheckedModeBanner: false,
+                    locale: localeState.locale,
+                    supportedLocales: AppLocalizations.supportedLocales,
+                    localizationsDelegates:
+                        AppLocalizations.localizationsDelegates,
+                  ),
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }

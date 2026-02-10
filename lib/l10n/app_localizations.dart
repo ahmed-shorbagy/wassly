@@ -1490,18 +1490,6 @@ abstract class AppLocalizations {
   /// **'How do you want to partner with us?'**
   String get selectPartnerTypeTitle;
 
-  /// No description provided for @manageRestaurantSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Manage your restaurant orders and menu'**
-  String get manageRestaurantSubtitle;
-
-  /// No description provided for @manageMarketSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Manage your market inventory and orders'**
-  String get manageMarketSubtitle;
-
   /// No description provided for @driverSubtitle.
   ///
   /// In en, this message translates to:
@@ -3488,6 +3476,18 @@ abstract class AppLocalizations {
   /// **'Welcome, {name}!'**
   String welcomeName(String name);
 
+  /// No description provided for @manageRestaurantSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your restaurant orders and menu'**
+  String get manageRestaurantSubtitle;
+
+  /// No description provided for @manageMarketSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your market inventory and orders'**
+  String get manageMarketSubtitle;
+
   /// No description provided for @welcomeToRestaurantDashboard.
   ///
   /// In en, this message translates to:
@@ -4723,6 +4723,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pending Approvals'**
   String get pendingApprovals;
+
+  /// No description provided for @wallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet'**
+  String get wallet;
+
+  /// No description provided for @totalEarnings.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Earnings'**
+  String get totalEarnings;
+
+  /// No description provided for @cashCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash Collected'**
+  String get cashCollected;
+
+  /// No description provided for @transactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get transactions;
 }
 
 class _AppLocalizationsDelegate

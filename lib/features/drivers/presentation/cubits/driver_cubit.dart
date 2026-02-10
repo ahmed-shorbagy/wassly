@@ -201,6 +201,60 @@ class DriverCubit extends Cubit<DriverState> {
     }
   }
 
+  Future<void> updateOnlineStatus(String driverId, bool isOnline) async {
+    try {
+      AppLogger.logInfo(
+        'Updating driver online status: $driverId to $isOnline',
+      );
+      final result = await driverRepository.updateDriverOnlineStatus(
+        driverId,
+        isOnline,
+      );
+
+      result.fold(
+        (failure) {
+          AppLogger.logError(
+            'Failed to update online status',
+            error: failure.message,
+          );
+          emit(DriverError(failure.message));
+        },
+        (_) {
+          AppLogger.logSuccess('Online status updated successfully');
+        },
+      );
+    } catch (e) {
+      AppLogger.logError('Error updating online status', error: e);
+      emit(DriverError('Failed to update online status: $e'));
+    }
+  }
+
+  Future<void> getDriverByUserId(String userId) async {
+    try {
+      emit(DriverLoading());
+      AppLogger.logInfo('Loading driver by user ID: $userId');
+
+      final result = await driverRepository.getDriverByUserId(userId);
+
+      result.fold(
+        (failure) {
+          AppLogger.logError(
+            'Failed to load driver by user ID',
+            error: failure.message,
+          );
+          emit(DriverError(failure.message));
+        },
+        (driver) {
+          AppLogger.logSuccess('Driver loaded: ${driver.name}');
+          emit(DriverLoaded(driver));
+        },
+      );
+    } catch (e) {
+      AppLogger.logError('Error loading driver by user ID', error: e);
+      emit(DriverError('Failed to load driver: $e'));
+    }
+  }
+
   void resetState() {
     emit(DriverInitial());
   }

@@ -6,6 +6,7 @@ import '../../../../core/utils/logger.dart';
 import '../../../../core/utils/extensions.dart';
 import '../../../../shared/widgets/language_toggle_button.dart';
 import '../../../auth/presentation/cubits/auth_cubit.dart';
+import '../cubits/driver_cubit.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../../../orders/presentation/cubits/order_cubit.dart';
 import '../../../orders/domain/repositories/order_repository.dart';
@@ -42,15 +43,14 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     if (authState is AuthAuthenticated) {
       if (mounted) {
         setState(() {
-          _driverId = authState.user.id;
           _driverName = authState.user.name;
           _driverPhone = authState.user.phone;
         });
       }
-      // If online, listen to new orders
-      if (_isOnline) {
-        context.read<OrderCubit>().listenToAvailableOrders();
-      }
+
+      // Load driver profile from drivers collection
+      context.read<DriverCubit>().getDriverByUserId(authState.user.id);
+
       await _refreshDashboard();
     }
   }
@@ -107,58 +107,80 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     }
   }
 
-  void _toggleStatus(bool isOnline) {
+  void _toggleStatus(bool value) {
+    if (_driverId == null) return;
+
     setState(() {
-      _isOnline = isOnline;
+      _isOnline = value;
     });
 
-    if (isOnline) {
+    // Update online status in Firestore
+    context.read<DriverCubit>().updateOnlineStatus(_driverId!, value);
+
+    if (value) {
       context.read<OrderCubit>().listenToAvailableOrders();
-      _refreshDashboard();
+      _refreshDashboard(); // Refresh dashboard to potentially show new orders
     } else {
-      // Maybe stop listening or just update UI
+      context.read<OrderCubit>().cancelOrdersSubscription();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC), // Slate 50
-      body: SafeArea(
-        child: Stack(
-          children: [
-            RefreshIndicator(
-              onRefresh: _refreshDashboard,
-              child: CustomScrollView(
-                slivers: [
-                  _buildSliverAppBar(),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 16),
-                          _buildStatusCard(),
-                          const SizedBox(height: 24),
-                          _buildMainContent(),
-                          const SizedBox(height: 24),
-                          _buildStatsRow(),
-                          const SizedBox(height: 24),
-                          _buildQuickActions(),
-                          const SizedBox(height: 40),
-                        ],
+    return BlocListener<DriverCubit, DriverState>(
+      listener: (context, state) {
+        if (state is DriverLoaded) {
+          setState(() {
+            _driverId = state.driver.id;
+            _isOnline = state.driver.isOnline;
+            _driverName = state.driver.name;
+            _driverPhone = state.driver.phone;
+          });
+          // If online, start listening to available orders
+          if (state.driver.isOnline) {
+            context.read<OrderCubit>().listenToAvailableOrders();
+          }
+          _refreshDashboard();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF8FAFC), // Slate 50
+        body: SafeArea(
+          child: Stack(
+            children: [
+              RefreshIndicator(
+                onRefresh: _refreshDashboard,
+                child: CustomScrollView(
+                  slivers: [
+                    _buildSliverAppBar(),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 16),
+                            _buildStatusCard(),
+                            const SizedBox(height: 24),
+                            _buildMainContent(),
+                            const SizedBox(height: 24),
+                            _buildStatsRow(),
+                            const SizedBox(height: 24),
+                            _buildQuickActions(),
+                            const SizedBox(height: 40),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            if (_isLoading)
-              Container(
-                color: Colors.black.withOpacity(0.1),
-                child: const Center(child: CircularProgressIndicator()),
-              ),
-          ],
+              if (_isLoading)
+                Container(
+                  color: Colors.black.withOpacity(0.1),
+                  child: const Center(child: CircularProgressIndicator()),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -798,9 +820,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
           onTap: () => context.push('/driver/orders'),
         ),
         _QuickAction(
-          icon: Icons.person_rounded,
-          label: context.l10n.profile,
-          onTap: () => context.push('/driver/profile'),
+          icon: Icons.account_balance_wallet_rounded,
+          label: context.l10n.wallet,
+          onTap: () => context.push('/driver/wallet'),
         ),
         _QuickAction(
           icon: Icons.headset_mic_rounded,

@@ -516,6 +516,7 @@ class OrderRepositoryImpl implements OrderRepository {
       final snapshot = await firestore
           .collection('orders')
           .where('status', isEqualTo: 'ready')
+          .where('isPickup', isEqualTo: false)
           .where('driverId', isNull: true)
           .orderBy('createdAt', descending: true)
           .get();
@@ -560,6 +561,7 @@ class OrderRepositoryImpl implements OrderRepository {
     return firestore
         .collection('orders')
         .where('status', isEqualTo: 'ready')
+        .where('isPickup', isEqualTo: false)
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {

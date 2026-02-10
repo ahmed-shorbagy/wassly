@@ -9,6 +9,8 @@ import '../../domain/usecases/get_active_orders_usecase.dart';
 import '../../domain/usecases/get_order_by_id_usecase.dart';
 import '../../domain/usecases/cancel_order_usecase.dart';
 import '../../domain/repositories/order_repository.dart';
+import '../../../wallet/domain/repositories/wallet_repository.dart';
+import '../../../wallet/domain/entities/wallet_transaction.dart';
 
 part 'order_state.dart';
 
@@ -19,6 +21,7 @@ class OrderCubit extends Cubit<OrderState> {
   final GetOrderByIdUseCase getOrderByIdUseCase;
   final CancelOrderUseCase cancelOrderUseCase;
   final OrderRepository repository;
+  final WalletRepository walletRepository;
 
   StreamSubscription? _orderSubscription;
   StreamSubscription? _ordersListSubscription;
@@ -30,6 +33,7 @@ class OrderCubit extends Cubit<OrderState> {
     required this.getOrderByIdUseCase,
     required this.cancelOrderUseCase,
     required this.repository,
+    required this.walletRepository,
   }) : super(OrderInitial());
 
   @override
@@ -168,16 +172,20 @@ class OrderCubit extends Cubit<OrderState> {
       AppLogger.logInfo('Setting up real-time listener for order: $orderId');
 
       _orderSubscription?.cancel();
-      _orderSubscription = repository.listenToOrder(orderId).listen(
-        (order) {
-          AppLogger.logInfo('Order updated: ${order.id} - ${order.statusText}');
-          emit(OrderLoaded(order));
-        },
-        onError: (error) {
-          AppLogger.logError('Error in order stream', error: error);
-          emit(const OrderError('Failed to get order updates'));
-        },
-      );
+      _orderSubscription = repository
+          .listenToOrder(orderId)
+          .listen(
+            (order) {
+              AppLogger.logInfo(
+                'Order updated: ${order.id} - ${order.statusText}',
+              );
+              emit(OrderLoaded(order));
+            },
+            onError: (error) {
+              AppLogger.logError('Error in order stream', error: error);
+              emit(const OrderError('Failed to get order updates'));
+            },
+          );
     } catch (e) {
       AppLogger.logError('Error setting up order listener', error: e);
       emit(const OrderError('Failed to listen to order updates'));
@@ -192,17 +200,20 @@ class OrderCubit extends Cubit<OrderState> {
       );
 
       _ordersListSubscription?.cancel();
-      _ordersListSubscription =
-          repository.listenToCustomerOrders(customerId).listen(
-        (orders) {
-          AppLogger.logInfo('Customer orders updated: ${orders.length} orders');
-          emit(OrdersLoaded(orders));
-        },
-        onError: (error) {
-          AppLogger.logError('Error in orders stream', error: error);
-          emit(const OrderError('Failed to get orders updates'));
-        },
-      );
+      _ordersListSubscription = repository
+          .listenToCustomerOrders(customerId)
+          .listen(
+            (orders) {
+              AppLogger.logInfo(
+                'Customer orders updated: ${orders.length} orders',
+              );
+              emit(OrdersLoaded(orders));
+            },
+            onError: (error) {
+              AppLogger.logError('Error in orders stream', error: error);
+              emit(const OrderError('Failed to get orders updates'));
+            },
+          );
     } catch (e) {
       AppLogger.logError('Error setting up orders listener', error: e);
       emit(const OrderError('Failed to listen to orders updates'));
@@ -219,7 +230,10 @@ class OrderCubit extends Cubit<OrderState> {
 
       result.fold(
         (failure) {
-          AppLogger.logError('Failed to fetch all orders', error: failure.message);
+          AppLogger.logError(
+            'Failed to fetch all orders',
+            error: failure.message,
+          );
           emit(OrderError(failure.message));
         },
         (orders) {
@@ -263,28 +277,34 @@ class OrderCubit extends Cubit<OrderState> {
       );
 
       _ordersListSubscription?.cancel();
-      _ordersListSubscription =
-          repository.listenToRestaurantOrders(restaurantId).listen(
-        (orders) {
-          AppLogger.logInfo('Restaurant orders updated: ${orders.length} orders');
-          emit(OrdersLoaded(orders));
-        },
-        onError: (error) {
-          AppLogger.logError('Error in restaurant orders stream', error: error);
-          emit(const OrderError('Failed to get orders updates'));
-        },
-      );
+      _ordersListSubscription = repository
+          .listenToRestaurantOrders(restaurantId)
+          .listen(
+            (orders) {
+              AppLogger.logInfo(
+                'Restaurant orders updated: ${orders.length} orders',
+              );
+              emit(OrdersLoaded(orders));
+            },
+            onError: (error) {
+              AppLogger.logError(
+                'Error in restaurant orders stream',
+                error: error,
+              );
+              emit(const OrderError('Failed to get orders updates'));
+            },
+          );
     } catch (e) {
-      AppLogger.logError('Error setting up restaurant orders listener', error: e);
+      AppLogger.logError(
+        'Error setting up restaurant orders listener',
+        error: e,
+      );
       emit(const OrderError('Failed to listen to orders updates'));
     }
   }
 
   /// Update order status
-  Future<void> updateOrderStatus(
-    String orderId,
-    OrderStatus status,
-  ) async {
+  Future<void> updateOrderStatus(String orderId, OrderStatus status) async {
     try {
       emit(OrderUpdating());
       AppLogger.logInfo('Updating order status: $orderId to $status');
@@ -296,9 +316,50 @@ class OrderCubit extends Cubit<OrderState> {
           AppLogger.logError('Failed to update order', error: failure.message);
           emit(OrderError(failure.message));
         },
-        (_) {
+        (_) async {
           AppLogger.logSuccess('Order status updated successfully');
           emit(OrderUpdated());
+
+          // If order is delivered, create wallet transaction
+          if (status == OrderStatus.delivered) {
+            final orderResult = await repository.getOrderById(orderId);
+            orderResult.fold(
+              (_) {}, // Ignore error fetching order for transaction
+              (order) async {
+                if (order.driverId != null) {
+                  // 1. Credit Transaction (Earnings - Delivery Fee)
+                  final creditTransaction = WalletTransaction(
+                    id: DateTime.now().millisecondsSinceEpoch
+                        .toString(), // Simple ID generation
+                    driverId: order.driverId!,
+                    amount: order.deliveryFee,
+                    type: TransactionType.credit,
+                    description:
+                        'Delivery Fee - Order #${order.id.substring(0, 6)}',
+                    date: DateTime.now(),
+                    orderId: order.id,
+                  );
+                  await walletRepository.addTransaction(creditTransaction);
+
+                  // 2. Debit Transaction (Cash Collected) - Only if Cash on Delivery
+                  if (order.paymentMethod == 'cash') {
+                    final debitTransaction = WalletTransaction(
+                      id: '${DateTime.now().millisecondsSinceEpoch}_debit',
+                      driverId: order.driverId!,
+                      amount: order.totalAmount,
+                      type: TransactionType.debit,
+                      description:
+                          'Cash collected - Order #${order.id.substring(0, 6)}',
+                      date: DateTime.now(),
+                      orderId: order.id,
+                    );
+                    await walletRepository.addTransaction(debitTransaction);
+                  }
+                }
+              },
+            );
+          }
+
           // Reload order to get updated state
           getOrderById(orderId);
         },
@@ -354,7 +415,10 @@ class OrderCubit extends Cubit<OrderState> {
 
       result.fold(
         (failure) {
-          AppLogger.logError('Failed to fetch driver orders', error: failure.message);
+          AppLogger.logError(
+            'Failed to fetch driver orders',
+            error: failure.message,
+          );
           emit(OrderError(failure.message));
         },
         (orders) {
@@ -378,7 +442,10 @@ class OrderCubit extends Cubit<OrderState> {
 
       result.fold(
         (failure) {
-          AppLogger.logError('Failed to fetch available orders', error: failure.message);
+          AppLogger.logError(
+            'Failed to fetch available orders',
+            error: failure.message,
+          );
           emit(OrderError(failure.message));
         },
         (orders) {
@@ -395,19 +462,25 @@ class OrderCubit extends Cubit<OrderState> {
   /// Listen to driver orders in real-time
   void listenToDriverOrders(String driverId) {
     try {
-      AppLogger.logInfo('Setting up real-time listener for driver orders: $driverId');
+      AppLogger.logInfo(
+        'Setting up real-time listener for driver orders: $driverId',
+      );
 
       _ordersListSubscription?.cancel();
-      _ordersListSubscription = repository.listenToDriverOrders(driverId).listen(
-        (orders) {
-          AppLogger.logInfo('Driver orders updated: ${orders.length} orders');
-          emit(OrdersLoaded(orders));
-        },
-        onError: (error) {
-          AppLogger.logError('Error in driver orders stream', error: error);
-          emit(const OrderError('Failed to get orders updates'));
-        },
-      );
+      _ordersListSubscription = repository
+          .listenToDriverOrders(driverId)
+          .listen(
+            (orders) {
+              AppLogger.logInfo(
+                'Driver orders updated: ${orders.length} orders',
+              );
+              emit(OrdersLoaded(orders));
+            },
+            onError: (error) {
+              AppLogger.logError('Error in driver orders stream', error: error);
+              emit(const OrderError('Failed to get orders updates'));
+            },
+          );
     } catch (e) {
       AppLogger.logError('Error setting up driver orders listener', error: e);
       emit(const OrderError('Failed to listen to orders updates'));
@@ -422,7 +495,9 @@ class OrderCubit extends Cubit<OrderState> {
       _ordersListSubscription?.cancel();
       _ordersListSubscription = repository.listenToAvailableOrders().listen(
         (orders) {
-          AppLogger.logInfo('Available orders updated: ${orders.length} orders');
+          AppLogger.logInfo(
+            'Available orders updated: ${orders.length} orders',
+          );
           emit(OrdersLoaded(orders));
         },
         onError: (error) {
@@ -431,9 +506,17 @@ class OrderCubit extends Cubit<OrderState> {
         },
       );
     } catch (e) {
-      AppLogger.logError('Error setting up available orders listener', error: e);
+      AppLogger.logError(
+        'Error setting up available orders listener',
+        error: e,
+      );
       emit(const OrderError('Failed to listen to orders updates'));
     }
   }
-}
 
+  void cancelOrdersSubscription() {
+    _ordersListSubscription?.cancel();
+    _ordersListSubscription = null;
+    emit(OrderInitial());
+  }
+}

@@ -17,5 +17,8 @@ abstract class DriverRepository {
   Future<Either<Failure, List<DriverEntity>>> getAllDrivers();
   Future<Either<Failure, DriverEntity>> getDriverById(String driverId);
   Future<Either<Failure, DriverEntity>> getDriverByUserId(String userId);
+  Future<Either<Failure, void>> updateDriverOnlineStatus(
+    String driverId,
+    bool isOnline,
+  );
 }
-

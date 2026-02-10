@@ -59,6 +59,8 @@ class OrderEntity extends Equatable {
   final DateTime updatedAt;
   final String? notes;
   final bool isPickup;
+  final String paymentMethod;
+  final double deliveryFee;
 
   const OrderEntity({
     required this.id,
@@ -81,6 +83,8 @@ class OrderEntity extends Equatable {
     required this.updatedAt,
     this.notes,
     this.isPickup = false,
+    this.paymentMethod = 'cash',
+    this.deliveryFee = 0.0,
   });
 
   // Helper methods
@@ -131,5 +135,7 @@ class OrderEntity extends Equatable {
     updatedAt,
     notes,
     isPickup,
+    paymentMethod,
+    deliveryFee,
   ];
 }

@@ -721,12 +721,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get selectPartnerTypeTitle => 'كيف تود أن تشاركنا؟';
 
   @override
-  String get manageRestaurantSubtitle => 'إدارة طلبات المطعـم والقائمـة';
-
-  @override
-  String get manageMarketSubtitle => 'إدارة مخزون المتجر والطلبات';
-
-  @override
   String get driverSubtitle => 'وصل الطلبات واكسب المال';
 
   @override
@@ -1750,6 +1744,12 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get manageRestaurantSubtitle => 'إدارة طلبات المطعـم والقائمـة';
+
+  @override
+  String get manageMarketSubtitle => 'إدارة مخزون المتجر والطلبات';
+
+  @override
   String get welcomeToRestaurantDashboard => 'مرحباً بكم في لوحة تحكم المطعم';
 
   @override
@@ -2394,4 +2394,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get pendingApprovals => 'الموافقات المعلقة';
+
+  @override
+  String get wallet => 'المحفظة';
+
+  @override
+  String get totalEarnings => 'إجمالي الأرباح';
+
+  @override
+  String get cashCollected => 'النقد المحصل';
+
+  @override
+  String get transactions => 'المعاملات';
 }

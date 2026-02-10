@@ -96,8 +96,11 @@ service cloud.firestore {
       allow read: if isRestaurantOwner() && 
         exists(/databases/$(database)/documents/restaurants/$(resource.data.restaurantId)) &&
         get(/databases/$(database)/documents/restaurants/$(resource.data.restaurantId)).data.ownerId == request.auth.uid;
-      // Drivers can read available orders (status = ready, no driver assigned)
-      allow read: if isDriver() && (resource.data.status == 'ready' || resource.data.driverId == request.auth.uid);
+      // Drivers can read available orders (status = ready, no driver assigned, NOT a pickup)
+      allow read: if isDriver() && (
+        (resource.data.status == 'ready' && (resource.data.driverId == null || resource.data.driverId == '') && resource.data.isPickup == false) || 
+        resource.data.driverId == request.auth.uid
+      );
       // Customers can create orders
       allow create: if isCustomer() && request.resource.data.customerId == request.auth.uid;
       // Customers can cancel their own orders (status update to cancelled)
@@ -109,10 +112,15 @@ service cloud.firestore {
       allow update: if isRestaurantOwner() && 
         exists(/databases/$(database)/documents/restaurants/$(resource.data.restaurantId)) &&
         get(/databases/$(database)/documents/restaurants/$(resource.data.restaurantId)).data.ownerId == request.auth.uid;
-      // Drivers can update orders they're assigned to
+      // Drivers can update orders they're assigned to or pick available ones
       allow update: if isDriver() && (
         resource.data.driverId == request.auth.uid ||
-        (resource.data.status == 'ready' && request.resource.data.driverId == request.auth.uid)
+        (
+          resource.data.status == 'ready' && 
+          resource.data.isPickup == false &&
+          (resource.data.driverId == null || resource.data.driverId == '') && 
+          request.resource.data.driverId == request.auth.uid
+        )
       );
       // Admins have full access
       allow read, write: if isAdmin();

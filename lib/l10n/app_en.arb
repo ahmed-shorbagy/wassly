@@ -263,8 +263,6 @@
   "marketOrders": "Market Orders",
   "marketProducts": "Market Products",
   "selectPartnerTypeTitle": "How do you want to partner with us?",
-  "manageRestaurantSubtitle": "Manage orders, menu, and more",
-  "manageMarketSubtitle": "Manage your market products and orders",
   "driverSubtitle": "Deliver orders and earn money",
   "noMarketProducts": "No Market Products",
   "startByAddingYourFirstMarketProduct": "Start by adding your first market product",
@@ -911,5 +909,9 @@
       }
     }
   },
-  "pendingApprovals": "Pending Approvals"
+  "pendingApprovals": "Pending Approvals",
+  "wallet": "Wallet",
+  "totalEarnings": "Total Earnings",
+  "cashCollected": "Cash Collected",
+  "transactions": "Transactions"
 }

@@ -23,6 +23,9 @@ class DriverModel extends DriverEntity {
     super.totalDeliveries,
     required super.createdAt,
     super.updatedAt,
+    super.walletBalance,
+    super.totalEarnings,
+    super.cashCollected,
   });
 
   factory DriverModel.fromJson(Map<String, dynamic> json) {
@@ -43,12 +46,17 @@ class DriverModel extends DriverEntity {
       address: json['address'],
       isActive: json['isActive'] ?? true,
       isOnline: json['isOnline'] ?? false,
-      rating: json['rating'] != null ? (json['rating'] as num).toDouble() : null,
+      rating: json['rating'] != null
+          ? (json['rating'] as num).toDouble()
+          : null,
       totalDeliveries: json['totalDeliveries'],
       createdAt: (json['createdAt'] as Timestamp).toDate(),
       updatedAt: json['updatedAt'] != null
           ? (json['updatedAt'] as Timestamp).toDate()
           : null,
+      walletBalance: (json['walletBalance'] as num?)?.toDouble() ?? 0.0,
+      totalEarnings: (json['totalEarnings'] as num?)?.toDouble() ?? 0.0,
+      cashCollected: (json['cashCollected'] as num?)?.toDouble() ?? 0.0,
     );
   }
 
@@ -74,6 +82,9 @@ class DriverModel extends DriverEntity {
       totalDeliveries: entity.totalDeliveries,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      walletBalance: entity.walletBalance,
+      totalEarnings: entity.totalEarnings,
+      cashCollected: entity.cashCollected,
     );
   }
 
@@ -99,6 +110,9 @@ class DriverModel extends DriverEntity {
       'totalDeliveries': totalDeliveries,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
+      'walletBalance': walletBalance,
+      'totalEarnings': totalEarnings,
+      'cashCollected': cashCollected,
     };
   }
 
@@ -109,4 +123,3 @@ class DriverModel extends DriverEntity {
     return DriverModel.fromJson({...data, 'id': doc.id});
   }
 }
-

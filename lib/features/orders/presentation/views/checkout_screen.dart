@@ -760,6 +760,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ? null
           : _notesController.text.trim(),
       isPickup: _isPickup,
+      deliveryFee: _getDeliveryFee(),
+      paymentMethod: 'cash',
     );
 
     // Save delivery address to cubit for future use (syncs across all apps)

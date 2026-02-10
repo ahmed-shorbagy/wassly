@@ -104,37 +104,25 @@ class DriverRepositoryImpl implements DriverRepository {
         String? vehicleLicenseUrl;
         String? vehiclePhotoUrl;
 
-        personalImageResult.fold(
-          (failure) => Left(failure),
-          (url) async {
-            personalImageUrl = url;
-            return Right(url);
-          },
-        );
+        personalImageResult.fold((failure) => Left(failure), (url) async {
+          personalImageUrl = url;
+          return Right(url);
+        });
 
-        driverLicenseResult.fold(
-          (failure) => Left(failure),
-          (url) async {
-            driverLicenseUrl = url;
-            return Right(url);
-          },
-        );
+        driverLicenseResult.fold((failure) => Left(failure), (url) async {
+          driverLicenseUrl = url;
+          return Right(url);
+        });
 
-        vehicleLicenseResult.fold(
-          (failure) => Left(failure),
-          (url) async {
-            vehicleLicenseUrl = url;
-            return Right(url);
-          },
-        );
+        vehicleLicenseResult.fold((failure) => Left(failure), (url) async {
+          vehicleLicenseUrl = url;
+          return Right(url);
+        });
 
-        vehiclePhotoResult.fold(
-          (failure) => Left(failure),
-          (url) async {
-            vehiclePhotoUrl = url;
-            return Right(url);
-          },
-        );
+        vehiclePhotoResult.fold((failure) => Left(failure), (url) async {
+          vehiclePhotoUrl = url;
+          return Right(url);
+        });
 
         // Create driver with image URLs
         final driverWithImages = driver.copyWith(
@@ -232,8 +220,7 @@ class DriverRepositoryImpl implements DriverRepository {
   }
 
   @override
-  Future<Either<Failure, DriverEntity>> getDriverByUserId(
-      String userId) async {
+  Future<Either<Failure, DriverEntity>> getDriverByUserId(String userId) async {
     if (await networkInfo.isConnected) {
       try {
         final snapshot = await firestore
@@ -276,5 +263,27 @@ class DriverRepositoryImpl implements DriverRepository {
       return const Left(NetworkFailure('No internet connection'));
     }
   }
-}
 
+  @override
+  Future<Either<Failure, void>> updateDriverOnlineStatus(
+    String driverId,
+    bool isOnline,
+  ) async {
+    if (await networkInfo.isConnected) {
+      try {
+        await firestore
+            .collection(AppConstants.driversCollection)
+            .doc(driverId)
+            .update({'isOnline': isOnline, 'updatedAt': Timestamp.now()});
+        return const Right(null);
+      } on ServerException catch (e) {
+        return Left(ServerFailure(e.message));
+      } catch (e) {
+        AppLogger.logError('Failed to update driver online status', error: e);
+        return Left(ServerFailure('Failed to update status: ${e.toString()}'));
+      }
+    } else {
+      return const Left(NetworkFailure('No internet connection'));
+    }
+  }
+}

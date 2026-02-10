@@ -63,6 +63,8 @@ class OrderModel extends OrderEntity {
     required super.updatedAt,
     super.notes,
     super.isPickup,
+    super.paymentMethod,
+    super.deliveryFee,
   });
 
   factory OrderModel.fromEntity(OrderEntity entity) {
@@ -87,6 +89,8 @@ class OrderModel extends OrderEntity {
       updatedAt: entity.updatedAt,
       notes: entity.notes,
       isPickup: entity.isPickup,
+      paymentMethod: entity.paymentMethod,
+      deliveryFee: entity.deliveryFee,
     );
   }
 
@@ -116,6 +120,8 @@ class OrderModel extends OrderEntity {
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),
       notes: data['notes'] as String?,
       isPickup: data['isPickup'] as bool? ?? false,
+      paymentMethod: data['paymentMethod'] as String? ?? 'cash',
+      deliveryFee: (data['deliveryFee'] as num?)?.toDouble() ?? 0.0,
     );
   }
 
@@ -142,6 +148,8 @@ class OrderModel extends OrderEntity {
       'updatedAt': Timestamp.fromDate(updatedAt),
       'notes': notes,
       'isPickup': isPickup,
+      'paymentMethod': paymentMethod,
+      'deliveryFee': deliveryFee,
     };
   }
 

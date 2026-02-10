@@ -725,13 +725,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectPartnerTypeTitle => 'How do you want to partner with us?';
 
   @override
-  String get manageRestaurantSubtitle =>
-      'Manage your restaurant orders and menu';
-
-  @override
-  String get manageMarketSubtitle => 'Manage your market inventory and orders';
-
-  @override
   String get driverSubtitle => 'Deliver orders and earn money';
 
   @override
@@ -1760,6 +1753,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get manageRestaurantSubtitle =>
+      'Manage your restaurant orders and menu';
+
+  @override
+  String get manageMarketSubtitle => 'Manage your market inventory and orders';
+
+  @override
   String get welcomeToRestaurantDashboard => 'Welcome to Restaurant Dashboard';
 
   @override
@@ -2410,4 +2410,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pendingApprovals => 'Pending Approvals';
+
+  @override
+  String get wallet => 'Wallet';
+
+  @override
+  String get totalEarnings => 'Total Earnings';
+
+  @override
+  String get cashCollected => 'Cash Collected';
+
+  @override
+  String get transactions => 'Transactions';
 }

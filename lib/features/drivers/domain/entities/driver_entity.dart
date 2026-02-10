@@ -21,6 +21,9 @@ class DriverEntity extends Equatable {
   final int? totalDeliveries;
   final DateTime createdAt;
   final DateTime? updatedAt;
+  final double walletBalance;
+  final double totalEarnings;
+  final double cashCollected;
 
   const DriverEntity({
     required this.id,
@@ -43,31 +46,37 @@ class DriverEntity extends Equatable {
     this.totalDeliveries,
     required this.createdAt,
     this.updatedAt,
+    this.walletBalance = 0.0,
+    this.totalEarnings = 0.0,
+    this.cashCollected = 0.0,
   });
 
   @override
   List<Object?> get props => [
-        id,
-        userId,
-        name,
-        email,
-        phone,
-        personalImageUrl,
-        driverLicenseUrl,
-        vehicleLicenseUrl,
-        vehiclePhotoUrl,
-        vehicleType,
-        vehicleModel,
-        vehicleColor,
-        vehiclePlateNumber,
-        address,
-        isActive,
-        isOnline,
-        rating,
-        totalDeliveries,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    userId,
+    name,
+    email,
+    phone,
+    personalImageUrl,
+    driverLicenseUrl,
+    vehicleLicenseUrl,
+    vehiclePhotoUrl,
+    vehicleType,
+    vehicleModel,
+    vehicleColor,
+    vehiclePlateNumber,
+    address,
+    isActive,
+    isOnline,
+    rating,
+    totalDeliveries,
+    createdAt,
+    updatedAt,
+    walletBalance,
+    totalEarnings,
+    cashCollected,
+  ];
 
   DriverEntity copyWith({
     String? id,
@@ -90,6 +99,9 @@ class DriverEntity extends Equatable {
     int? totalDeliveries,
     DateTime? createdAt,
     DateTime? updatedAt,
+    double? walletBalance,
+    double? totalEarnings,
+    double? cashCollected,
   }) {
     return DriverEntity(
       id: id ?? this.id,
@@ -112,7 +124,9 @@ class DriverEntity extends Equatable {
       totalDeliveries: totalDeliveries ?? this.totalDeliveries,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      walletBalance: walletBalance ?? this.walletBalance,
+      totalEarnings: totalEarnings ?? this.totalEarnings,
+      cashCollected: cashCollected ?? this.cashCollected,
     );
   }
 }
-

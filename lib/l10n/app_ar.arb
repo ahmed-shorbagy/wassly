@@ -249,8 +249,6 @@
   "marketOrders": "طلبات المتجر",
   "marketProducts": "منتجات الماركت",
   "selectPartnerTypeTitle": "كيف تود أن تشاركنا؟",
-  "manageRestaurantSubtitle": "إدارة الطلبات والقائمة والمزيد",
-  "manageMarketSubtitle": "إدارة منتجات وتصنيفات المتجر",
   "driverSubtitle": "وصل الطلبات واكسب المال",
   "noMarketProducts": "لا توجد منتجات سوق",
   "startByAddingYourFirstMarketProduct": "ابدأ بإضافة منتج الماركت الأول",
@@ -893,5 +891,9 @@
       }
     }
   },
-  "pendingApprovals": "الموافقات المعلقة"
+  "pendingApprovals": "الموافقات المعلقة",
+  "wallet": "المحفظة",
+  "totalEarnings": "إجمالي الأرباح",
+  "cashCollected": "النقد المحصل",
+  "transactions": "المعاملات"
 }

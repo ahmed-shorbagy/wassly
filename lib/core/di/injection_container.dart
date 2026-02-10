@@ -64,6 +64,9 @@ import '../../features/articles/presentation/cubits/article_cubit.dart';
 import '../../features/support/domain/repositories/support_repository.dart';
 import '../../features/support/data/repositories/support_repository_impl.dart';
 import '../../features/support/presentation/cubits/support_cubit.dart';
+import '../../features/wallet/data/repositories/wallet_repository_impl.dart';
+import '../../features/wallet/domain/repositories/wallet_repository.dart';
+import '../../features/wallet/presentation/cubits/wallet_cubit.dart';
 
 import '../network/network_info.dart';
 import '../network/supabase_service.dart';
@@ -96,6 +99,7 @@ class InjectionContainer {
   late final DeliveryAddressRepository _deliveryAddressRepository;
   late final ArticleRepository _articleRepository;
   late final SupportRepository _supportRepository;
+  late final WalletRepository _walletRepository;
   late final NotificationService _notificationService;
   late final NotificationSenderService _notificationSenderService;
   late final AuthCubit _authCubit;
@@ -175,6 +179,8 @@ class InjectionContainer {
 
     _supportRepository = SupportRepositoryImpl(firestore: _firestore);
 
+    _walletRepository = WalletRepositoryImpl(_firestore);
+
     // Blocs/Cubits - Initialize singletons
     _authCubit = AuthCubit(
       loginUseCase: LoginUseCase(_authRepository),
@@ -192,6 +198,7 @@ class InjectionContainer {
   NotificationService get notificationService => _notificationService;
   NotificationSenderService get notificationSenderService =>
       _notificationSenderService;
+  OrderRepository get orderRepository => _orderRepository;
   AuthCubit get authCubit => _authCubit;
 
   List<BlocProvider> getBlocProviders() {
@@ -237,6 +244,7 @@ class InjectionContainer {
           getOrderByIdUseCase: GetOrderByIdUseCase(_orderRepository),
           cancelOrderUseCase: CancelOrderUseCase(_orderRepository),
           repository: _orderRepository,
+          walletRepository: _walletRepository,
         ),
       ),
       BlocProvider<ProductManagementCubit>(
@@ -298,6 +306,7 @@ class InjectionContainer {
       BlocProvider<SupportCubit>(
         create: (_) => SupportCubit(_supportRepository),
       ),
+      BlocProvider<WalletCubit>(create: (_) => WalletCubit(_walletRepository)),
     ];
   }
 
