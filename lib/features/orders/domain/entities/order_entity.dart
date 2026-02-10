@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../features/restaurants/domain/entities/product_options.dart';
 
 enum OrderStatus {
   pending,
@@ -17,6 +18,7 @@ class OrderItemEntity extends Equatable {
   final double price;
   final int quantity;
   final String? imageUrl;
+  final List<ProductOption> selectedOptions;
 
   const OrderItemEntity({
     required this.productId,
@@ -24,9 +26,16 @@ class OrderItemEntity extends Equatable {
     required this.price,
     required this.quantity,
     this.imageUrl,
+    this.selectedOptions = const [],
   });
 
-  double get totalPrice => price * quantity;
+  double get totalPrice {
+    final optionsPrice = selectedOptions.fold(
+      0.0,
+      (sum, option) => sum + option.priceModifier,
+    );
+    return (price + optionsPrice) * quantity;
+  }
 
   @override
   List<Object?> get props => [
@@ -35,6 +44,7 @@ class OrderItemEntity extends Equatable {
     price,
     quantity,
     imageUrl,
+    selectedOptions,
   ];
 }
 

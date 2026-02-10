@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../features/restaurants/domain/entities/product_options.dart';
 import '../../domain/entities/order_entity.dart';
 
 class OrderItemModel extends OrderItemEntity {
@@ -8,6 +9,7 @@ class OrderItemModel extends OrderItemEntity {
     required super.price,
     required super.quantity,
     super.imageUrl,
+    super.selectedOptions = const [],
   });
 
   factory OrderItemModel.fromEntity(OrderItemEntity entity) {
@@ -17,6 +19,7 @@ class OrderItemModel extends OrderItemEntity {
       price: entity.price,
       quantity: entity.quantity,
       imageUrl: entity.imageUrl,
+      selectedOptions: entity.selectedOptions,
     );
   }
 
@@ -27,6 +30,11 @@ class OrderItemModel extends OrderItemEntity {
       price: (json['price'] as num).toDouble(),
       quantity: json['quantity'] as int,
       imageUrl: json['imageUrl'] as String?,
+      selectedOptions:
+          (json['selectedOptions'] as List<dynamic>?)
+              ?.map((e) => ProductOption.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
     );
   }
 
@@ -37,6 +45,7 @@ class OrderItemModel extends OrderItemEntity {
       'price': price,
       'quantity': quantity,
       'imageUrl': imageUrl,
+      'selectedOptions': selectedOptions.map((e) => e.toJson()).toList(),
     };
   }
 }

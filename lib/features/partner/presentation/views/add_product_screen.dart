@@ -12,6 +12,7 @@ import '../../../../features/restaurants/presentation/cubits/food_category_cubit
 import '../../../../features/restaurants/domain/entities/food_category_entity.dart';
 import '../../../../features/admin/presentation/cubits/admin_product_cubit.dart';
 import '../../../../features/restaurants/presentation/cubits/restaurant_cubit.dart';
+import '../../../../features/restaurants/domain/entities/product_options.dart';
 
 class AddProductScreen extends StatefulWidget {
   const AddProductScreen({super.key});
@@ -30,6 +31,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
   bool _isAvailable = true;
   String? _selectedCategoryId;
   String? _restaurantId;
+  final List<ProductOptionGroup> _optionGroups = [];
 
   @override
   void initState() {
@@ -170,6 +172,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       categoryId: _selectedCategoryId,
       imageFile: _selectedImage!,
       isAvailable: _isAvailable,
+      optionGroups: _optionGroups,
     );
   }
 
@@ -260,6 +263,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   value: _isAvailable,
                   onChanged: (val) => setState(() => _isAvailable = val),
                 ),
+
+                const SizedBox(height: 24),
+                _buildOptionsSection(l10n),
 
                 const SizedBox(height: 32),
                 ElevatedButton(
@@ -388,6 +394,232 @@ class _AddProductScreenState extends State<AddProductScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildOptionsSection(AppLocalizations l10n) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              l10n.productOptions,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            TextButton.icon(
+              onPressed: _addOptionGroup,
+              icon: const Icon(Icons.add),
+              label: Text(l10n.addGroup),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (_optionGroups.isEmpty)
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Text(
+                l10n.noOptionsAdded,
+                style: const TextStyle(color: Colors.grey),
+              ),
+            ),
+          )
+        else
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _optionGroups.length,
+            separatorBuilder: (context, index) => const SizedBox(height: 16),
+            itemBuilder: (context, index) {
+              return _buildOptionGroupItem(index, l10n);
+            },
+          ),
+      ],
+    );
+  }
+
+  void _addOptionGroup() {
+    setState(() {
+      _optionGroups.add(
+        ProductOptionGroup(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          name: '',
+          allowMultiple: false,
+          isRequired: false,
+          options: [],
+        ),
+      );
+    });
+  }
+
+  Widget _buildOptionGroupItem(int groupIndex, AppLocalizations l10n) {
+    final group = _optionGroups[groupIndex];
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade300),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    initialValue: group.name,
+                    decoration: InputDecoration(
+                      labelText: l10n.groupName,
+                      hintText: 'e.g., Size, Addons',
+                      isDense: true,
+                    ),
+                    onChanged: (val) {
+                      _optionGroups[groupIndex] = group.copyWith(name: val);
+                    },
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                  onPressed: () => setState(() {
+                    _optionGroups.removeAt(groupIndex);
+                  }),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: CheckboxListTile(
+                    title: Text(l10n.multipleSelections),
+                    value: group.allowMultiple,
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    onChanged: (val) {
+                      setState(() {
+                        _optionGroups[groupIndex] = group.copyWith(
+                          allowMultiple: val ?? false,
+                        );
+                      });
+                    },
+                  ),
+                ),
+                Expanded(
+                  child: CheckboxListTile(
+                    title: Text(l10n.required),
+                    value: group.isRequired,
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    onChanged: (val) {
+                      setState(() {
+                        _optionGroups[groupIndex] = group.copyWith(
+                          isRequired: val ?? false,
+                        );
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const Divider(),
+            _buildOptionsList(groupIndex, l10n),
+            TextButton.icon(
+              onPressed: () => _addOptionToGroup(groupIndex),
+              icon: const Icon(Icons.add_circle_outline),
+              label: Text(l10n.addOption),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _addOptionToGroup(int groupIndex) {
+    setState(() {
+      final group = _optionGroups[groupIndex];
+      final newOptions = List<ProductOption>.from(group.options)
+        ..add(
+          ProductOption(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            name: '',
+            priceModifier: 0,
+          ),
+        );
+      _optionGroups[groupIndex] = group.copyWith(options: newOptions);
+    });
+  }
+
+  Widget _buildOptionsList(int groupIndex, AppLocalizations l10n) {
+    final group = _optionGroups[groupIndex];
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: group.options.length,
+      itemBuilder: (context, optionIndex) {
+        final option = group.options[optionIndex];
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: TextFormField(
+                  initialValue: option.name,
+                  decoration: InputDecoration(
+                    labelText: l10n.optionName,
+                    isDense: true,
+                  ),
+                  onChanged: (val) {
+                    final newOptions = List<ProductOption>.from(group.options);
+                    newOptions[optionIndex] = option.copyWith(name: val);
+                    _optionGroups[groupIndex] = group.copyWith(
+                      options: newOptions,
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                flex: 2,
+                child: TextFormField(
+                  initialValue: option.priceModifier.toString(),
+                  decoration: InputDecoration(
+                    labelText: l10n.price,
+                    isDense: true,
+                  ),
+                  keyboardType: TextInputType.number,
+                  onChanged: (val) {
+                    final price = double.tryParse(val) ?? 0;
+                    final newOptions = List<ProductOption>.from(group.options);
+                    newOptions[optionIndex] = option.copyWith(
+                      priceModifier: price,
+                    );
+                    _optionGroups[groupIndex] = group.copyWith(
+                      options: newOptions,
+                    );
+                  },
+                ),
+              ),
+              IconButton(
+                icon: const Icon(
+                  Icons.remove_circle_outline,
+                  color: Colors.grey,
+                ),
+                onPressed: () => setState(() {
+                  final newOptions = List<ProductOption>.from(group.options)
+                    ..removeAt(optionIndex);
+                  _optionGroups[groupIndex] = group.copyWith(
+                    options: newOptions,
+                  );
+                }),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

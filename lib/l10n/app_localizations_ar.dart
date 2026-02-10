@@ -335,6 +335,30 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addProduct => 'إضافة منتج';
 
   @override
+  String get productOptions => 'خيارات المنتج';
+
+  @override
+  String get addGroup => 'إضافة مجموعة';
+
+  @override
+  String get noOptionsAdded => 'لم يتم إضافة خيارات بعد';
+
+  @override
+  String get groupName => 'اسم المجموعة';
+
+  @override
+  String get multipleSelections => 'اختيارات متعددة';
+
+  @override
+  String get addOption => 'إضافة خيار';
+
+  @override
+  String get optionName => 'اسم الخيار';
+
+  @override
+  String get price => 'السعر';
+
+  @override
   String get editProduct => 'تعديل منتج';
 
   @override

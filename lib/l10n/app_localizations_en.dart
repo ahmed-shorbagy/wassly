@@ -335,6 +335,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addProduct => 'Add Product';
 
   @override
+  String get productOptions => 'Product Options';
+
+  @override
+  String get addGroup => 'Add Group';
+
+  @override
+  String get noOptionsAdded => 'No options added yet';
+
+  @override
+  String get groupName => 'Group Name';
+
+  @override
+  String get multipleSelections => 'Multiple Selections';
+
+  @override
+  String get addOption => 'Add Option';
+
+  @override
+  String get optionName => 'Option Name';
+
+  @override
+  String get price => 'Price';
+
+  @override
   String get editProduct => 'Edit Product';
 
   @override

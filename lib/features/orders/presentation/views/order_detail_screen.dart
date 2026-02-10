@@ -393,6 +393,17 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
+                        if (item.selectedOptions.isNotEmpty) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            item.selectedOptions.map((e) => e.name).join(', '),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: 4),
                         Text(
                           '${item.quantity}x ${item.price.toStringAsFixed(2)} ${AppLocalizations.of(context)?.currencySymbol ?? 'ج.م'}',

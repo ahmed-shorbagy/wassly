@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'product_options.dart';
 
 class ProductEntity extends Equatable {
   final String id;
@@ -11,6 +12,7 @@ class ProductEntity extends Equatable {
   final String? category; // Keep for backward compatibility, will be deprecated
   final bool isAvailable;
   final DateTime createdAt;
+  final List<ProductOptionGroup> optionGroups;
 
   const ProductEntity({
     required this.id,
@@ -23,6 +25,7 @@ class ProductEntity extends Equatable {
     this.category,
     required this.isAvailable,
     required this.createdAt,
+    this.optionGroups = const [],
   });
 
   @override
@@ -37,5 +40,6 @@ class ProductEntity extends Equatable {
     category,
     isAvailable,
     createdAt,
+    optionGroups,
   ];
 }

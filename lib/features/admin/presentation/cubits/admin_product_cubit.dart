@@ -4,6 +4,7 @@ import 'package:equatable/equatable.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/constants/supabase_constants.dart';
 import '../../../restaurants/domain/entities/product_entity.dart';
+import '../../../restaurants/domain/entities/product_options.dart';
 import '../../../restaurants/domain/repositories/restaurant_owner_repository.dart';
 
 part 'admin_product_state.dart';
@@ -45,6 +46,7 @@ class AdminProductCubit extends Cubit<AdminProductState> {
     String? category, // Keep for backward compatibility
     required File? imageFile,
     bool isAvailable = true,
+    List<ProductOptionGroup> optionGroups = const [],
   }) async {
     try {
       emit(AdminProductLoading());
@@ -91,6 +93,7 @@ class AdminProductCubit extends Cubit<AdminProductState> {
         category: category, // Keep for backward compatibility
         isAvailable: isAvailable,
         createdAt: DateTime.now(),
+        optionGroups: optionGroups,
       );
 
       final result = await repository.addProduct(product);
@@ -122,6 +125,7 @@ class AdminProductCubit extends Cubit<AdminProductState> {
     String? category, // Keep for backward compatibility
     File? imageFile,
     bool? isAvailable,
+    List<ProductOptionGroup>? optionGroups,
   }) async {
     try {
       emit(AdminProductLoading());
@@ -169,6 +173,7 @@ class AdminProductCubit extends Cubit<AdminProductState> {
             category ?? product.category, // Keep for backward compatibility
         isAvailable: isAvailable ?? product.isAvailable,
         createdAt: product.createdAt,
+        optionGroups: optionGroups ?? product.optionGroups,
       );
 
       final result = await repository.updateProduct(updatedProduct);

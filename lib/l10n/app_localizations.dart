@@ -734,6 +734,54 @@ abstract class AppLocalizations {
   /// **'Add Product'**
   String get addProduct;
 
+  /// No description provided for @productOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Product Options'**
+  String get productOptions;
+
+  /// No description provided for @addGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Group'**
+  String get addGroup;
+
+  /// No description provided for @noOptionsAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'No options added yet'**
+  String get noOptionsAdded;
+
+  /// No description provided for @groupName.
+  ///
+  /// In en, this message translates to:
+  /// **'Group Name'**
+  String get groupName;
+
+  /// No description provided for @multipleSelections.
+  ///
+  /// In en, this message translates to:
+  /// **'Multiple Selections'**
+  String get multipleSelections;
+
+  /// No description provided for @addOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Option'**
+  String get addOption;
+
+  /// No description provided for @optionName.
+  ///
+  /// In en, this message translates to:
+  /// **'Option Name'**
+  String get optionName;
+
+  /// No description provided for @price.
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get price;
+
   /// No description provided for @editProduct.
   ///
   /// In en, this message translates to:

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/entities/product_entity.dart';
+import '../../domain/entities/product_options.dart';
 import '../../../../core/utils/logger.dart';
 
 class ProductModel extends ProductEntity {
@@ -14,6 +15,7 @@ class ProductModel extends ProductEntity {
     super.category,
     required super.isAvailable,
     required super.createdAt,
+    super.optionGroups = const [],
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
@@ -69,6 +71,11 @@ class ProductModel extends ProductEntity {
       category: json['category'] as String?, // Keep for backward compatibility
       isAvailable: json['isAvailable'] as bool? ?? true,
       createdAt: parseDate(json['createdAt']),
+      optionGroups:
+          (json['optionGroups'] as List<dynamic>?)
+              ?.map((e) => ProductOptionGroup.fromJson(e))
+              .toList() ??
+          [],
     );
   }
 
@@ -84,6 +91,7 @@ class ProductModel extends ProductEntity {
       category: entity.category,
       isAvailable: entity.isAvailable,
       createdAt: entity.createdAt,
+      optionGroups: entity.optionGroups,
     );
   }
 
@@ -99,6 +107,7 @@ class ProductModel extends ProductEntity {
       'category': category, // Keep for backward compatibility
       'isAvailable': isAvailable,
       'createdAt': Timestamp.fromDate(createdAt),
+      'optionGroups': optionGroups.map((e) => e.toJson()).toList(),
     };
   }
 
@@ -129,6 +138,7 @@ class ProductModel extends ProductEntity {
     String? category,
     bool? isAvailable,
     DateTime? createdAt,
+    List<ProductOptionGroup>? optionGroups,
   }) {
     return ProductModel(
       id: id ?? this.id,
@@ -141,6 +151,7 @@ class ProductModel extends ProductEntity {
       category: category ?? this.category,
       isAvailable: isAvailable ?? this.isAvailable,
       createdAt: createdAt ?? this.createdAt,
+      optionGroups: optionGroups ?? this.optionGroups,
     );
   }
 }
