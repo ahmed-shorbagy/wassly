@@ -530,59 +530,53 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   }
 
   Widget _buildOrderSummary(OrderEntity order) {
+    final l10n = AppLocalizations.of(context);
+    final subtotal = order.totalAmount - order.deliveryFee;
+
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            AppLocalizations.of(context)?.orderSummary ?? 'ملخص الطلب',
+            l10n?.orderSummary ?? 'ملخص الطلب',
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                AppLocalizations.of(context)?.orderId ?? 'رقم الطلب',
-                style: const TextStyle(fontSize: 14),
-              ),
-              Text(
-                '#${order.id.substring(0, 8).toUpperCase()}',
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
+          _buildSummaryRow(
+            l10n?.orderId ?? 'رقم الطلب',
+            '#${order.id.substring(0, 8).toUpperCase()}',
+          ),
+          _buildSummaryRow(
+            l10n?.orderTime ?? 'وقت الطلب',
+            DateFormat('MMM dd, yyyy • HH:mm').format(order.createdAt),
+          ),
+          _buildSummaryRow(
+            l10n?.paymentMethod ?? 'طريقة الدفع',
+            order.paymentMethod.toUpperCase(),
+          ),
+          const Divider(height: 24),
+          _buildSummaryRow(
+            l10n?.subtotal ?? 'المجموع الفرعي',
+            '${subtotal.toStringAsFixed(2)} ${l10n?.currencySymbol ?? 'ج.م'}',
+          ),
+          _buildSummaryRow(
+            l10n?.deliveryFee ?? 'رسوم التوصيل',
+            '${order.deliveryFee.toStringAsFixed(2)} ${l10n?.currencySymbol ?? 'ج.م'}',
           ),
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                AppLocalizations.of(context)?.orderTime ?? 'وقت الطلب',
-                style: const TextStyle(fontSize: 14),
-              ),
-              Text(
-                DateFormat('MMM dd, yyyy • HH:mm').format(order.createdAt),
-                style: const TextStyle(fontSize: 14),
-              ),
-            ],
-          ),
-          const Divider(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                AppLocalizations.of(context)?.totalAmount ?? 'المجموع الكلي',
+                l10n?.totalAmount ?? 'المجموع الكلي',
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
-                '${order.totalAmount.toStringAsFixed(2)} ${AppLocalizations.of(context)?.currencySymbol ?? 'ج.م'}',
+                '${order.totalAmount.toStringAsFixed(2)} ${l10n?.currencySymbol ?? 'ج.م'}',
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -590,6 +584,25 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+          ),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ],
       ),

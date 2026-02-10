@@ -906,5 +906,43 @@
   "wallet": "المحفظة",
   "totalEarnings": "إجمالي الأرباح",
   "cashCollected": "النقد المحصل",
-  "transactions": "المعاملات"
+  "transactions": "المعاملات",
+  "driverBonusSettings": "إعدادات مكافأة السائق",
+  "minMonthlyDeliveries": "الحد الأدنى للتوصيلات الشهرية",
+  "bonusAmount": "مبلغ المكافأة",
+  "distributeMonthlyBonuses": "توزيع مكافآت الشهر الماضي",
+  "bonusDistributionSuccess": "تم توزيع المكافآت بنجاح",
+  "bonusEnabled": "تفعيل ميزة المكافآت",
+  "bonusTarget": "هدف المكافأة",
+  "ordersDeliveriedThisMonth": "تم توصيل {count} طلب هذا الشهر",
+  "@ordersDeliveriedThisMonth": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bonusProgress": "تقدم المكافأة: {current}/{target} طلب",
+  "@bonusProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "reachTargetForBonus": "صل إلى {target} طلب هذا الشهر للحصول على مكافأة {amount}!",
+  "@reachTargetForBonus": {
+    "placeholders": {
+      "target": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "confirm": "تأكيد"
 }

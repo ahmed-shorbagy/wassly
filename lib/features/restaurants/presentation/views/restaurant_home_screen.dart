@@ -21,6 +21,7 @@ class RestaurantHomeScreen extends StatefulWidget {
 
 class _RestaurantHomeScreenState extends State<RestaurantHomeScreen> {
   RestaurantEntity? _myRestaurant;
+  List<OrderEntity> _cachedOrders = [];
 
   @override
   void initState() {
@@ -88,10 +89,23 @@ class _RestaurantHomeScreenState extends State<RestaurantHomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      body: BlocListener<RestaurantCubit, RestaurantState>(
-        listener: (context, state) {
-          _updateMyRestaurant(state);
-        },
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<RestaurantCubit, RestaurantState>(
+            listener: (context, state) {
+              _updateMyRestaurant(state);
+            },
+          ),
+          BlocListener<OrderCubit, OrderState>(
+            listener: (context, state) {
+              if (state is OrdersLoaded) {
+                setState(() {
+                  _cachedOrders = state.orders;
+                });
+              }
+            },
+          ),
+        ],
         child: SingleChildScrollView(
           child: Column(
             children: [
@@ -341,11 +355,11 @@ class _RestaurantHomeScreenState extends State<RestaurantHomeScreen> {
         int pendingCount = 0;
         int activeCount = 0;
 
-        if (state is OrdersLoaded) {
-          pendingCount = state.orders
+        if (_cachedOrders.isNotEmpty) {
+          pendingCount = _cachedOrders
               .where((o) => o.status == OrderStatus.pending)
               .length;
-          activeCount = state.orders
+          activeCount = _cachedOrders
               .where(
                 (o) =>
                     o.status == OrderStatus.accepted ||
@@ -356,7 +370,7 @@ class _RestaurantHomeScreenState extends State<RestaurantHomeScreen> {
 
           // Calculate today's earnings
           final now = DateTime.now();
-          final todayOrders = state.orders.where(
+          final todayOrders = _cachedOrders.where(
             (o) =>
                 o.createdAt.year == now.year &&
                 o.createdAt.month == now.month &&

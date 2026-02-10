@@ -21,6 +21,7 @@ class MarketHomeScreen extends StatefulWidget {
 
 class _MarketHomeScreenState extends State<MarketHomeScreen> {
   RestaurantEntity? _myMarket;
+  List<OrderEntity> _cachedOrders = [];
 
   void _toggleStatus(bool value) {
     if (_myMarket != null) {
@@ -35,14 +36,29 @@ class _MarketHomeScreenState extends State<MarketHomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      body: BlocListener<RestaurantCubit, RestaurantState>(
-        listener: (context, state) {
-          if (state is RestaurantsLoaded && state.restaurants.isNotEmpty) {
-            final restaurantId = state.restaurants.first.id;
-            _myMarket = state.restaurants.first;
-            context.read<OrderCubit>().listenToRestaurantOrders(restaurantId);
-          }
-        },
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<RestaurantCubit, RestaurantState>(
+            listener: (context, state) {
+              if (state is RestaurantsLoaded && state.restaurants.isNotEmpty) {
+                final restaurantId = state.restaurants.first.id;
+                _myMarket = state.restaurants.first;
+                context.read<OrderCubit>().listenToRestaurantOrders(
+                  restaurantId,
+                );
+              }
+            },
+          ),
+          BlocListener<OrderCubit, OrderState>(
+            listener: (context, state) {
+              if (state is OrdersLoaded) {
+                setState(() {
+                  _cachedOrders = state.orders;
+                });
+              }
+            },
+          ),
+        ],
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
@@ -170,11 +186,11 @@ class _MarketHomeScreenState extends State<MarketHomeScreen> {
         int pendingCount = 0;
         int activeCount = 0;
 
-        if (state is OrdersLoaded) {
-          pendingCount = state.orders
+        if (_cachedOrders.isNotEmpty) {
+          pendingCount = _cachedOrders
               .where((o) => o.status == OrderStatus.pending)
               .length;
-          activeCount = state.orders
+          activeCount = _cachedOrders
               .where(
                 (o) =>
                     o.status == OrderStatus.accepted ||
@@ -185,7 +201,7 @@ class _MarketHomeScreenState extends State<MarketHomeScreen> {
 
           // Calculate today's earnings
           final now = DateTime.now();
-          final todayOrders = state.orders.where(
+          final todayOrders = _cachedOrders.where(
             (o) =>
                 o.createdAt.year == now.year &&
                 o.createdAt.month == now.month &&

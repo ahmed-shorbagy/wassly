@@ -2455,4 +2455,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transactions => 'Transactions';
+
+  @override
+  String get driverBonusSettings => 'Driver Bonus Settings';
+
+  @override
+  String get bonusEnabled => 'Enable Bonus System';
+
+  @override
+  String get minMonthlyDeliveries => 'Min Monthly Deliveries';
+
+  @override
+  String get bonusAmount => 'Bonus Amount';
+
+  @override
+  String get distributeMonthlyBonuses => 'Distribute Monthly Bonuses';
+
+  @override
+  String get bonusDistributionSuccess =>
+      'Monthly bonuses distributed successfully';
+
+  @override
+  String reachTargetForBonus(int target, String amount) {
+    return 'Reach $target orders this month for $amount bonus!';
+  }
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
+  String get paymentMethod => 'Payment Method';
 }

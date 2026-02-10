@@ -2439,4 +2439,33 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get transactions => 'المعاملات';
+
+  @override
+  String get driverBonusSettings => 'إعدادات مكافأة السائق';
+
+  @override
+  String get bonusEnabled => 'تفعيل نظام المكافآت';
+
+  @override
+  String get minMonthlyDeliveries => 'الحد الأدنى للطلبات الشهرية';
+
+  @override
+  String get bonusAmount => 'قيمة المكافأة';
+
+  @override
+  String get distributeMonthlyBonuses => 'توزيع المكافآت الشهرية';
+
+  @override
+  String get bonusDistributionSuccess => 'تم توزيع المكافآت الشهرية بنجاح';
+
+  @override
+  String reachTargetForBonus(int target, String amount) {
+    return 'صل إلى $target طلب هذا الشهر للحصول على مكافأة $amount!';
+  }
+
+  @override
+  String get confirm => 'تأكيد';
+
+  @override
+  String get paymentMethod => 'طريقة الدفع';
 }

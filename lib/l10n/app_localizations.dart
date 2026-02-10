@@ -4813,6 +4813,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Transactions'**
   String get transactions;
+
+  /// No description provided for @driverBonusSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver Bonus Settings'**
+  String get driverBonusSettings;
+
+  /// No description provided for @bonusEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Bonus System'**
+  String get bonusEnabled;
+
+  /// No description provided for @minMonthlyDeliveries.
+  ///
+  /// In en, this message translates to:
+  /// **'Min Monthly Deliveries'**
+  String get minMonthlyDeliveries;
+
+  /// No description provided for @bonusAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Bonus Amount'**
+  String get bonusAmount;
+
+  /// No description provided for @distributeMonthlyBonuses.
+  ///
+  /// In en, this message translates to:
+  /// **'Distribute Monthly Bonuses'**
+  String get distributeMonthlyBonuses;
+
+  /// No description provided for @bonusDistributionSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly bonuses distributed successfully'**
+  String get bonusDistributionSuccess;
+
+  /// No description provided for @reachTargetForBonus.
+  ///
+  /// In en, this message translates to:
+  /// **'Reach {target} orders this month for {amount} bonus!'**
+  String reachTargetForBonus(int target, String amount);
+
+  /// No description provided for @confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
+
+  /// No description provided for @paymentMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Method'**
+  String get paymentMethod;
 }
 
 class _AppLocalizationsDelegate

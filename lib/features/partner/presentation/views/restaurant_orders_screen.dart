@@ -25,6 +25,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String? _restaurantId;
+  List<OrderEntity> _cachedOrders = [];
 
   @override
   void initState() {
@@ -82,11 +83,11 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen>
           }
         },
         builder: (context, restaurantState) {
-          if (restaurantState is RestaurantLoading) {
+          if (restaurantState is RestaurantLoading && _restaurantId == null) {
             return const LoadingWidget();
           }
 
-          if (restaurantState is RestaurantError) {
+          if (restaurantState is RestaurantError && _restaurantId == null) {
             return ErrorDisplayWidget(
               message: restaurantState.message,
               onRetry: _loadRestaurantAndOrders,
@@ -97,26 +98,33 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen>
             return Center(child: Text(l10n.restaurantNotFound));
           }
 
-          return BlocBuilder<OrderCubit, OrderState>(
+          return BlocConsumer<OrderCubit, OrderState>(
+            listener: (context, orderState) {
+              if (orderState is OrdersLoaded) {
+                setState(() {
+                  _cachedOrders = orderState.orders;
+                });
+              }
+            },
             builder: (context, orderState) {
-              if (orderState is OrderLoading) {
+              if (orderState is OrderLoading && _cachedOrders.isEmpty) {
                 return const LoadingWidget();
               }
 
-              if (orderState is OrderError) {
+              if (orderState is OrderError && _cachedOrders.isEmpty) {
                 return ErrorDisplayWidget(
                   message: orderState.message,
                   onRetry: () => _listenToOrders(_restaurantId!),
                 );
               }
 
-              if (orderState is OrdersLoaded) {
+              if (_cachedOrders.isNotEmpty) {
                 return TabBarView(
                   controller: _tabController,
                   children: [
-                    _buildPendingOrders(orderState.orders, l10n),
-                    _buildActiveOrders(orderState.orders, l10n),
-                    _buildOrderHistory(orderState.orders, l10n),
+                    _buildPendingOrders(_cachedOrders, l10n),
+                    _buildActiveOrders(_cachedOrders, l10n),
+                    _buildOrderHistory(_cachedOrders, l10n),
                   ],
                 );
               }

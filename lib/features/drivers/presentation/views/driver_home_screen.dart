@@ -28,6 +28,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
   // Stats
   double _todayEarnings = 0;
   int _todayDeliveries = 0;
+  int _monthlyDeliveries = 0;
+  int _bonusTarget = 50;
+  double _bonusAmount = 100.0;
+  bool _bonusEnabled = false;
 
   // Active Order (Assigned to driver but not completed)
   OrderEntity? _activeOrder;
@@ -36,6 +40,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
   void initState() {
     super.initState();
     _loadDriverData();
+    context.read<DriverCubit>().getBonusSettings();
   }
 
   Future<void> _loadDriverData() async {
@@ -50,8 +55,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
 
       // Load driver profile from drivers collection
       context.read<DriverCubit>().getDriverByUserId(authState.user.id);
-
-      await _refreshDashboard();
     }
   }
 
@@ -71,6 +74,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
         (orders) {
           final now = DateTime.now();
           final today = DateTime(now.year, now.month, now.day);
+          final firstDayOfMonth = DateTime(now.year, now.month, 1);
 
           // 1. Calculate Today's Stats
           final todayCompletedOrders = orders.where((o) {
@@ -78,7 +82,13 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                 o.updatedAt.isAfter(today);
           }).toList();
 
-          // 2. Find Active Order (Assigned to me, not delivered/cancelled)
+          // 2. Calculate Monthly Deliveries
+          final monthlyCompletedOrders = orders.where((o) {
+            return o.status == OrderStatus.delivered &&
+                o.updatedAt.isAfter(firstDayOfMonth);
+          }).toList();
+
+          // 3. Find Active Order (Assigned to me, not delivered/cancelled)
           final active = orders.where((o) {
             return o.driverId == _driverId &&
                 o.status != OrderStatus.delivered &&
@@ -95,6 +105,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                 0.0,
                 (sum, order) => sum + order.totalAmount,
               );
+              _monthlyDeliveries = monthlyCompletedOrders.length;
               _activeOrder = active.isNotEmpty ? active.first : null;
             });
           }
@@ -141,6 +152,12 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
             context.read<OrderCubit>().listenToAvailableOrders();
           }
           _refreshDashboard();
+        } else if (state is DriverBonusSettingsLoaded) {
+          setState(() {
+            _bonusTarget = state.settings['minDeliveries'] ?? 50;
+            _bonusAmount = (state.settings['bonusAmount'] ?? 100.0).toDouble();
+            _bonusEnabled = state.settings['isEnabled'] ?? false;
+          });
         }
       },
       child: Scaffold(
@@ -160,6 +177,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                           children: [
                             const SizedBox(height: 16),
                             _buildStatusCard(),
+                            if (_bonusEnabled) ...[
+                              const SizedBox(height: 16),
+                              _buildBonusProgressCard(),
+                            ],
                             const SizedBox(height: 24),
                             _buildMainContent(),
                             const SizedBox(height: 24),
@@ -182,6 +203,116 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildBonusProgressCard() {
+    final progress = (_monthlyDeliveries / _bonusTarget).clamp(0.0, 1.0);
+    final remaining = (_bonusTarget - _monthlyDeliveries).clamp(
+      0,
+      _bonusTarget,
+    );
+    final isCompleted = _monthlyDeliveries >= _bonusTarget;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.stars_rounded,
+                  color: Colors.amber,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.l10n.driverBonusSettings,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1E293B),
+                      ),
+                    ),
+                    Text(
+                      isCompleted
+                          ? 'Bonus target reached!'
+                          : context.l10n.reachTargetForBonus(
+                              _bonusTarget,
+                              '$_bonusAmount ${context.l10n.currencySymbol}',
+                            ),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (isCompleted)
+                const Icon(Icons.check_circle, color: Colors.green, size: 24),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 12,
+              backgroundColor: Colors.grey.shade100,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                isCompleted ? Colors.green : AppColors.primary,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '$_monthlyDeliveries / $_bonusTarget deliveries',
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF475569),
+                ),
+              ),
+              if (!isCompleted)
+                Text(
+                  '$remaining more to go',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppColors.primary.withOpacity(0.8),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+            ],
+          ),
+        ],
       ),
     );
   }

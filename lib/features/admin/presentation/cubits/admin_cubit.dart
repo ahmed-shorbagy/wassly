@@ -528,4 +528,179 @@ class AdminCubit extends Cubit<AdminState> {
   void resetState() {
     emit(AdminInitial());
   }
+
+  // --- Driver Bonus Methods ---
+
+  Future<void> getBonusSettings() async {
+    try {
+      emit(AdminLoading());
+      final doc = await FirebaseFirestore.instance
+          .collection('app_settings')
+          .doc('driver_bonus')
+          .get();
+
+      if (doc.exists) {
+        emit(BonusSettingsLoaded(doc.data()!));
+      } else {
+        // Default settings
+        final defaultSettings = {
+          'minDeliveries': 50,
+          'bonusAmount': 100.0,
+          'isEnabled': false,
+        };
+        emit(BonusSettingsLoaded(defaultSettings));
+      }
+    } catch (e) {
+      AppLogger.logError('Error fetching bonus settings', error: e);
+      emit(AdminError('Failed to fetch bonus settings: $e'));
+    }
+  }
+
+  Future<void> updateBonusSettings({
+    required int minDeliveries,
+    required double bonusAmount,
+    required bool isEnabled,
+  }) async {
+    try {
+      emit(AdminLoading());
+      await FirebaseFirestore.instance
+          .collection('app_settings')
+          .doc('driver_bonus')
+          .set({
+            'minDeliveries': minDeliveries,
+            'bonusAmount': bonusAmount,
+            'isEnabled': isEnabled,
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+      getBonusSettings(); // Refresh settings
+    } catch (e) {
+      AppLogger.logError('Error updating bonus settings', error: e);
+      emit(AdminError('Failed to update bonus settings: $e'));
+    }
+  }
+
+  Future<void> distributeMonthlyBonuses() async {
+    try {
+      emit(AdminLoading());
+
+      // 1. Determine last month
+      final now = DateTime.now();
+      final lastMonthDate = DateTime(now.year, now.month - 1, 1);
+      final monthKey = "${lastMonthDate.year}_${lastMonthDate.month}";
+      final monthLabel = "${lastMonthDate.year}-${lastMonthDate.month}";
+
+      // 2. Check if already distributed
+      final distributionDoc = await FirebaseFirestore.instance
+          .collection('bonus_distributions')
+          .doc(monthKey)
+          .get();
+
+      if (distributionDoc.exists) {
+        emit(
+          const AdminError(
+            'Monthly bonuses for this month already distributed',
+          ),
+        );
+        return;
+      }
+
+      // 3. Get settings
+      final settingsDoc = await FirebaseFirestore.instance
+          .collection('app_settings')
+          .doc('driver_bonus')
+          .get();
+
+      if (!settingsDoc.exists || !(settingsDoc.data()?['isEnabled'] ?? false)) {
+        emit(
+          const AdminError(
+            'Driver bonus feature is disabled or not configured',
+          ),
+        );
+        return;
+      }
+
+      final minDeliveries = settingsDoc.data()!['minDeliveries'] as int;
+      final bonusAmount = (settingsDoc.data()!['bonusAmount'] as num)
+          .toDouble();
+
+      // 4. Calculate date range for last month
+      final firstDay = DateTime(now.year, now.month - 1, 1);
+      final lastDay = DateTime(now.year, now.month, 0, 23, 59, 59);
+
+      // 5. Fetch all drivers
+      final driversSnapshot = await FirebaseFirestore.instance
+          .collection('drivers')
+          .where('isActive', isEqualTo: true)
+          .get();
+
+      int distributedCount = 0;
+      final batch = FirebaseFirestore.instance.batch();
+
+      for (var driverDoc in driversSnapshot.docs) {
+        final driverId = driverDoc.id;
+
+        // 6. Count delivered orders for this driver in last month
+        final ordersSnapshot = await FirebaseFirestore.instance
+            .collection('orders')
+            .where('driverId', isEqualTo: driverId)
+            .where('status', isEqualTo: 'delivered')
+            .where('createdAt', isGreaterThanOrEqualTo: firstDay)
+            .where('createdAt', isLessThanOrEqualTo: lastDay)
+            .get();
+
+        if (ordersSnapshot.docs.length >= minDeliveries) {
+          // 7. Award bonus
+          final walletRef = FirebaseFirestore.instance
+              .collection('drivers')
+              .doc(driverId);
+
+          // Note: In a real app we should use a transaction, but since we are doing multiple drivers
+          // and batches help with atomic writes. However, Firestore doesn't support reading in batches.
+          // For simplicity in this requirement, we update.
+
+          final currentData = driverDoc.data();
+          final currentBalance = (currentData['walletBalance'] as num? ?? 0.0)
+              .toDouble();
+          final currentTotalEarnings =
+              (currentData['totalEarnings'] as num? ?? 0.0).toDouble();
+
+          batch.update(walletRef, {
+            'walletBalance': currentBalance + bonusAmount,
+            'totalEarnings': currentTotalEarnings + bonusAmount,
+          });
+
+          // 8. Add transaction record
+          final transactionRef = FirebaseFirestore.instance
+              .collection('walletTransactions')
+              .doc();
+          batch.set(transactionRef, {
+            'driverId': driverId,
+            'amount': bonusAmount,
+            'type': 'credit',
+            'description': 'Monthly Bonus - $monthLabel',
+            'date': FieldValue.serverTimestamp(),
+          });
+
+          distributedCount++;
+        }
+      }
+
+      // 9. Mark as distributed
+      final distRef = FirebaseFirestore.instance
+          .collection('bonus_distributions')
+          .doc(monthKey);
+      batch.set(distRef, {
+        'month': monthLabel,
+        'distributedAt': FieldValue.serverTimestamp(),
+        'count': distributedCount,
+        'totalAmount': distributedCount * bonusAmount,
+      });
+
+      await batch.commit();
+      emit(BonusDistributionSuccess(distributedCount));
+    } catch (e) {
+      AppLogger.logError('Error distributing bonuses', error: e);
+      emit(AdminError('Failed to distribute bonuses: $e'));
+    }
+  }
 }

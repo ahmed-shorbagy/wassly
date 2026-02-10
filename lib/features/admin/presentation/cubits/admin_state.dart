@@ -56,6 +56,24 @@ class PendingPartnersLoaded extends AdminState {
 
 class PartnerApprovedSuccess extends AdminState {}
 
+class BonusSettingsLoaded extends AdminState {
+  final Map<String, dynamic> settings;
+
+  const BonusSettingsLoaded(this.settings);
+
+  @override
+  List<Object?> get props => [settings];
+}
+
+class BonusDistributionSuccess extends AdminState {
+  final int count;
+
+  const BonusDistributionSuccess(this.count);
+
+  @override
+  List<Object?> get props => [count];
+}
+
 class AdminError extends AdminState {
   final String message;
 

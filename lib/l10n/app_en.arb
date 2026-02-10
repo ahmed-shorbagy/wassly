@@ -924,5 +924,43 @@
   "wallet": "Wallet",
   "totalEarnings": "Total Earnings",
   "cashCollected": "Cash Collected",
-  "transactions": "Transactions"
+  "transactions": "Transactions",
+  "driverBonusSettings": "Driver Bonus Settings",
+  "minMonthlyDeliveries": "Min Monthly Deliveries",
+  "bonusAmount": "Bonus Amount",
+  "distributeMonthlyBonuses": "Distribute Last Month's Bonuses",
+  "bonusDistributionSuccess": "Bonuses distributed successfully",
+  "bonusEnabled": "Enable Bonus Feature",
+  "bonusTarget": "Bonus Target",
+  "ordersDeliveriedThisMonth": "{count} orders delivered this month",
+  "@ordersDeliveriedThisMonth": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bonusProgress": "Bonus Progress: {current}/{target} orders",
+  "@bonusProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "reachTargetForBonus": "Reach {target} orders this month for {amount} bonus!",
+  "@reachTargetForBonus": {
+    "placeholders": {
+      "target": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "confirm": "Confirm"
 }

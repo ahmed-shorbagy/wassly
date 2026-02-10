@@ -4,6 +4,7 @@ import 'package:equatable/equatable.dart';
 import '../../../../core/utils/logger.dart';
 import '../../domain/entities/driver_entity.dart';
 import '../../domain/repositories/driver_repository.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../auth/domain/repositories/auth_repository.dart';
 
 part 'driver_state.dart';
@@ -252,6 +253,31 @@ class DriverCubit extends Cubit<DriverState> {
     } catch (e) {
       AppLogger.logError('Error loading driver by user ID', error: e);
       emit(DriverError('Failed to load driver: $e'));
+    }
+  }
+
+  Future<void> getBonusSettings() async {
+    try {
+      emit(DriverLoading());
+      final doc = await FirebaseFirestore.instance
+          .collection('app_settings')
+          .doc('driver_bonus')
+          .get();
+
+      if (doc.exists) {
+        emit(DriverBonusSettingsLoaded(doc.data()!));
+      } else {
+        // Default settings
+        final defaultSettings = {
+          'minDeliveries': 50,
+          'bonusAmount': 100.0,
+          'isEnabled': false,
+        };
+        emit(DriverBonusSettingsLoaded(defaultSettings));
+      }
+    } catch (e) {
+      AppLogger.logError('Error fetching bonus settings', error: e);
+      emit(DriverError('Failed to fetch bonus settings: $e'));
     }
   }
 

@@ -58,3 +58,11 @@ class DriverError extends DriverState {
   List<Object> get props => [message];
 }
 
+class DriverBonusSettingsLoaded extends DriverState {
+  final Map<String, dynamic> settings;
+
+  const DriverBonusSettingsLoaded(this.settings);
+
+  @override
+  List<Object> get props => [settings];
+}
