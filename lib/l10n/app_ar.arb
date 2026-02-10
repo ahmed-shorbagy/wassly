@@ -900,6 +900,9 @@
     }
   },
   "pendingApprovals": "الموافقات المعلقة",
+  "totalEarningsToday": "إجمالي أرباح اليوم",
+  "acceptingOrders": "أنت تقبل الطلبات الآن",
+  "currentlyOffline": "أنت حالياً غير متصل",
   "wallet": "المحفظة",
   "totalEarnings": "إجمالي الأرباح",
   "cashCollected": "النقد المحصل",

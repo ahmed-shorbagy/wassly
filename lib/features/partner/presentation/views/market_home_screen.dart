@@ -8,11 +8,28 @@ import '../../../auth/presentation/cubits/auth_cubit.dart';
 import '../../../restaurants/presentation/cubits/restaurant_cubit.dart';
 import '../../../orders/presentation/cubits/order_cubit.dart';
 import '../../../orders/domain/entities/order_entity.dart';
+import '../../../restaurants/domain/entities/restaurant_entity.dart';
 import '../../../../core/utils/extensions.dart';
 import '../../../../shared/widgets/language_toggle_button.dart';
 
-class MarketHomeScreen extends StatelessWidget {
+class MarketHomeScreen extends StatefulWidget {
   const MarketHomeScreen({super.key});
+
+  @override
+  State<MarketHomeScreen> createState() => _MarketHomeScreenState();
+}
+
+class _MarketHomeScreenState extends State<MarketHomeScreen> {
+  RestaurantEntity? _myMarket;
+
+  void _toggleStatus(bool value) {
+    if (_myMarket != null) {
+      context.read<RestaurantCubit>().toggleRestaurantStatus(
+        _myMarket!.id,
+        value,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +39,7 @@ class MarketHomeScreen extends StatelessWidget {
         listener: (context, state) {
           if (state is RestaurantsLoaded && state.restaurants.isNotEmpty) {
             final restaurantId = state.restaurants.first.id;
+            _myMarket = state.restaurants.first;
             context.read<OrderCubit>().listenToRestaurantOrders(restaurantId);
           }
         },
@@ -36,6 +54,8 @@ class MarketHomeScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    _buildStatusSection(context),
+                    const SizedBox(height: 24),
                     _buildQuickStats(context),
                     const SizedBox(height: 32),
                     _buildQuickActions(context),
@@ -162,35 +182,154 @@ class MarketHomeScreen extends StatelessWidget {
                     o.status == OrderStatus.ready,
               )
               .length;
-        }
 
-        return Row(
-          children: [
-            Expanded(
-              child: _StatCard(
-                title: context.l10n.pendingOrders,
-                value: pendingCount.toString(),
-                icon: Icons.notifications_active_outlined,
-                color: AppColors.warning,
-                gradientColors: [
-                  AppColors.warning.withOpacity(0.1),
-                  Colors.white,
+          // Calculate today's earnings
+          final now = DateTime.now();
+          final todayOrders = state.orders.where(
+            (o) =>
+                o.createdAt.year == now.year &&
+                o.createdAt.month == now.month &&
+                o.createdAt.day == now.day &&
+                o.status != OrderStatus.cancelled,
+          );
+          double earnings = 0;
+          for (var o in todayOrders) {
+            earnings += o.totalAmount;
+          }
+
+          return Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: _StatCard(
+                      title: context.l10n.pendingOrders,
+                      value: pendingCount.toString(),
+                      icon: Icons.notifications_active_outlined,
+                      color: AppColors.warning,
+                      gradientColors: [
+                        AppColors.warning.withOpacity(0.1),
+                        Colors.white,
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _StatCard(
+                      title: context.l10n.activeOrders,
+                      value: activeCount.toString(),
+                      icon: Icons.shopping_bag_outlined,
+                      color: AppColors.info,
+                      gradientColors: [
+                        AppColors.info.withOpacity(0.1),
+                        Colors.white,
+                      ],
+                    ),
+                  ),
                 ],
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _StatCard(
-                title: context.l10n.activeOrders,
-                value: activeCount.toString(),
-                icon: Icons.shopping_bag_outlined,
-                color: AppColors.info,
-                gradientColors: [AppColors.info.withOpacity(0.1), Colors.white],
+              const SizedBox(height: 16),
+              _StatCard(
+                title: context.l10n.totalEarningsToday,
+                value:
+                    '${earnings.toStringAsFixed(2)} ${context.l10n.currency}',
+                icon: Icons.account_balance_wallet_rounded,
+                color: Colors.blue,
+                gradientColors: [Colors.blue.withOpacity(0.1), Colors.white],
+                isFullWidth: true,
               ),
-            ),
-          ],
-        );
+            ],
+          );
+        }
+        return const SizedBox.shrink();
       },
+    );
+  }
+
+  Widget _buildStatusSection(BuildContext context) {
+    final isOpen = _myMarket?.isOpen ?? false;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: isOpen
+                  ? Colors.green.withOpacity(0.1)
+                  : Colors.red.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.storefront_rounded,
+              color: isOpen ? Colors.green : Colors.red,
+              size: 30,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isOpen ? context.l10n.open : context.l10n.closed,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: isOpen ? Colors.green : Colors.red,
+                  ),
+                ),
+                Text(
+                  isOpen
+                      ? context.l10n.acceptingOrders
+                      : context.l10n.currentlyOffline,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (_myMarket != null)
+            Column(
+              children: [
+                Transform.scale(
+                  scale: 1.2,
+                  child: Switch(
+                    value: isOpen,
+                    onChanged: _toggleStatus,
+                    activeThumbColor: Colors.green,
+                    activeTrackColor: Colors.green.withOpacity(0.2),
+                    inactiveThumbColor: Colors.grey,
+                    inactiveTrackColor: Colors.grey.withOpacity(0.2),
+                  ),
+                ),
+                Text(
+                  isOpen ? context.l10n.online : context.l10n.offline,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: isOpen ? Colors.green : Colors.grey,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              ],
+            ),
+        ],
+      ),
     );
   }
 
@@ -213,7 +352,7 @@ class MarketHomeScreen extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
-          childAspectRatio: 1.1,
+          childAspectRatio: 1.2,
           children: [
             _ActionCard(
               title: context.l10n.viewOrders,
@@ -234,21 +373,25 @@ class MarketHomeScreen extends StatelessWidget {
               },
             ),
             _ActionCard(
-              title: context.l10n.marketSettings,
-              icon: Icons.settings_rounded,
-              color: AppColors.secondary,
+              title: context.l10n.categories,
+              icon: Icons.category_rounded,
+              color: Colors.purple,
               onTap: () {
-                AppLogger.logNavigation('Navigating to market settings');
-                context.push('/market/settings');
+                if (_myMarket != null) {
+                  context.push(
+                    '/market/categories',
+                    extra: {'restaurantId': _myMarket!.id},
+                  );
+                }
               },
             ),
             _ActionCard(
-              title: context.l10n.profile,
-              icon: Icons.person_outline_rounded,
-              color: AppColors.primary,
+              title: context.l10n.helpSupport,
+              icon: Icons.headset_mic_rounded,
+              color: Colors.pink,
               onTap: () {
-                AppLogger.logNavigation('Navigating to profile');
-                context.push('/profile');
+                AppLogger.logNavigation('Navigating to support');
+                context.push('/market/support');
               },
             ),
           ],
@@ -420,17 +563,21 @@ class _StatCard extends StatelessWidget {
   final Color color;
   final List<Color> gradientColors;
 
+  final bool isFullWidth;
+
   const _StatCard({
     required this.title,
     required this.value,
     required this.icon,
     required this.color,
     required this.gradientColors,
+    this.isFullWidth = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: isFullWidth ? double.infinity : null,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,

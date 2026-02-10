@@ -59,7 +59,7 @@ class PartnerSignupCubit extends Cubit<PartnerSignupState> {
       (id) => emit(
         PartnerSignupSuccess(
           message:
-              '${userType == AppConstants.userTypeMarket ? 'Market' : 'Restaurant'} registered successfully!',
+              '${userType == AppConstants.userTypeMarket ? 'Market' : 'Restaurant'} registered successfully! Please wait for admin approval.',
           userType: userType,
         ),
       ),

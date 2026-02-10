@@ -485,6 +485,46 @@ class AdminCubit extends Cubit<AdminState> {
     }
   }
 
+  Future<void> rejectPartner(
+    String userId,
+    String detailId,
+    String type,
+  ) async {
+    try {
+      emit(AdminLoading());
+      AppLogger.logInfo('Rejecting partner: $userId');
+
+      // 1. Delete detail document
+      if (type == 'restaurant' || type == 'market') {
+        await FirebaseFirestore.instance
+            .collection('restaurants')
+            .doc(detailId)
+            .delete();
+      } else if (type == 'driver') {
+        await FirebaseFirestore.instance
+            .collection('drivers')
+            .doc(detailId)
+            .delete();
+      }
+
+      // 2. Delete user document from Firestore
+      await FirebaseFirestore.instance.collection('users').doc(userId).delete();
+
+      // Note: We cannot easily delete the Firebase Auth user without Admin SDK or Cloud Function from the client side
+      // for a different user. However, since theFirestore doc is gone and login checks it, they won't be able to log in.
+
+      AppLogger.logSuccess('Partner rejected successfully');
+      emit(
+        PartnerApprovedSuccess(),
+      ); // We can reuse this or create a PartnerRejectedSuccess
+      // Refresh list
+      getPendingPartners();
+    } catch (e) {
+      AppLogger.logError('Error rejecting partner', error: e);
+      emit(AdminError('Failed to reject partner: $e'));
+    }
+  }
+
   void resetState() {
     emit(AdminInitial());
   }

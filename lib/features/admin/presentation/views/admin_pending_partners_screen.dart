@@ -80,13 +80,45 @@ class _AdminPendingPartnersScreenState
                             _buildInfoRow('Phone', user['phone'] ?? 'N/A'),
                             if (type == 'driver') ...[
                               _buildInfoRow(
-                                'Vehicle',
-                                '${details['vehicleType']} - ${details['vehiclePlateNumber']}',
-                              ),
-                            ] else ...[
-                              _buildInfoRow(
                                 'Address',
                                 details['address'] ?? 'N/A',
+                              ),
+                            ],
+                            const SizedBox(height: 16),
+                            if (type == 'driver') ...[
+                              _buildDocumentSection(
+                                context,
+                                'Driver Documents',
+                                [
+                                  _DocItem(
+                                    'Personal Image',
+                                    details['personalImageUrl'],
+                                  ),
+                                  _DocItem(
+                                    'Driver License',
+                                    details['driverLicenseUrl'],
+                                  ),
+                                  _DocItem(
+                                    'Vehicle License',
+                                    details['vehicleLicenseUrl'],
+                                  ),
+                                  _DocItem(
+                                    'Vehicle Photo',
+                                    details['vehiclePhotoUrl'],
+                                  ),
+                                ],
+                              ),
+                            ] else ...[
+                              _buildDocumentSection(
+                                context,
+                                'Business Documents',
+                                [
+                                  _DocItem(
+                                    'Commercial Registration',
+                                    details['commercialRegistrationPhotoUrl'],
+                                  ),
+                                  _DocItem('Logo', details['imageUrl']),
+                                ],
                               ),
                             ],
                             const SizedBox(height: 16),
@@ -95,9 +127,39 @@ class _AdminPendingPartnersScreenState
                               children: [
                                 OutlinedButton(
                                   onPressed: () {
-                                    // Implementation for rejection could be added here
-                                    context.showInfoSnackBar(
-                                      'Reject functionality not yet implemented',
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title: const Text('Reject Partner?'),
+                                        content: const Text(
+                                          'Are you sure you want to reject and delete this registration request?',
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context),
+                                            child: const Text('Cancel'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                              context
+                                                  .read<AdminCubit>()
+                                                  .rejectPartner(
+                                                    user['id'],
+                                                    partner['id'],
+                                                    type,
+                                                  );
+                                            },
+                                            child: const Text(
+                                              'Reject',
+                                              style: TextStyle(
+                                                color: Colors.red,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     );
                                   },
                                   style: OutlinedButton.styleFrom(
@@ -138,6 +200,113 @@ class _AdminPendingPartnersScreenState
     );
   }
 
+  Widget _buildDocumentSection(
+    BuildContext context,
+    String title,
+    List<_DocItem> items,
+  ) {
+    // Filter out items with null URLs
+    final validItems = items.where((item) => item.url != null).toList();
+
+    if (validItems.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 120,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: validItems.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final item = validItems[index];
+              return Column(
+                children: [
+                  GestureDetector(
+                    onTap: () =>
+                        _showImageDialog(context, item.label, item.url!),
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade300),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          item.url!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.error_outline),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  SizedBox(
+                    width: 80,
+                    child: Text(
+                      item.label,
+                      style: const TextStyle(fontSize: 10),
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+
+  void _showImageDialog(BuildContext context, String title, String url) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+            ),
+            Image.network(
+              url,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) => const SizedBox(
+                height: 200,
+                child: Center(child: Icon(Icons.error, size: 48)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildInfoRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
@@ -155,4 +324,11 @@ class _AdminPendingPartnersScreenState
       ),
     );
   }
+}
+
+class _DocItem {
+  final String label;
+  final String? url;
+
+  _DocItem(this.label, this.url);
 }

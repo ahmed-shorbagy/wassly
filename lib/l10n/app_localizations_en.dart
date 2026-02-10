@@ -1781,7 +1781,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Manage your restaurant orders and menu';
 
   @override
-  String get manageMarketSubtitle => 'Manage your market inventory and orders';
+  String get manageMarketSubtitle => 'Monitor your sales and inventory';
 
   @override
   String get welcomeToRestaurantDashboard => 'Welcome to Restaurant Dashboard';
@@ -1989,10 +1989,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get name => 'Name';
 
   @override
-  String get online => 'Online';
+  String get online => 'ONLINE';
 
   @override
-  String get offline => 'Offline';
+  String get offline => 'OFFLINE';
 
   @override
   String get statusUpdated => 'Status updated';
@@ -2434,6 +2434,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pendingApprovals => 'Pending Approvals';
+
+  @override
+  String get totalEarningsToday => 'Total Earnings Today';
+
+  @override
+  String get acceptingOrders => 'You are accepting orders';
+
+  @override
+  String get currentlyOffline => 'You are currently offline';
 
   @override
   String get wallet => 'Wallet';

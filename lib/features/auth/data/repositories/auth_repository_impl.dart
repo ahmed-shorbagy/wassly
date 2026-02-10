@@ -104,7 +104,10 @@ class AuthRepositoryImpl implements AuthRepository {
             phone: phone,
             userType: userType,
             createdAt: DateTime.now(),
-            isActive: true,
+            isActive:
+                userType ==
+                AppConstants
+                    .userTypeCustomer, // Only customers are active by default
           );
 
           await firestore

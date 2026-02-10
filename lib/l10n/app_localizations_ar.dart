@@ -2420,6 +2420,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get pendingApprovals => 'الموافقات المعلقة';
 
   @override
+  String get totalEarningsToday => 'إجمالي أرباح اليوم';
+
+  @override
+  String get acceptingOrders => 'أنت تقبل الطلبات الآن';
+
+  @override
+  String get currentlyOffline => 'أنت حالياً غير متصل';
+
+  @override
   String get wallet => 'المحفظة';
 
   @override

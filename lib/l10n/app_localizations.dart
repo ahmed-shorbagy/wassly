@@ -3533,7 +3533,7 @@ abstract class AppLocalizations {
   /// No description provided for @manageMarketSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Manage your market inventory and orders'**
+  /// **'Monitor your sales and inventory'**
   String get manageMarketSubtitle;
 
   /// No description provided for @welcomeToRestaurantDashboard.
@@ -3929,13 +3929,13 @@ abstract class AppLocalizations {
   /// No description provided for @online.
   ///
   /// In en, this message translates to:
-  /// **'Online'**
+  /// **'ONLINE'**
   String get online;
 
   /// No description provided for @offline.
   ///
   /// In en, this message translates to:
-  /// **'Offline'**
+  /// **'OFFLINE'**
   String get offline;
 
   /// No description provided for @statusUpdated.
@@ -4771,6 +4771,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pending Approvals'**
   String get pendingApprovals;
+
+  /// No description provided for @totalEarningsToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Earnings Today'**
+  String get totalEarningsToday;
+
+  /// No description provided for @acceptingOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'You are accepting orders'**
+  String get acceptingOrders;
+
+  /// No description provided for @currentlyOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'You are currently offline'**
+  String get currentlyOffline;
 
   /// No description provided for @wallet.
   ///

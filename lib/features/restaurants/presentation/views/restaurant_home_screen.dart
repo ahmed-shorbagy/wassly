@@ -295,8 +295,8 @@ class _RestaurantHomeScreenState extends State<RestaurantHomeScreen> {
                 ),
                 Text(
                   isOpen
-                      ? 'You are accepting orders'
-                      : 'You are currently offline',
+                      ? context.l10n.acceptingOrders
+                      : context.l10n.currentlyOffline,
                   style: TextStyle(
                     fontSize: 14,
                     color: AppColors.textSecondary,
@@ -320,7 +320,7 @@ class _RestaurantHomeScreenState extends State<RestaurantHomeScreen> {
                   ),
                 ),
                 Text(
-                  isOpen ? 'ONLINE' : 'OFFLINE',
+                  isOpen ? context.l10n.online : context.l10n.offline,
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -395,7 +395,7 @@ class _RestaurantHomeScreenState extends State<RestaurantHomeScreen> {
               ),
               const SizedBox(height: 16),
               _StatCard(
-                title: 'Total Earnings Today',
+                title: context.l10n.totalEarningsToday,
                 value:
                     '${earnings.toStringAsFixed(2)} ${context.l10n.currency}',
                 icon: Icons.account_balance_wallet_rounded,
@@ -428,7 +428,7 @@ class _RestaurantHomeScreenState extends State<RestaurantHomeScreen> {
         onTap: () => context.push('/restaurant/products'),
       ),
       _ActionItem(
-        title: 'Categories',
+        title: context.l10n.categories,
         icon: Icons.category_rounded,
         color: Colors.purple,
         onTap: () {
@@ -447,13 +447,13 @@ class _RestaurantHomeScreenState extends State<RestaurantHomeScreen> {
         onTap: () => context.push('/restaurant/orders'),
       ),
       _ActionItem(
-        title: 'Reviews',
+        title: context.l10n.reviews,
         icon: Icons.star_rounded,
         color: Colors.amber,
         onTap: () => context.push('/restaurant/reviews'),
       ),
       _ActionItem(
-        title: 'Support',
+        title: context.l10n.helpSupport,
         icon: Icons.headset_mic_rounded,
         color: Colors.pink,
         onTap: () => context.push('/restaurant/support'),
