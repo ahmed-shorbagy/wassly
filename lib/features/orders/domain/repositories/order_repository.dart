@@ -18,9 +18,7 @@ abstract class OrderRepository {
   Future<Either<Failure, List<OrderEntity>>> getActiveOrders(String customerId);
 
   /// Get order history for a customer
-  Future<Either<Failure, List<OrderEntity>>> getOrderHistory(
-    String customerId,
-  );
+  Future<Either<Failure, List<OrderEntity>>> getOrderHistory(String customerId);
 
   /// Cancel an order
   Future<Either<Failure, void>> cancelOrder(String orderId);
@@ -60,15 +58,16 @@ abstract class OrderRepository {
   );
 
   /// Get orders for a driver
-  Future<Either<Failure, List<OrderEntity>>> getDriverOrders(String driverId);
+  Future<Either<Failure, List<OrderEntity>>> getDriverOrders(
+    List<String> driverIds,
+  );
 
   /// Get available orders for drivers (ready to be picked up)
   Future<Either<Failure, List<OrderEntity>>> getAvailableOrdersForDrivers();
 
   /// Listen to driver orders (real-time)
-  Stream<List<OrderEntity>> listenToDriverOrders(String driverId);
+  Stream<List<OrderEntity>> listenToDriverOrders(List<String> driverIds);
 
   /// Listen to available orders (real-time) - for drivers to pick up
   Stream<List<OrderEntity>> listenToAvailableOrders();
 }
-

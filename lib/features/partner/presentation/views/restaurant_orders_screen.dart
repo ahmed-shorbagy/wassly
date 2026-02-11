@@ -31,6 +31,13 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+
+    // Hydrate from existing state if available
+    final orderState = context.read<OrderCubit>().state;
+    if (orderState is OrdersLoaded) {
+      _cachedOrders = orderState.orders;
+    }
+
     _loadRestaurantAndOrders();
   }
 
@@ -61,6 +68,8 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen>
         title: Text(
           widget.isMarket ? l10n.marketOrders : l10n.restaurantOrders,
         ),
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.white,
@@ -75,7 +84,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen>
       ),
       body: BlocConsumer<RestaurantCubit, RestaurantState>(
         listener: (context, state) {
-          if (state is RestaurantLoaded) {
+          if (state is RestaurantLoaded && _restaurantId == null) {
             setState(() {
               _restaurantId = state.restaurant.id;
             });
@@ -169,7 +178,8 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen>
           (order) =>
               order.status == OrderStatus.accepted ||
               order.status == OrderStatus.preparing ||
-              order.status == OrderStatus.ready,
+              order.status == OrderStatus.ready ||
+              order.status == OrderStatus.pickedUp,
         )
         .toList();
 

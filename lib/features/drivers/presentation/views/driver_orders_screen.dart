@@ -6,7 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/extensions.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/loading_widget.dart';
-import '../../../auth/presentation/cubits/auth_cubit.dart';
+import '../cubits/driver_cubit.dart';
 import '../../../orders/domain/entities/order_entity.dart';
 import '../../../orders/presentation/cubits/order_cubit.dart';
 
@@ -20,13 +20,10 @@ class DriverOrdersScreen extends StatefulWidget {
 class _DriverOrdersScreenState extends State<DriverOrdersScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  String? _driverId;
-
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _loadDriverAndOrders();
   }
 
   @override
@@ -35,84 +32,106 @@ class _DriverOrdersScreenState extends State<DriverOrdersScreen>
     super.dispose();
   }
 
-  void _loadDriverAndOrders() {
-    final authState = context.read<AuthCubit>().state;
-    if (authState is AuthAuthenticated) {
-      setState(() {
-        _driverId = authState.user.id;
-      });
-      // Load driver's orders
-      // Note: This would need a getDriverOrders method in OrderRepository
-      context.read<OrderCubit>().getAllOrders();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.navOrders),
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: Colors.white,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-          tabs: [
-            Tab(text: l10n.activeOrders),
-            Tab(text: l10n.orderHistory),
-          ],
-        ),
-      ),
-      body: _driverId == null
-          ? Center(child: Text(l10n.pleaseLoginToPlaceOrder))
-          : BlocBuilder<OrderCubit, OrderState>(
-              builder: (context, state) {
-                if (state is OrderLoading) {
-                  return const LoadingWidget();
-                }
+    return BlocBuilder<DriverCubit, DriverState>(
+      builder: (context, driverState) {
+        final driverIds = <String>[];
+        if (driverState is DriverLoaded) {
+          driverIds.add(driverState.driver.id);
+          driverIds.add(driverState.driver.userId);
+        }
 
-                if (state is OrderError) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(state.message),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: _loadDriverAndOrders,
-                          child: Text(l10n.retry),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                if (state is OrdersLoaded) {
-                  // Filter orders by driver ID
-                  final driverOrders = state.orders
-                      .where((order) => order.driverId == _driverId)
-                      .toList();
-
-                  return TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _buildActiveOrders(
-                        driverOrders.where((o) => o.isActive).toList(),
-                        l10n,
-                      ),
-                      _buildOrderHistory(
-                        driverOrders.where((o) => !o.isActive).toList(),
-                        l10n,
-                      ),
-                    ],
-                  );
-                }
-
-                return Center(child: Text(l10n.noOrdersYet));
-              },
+        return Scaffold(
+          backgroundColor: const Color(0xFFF8FAFC),
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.black,
+            elevation: 0,
+            title: Text(l10n.navOrders),
+            bottom: TabBar(
+              controller: _tabController,
+              indicatorColor: AppColors.primary,
+              labelColor: AppColors.primary,
+              unselectedLabelColor: Colors.grey,
+              tabs: [
+                Tab(text: l10n.activeOrders),
+                Tab(text: l10n.orderHistory),
+              ],
             ),
+          ),
+          body: driverIds.isEmpty
+              ? Center(child: Text(l10n.pleaseLoginToPlaceOrder))
+              : BlocBuilder<OrderCubit, OrderState>(
+                  buildWhen: (previous, current) =>
+                      current is DriverOrdersLoaded ||
+                      current is OrdersLoaded ||
+                      current is OrderLoading ||
+                      current is OrderError,
+                  builder: (context, state) {
+                    if (state is OrderLoading) {
+                      return const LoadingWidget();
+                    }
+
+                    if (state is OrderError) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(state.message),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () {
+                                if (driverIds.isNotEmpty) {
+                                  context
+                                      .read<OrderCubit>()
+                                      .listenToDriverOrders(driverIds);
+                                }
+                              },
+                              child: Text(l10n.retry),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    if (state is DriverOrdersLoaded) {
+                      final driverOrders = state.orders;
+
+                      if (driverOrders.isEmpty) {
+                        return Center(child: Text(l10n.noOrdersYet));
+                      }
+
+                      final activeOrders = driverOrders
+                          .where((o) => o.isActive)
+                          .toList();
+                      final historyOrders = driverOrders
+                          .where((o) => !o.isActive)
+                          .toList();
+
+                      return TabBarView(
+                        controller: _tabController,
+                        children: [
+                          _buildActiveOrders(activeOrders, l10n),
+                          _buildOrderHistory(historyOrders, l10n),
+                        ],
+                      );
+                    }
+
+                    // If initial or other state, load orders again if we have the ID
+                    if (driverIds.isNotEmpty) {
+                      context.read<OrderCubit>().listenToDriverOrders(
+                        driverIds,
+                      );
+                    }
+
+                    return const Center(child: LoadingWidget());
+                  },
+                ),
+        );
+      },
     );
   }
 

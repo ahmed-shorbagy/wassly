@@ -27,6 +27,12 @@ class _RestaurantHomeScreenState extends State<RestaurantHomeScreen> {
   void initState() {
     super.initState();
     _loadData();
+
+    // Hydrate orders from existing state if available
+    final orderState = context.read<OrderCubit>().state;
+    if (orderState is OrdersLoaded) {
+      _cachedOrders = orderState.orders;
+    }
   }
 
   void _loadData() {

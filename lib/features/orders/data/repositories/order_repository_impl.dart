@@ -481,14 +481,14 @@ class OrderRepositoryImpl implements OrderRepository {
 
   @override
   Future<Either<Failure, List<OrderEntity>>> getDriverOrders(
-    String driverId,
+    List<String> driverIds,
   ) async {
     try {
-      AppLogger.logInfo('Fetching orders for driver: $driverId');
+      AppLogger.logInfo('Fetching orders for driver IDs: $driverIds');
 
       final snapshot = await firestore
           .collection('orders')
-          .where('driverId', isEqualTo: driverId)
+          .where('driverId', whereIn: driverIds)
           .orderBy('createdAt', descending: true)
           .get();
 
@@ -515,7 +515,7 @@ class OrderRepositoryImpl implements OrderRepository {
 
       final snapshot = await firestore
           .collection('orders')
-          .where('status', isEqualTo: 'ready')
+          .where('status', whereIn: ['accepted', 'preparing', 'ready'])
           .where('isPickup', isEqualTo: false)
           .where('driverId', isNull: true)
           .orderBy('createdAt', descending: true)
@@ -539,12 +539,14 @@ class OrderRepositoryImpl implements OrderRepository {
   }
 
   @override
-  Stream<List<OrderEntity>> listenToDriverOrders(String driverId) {
-    AppLogger.logInfo('Setting up real-time listener for driver orders');
+  Stream<List<OrderEntity>> listenToDriverOrders(List<String> driverIds) {
+    AppLogger.logInfo(
+      'Setting up real-time listener for driver orders with IDs: $driverIds',
+    );
 
     return firestore
         .collection('orders')
-        .where('driverId', isEqualTo: driverId)
+        .where('driverId', whereIn: driverIds)
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {
@@ -560,7 +562,7 @@ class OrderRepositoryImpl implements OrderRepository {
 
     return firestore
         .collection('orders')
-        .where('status', isEqualTo: 'ready')
+        .where('status', whereIn: ['accepted', 'preparing', 'ready'])
         .where('isPickup', isEqualTo: false)
         .orderBy('createdAt', descending: true)
         .snapshots()

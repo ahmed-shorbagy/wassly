@@ -1032,6 +1032,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orderTime => 'Order Time';
 
   @override
+  String get paymentMethod => 'Payment Method';
+
+  @override
   String get totalAmount => 'Total Amount';
 
   @override
@@ -2460,20 +2463,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get driverBonusSettings => 'Driver Bonus Settings';
 
   @override
-  String get bonusEnabled => 'Enable Bonus System';
-
-  @override
   String get minMonthlyDeliveries => 'Min Monthly Deliveries';
 
   @override
   String get bonusAmount => 'Bonus Amount';
 
   @override
-  String get distributeMonthlyBonuses => 'Distribute Monthly Bonuses';
+  String get distributeMonthlyBonuses => 'Distribute Last Month\'s Bonuses';
 
   @override
-  String get bonusDistributionSuccess =>
-      'Monthly bonuses distributed successfully';
+  String get bonusDistributionSuccess => 'Bonuses distributed successfully';
+
+  @override
+  String get bonusEnabled => 'Enable Bonus Feature';
+
+  @override
+  String get bonusTarget => 'Bonus Target';
+
+  @override
+  String ordersDeliveriedThisMonth(int count) {
+    return '$count orders delivered this month';
+  }
+
+  @override
+  String bonusProgress(int current, int target) {
+    return 'Bonus Progress: $current/$target orders';
+  }
 
   @override
   String reachTargetForBonus(int target, String amount) {
@@ -2482,7 +2497,4 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get confirm => 'Confirm';
-
-  @override
-  String get paymentMethod => 'Payment Method';
 }

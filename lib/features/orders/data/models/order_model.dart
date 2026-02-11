@@ -125,8 +125,12 @@ class OrderModel extends OrderEntity {
       deliveryAddress: data['deliveryAddress'] as String,
       deliveryLocation: data['deliveryLocation'] as GeoPoint?,
       restaurantLocation: data['restaurantLocation'] as GeoPoint?,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+      createdAt: data['createdAt'] != null
+          ? (data['createdAt'] as Timestamp).toDate()
+          : DateTime.now(),
+      updatedAt: data['updatedAt'] != null
+          ? (data['updatedAt'] as Timestamp).toDate()
+          : DateTime.now(),
       notes: data['notes'] as String?,
       isPickup: data['isPickup'] as bool? ?? false,
       paymentMethod: data['paymentMethod'] as String? ?? 'cash',

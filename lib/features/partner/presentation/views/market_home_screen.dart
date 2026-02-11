@@ -23,6 +23,16 @@ class _MarketHomeScreenState extends State<MarketHomeScreen> {
   RestaurantEntity? _myMarket;
   List<OrderEntity> _cachedOrders = [];
 
+  @override
+  void initState() {
+    super.initState();
+    // Hydrate orders from existing state if available
+    final orderState = context.read<OrderCubit>().state;
+    if (orderState is OrdersLoaded) {
+      _cachedOrders = orderState.orders;
+    }
+  }
+
   void _toggleStatus(bool value) {
     if (_myMarket != null) {
       context.read<RestaurantCubit>().toggleRestaurantStatus(

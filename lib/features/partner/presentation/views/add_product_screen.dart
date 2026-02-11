@@ -15,7 +15,8 @@ import '../../../../features/restaurants/presentation/cubits/restaurant_cubit.da
 import '../../../../features/restaurants/domain/entities/product_options.dart';
 
 class AddProductScreen extends StatefulWidget {
-  const AddProductScreen({super.key});
+  final String? restaurantId;
+  const AddProductScreen({super.key, this.restaurantId});
 
   @override
   State<AddProductScreen> createState() => _AddProductScreenState();
@@ -36,10 +37,16 @@ class _AddProductScreenState extends State<AddProductScreen> {
   @override
   void initState() {
     super.initState();
+    _restaurantId = widget.restaurantId;
     _loadRestaurantData();
   }
 
   void _loadRestaurantData() {
+    if (_restaurantId != null) {
+      _loadCategories();
+      return;
+    }
+
     // Try to get restaurant ID from cubit state if available
     final restaurantState = context.read<RestaurantCubit>().state;
     if (restaurantState is RestaurantLoaded) {
@@ -58,6 +65,16 @@ class _AddProductScreenState extends State<AddProductScreen> {
         } catch (_) {
           // No match found
         }
+      }
+    } else if (restaurantState is ProductsLoaded) {
+      // If products are loaded, we might have restaurantId from AuthCubit
+      final authState = context.read<AuthCubit>().state;
+      if (authState is AuthAuthenticated) {
+        // We can't easily get it from ProductsLoaded state directly without the restaurant object
+        // So we'll trigger a reload of restaurant data
+        context.read<RestaurantCubit>().getRestaurantByOwnerId(
+          authState.user.id,
+        );
       }
     }
   }
@@ -186,101 +203,130 @@ class _AddProductScreenState extends State<AddProductScreen> {
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
-      body: BlocConsumer<AdminProductCubit, AdminProductState>(
-        listener: (context, state) {
-          if (state is AdminProductAdded) {
-            context.read<AdminProductCubit>().resetState();
-            context.pop();
-          } else if (state is AdminProductError) {
-            context.showErrorSnackBar(state.message);
-          }
-        },
-        builder: (context, state) {
-          if (state is AdminProductLoading) {
-            return LoadingWidget(message: l10n.creatingProduct);
-          }
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<AdminProductCubit, AdminProductState>(
+            listener: (context, state) {
+              if (state is AdminProductAdded) {
+                context.read<AdminProductCubit>().resetState();
+                context.pop();
+              } else if (state is AdminProductError) {
+                context.showErrorSnackBar(state.message);
+              }
+            },
+          ),
+          BlocListener<RestaurantCubit, RestaurantState>(
+            listener: (context, state) {
+              if (state is RestaurantLoaded && _restaurantId == null) {
+                setState(() {
+                  _restaurantId = state.restaurant.id;
+                });
+                _loadCategories();
+              } else if (state is RestaurantsLoaded && _restaurantId == null) {
+                final authState = context.read<AuthCubit>().state;
+                if (authState is AuthAuthenticated) {
+                  try {
+                    final myRestaurant = state.restaurants.firstWhere(
+                      (r) => r.ownerId == authState.user.id,
+                    );
+                    setState(() {
+                      _restaurantId = myRestaurant.id;
+                    });
+                    _loadCategories();
+                  } catch (_) {}
+                }
+              }
+            },
+          ),
+        ],
+        child: BlocBuilder<AdminProductCubit, AdminProductState>(
+          builder: (context, state) {
+            if (state is AdminProductLoading) {
+              return LoadingWidget(message: l10n.creatingProduct);
+            }
 
-          if (_restaurantId == null) {
-            return Center(child: Text('Loading restaurant data...'));
-          }
+            if (_restaurantId == null) {
+              return Center(child: Text('Loading restaurant data...'));
+            }
 
-          return Form(
-            key: _formKey,
-            child: ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                _buildImageUploadSection(l10n),
-                const SizedBox(height: 24),
+            return Form(
+              key: _formKey,
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  _buildImageUploadSection(l10n),
+                  const SizedBox(height: 24),
 
-                _buildTextField(
-                  controller: _nameController,
-                  label: l10n.productName,
-                  icon: Icons.fastfood,
-                  validator: (value) =>
-                      value!.isEmpty ? l10n.pleaseEnterProductName : null,
-                ),
-                const SizedBox(height: 16),
-                _buildTextField(
-                  controller: _descriptionController,
-                  label: l10n.productDescription,
-                  icon: Icons.description,
-                  maxLines: 3,
-                  validator: (value) => value!.isEmpty
-                      ? l10n.pleaseEnterProductDescription
-                      : null,
-                ),
-                const SizedBox(height: 16),
-                _buildTextField(
-                  controller: _priceController,
-                  label: l10n.productPrice,
-                  icon: Icons.attach_money,
-                  keyboardType: TextInputType.number,
-                  validator: (value) =>
-                      value!.isEmpty ? l10n.pleaseEnterProductPrice : null,
-                ),
-                const SizedBox(height: 24),
-
-                BlocBuilder<FoodCategoryCubit, FoodCategoryState>(
-                  builder: (context, state) {
-                    if (state is FoodCategoryLoaded) {
-                      return _buildCategorySelector(
-                        context,
-                        l10n,
-                        state.categories,
-                      );
-                    }
-                    return _buildCategorySelector(context, l10n, []);
-                  },
-                ),
-                const SizedBox(height: 24),
-
-                SwitchListTile(
-                  title: Text(
-                    _isAvailable
-                        ? l10n.productAvailable
-                        : l10n.productUnavailable,
+                  _buildTextField(
+                    controller: _nameController,
+                    label: l10n.productName,
+                    icon: Icons.fastfood,
+                    validator: (value) =>
+                        value!.isEmpty ? l10n.pleaseEnterProductName : null,
                   ),
-                  value: _isAvailable,
-                  onChanged: (val) => setState(() => _isAvailable = val),
-                ),
-
-                const SizedBox(height: 24),
-                _buildOptionsSection(l10n),
-
-                const SizedBox(height: 32),
-                ElevatedButton(
-                  onPressed: _submitForm,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    foregroundColor: Colors.white,
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    controller: _descriptionController,
+                    label: l10n.productDescription,
+                    icon: Icons.description,
+                    maxLines: 3,
+                    validator: (value) => value!.isEmpty
+                        ? l10n.pleaseEnterProductDescription
+                        : null,
                   ),
-                  child: Text(l10n.addProduct),
-                ),
-              ],
-            ),
-          );
-        },
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    controller: _priceController,
+                    label: l10n.productPrice,
+                    icon: Icons.attach_money,
+                    keyboardType: TextInputType.number,
+                    validator: (value) =>
+                        value!.isEmpty ? l10n.pleaseEnterProductPrice : null,
+                  ),
+                  const SizedBox(height: 24),
+
+                  BlocBuilder<FoodCategoryCubit, FoodCategoryState>(
+                    builder: (context, state) {
+                      if (state is FoodCategoryLoaded) {
+                        return _buildCategorySelector(
+                          context,
+                          l10n,
+                          state.categories,
+                        );
+                      }
+                      return _buildCategorySelector(context, l10n, []);
+                    },
+                  ),
+                  const SizedBox(height: 24),
+
+                  SwitchListTile(
+                    title: Text(
+                      _isAvailable
+                          ? l10n.productAvailable
+                          : l10n.productUnavailable,
+                    ),
+                    value: _isAvailable,
+                    onChanged: (val) => setState(() => _isAvailable = val),
+                  ),
+
+                  const SizedBox(height: 24),
+                  _buildOptionsSection(l10n),
+
+                  const SizedBox(height: 32),
+                  ElevatedButton(
+                    onPressed: _submitForm,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      foregroundColor: Colors.white,
+                    ),
+                    child: Text(l10n.addProduct),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

@@ -23,6 +23,7 @@ import '../../features/support/presentation/views/create_ticket_screen.dart';
 import '../../features/partner/presentation/views/restaurant_orders_screen.dart';
 import '../../features/partner/presentation/views/restaurant_settings_screen.dart';
 import '../../features/drivers/presentation/views/driver_orders_screen.dart';
+import '../../features/wallet/presentation/views/driver_wallet_screen.dart';
 import '../../features/auth/presentation/cubits/auth_cubit.dart';
 import '../../features/restaurants/presentation/views/favorites_screen.dart';
 import '../../features/restaurants/presentation/views/search_results_screen.dart';
@@ -337,6 +338,11 @@ class AppRouter {
             path: 'orders',
             name: 'driver-orders',
             builder: (context, state) => const DriverOrdersScreen(),
+          ),
+          GoRoute(
+            path: 'wallet',
+            name: 'driver-wallet',
+            builder: (context, state) => const DriverWalletScreen(),
           ),
           GoRoute(
             path: 'order/:id',

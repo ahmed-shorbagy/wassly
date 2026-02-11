@@ -369,6 +369,7 @@
   "orderCancelledSuccessfully": "Order cancelled successfully",
   "restaurant": "Restaurant",
   "orderTime": "Order Time",
+  "paymentMethod": "Payment Method",
   "totalAmount": "Total Amount",
   "driverInformation": "Driver Information",
   "driver": "Driver",

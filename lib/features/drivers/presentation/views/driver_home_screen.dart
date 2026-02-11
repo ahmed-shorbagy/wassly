@@ -21,6 +21,7 @@ class DriverHomeScreen extends StatefulWidget {
 class _DriverHomeScreenState extends State<DriverHomeScreen> {
   bool _isOnline = false;
   String? _driverId;
+  String? _userId;
   String? _driverName;
   String? _driverPhone;
   bool _isLoading = false;
@@ -48,6 +49,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     if (authState is AuthAuthenticated) {
       if (mounted) {
         setState(() {
+          _userId = authState.user.id;
           _driverName = authState.user.name;
           _driverPhone = authState.user.phone;
         });
@@ -64,7 +66,16 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
 
     try {
       final repo = context.read<OrderRepository>();
-      final result = await repo.getDriverOrders(_driverId!);
+      final ids = <String>[];
+      if (_driverId != null) ids.add(_driverId!);
+      if (_userId != null) ids.add(_userId!);
+
+      if (ids.isEmpty) {
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      final result = await repo.getDriverOrders(ids);
 
       result.fold(
         (failure) => AppLogger.logError(
@@ -90,7 +101,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
 
           // 3. Find Active Order (Assigned to me, not delivered/cancelled)
           final active = orders.where((o) {
-            return o.driverId == _driverId &&
+            return (o.driverId == _driverId || o.driverId == _userId) &&
                 o.status != OrderStatus.delivered &&
                 o.status != OrderStatus.cancelled;
           }).toList();
@@ -781,11 +792,16 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
 
   Widget _buildAvailableOrdersList() {
     return BlocBuilder<OrderCubit, OrderState>(
+      buildWhen: (previous, current) =>
+          current is AvailableOrdersLoaded || current is OrderLoading,
       builder: (context, state) {
         if (state is OrdersLoaded) {
-          final available = state.orders
-              .where((o) => o.status == OrderStatus.ready && o.driverId == null)
-              .toList();
+          final available = state.orders.where((o) {
+            return (o.status == OrderStatus.accepted ||
+                    o.status == OrderStatus.preparing ||
+                    o.status == OrderStatus.ready) &&
+                o.driverId == null;
+          }).toList();
 
           if (available.isEmpty) {
             return Container(

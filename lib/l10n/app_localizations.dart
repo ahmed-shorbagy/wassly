@@ -2084,6 +2084,12 @@ abstract class AppLocalizations {
   /// **'Order Time'**
   String get orderTime;
 
+  /// No description provided for @paymentMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Method'**
+  String get paymentMethod;
+
   /// No description provided for @totalAmount.
   ///
   /// In en, this message translates to:
@@ -4820,12 +4826,6 @@ abstract class AppLocalizations {
   /// **'Driver Bonus Settings'**
   String get driverBonusSettings;
 
-  /// No description provided for @bonusEnabled.
-  ///
-  /// In en, this message translates to:
-  /// **'Enable Bonus System'**
-  String get bonusEnabled;
-
   /// No description provided for @minMonthlyDeliveries.
   ///
   /// In en, this message translates to:
@@ -4841,14 +4841,38 @@ abstract class AppLocalizations {
   /// No description provided for @distributeMonthlyBonuses.
   ///
   /// In en, this message translates to:
-  /// **'Distribute Monthly Bonuses'**
+  /// **'Distribute Last Month\'s Bonuses'**
   String get distributeMonthlyBonuses;
 
   /// No description provided for @bonusDistributionSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Monthly bonuses distributed successfully'**
+  /// **'Bonuses distributed successfully'**
   String get bonusDistributionSuccess;
+
+  /// No description provided for @bonusEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Bonus Feature'**
+  String get bonusEnabled;
+
+  /// No description provided for @bonusTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Bonus Target'**
+  String get bonusTarget;
+
+  /// No description provided for @ordersDeliveriedThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} orders delivered this month'**
+  String ordersDeliveriedThisMonth(int count);
+
+  /// No description provided for @bonusProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Bonus Progress: {current}/{target} orders'**
+  String bonusProgress(int current, int target);
 
   /// No description provided for @reachTargetForBonus.
   ///
@@ -4861,12 +4885,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirm'**
   String get confirm;
-
-  /// No description provided for @paymentMethod.
-  ///
-  /// In en, this message translates to:
-  /// **'Payment Method'**
-  String get paymentMethod;
 }
 
 class _AppLocalizationsDelegate

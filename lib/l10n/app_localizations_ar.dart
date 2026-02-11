@@ -1026,6 +1026,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get orderTime => 'وقت الطلب';
 
   @override
+  String get paymentMethod => 'طريقة الدفع';
+
+  @override
   String get totalAmount => 'المجموع الكلي';
 
   @override
@@ -2444,19 +2447,32 @@ class AppLocalizationsAr extends AppLocalizations {
   String get driverBonusSettings => 'إعدادات مكافأة السائق';
 
   @override
-  String get bonusEnabled => 'تفعيل نظام المكافآت';
+  String get minMonthlyDeliveries => 'الحد الأدنى للتوصيلات الشهرية';
 
   @override
-  String get minMonthlyDeliveries => 'الحد الأدنى للطلبات الشهرية';
+  String get bonusAmount => 'مبلغ المكافأة';
 
   @override
-  String get bonusAmount => 'قيمة المكافأة';
+  String get distributeMonthlyBonuses => 'توزيع مكافآت الشهر الماضي';
 
   @override
-  String get distributeMonthlyBonuses => 'توزيع المكافآت الشهرية';
+  String get bonusDistributionSuccess => 'تم توزيع المكافآت بنجاح';
 
   @override
-  String get bonusDistributionSuccess => 'تم توزيع المكافآت الشهرية بنجاح';
+  String get bonusEnabled => 'تفعيل ميزة المكافآت';
+
+  @override
+  String get bonusTarget => 'هدف المكافأة';
+
+  @override
+  String ordersDeliveriedThisMonth(int count) {
+    return 'تم توصيل $count طلب هذا الشهر';
+  }
+
+  @override
+  String bonusProgress(int current, int target) {
+    return 'تقدم المكافأة: $current/$target طلب';
+  }
 
   @override
   String reachTargetForBonus(int target, String amount) {
@@ -2465,7 +2481,4 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get confirm => 'تأكيد';
-
-  @override
-  String get paymentMethod => 'طريقة الدفع';
 }

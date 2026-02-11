@@ -352,6 +352,7 @@
   "orderCancelledSuccessfully": "تم إلغاء الطلب بنجاح",
   "restaurant": "المطعم",
   "orderTime": "وقت الطلب",
+  "paymentMethod": "طريقة الدفع",
   "totalAmount": "المجموع الكلي",
   "driverInformation": "معلومات السائق",
   "driver": "السائق",

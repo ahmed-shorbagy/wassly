@@ -33,6 +33,14 @@ class OrdersLoaded extends OrderState {
   List<Object?> get props => [orders];
 }
 
+class AvailableOrdersLoaded extends OrdersLoaded {
+  const AvailableOrdersLoaded(super.orders);
+}
+
+class DriverOrdersLoaded extends OrdersLoaded {
+  const DriverOrdersLoaded(super.orders);
+}
+
 class OrderCreated extends OrderState {
   final OrderEntity order;
 
@@ -56,4 +64,3 @@ class OrderError extends OrderState {
   @override
   List<Object?> get props => [message];
 }
-

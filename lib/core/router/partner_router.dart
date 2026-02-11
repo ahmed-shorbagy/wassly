@@ -7,6 +7,7 @@ import '../../features/restaurants/presentation/views/restaurant_home_screen.dar
 import '../../features/drivers/presentation/views/driver_home_screen.dart';
 import '../../features/partner/presentation/views/restaurant_orders_screen.dart';
 import '../../features/partner/presentation/views/restaurant_settings_screen.dart';
+import '../../features/wallet/presentation/views/driver_wallet_screen.dart';
 
 import '../../features/partner/presentation/views/product_management_screen.dart';
 import '../../features/partner/presentation/views/market_orders_screen.dart';
@@ -107,8 +108,11 @@ class PartnerRouter {
               GoRoute(
                 path: 'add',
                 name: 'restaurant-add-product',
-                builder: (context, state) =>
-                    const AddProductScreen(), // You'll need to define this or verify import
+                builder: (context, state) {
+                  final extras = state.extra as Map<String, dynamic>?;
+                  final restaurantId = extras?['restaurantId'] as String?;
+                  return AddProductScreen(restaurantId: restaurantId);
+                },
               ),
               GoRoute(
                 path: 'edit/:productId',
@@ -242,6 +246,11 @@ class PartnerRouter {
             builder: (context, state) => const DriverOrdersScreen(),
           ),
           GoRoute(
+            path: 'wallet',
+            name: 'driver-wallet',
+            builder: (context, state) => const DriverWalletScreen(),
+          ),
+          GoRoute(
             path: 'order/:id',
             name: 'driver-order-detail',
             builder: (context, state) {
@@ -299,7 +308,11 @@ class PartnerRouter {
               GoRoute(
                 path: 'add',
                 name: 'market-add-product',
-                builder: (context, state) => const AddProductScreen(),
+                builder: (context, state) {
+                  final extras = state.extra as Map<String, dynamic>?;
+                  final restaurantId = extras?['restaurantId'] as String?;
+                  return AddProductScreen(restaurantId: restaurantId);
+                },
               ),
               GoRoute(
                 path: 'edit/:productId',

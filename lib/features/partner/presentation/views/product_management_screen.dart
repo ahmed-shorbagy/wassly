@@ -508,9 +508,15 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
       return;
     }
     if (widget.isMarket) {
-      context.push('/market/products/add');
+      context.push(
+        '/market/products/add',
+        extra: {'restaurantId': _restaurantId},
+      );
     } else {
-      context.push('/restaurant/products/add');
+      context.push(
+        '/restaurant/products/add',
+        extra: {'restaurantId': _restaurantId},
+      );
     }
   }
 
