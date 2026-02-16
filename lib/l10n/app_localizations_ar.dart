@@ -63,6 +63,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get address => 'العنوان';
 
   @override
+  String get deliverTo => 'التوصيل إلى';
+
+  @override
   String get pleaseEnterAddress => 'الرجاء إدخال العنوان';
 
   @override

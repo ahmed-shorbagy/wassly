@@ -22,7 +22,7 @@ import '../../../market_products/presentation/cubits/market_product_customer_cub
 import '../../../ads/presentation/cubits/startup_ad_customer_cubit.dart';
 import '../../../../shared/widgets/startup_ad_popup.dart';
 import '../../../delivery_address/presentation/cubits/delivery_address_cubit.dart';
-import 'package:lottie/lottie.dart';
+
 import '../../../../core/utils/search_helper.dart';
 import '../../../../core/utils/category_image_helper.dart';
 // import '../../../../core/constants/market_product_categories.dart'; // Unused
@@ -119,6 +119,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
+      backgroundColor: AppColors.premiumBackground,
       body: MultiBlocProvider(
         providers: [
           BlocProvider<RestaurantCubit>.value(
@@ -281,8 +282,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             floating: false,
             pinned: true,
             elevation: 0,
-            backgroundColor: AppColors.primaryDark,
-            toolbarHeight: ResponsiveHelper.getAppBarHeight(context),
+            backgroundColor: AppColors.premiumBackground,
+            toolbarHeight:
+                170.h, // Increased for premium design (Address + Search)
             automaticallyImplyLeading: false,
             flexibleSpace: _CombinedAppBar(
               searchController: _searchController,
@@ -1395,21 +1397,26 @@ class _CombinedAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    // Use darker primary color for the app bar
-    const appBarColor = AppColors.primaryDark;
 
     return Container(
-      decoration: const BoxDecoration(
-        color: appBarColor,
+      decoration: BoxDecoration(
+        color: Colors.white,
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(0),
-          bottomRight: Radius.circular(0),
+          bottomLeft: Radius.circular(32.r),
+          bottomRight: Radius.circular(32.r),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: ResponsiveHelper.padding(horizontal: 16, top: 8, bottom: 12),
+          padding: ResponsiveHelper.padding(horizontal: 16, top: 8, bottom: 16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -1425,70 +1432,99 @@ class _CombinedAppBar extends StatelessWidget {
 
                   return InkWell(
                     onTap: () {
-                      // Navigate to address book screen for better address management
                       context.push('/address-book');
                     },
                     child: Padding(
-                      padding: ResponsiveHelper.padding(bottom: 12),
+                      padding: ResponsiveHelper.padding(bottom: 16),
                       child: Row(
                         children: [
-                          // Headphone Icon
-                          Icon(
-                            Icons.headset_mic,
-                            color: Colors.white,
-                            size: ResponsiveHelper.iconSize(20),
+                          // Location Icon (Light Grey background)
+                          Container(
+                            padding: EdgeInsets.all(8.r),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[100],
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.location_on_rounded,
+                              color: AppColors.primary,
+                              size: ResponsiveHelper.iconSize(20),
+                            ),
                           ),
-                          ResponsiveHelper.spacing(width: 12),
-                          // Delivery Text
+                          SizedBox(width: 12.w),
+
+                          // Address Text Column
                           Expanded(
-                            child: AutoSizeText(
-                              displayText,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500,
-                                fontSize: ResponsiveHelper.fontSize(12),
-                              ),
-                              maxLines: 1,
-                              minFontSize: 12,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          // Chevron Icon
-                          Icon(
-                            Icons.keyboard_arrow_down,
-                            color: Colors.white,
-                            size: ResponsiveHelper.iconSize(20),
-                          ),
-                          const Spacer(),
-                          // Ramadan Animated Decoration
-                          SizedBox(
-                            width: 30.w,
-                            height: 30.h,
-                            child: Lottie.network(
-                              'https://lottie.host/802ecbad-b977-4f10-994c-53538a167735/H3uC39C9C9.json',
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) {
-                                return const Center(
-                                  child: Text(
-                                    '🌙',
-                                    style: TextStyle(fontSize: 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      l10n.deliverTo,
+                                      style: TextStyle(
+                                        color: AppColors.textSecondary,
+                                        fontSize: ResponsiveHelper.fontSize(12),
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                    SizedBox(width: 4.w),
+                                    Icon(
+                                      Icons.keyboard_arrow_down_rounded,
+                                      color: AppColors.primary,
+                                      size: ResponsiveHelper.iconSize(16),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 2.h),
+                                Text(
+                                  displayText,
+                                  style: TextStyle(
+                                    color: AppColors.textPrimary,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: ResponsiveHelper.fontSize(14),
                                   ),
-                                );
-                              },
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
                             ),
                           ),
-                          const Text('✨', style: TextStyle(fontSize: 16)),
-                          SizedBox(width: 8.w),
-                          InkWell(
-                            onTap: () => context.pushNamed('cart'),
-                            child: Padding(
-                              padding: EdgeInsets.all(4.r),
-                              child: Icon(
-                                Icons.shopping_cart_outlined,
-                                color: Colors.white,
-                                size: ResponsiveHelper.iconSize(24),
+
+                          // Actions
+                          Row(
+                            children: [
+                              // Notification Bell
+                              Container(
+                                padding: EdgeInsets.all(8.r),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[100],
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.notifications_none_rounded,
+                                  color: AppColors.textPrimary,
+                                  size: ResponsiveHelper.iconSize(20),
+                                ),
                               ),
-                            ),
+                              SizedBox(width: 12.w),
+                              // Cart
+                              InkWell(
+                                onTap: () => context.pushNamed('cart'),
+                                child: Container(
+                                  padding: EdgeInsets.all(8.r),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[100],
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.shopping_cart_outlined,
+                                    color: AppColors.textPrimary,
+                                    size: ResponsiveHelper.iconSize(20),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -1496,80 +1532,74 @@ class _CombinedAppBar extends StatelessWidget {
                   );
                 },
               ),
-              // Search Field - Full Width
+
+              // Search Field - Light Grey Fill
               Container(
-                height: 36.h,
+                height: 48.h,
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20.r),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 8.r,
-                      offset: Offset(0, 2.h),
-                    ),
-                  ],
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(16.r),
                 ),
-                child: StatefulBuilder(
-                  builder: (context, setState) => TextField(
-                    controller: searchController,
-                    onTap: () {
-                      if (onSearchTap != null) {
-                        onSearchTap!();
-                      }
-                    },
-                    onChanged: (_) {
-                      setState(() {});
-                      onSearchChanged();
-                      // Navigate to search results if there's text
-                      if (searchController.text.isNotEmpty &&
-                          onSearchTap != null) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          if (context.mounted) {
-                            context.push(
-                              '/search?q=${Uri.encodeComponent(searchController.text)}',
-                              extra: restaurants,
-                            );
-                          }
-                        });
-                      }
-                    },
-                    decoration: InputDecoration(
-                      hintText: l10n.searchRestaurants,
-                      hintStyle: TextStyle(
-                        color: AppColors.textHint,
-                        fontSize: ResponsiveHelper.fontSize(12),
-                      ),
-                      prefixIcon: Icon(
-                        Icons.search,
-                        color: AppColors.textSecondary,
-                        size: ResponsiveHelper.iconSize(20),
-                      ),
-                      suffixIcon: searchController.text.isNotEmpty
-                          ? IconButton(
-                              icon: Icon(
-                                Icons.clear,
-                                color: AppColors.textSecondary,
-                                size: ResponsiveHelper.iconSize(20),
-                              ),
-                              onPressed: () {
-                                searchController.clear();
-                                setState(() {});
-                                onSearchChanged();
-                              },
-                            )
-                          : null,
-                      border: InputBorder.none,
-                      contentPadding: ResponsiveHelper.padding(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                      isDense: true,
+                child: TextField(
+                  controller: searchController,
+                  onChanged: (value) {
+                    onSearchChanged();
+                    if (value.isNotEmpty && onSearchTap != null) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (context.mounted) {
+                          context.push(
+                            '/search?q=${Uri.encodeComponent(value)}',
+                            extra: restaurants,
+                          );
+                        }
+                      });
+                    }
+                  },
+                  onTap: onSearchTap,
+                  readOnly: onSearchTap != null,
+                  decoration: InputDecoration(
+                    hintText: l10n.searchRestaurants,
+                    hintStyle: TextStyle(
+                      color: AppColors.textHint,
+                      fontSize: ResponsiveHelper.fontSize(14),
                     ),
-                    style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: ResponsiveHelper.fontSize(12),
+                    prefixIcon: Icon(
+                      Icons.search_rounded,
+                      color: AppColors.textSecondary,
+                      size: ResponsiveHelper.iconSize(24),
                     ),
+                    suffixIcon: searchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: Icon(
+                              Icons.close_rounded,
+                              size: ResponsiveHelper.iconSize(20),
+                              color: AppColors.textSecondary,
+                            ),
+                            onPressed: () {
+                              searchController.clear();
+                              onSearchChanged();
+                            },
+                          )
+                        : Container(
+                            margin: EdgeInsets.all(8.r),
+                            padding: EdgeInsets.all(6.r),
+                            child: Icon(
+                              Icons.tune_rounded, // Filter icon hint
+                              color: AppColors.primary,
+                              size: ResponsiveHelper.iconSize(20),
+                            ),
+                          ),
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 12.h,
+                    ),
+                    isDense: true,
+                  ),
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: ResponsiveHelper.fontSize(14),
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),

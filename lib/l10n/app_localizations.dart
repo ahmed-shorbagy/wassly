@@ -206,6 +206,12 @@ abstract class AppLocalizations {
   /// **'Address'**
   String get address;
 
+  /// No description provided for @deliverTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliver to'**
+  String get deliverTo;
+
   /// No description provided for @pleaseEnterAddress.
   ///
   /// In en, this message translates to:

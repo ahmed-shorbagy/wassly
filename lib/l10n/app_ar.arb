@@ -19,6 +19,7 @@
   "pleaseEnterValidEmail": "الرجاء إدخال بريد إلكتروني صحيح",
   "location": "الموقع",
   "address": "العنوان",
+  "deliverTo": "التوصيل إلى",
   "pleaseEnterAddress": "الرجاء إدخال العنوان",
   "tapToSelectLocationOnMap": "اضغط لاختيار الموقع على الخريطة",
   "locationSet": "الموقع: {latitude}, {longitude}",

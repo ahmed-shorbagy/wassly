@@ -18,6 +18,7 @@
   "pleaseEnterValidEmail": "Please enter a valid email",
   "location": "Location",
   "address": "Address",
+  "deliverTo": "Deliver to",
   "pleaseEnterAddress": "Please enter address",
   "tapToSelectLocationOnMap": "Tap to select location on map",
   "locationSet": "Location: {latitude}, {longitude}",

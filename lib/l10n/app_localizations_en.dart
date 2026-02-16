@@ -63,6 +63,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get address => 'Address';
 
   @override
+  String get deliverTo => 'Deliver to';
+
+  @override
   String get pleaseEnterAddress => 'Please enter address';
 
   @override

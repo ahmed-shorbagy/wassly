@@ -15,6 +15,7 @@ class AppColors {
   static const Color background = Color(0xFFFFFFFF); // Pure White
   static const Color surface = Color(0xFFFFFFFF); // White Surface
   static const Color cardBackground = Color(0xFFFFFFFF); // White Cards
+  static const Color premiumBackground = Color(0xFFFAFAFA); // Premium Off-White
 
   // Text Colors - Black & Gray
   static const Color textPrimary = Color(0xFF09051C); // Almost Black
@@ -39,8 +40,10 @@ class AppColors {
   // Overlay Colors
   static const Color overlay = Color(0x80000000); // Dark overlay
   static const Color overlayLight = Color(0x40000000); // Light overlay
-  
+
   // Promo/Special Colors
   static const Color promoGreen = Color(0xFF53E88B); // For promo banners
-  static const Color promoBackground = Color(0xFFF0FFF4); // Light green background
+  static const Color promoBackground = Color(
+    0xFFF0FFF4,
+  ); // Light green background
 }
