@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/utils/responsive_helper.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/restaurant_entity.dart';
 import '../../../home/presentation/cubits/home_cubit.dart';
@@ -19,10 +18,15 @@ class RestaurantCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(24.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 24.r,
+            offset: const Offset(0, 12),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
             blurRadius: 10.r,
             offset: const Offset(0, 4),
           ),
@@ -72,13 +76,13 @@ class RestaurantCard extends StatelessWidget {
           children: [
             // Top image section - Image First Optimization
             Expanded(
-              flex: 3,
+              flex: 12,
               child: Stack(
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(20.r),
-                      topRight: Radius.circular(20.r),
+                      topLeft: Radius.circular(24.r),
+                      topRight: Radius.circular(24.r),
                     ),
                     child: Container(
                       width: double.infinity,
@@ -110,33 +114,50 @@ class RestaurantCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Optional discount badge on image
+                  // Redesigned modern discount badge
                   if (restaurant.isDiscountActive)
                     Positioned(
-                      top: 10,
-                      right: 10,
+                      top: 12.h,
+                      left: 12.w,
                       child: Container(
                         padding: EdgeInsets.symmetric(
-                          horizontal: 8.w,
-                          vertical: 4.h,
+                          horizontal: 10.w,
+                          vertical: 6.h,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(10.r),
+                          gradient: LinearGradient(
+                            colors: [
+                              AppColors.accentFood,
+                              const Color(0xFFFF5C00), // Deeper Orange
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(12.r),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 4,
+                              color: AppColors.accentFood.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
                             ),
                           ],
                         ),
-                        child: Text(
-                          'خصم',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: ResponsiveHelper.fontSize(10),
-                            fontWeight: FontWeight.bold,
-                          ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.local_offer,
+                              color: Colors.white,
+                              size: 12.r,
+                            ),
+                            SizedBox(width: 4.w),
+                            Text(
+                              'خصم', // Localized would be better, but keeping as is for now or use l10n
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -144,11 +165,10 @@ class RestaurantCard extends StatelessWidget {
               ),
             ),
 
-            // Bottom info section - More compact
             Expanded(
-              flex: 2,
+              flex: 9,
               child: Padding(
-                padding: ResponsiveHelper.padding(horizontal: 12, vertical: 8),
+                padding: EdgeInsets.all(14.r),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -156,70 +176,70 @@ class RestaurantCard extends StatelessWidget {
                     Text(
                       restaurant.name,
                       style: TextStyle(
-                        fontSize: ResponsiveHelper.fontSize(14),
-                        fontWeight: FontWeight.bold,
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w900,
                         color: AppColors.textPrimary,
+                        letterSpacing: -0.5,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
 
+                    // Rating and Reviews Grouped
                     Row(
                       children: [
-                        const Icon(Icons.star, color: Colors.amber, size: 14),
-                        SizedBox(width: 4.w),
-                        Text(
-                          restaurant.rating.toStringAsFixed(1),
-                          style: TextStyle(
-                            fontSize: ResponsiveHelper.fontSize(12),
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 6.w,
+                            vertical: 2.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.amber.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(6.r),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.star_rounded,
+                                color: Colors.amber,
+                                size: 16,
+                              ),
+                              SizedBox(width: 2.w),
+                              Text(
+                                restaurant.rating.toStringAsFixed(1),
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w800,
+                                  color: const Color(0xFFB8860B), // Dark Gold
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        SizedBox(width: 4.w),
+                        SizedBox(width: 8.w),
                         Text(
-                          '(${restaurant.totalReviews})',
+                          '(${restaurant.totalReviews} reviews)',
                           style: TextStyle(
-                            fontSize: ResponsiveHelper.fontSize(10),
+                            fontSize: 11.sp,
                             color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
                     ),
 
+                    // Delivery Info Row
                     Row(
                       children: [
-                        Icon(
-                          Icons.access_time,
-                          size: 12.w,
-                          color: AppColors.textSecondary,
+                        _buildFeatureIcon(
+                          Icons.timer_outlined,
+                          '${restaurant.estimatedDeliveryTime}',
                         ),
-                        SizedBox(width: 4.w),
-                        Builder(
-                          builder: (context) {
-                            final l10n = AppLocalizations.of(context)!;
-                            return Text(
-                              '${restaurant.estimatedDeliveryTime} ${l10n.minutesAbbreviation}',
-                              style: TextStyle(
-                                fontSize: ResponsiveHelper.fontSize(11),
-                                color: AppColors.textSecondary,
-                              ),
-                            );
-                          },
-                        ),
-                        const Spacer(),
-                        Builder(
-                          builder: (context) {
-                            final l10n = AppLocalizations.of(context)!;
-                            return Text(
-                              '${restaurant.deliveryFee.toStringAsFixed(0)} ${l10n.currencySymbol}',
-                              style: TextStyle(
-                                fontSize: ResponsiveHelper.fontSize(12),
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.success,
-                              ),
-                            );
-                          },
+                        SizedBox(width: 12.w),
+                        _buildFeatureIcon(
+                          Icons.pedal_bike_rounded,
+                          restaurant.deliveryFee.toStringAsFixed(0),
+                          isCurrency: true,
                         ),
                       ],
                     ),
@@ -230,6 +250,54 @@ class RestaurantCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildFeatureIcon(
+    IconData icon,
+    String value, {
+    bool isCurrency = false,
+  }) {
+    return Builder(
+      builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14.sp, color: AppColors.primaryDark),
+            SizedBox(width: 4.w),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            if (!isCurrency) ...[
+              SizedBox(width: 2.w),
+              Text(
+                l10n.minutesAbbreviation,
+                style: TextStyle(
+                  fontSize: 10.sp,
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ] else ...[
+              SizedBox(width: 2.w),
+              Text(
+                l10n.currencySymbol,
+                style: TextStyle(
+                  fontSize: 10.sp,
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ],
+        );
+      },
     );
   }
 }

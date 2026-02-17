@@ -579,10 +579,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nearbyRestaurants => 'Nearby Restaurants';
 
   @override
+  String get topRatedBrands => 'Top Rated Brands';
+
+  @override
+  String get newOnWassly => 'New & Trending';
+
+  @override
+  String get nearbyFavorites => 'Nearby Favorites';
+
+  @override
   String get viewAll => 'View All';
 
   @override
-  String get specialOffers => 'Special Offers';
+  String get specialOffers => 'Exclusive Deals';
 
   @override
   String get noRestaurants => 'No Restaurants';

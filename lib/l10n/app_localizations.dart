@@ -1208,6 +1208,24 @@ abstract class AppLocalizations {
   /// **'Nearby Restaurants'**
   String get nearbyRestaurants;
 
+  /// No description provided for @topRatedBrands.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Rated Brands'**
+  String get topRatedBrands;
+
+  /// No description provided for @newOnWassly.
+  ///
+  /// In en, this message translates to:
+  /// **'New & Trending'**
+  String get newOnWassly;
+
+  /// No description provided for @nearbyFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Nearby Favorites'**
+  String get nearbyFavorites;
+
   /// No description provided for @viewAll.
   ///
   /// In en, this message translates to:
@@ -1217,7 +1235,7 @@ abstract class AppLocalizations {
   /// No description provided for @specialOffers.
   ///
   /// In en, this message translates to:
-  /// **'Special Offers'**
+  /// **'Exclusive Deals'**
   String get specialOffers;
 
   /// No description provided for @noRestaurants.

@@ -119,7 +119,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: AppColors.premiumBackground,
+      backgroundColor: Colors.white,
       body: MultiBlocProvider(
         providers: [
           BlocProvider<RestaurantCubit>.value(
@@ -282,9 +282,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             floating: false,
             pinned: true,
             elevation: 0,
-            backgroundColor: AppColors.premiumBackground,
-            toolbarHeight:
-                170.h, // Increased for premium design (Address + Search)
+            backgroundColor: Colors.transparent,
+            surfaceTintColor: Colors.transparent,
+            toolbarHeight: 130.h, // Further reduced for a tighter fit
             automaticallyImplyLeading: false,
             flexibleSpace: _CombinedAppBar(
               searchController: _searchController,
@@ -306,14 +306,22 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   ? state.banners.where((b) => b.type == 'home').toList()
                   : <BannerEntity>[];
               return SliverToBoxAdapter(
-                child: _BannerCarousel(
-                  banners: banners,
-                  onPageChanged: (index) {
-                    setState(() {
-                      _currentBannerIndex = index;
-                    });
-                  },
-                  currentIndex: _currentBannerIndex,
+                child: Column(
+                  children: [
+                    _SectionHeader(
+                      title: l10n.specialOffers,
+                      accentColor: AppColors.accentFood,
+                    ),
+                    _BannerCarousel(
+                      banners: banners,
+                      onPageChanged: (index) {
+                        setState(() {
+                          _currentBannerIndex = index;
+                        });
+                      },
+                      currentIndex: _currentBannerIndex,
+                    ),
+                  ],
                 ),
               );
             },
@@ -332,15 +340,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                      child: Text(
-                        l10n.exploreOurRichWorld,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
+                    _SectionHeader(
+                      title: l10n.exploreOurRichWorld,
+                      accentColor: AppColors.primary,
                     ),
                     PromotionalImageWidget(image: promoImages.first),
                   ],
@@ -356,37 +358,42 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   ? state.categories
                   : <RestaurantCategoryEntity>[];
               return SliverToBoxAdapter(
-                child: Padding(
-                  padding: ResponsiveHelper.padding(horizontal: 16, top: 16),
-                  child: _MarketProductCategoriesSection(
-                    restaurantCategories: categories,
-                    onCategoryTap: (category, isMarket) {
-                      if (isMarket) {
-                        // Navigate to Markets (Vendors)
-                        if (category == l10n.market) {
-                          // Navigate to "Our Market" page (Market Products)
-                          context.push('/market-products');
+                child: Column(
+                  children: [
+                    _SectionHeader(
+                      title: l10n.discoverWassly,
+                      accentColor: AppColors.accentMarket,
+                    ),
+                    _MarketProductCategoriesSection(
+                      restaurantCategories: categories,
+                      onCategoryTap: (category, isMarket) {
+                        if (isMarket) {
+                          // Navigate to Markets (Vendors)
+                          if (category == l10n.market) {
+                            // Navigate to "Our Market" page (Market Products)
+                            context.push('/market-products');
+                          } else {
+                            // Show vendors for specific market category
+                            // Pass filterType=market to hide restaurant top categories
+                            context.push(
+                              '/search?q=${Uri.encodeComponent(category)}&filterType=market',
+                              extra: _allRestaurants,
+                            );
+                          }
                         } else {
-                          // Show vendors for specific market category
-                          // Pass filterType=market to hide restaurant top categories
-                          context.push(
-                            '/search?q=${Uri.encodeComponent(category)}&filterType=market',
-                            extra: _allRestaurants,
-                          );
+                          // Navigate to Restaurants Search
+                          if (category == l10n.restaurants) {
+                            context.push('/search', extra: _allRestaurants);
+                          } else {
+                            context.push(
+                              '/search?q=${Uri.encodeComponent(category)}',
+                              extra: _allRestaurants,
+                            );
+                          }
                         }
-                      } else {
-                        // Navigate to Restaurants Search
-                        if (category == l10n.restaurants) {
-                          context.push('/search', extra: _allRestaurants);
-                        } else {
-                          context.push(
-                            '/search?q=${Uri.encodeComponent(category)}',
-                            extra: _allRestaurants,
-                          );
-                        }
-                      }
-                    },
-                  ),
+                      },
+                    ),
+                  ],
                 ),
               );
             },
@@ -398,8 +405,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               child: Padding(
                 padding: ResponsiveHelper.padding(
                   horizontal: 16,
-                  top: 24,
-                  bottom: 8,
+                  top: 12, // Reduced from 24
+                  bottom: 4, // Reduced from 8
                 ),
                 child: _DiscountRestaurantsBannerCarousel(
                   restaurants: discountedRestaurants,
@@ -413,40 +420,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               ),
             ),
 
-          // Restaurants Section Header
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: ResponsiveHelper.padding(horizontal: 16, vertical: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    l10n.nearbyRestaurants,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                      fontSize: ResponsiveHelper.fontSize(16),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      context.push('/search?q=', extra: _allRestaurants);
-                    },
-                    child: Text(
-                      l10n.viewAll,
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
-                        fontSize: ResponsiveHelper.fontSize(12),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Enhanced Restaurants Grid (shows all restaurants, including discounted ones)
+          // --- START SEGMENTED RESTAURANTS ---
           if (restaurants.isEmpty)
             SliverFillRemaining(
               child: _EmptyStateWidget(
@@ -461,14 +435,35 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     : Icons.restaurant_outlined,
               ),
             )
-          else
-            // Three independent horizontal rows, each scrolls separately
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: ResponsiveHelper.padding(all: 16),
-                child: _ThreeRowRestaurantScroller(restaurants: restaurants),
-              ),
+          else ...[
+            // 1. Top Rated Brands
+            _HorizontalRestaurantList(
+              restaurants: restaurants.where((r) => r.rating >= 4.0).toList()
+                ..sort((a, b) => b.totalReviews.compareTo(a.totalReviews)),
+              title: l10n.topRatedBrands,
+              accentColor: Colors.amber,
+              onViewAll: () =>
+                  context.push('/search?q=', extra: _allRestaurants),
             ),
+
+            // 2. New & Trending
+            _HorizontalRestaurantList(
+              restaurants: restaurants.toList()
+                ..sort((a, b) => b.createdAt.compareTo(a.createdAt)),
+              title: l10n.newOnWassly,
+              accentColor: AppColors.primary,
+              onViewAll: () =>
+                  context.push('/search?q=', extra: _allRestaurants),
+            ),
+
+            // 3. Nearby Favorites (Now Horizontal)
+            _HorizontalRestaurantList(
+              restaurants: restaurants,
+              title: l10n.nearbyFavorites,
+              onViewAll: () =>
+                  context.push('/search?q=', extra: _allRestaurants),
+            ),
+          ],
         ],
       ),
     );
@@ -482,7 +477,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           floating: true,
           pinned: true,
           toolbarHeight: ResponsiveHelper.getAppBarHeight(context),
-          backgroundColor: AppColors.surface,
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.white,
           flexibleSpace: Container(
             padding: ResponsiveHelper.padding(
               horizontal: 16,
@@ -543,6 +539,124 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   }
 }
 
+// Standalone Section Header widget for reuse
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  final VoidCallback? onViewAll;
+  final Color accentColor;
+
+  const _SectionHeader({
+    required this.title,
+    this.onViewAll,
+    this.accentColor = AppColors.primary,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: ResponsiveHelper.padding(
+        horizontal: 16,
+        vertical: 4,
+      ), // Reduced from 8
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 4.w,
+                height: 18.h,
+                decoration: BoxDecoration(
+                  color: accentColor,
+                  borderRadius: BorderRadius.circular(2.r),
+                ),
+              ),
+              SizedBox(width: 8.w),
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.textPrimary,
+                  fontSize: 18.sp,
+                  letterSpacing: -0.6,
+                ),
+              ),
+            ],
+          ),
+          if (onViewAll != null)
+            TextButton(
+              onPressed: onViewAll,
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(
+                AppLocalizations.of(context)!.viewAll,
+                style: TextStyle(
+                  color: accentColor == AppColors.primary
+                      ? AppColors.primaryDark
+                      : accentColor,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12.sp,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HorizontalRestaurantList extends StatelessWidget {
+  final List<RestaurantEntity> restaurants;
+  final String title;
+  final VoidCallback? onViewAll;
+  final Color accentColor;
+
+  const _HorizontalRestaurantList({
+    required this.restaurants,
+    required this.title,
+    this.onViewAll,
+    this.accentColor = AppColors.primary,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (restaurants.isEmpty)
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+
+    return SliverToBoxAdapter(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionHeader(
+            title: title,
+            onViewAll: onViewAll,
+            accentColor: accentColor,
+          ),
+          SizedBox(
+            height: 220.h,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: ResponsiveHelper.padding(horizontal: 16),
+              itemCount: restaurants.length > 8 ? 8 : restaurants.length,
+              separatorBuilder: (_, __) => SizedBox(width: 12.w),
+              itemBuilder: (context, index) {
+                return SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.75,
+                  child: RestaurantCard(restaurant: restaurants[index]),
+                );
+              },
+            ),
+          ),
+          ResponsiveHelper.spacing(height: 16),
+        ],
+      ),
+    );
+  }
+}
+
 class _BannerCarousel extends StatelessWidget {
   final List<BannerEntity> banners;
   final Function(int) onPageChanged;
@@ -572,12 +686,17 @@ class _BannerCarousel extends StatelessWidget {
     final double bannerHeight = 130.h;
 
     return Padding(
-      padding: ResponsiveHelper.padding(left: 16, top: 16, right: 8, bottom: 0),
+      padding: ResponsiveHelper.padding(
+        left: 16,
+        top: 4,
+        right: 8,
+        bottom: 0,
+      ), // Reduced from 16
       child: CarouselSlider(
         options: CarouselOptions(
-          height: bannerHeight,
-          viewportFraction: 0.95,
-          enlargeCenterPage: false,
+          height: bannerHeight + 24.h, // Space for shadows
+          viewportFraction: 0.9,
+          enlargeCenterPage: true,
           enableInfiniteScroll: effective.length > 1,
           autoPlay: effective.length > 1,
           autoPlayInterval: const Duration(seconds: 4),
@@ -592,9 +711,19 @@ class _BannerCarousel extends StatelessWidget {
             builder: (BuildContext context) {
               return Container(
                 width: MediaQuery.of(context).size.width,
-                margin: const EdgeInsets.symmetric(horizontal: 4),
+                margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 12.h),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.06),
+                      blurRadius: 15,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(20.r),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       // Responsive banner dimensions
@@ -773,6 +902,31 @@ class _MarketProductCategoriesSectionState
     ];
   }
 
+  Color _getCategoryColor(String title) {
+    final t = title.toLowerCase();
+    if (t.contains('food') || t.contains('restaurant') || t.contains('مطعم')) {
+      return AppColors.accentFood;
+    }
+    if (t.contains('market') || t.contains('grocery') || t.contains('سوبر')) {
+      return AppColors.accentMarket;
+    }
+    if (t.contains('health') ||
+        t.contains('pharmacy') ||
+        t.contains('صيدلية')) {
+      return AppColors.accentHealth;
+    }
+    if (t.contains('bakery') || t.contains('bread') || t.contains('مخبز')) {
+      return AppColors.accentBakery;
+    }
+    if (t.contains('coffee') || t.contains('cafe') || t.contains('قهوة')) {
+      return AppColors.accentCoffee;
+    }
+    if (t.contains('flower') || t.contains('gift') || t.contains('ورد')) {
+      return AppColors.accentFlowers;
+    }
+    return AppColors.primary;
+  }
+
   Widget _buildCategoryCard(
     BuildContext context,
     String? imageUrl,
@@ -780,19 +934,19 @@ class _MarketProductCategoriesSectionState
     String title,
     VoidCallback onTap,
   ) {
+    final accentColor = _getCategoryColor(title);
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
         decoration: BoxDecoration(
-          color: const Color(0xFFF7F7F7),
-          borderRadius: BorderRadius.circular(24.r),
-          border: Border.all(color: Colors.black.withOpacity(0.04)),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.02),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: accentColor.withOpacity(0.08),
+              blurRadius: 15,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
@@ -801,49 +955,50 @@ class _MarketProductCategoriesSectionState
             Container(
               width: 38.w,
               height: 38.w,
-              padding: EdgeInsets.all(6.r),
+              padding: EdgeInsets.all(7.r),
               decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(12.r),
+                color: AppColors.getAccentBackground(accentColor),
+                borderRadius: BorderRadius.circular(14.r),
               ),
               child: assetPath != null
                   ? Image.asset(
                       assetPath,
-                      fit: BoxFit.contain,
+                      fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => Icon(
                         Icons.category_rounded,
                         size: 20.w,
-                        color: AppColors.textSecondary,
+                        color: accentColor,
                       ),
                     )
                   : (imageUrl != null && imageUrl.isNotEmpty)
                   ? CachedNetworkImage(
                       imageUrl: imageUrl,
-                      fit: BoxFit.contain,
+                      fit: BoxFit.cover,
                       placeholder: (context, url) => const Center(
                         child: CircularProgressIndicator(strokeWidth: 2),
                       ),
                       errorWidget: (context, url, error) => Icon(
                         Icons.category_rounded,
                         size: 20.w,
-                        color: AppColors.textSecondary,
+                        color: accentColor,
                       ),
                     )
                   : Icon(
                       Icons.category_rounded,
                       size: 20.w,
-                      color: AppColors.textSecondary,
+                      color: accentColor,
                     ),
             ),
-            SizedBox(width: 8.w),
+            SizedBox(width: 10.w),
             Expanded(
               child: Text(
                 title,
                 style: TextStyle(
-                  fontSize: ResponsiveHelper.fontSize(12),
-                  fontWeight: FontWeight.bold,
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
                   height: 1.1,
+                  letterSpacing: -0.2,
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -941,16 +1096,7 @@ class _MarketProductCategoriesSectionState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Header
-        Text(
-          l10n.discoverWassly,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-            fontSize: ResponsiveHelper.fontSize(18),
-          ),
-        ),
-        ResponsiveHelper.spacing(height: 12),
+        // Internal header removed as it's now handled by the parent
         // Horizontal Scrollable Categories in 2 Rows
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -1075,32 +1221,10 @@ class _DiscountRestaurantsBannerCarousel extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Header
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              l10n.specialOffers,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-                fontSize: ResponsiveHelper.fontSize(16),
-              ),
-            ),
-            if (restaurants.length > 1)
-              GestureDetector(
-                onTap: () {
-                  // Could navigate to a special offers page
-                },
-                child: Text(
-                  l10n.viewAll,
-                  style: TextStyle(
-                    color: AppColors.success,
-                    fontWeight: FontWeight.w600,
-                    fontSize: ResponsiveHelper.fontSize(14),
-                  ),
-                ),
-              ),
-          ],
+        _SectionHeader(
+          title: l10n.specialOffers,
+          accentColor: AppColors.accentFood,
+          onViewAll: restaurants.length > 1 ? () {} : null,
         ),
         ResponsiveHelper.spacing(height: 12),
         // Banner Carousel
@@ -1306,15 +1430,16 @@ class _DiscountRestaurantsBannerCarousel extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(
               restaurants.length,
-              (index) => Container(
-                width: currentIndex == index ? 24.w : 8.w,
-                height: 8.h,
-                margin: ResponsiveHelper.margin(horizontal: 4),
+              (index) => AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                width: currentIndex == index ? 20.w : 6.w,
+                height: 6.h,
+                margin: EdgeInsets.symmetric(horizontal: 3.w),
                 decoration: BoxDecoration(
                   color: currentIndex == index
                       ? AppColors.primary
-                      : AppColors.textHint,
-                  borderRadius: BorderRadius.circular(4.r),
+                      : AppColors.textHint.withOpacity(0.4),
+                  borderRadius: BorderRadius.circular(3.r),
                 ),
               ),
             ),
@@ -1407,7 +1532,7 @@ class _CombinedAppBar extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -1416,7 +1541,11 @@ class _CombinedAppBar extends StatelessWidget {
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: ResponsiveHelper.padding(horizontal: 16, top: 8, bottom: 16),
+          padding: ResponsiveHelper.padding(
+            horizontal: 16,
+            top: 4,
+            bottom: 4,
+          ), // Tightened Further
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -1435,7 +1564,9 @@ class _CombinedAppBar extends StatelessWidget {
                       context.push('/address-book');
                     },
                     child: Padding(
-                      padding: ResponsiveHelper.padding(bottom: 16),
+                      padding: ResponsiveHelper.padding(
+                        bottom: 8,
+                      ), // Reduced from 16
                       child: Row(
                         children: [
                           // Location Icon (Light Grey background)

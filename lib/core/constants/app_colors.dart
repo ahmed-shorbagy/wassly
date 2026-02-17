@@ -29,6 +29,39 @@ class AppColors {
   static const Color error = Color(0xFFF54748); // Red
   static const Color info = Color(0xFF3C92FF); // Blue
 
+  // Category Accent Colors - Premium & Vibrant
+  static const Color accentFood = Color(0xFFFF7C32); // Vibrant Orange
+  static const Color accentMarket = Color(
+    0xFF53E88B,
+  ); // Vibrant Green (Primary)
+  static const Color accentHealth = Color(0xFF3C92FF); // Blue
+  static const Color accentBakery = Color(0xFFA16B47); // Brown/Gold
+  static const Color accentCoffee = Color(0xFF6F4E37); // Coffee Brown
+  static const Color accentFlowers = Color(0xFFFF69B4); // Pink
+
+  // Category Gradients
+  static const LinearGradient gradientPrimary = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF53E88B), Color(0xFF15BE77)],
+  );
+
+  static const LinearGradient gradientOrange = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFFFF9F67), Color(0xFFFF7C32)],
+  );
+
+  static const LinearGradient gradientBlue = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF6FB1FF), Color(0xFF3C92FF)],
+  );
+
+  // Background Colors for accented items (Subtle)
+  static Color getAccentBackground(Color accentColor) =>
+      accentColor.withOpacity(0.08);
+
   // Border Colors - Light Gray
   static const Color border = Color(0xFFF4F4F4); // Very Light Gray
   static const Color borderDark = Color(0xFFE8E8E8); // Light Gray

@@ -576,10 +576,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get nearbyRestaurants => 'مطاعم قريبة منك';
 
   @override
+  String get topRatedBrands => 'ماركات الأعلى تقييماً';
+
+  @override
+  String get newOnWassly => 'جديد و رائج';
+
+  @override
+  String get nearbyFavorites => 'المفضل بالقرب منك';
+
+  @override
   String get viewAll => 'عرض الكل';
 
   @override
-  String get specialOffers => 'عروض خاصة';
+  String get specialOffers => 'عروض حصرية';
 
   @override
   String get noRestaurants => 'لا توجد مطاعم';
