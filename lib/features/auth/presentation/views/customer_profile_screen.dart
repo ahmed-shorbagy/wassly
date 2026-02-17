@@ -17,14 +17,21 @@ class CustomerProfileScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
           l10n.myProfile,
-          style: TextStyle(fontSize: ResponsiveHelper.fontSize(18)),
+          style: TextStyle(
+            fontSize: ResponsiveHelper.fontSize(18),
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
         ),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        foregroundColor: AppColors.textPrimary,
         elevation: 0,
+        centerTitle: false,
+        scrolledUnderElevation: 0,
         toolbarHeight: ResponsiveHelper.getAppBarHeight(context),
       ),
       body: BlocBuilder<AuthCubit, AuthState>(
@@ -36,112 +43,125 @@ class CustomerProfileScreen extends StatelessWidget {
           if (state is AuthAuthenticated) {
             final user = state.user;
             return SingleChildScrollView(
-              padding: ResponsiveHelper.padding(all: 16),
+              padding: EdgeInsets.only(bottom: 32.h),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Profile Header
+                  // Profile Header (Premium & Open)
                   _buildProfileHeader(context, user, l10n),
-                  ResponsiveHelper.spacing(height: 24),
+
+                  SizedBox(height: 16.h),
 
                   // Account Information Section
-                  _buildSectionTitle(l10n.accountInformation),
-                  ResponsiveHelper.spacing(height: 12),
-                  _buildInfoCard(context, [
-                    _buildInfoRow(
-                      Icons.person_outline,
-                      l10n.fullName,
-                      user.name,
-                    ),
-                    const Divider(height: 1),
-                    _buildInfoRow(Icons.email_outlined, l10n.email, user.email),
-                    const Divider(height: 1),
-                    _buildInfoRow(Icons.phone_outlined, l10n.phone, user.phone),
-                  ]),
-                  ResponsiveHelper.spacing(height: 24),
-
-                  // Actions Section
-                  _buildSectionTitle(l10n.settings),
-                  ResponsiveHelper.spacing(height: 12),
-                  _buildActionCard(context, [
-                    _buildActionTile(
-                      context,
-                      icon: Icons.shopping_bag_outlined,
-                      title: l10n.myOrders,
-                      onTap: () => context.go('/orders'),
-                    ),
-                    const Divider(height: 1),
-                    _buildActionTile(
-                      context,
-                      icon: Icons.lock_outline,
-                      title: l10n.changePassword,
-                      onTap: () => _showChangePasswordDialog(context, l10n),
-                    ),
-                    const Divider(height: 1),
-                    _buildActionTile(
-                      context,
-                      icon: Icons.support_agent,
-                      title: l10n.supportChat,
-                      onTap: () => context.pushNamed('customer-support'),
-                    ),
-                  ]),
-                  ResponsiveHelper.spacing(height: 24),
-
-                  // Logout Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () => _showLogoutDialog(context, l10n),
-                      icon: Icon(
-                        Icons.logout,
-                        size: ResponsiveHelper.iconSize(20),
+                  const _SectionHeader(title: 'Account Information'),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    child: _buildInfoCard(context, [
+                      _buildInfoRow(
+                        Icons.person_outline_rounded,
+                        l10n.fullName,
+                        user.name,
+                        accentColor: const Color(0xFFFF9F67),
                       ),
-                      label: Text(
-                        l10n.logout,
-                        style: TextStyle(
-                          fontSize: ResponsiveHelper.fontSize(16),
-                        ),
+                      _buildInfoRow(
+                        Icons.email_outlined,
+                        l10n.email,
+                        user.email,
+                        accentColor: const Color(0xFF6FB1FF),
                       ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.error,
-                        foregroundColor: Colors.white,
-                        padding: ResponsiveHelper.padding(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
+                      _buildInfoRow(
+                        Icons.phone_iphone_rounded,
+                        l10n.phone,
+                        user.phone,
+                        accentColor: const Color(0xFF53E88B),
+                        isLast: true,
                       ),
-                    ),
+                    ]),
                   ),
-                  ResponsiveHelper.spacing(height: 32),
+
+                  SizedBox(height: 24.h),
+
+                  // Settings / Actions Section
+                  const _SectionHeader(title: 'Settings'),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    child: _buildActionCard(context, [
+                      _buildActionTile(
+                        context,
+                        icon: Icons.shopping_basket_outlined,
+                        title: l10n.myOrders,
+                        onTap: () => context.go('/orders'),
+                        accentColor: const Color(0xFF15BE77),
+                      ),
+                      _buildActionTile(
+                        context,
+                        icon: Icons.shield_outlined,
+                        title: l10n.changePassword,
+                        onTap: () => _showChangePasswordDialog(context, l10n),
+                        accentColor: const Color(0xFFFFC107),
+                      ),
+                      _buildActionTile(
+                        context,
+                        icon: Icons.headset_mic_outlined,
+                        title: l10n.supportChat,
+                        onTap: () => context.pushNamed('customer-support'),
+                        accentColor: const Color(0xFF3C92FF),
+                      ),
+                      _buildActionTile(
+                        context,
+                        icon: Icons.logout_rounded,
+                        title: l10n.logout,
+                        onTap: () => _showLogoutDialog(context, l10n),
+                        accentColor: AppColors.error,
+                        isLast: true,
+                        isDestructive: true,
+                      ),
+                    ]),
+                  ),
                 ],
               ),
             );
           }
 
-          // Not authenticated - redirect to login
+          // Not authenticated - simplified redirect
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  Icons.person_outline,
-                  size: ResponsiveHelper.iconSize(64),
-                  color: AppColors.textSecondary,
+                  Icons.account_circle_outlined,
+                  size: 80.r,
+                  color: AppColors.textSecondary.withOpacity(0.3),
                 ),
-                ResponsiveHelper.spacing(height: 16),
+                SizedBox(height: 16.h),
                 Text(
                   l10n.pleaseLogIn,
                   style: TextStyle(
                     fontSize: ResponsiveHelper.fontSize(16),
                     color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                ResponsiveHelper.spacing(height: 24),
+                SizedBox(height: 24.h),
                 ElevatedButton(
                   onPressed: () => context.push('/login'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 32.w,
+                      vertical: 12.h,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                  ),
                   child: Text(
                     l10n.login,
-                    style: TextStyle(fontSize: ResponsiveHelper.fontSize(16)),
+                    style: TextStyle(
+                      fontSize: ResponsiveHelper.fontSize(16),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -158,60 +178,92 @@ class CustomerProfileScreen extends StatelessWidget {
     AppLocalizations l10n,
   ) {
     return Container(
-      padding: ResponsiveHelper.padding(all: 24),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppColors.primary, AppColors.primary.withOpacity(0.8)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.3),
-            blurRadius: 12.r,
-            offset: Offset(0, 4.h),
-          ),
-        ],
-      ),
-      child: Row(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
+      child: Column(
         children: [
-          CircleAvatar(
-            radius: 40.r,
-            backgroundColor: Colors.white,
-            child: Text(
-              user.name.isNotEmpty ? user.name[0].toUpperCase() : 'U',
-              style: TextStyle(
-                fontSize: ResponsiveHelper.fontSize(32),
-                fontWeight: FontWeight.bold,
-                color: AppColors.primary,
+          Stack(
+            alignment: Alignment.bottomRight,
+            children: [
+              Container(
+                padding: EdgeInsets.all(4.w),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0x1A000000),
+                      blurRadius: 20,
+                      offset: Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: CircleAvatar(
+                  radius: 50.r,
+                  backgroundColor: AppColors.primary.withOpacity(0.1),
+                  child: Text(
+                    user.name.isNotEmpty ? user.name[0].toUpperCase() : 'U',
+                    style: TextStyle(
+                      fontSize: ResponsiveHelper.fontSize(40),
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.primaryDark,
+                    ),
+                  ),
+                ),
               ),
+              Container(
+                padding: EdgeInsets.all(6.w),
+                decoration: const BoxDecoration(
+                  color: Color(0xFF15BE77),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0x3315BE77),
+                      blurRadius: 8,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.check_rounded,
+                  color: Colors.white,
+                  size: 14.r,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 16.h),
+          Text(
+            user.name,
+            style: TextStyle(
+              fontSize: ResponsiveHelper.fontSize(22),
+              fontWeight: FontWeight.w800,
+              color: AppColors.textPrimary,
             ),
           ),
-          ResponsiveHelper.spacing(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          SizedBox(height: 4.h),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFEAD1D).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  user.name,
-                  style: TextStyle(
-                    fontSize: ResponsiveHelper.fontSize(24),
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                Icon(
+                  Icons.star_rounded,
+                  color: const Color(0xFFFEAD1D),
+                  size: 14.r,
                 ),
-                ResponsiveHelper.spacing(height: 4),
+                SizedBox(width: 4.w),
                 Text(
-                  user.email,
+                  'Gold Member',
                   style: TextStyle(
-                    fontSize: ResponsiveHelper.fontSize(14),
-                    color: Colors.white.withOpacity(0.9),
+                    fontSize: ResponsiveHelper.fontSize(11),
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFFFEAD1D),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -221,45 +273,49 @@ class CustomerProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: TextStyle(
-        fontSize: ResponsiveHelper.fontSize(18),
-        fontWeight: FontWeight.bold,
-        color: AppColors.textPrimary,
-      ),
-    );
-  }
-
   Widget _buildInfoCard(BuildContext context, List<Widget> children) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10.r,
-            offset: Offset(0, 2.h),
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
+        border: Border.all(color: const Color(0xFFF4F4F4)),
       ),
       child: Column(children: children),
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String label, String value) {
-    return Padding(
-      padding: ResponsiveHelper.padding(horizontal: 16, vertical: 12),
+  Widget _buildInfoRow(
+    IconData icon,
+    String label,
+    String value, {
+    required Color accentColor,
+    bool isLast = false,
+  }) {
+    return Container(
+      padding: EdgeInsets.all(16.r),
+      decoration: BoxDecoration(
+        border: isLast
+            ? null
+            : const Border(bottom: BorderSide(color: Color(0xFFF4F4F4))),
+      ),
       child: Row(
         children: [
-          Icon(
-            icon,
-            color: AppColors.primary,
-            size: ResponsiveHelper.iconSize(24),
+          Container(
+            padding: EdgeInsets.all(10.r),
+            decoration: BoxDecoration(
+              color: accentColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: Icon(icon, color: accentColor, size: 20.r),
           ),
-          ResponsiveHelper.spacing(width: 16),
+          SizedBox(width: 16.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -267,19 +323,20 @@ class CustomerProfileScreen extends StatelessWidget {
                 Text(
                   label,
                   style: TextStyle(
-                    fontSize: ResponsiveHelper.fontSize(12),
+                    fontSize: ResponsiveHelper.fontSize(11),
                     color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                ResponsiveHelper.spacing(height: 4),
+                SizedBox(height: 2.h),
                 Text(
                   value,
                   style: TextStyle(
-                    fontSize: ResponsiveHelper.fontSize(16),
-                    fontWeight: FontWeight.w500,
+                    fontSize: ResponsiveHelper.fontSize(14),
+                    fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
                   ),
-                  maxLines: 2,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
@@ -294,14 +351,15 @@ class CustomerProfileScreen extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10.r,
-            offset: Offset(0, 2.h),
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
+        border: Border.all(color: const Color(0xFFF4F4F4)),
       ),
       child: Column(children: children),
     );
@@ -312,26 +370,53 @@ class CustomerProfileScreen extends StatelessWidget {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
+    required Color accentColor,
+    bool isLast = false,
+    bool isDestructive = false,
   }) {
-    return ListTile(
-      leading: Icon(
-        icon,
-        color: AppColors.primary,
-        size: ResponsiveHelper.iconSize(24),
-      ),
-      title: Text(
-        title,
-        style: TextStyle(
-          fontSize: ResponsiveHelper.fontSize(16),
-          fontWeight: FontWeight.w500,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: isLast
+          ? BorderRadius.vertical(bottom: Radius.circular(16.r))
+          : BorderRadius.zero,
+      child: Container(
+        padding: EdgeInsets.all(16.r),
+        decoration: BoxDecoration(
+          border: isLast
+              ? null
+              : const Border(bottom: BorderSide(color: Color(0xFFF4F4F4))),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(10.r),
+              decoration: BoxDecoration(
+                color: accentColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: Icon(icon, color: accentColor, size: 20.r),
+            ),
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: ResponsiveHelper.fontSize(14),
+                  fontWeight: FontWeight.w700,
+                  color: isDestructive
+                      ? AppColors.error
+                      : AppColors.textPrimary,
+                ),
+              ),
+            ),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textSecondary.withOpacity(0.5),
+              size: 20.r,
+            ),
+          ],
         ),
       ),
-      trailing: Icon(
-        Icons.chevron_right,
-        color: AppColors.textSecondary,
-        size: ResponsiveHelper.iconSize(24),
-      ),
-      onTap: onTap,
     );
   }
 
@@ -352,57 +437,36 @@ class CustomerProfileScreen extends StatelessWidget {
           }
         },
         child: AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.r),
+          ),
           title: Text(
             l10n.changePassword,
-            style: TextStyle(fontSize: ResponsiveHelper.fontSize(18)),
+            style: TextStyle(
+              fontSize: ResponsiveHelper.fontSize(18),
+              fontWeight: FontWeight.bold,
+            ),
           ),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(
+                _buildDialogTextField(
                   controller: currentPasswordController,
-                  obscureText: true,
-                  style: TextStyle(fontSize: ResponsiveHelper.fontSize(16)),
-                  decoration: InputDecoration(
-                    labelText: l10n.currentPassword,
-                    labelStyle: TextStyle(
-                      fontSize: ResponsiveHelper.fontSize(14),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                  ),
+                  label: l10n.currentPassword,
+                  obscure: true,
                 ),
-                ResponsiveHelper.spacing(height: 16),
-                TextField(
+                SizedBox(height: 16.h),
+                _buildDialogTextField(
                   controller: newPasswordController,
-                  obscureText: true,
-                  style: TextStyle(fontSize: ResponsiveHelper.fontSize(16)),
-                  decoration: InputDecoration(
-                    labelText: l10n.newPassword,
-                    labelStyle: TextStyle(
-                      fontSize: ResponsiveHelper.fontSize(14),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                  ),
+                  label: l10n.newPassword,
+                  obscure: true,
                 ),
-                ResponsiveHelper.spacing(height: 16),
-                TextField(
+                SizedBox(height: 16.h),
+                _buildDialogTextField(
                   controller: confirmPasswordController,
-                  obscureText: true,
-                  style: TextStyle(fontSize: ResponsiveHelper.fontSize(16)),
-                  decoration: InputDecoration(
-                    labelText: l10n.confirmNewPassword,
-                    labelStyle: TextStyle(
-                      fontSize: ResponsiveHelper.fontSize(14),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                  ),
+                  label: l10n.confirmNewPassword,
+                  obscure: true,
                 ),
               ],
             ),
@@ -410,7 +474,10 @@ class CustomerProfileScreen extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => context.pop(),
-              child: Text(l10n.cancel),
+              child: Text(
+                l10n.cancel,
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
             ),
             BlocBuilder<AuthCubit, AuthState>(
               builder: (context, state) {
@@ -435,18 +502,25 @@ class CustomerProfileScreen extends StatelessWidget {
                             newPasswordController.text,
                           );
                         },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                  ),
                   child: isLoading
                       ? SizedBox(
                           width: 20.w,
-                          height: 20.h,
-                          child: CircularProgressIndicator(strokeWidth: 2.w),
-                        )
-                      : Text(
-                          l10n.updatePassword,
-                          style: TextStyle(
-                            fontSize: ResponsiveHelper.fontSize(16),
+                          height: 20.w,
+                          child: const CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                           ),
-                        ),
+                        )
+                      : Text(l10n.updatePassword),
                 );
               },
             ),
@@ -456,24 +530,49 @@ class CustomerProfileScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildDialogTextField({
+    required TextEditingController controller,
+    required String label,
+    required bool obscure,
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: obscure,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(
+          fontSize: ResponsiveHelper.fontSize(14),
+          color: AppColors.textSecondary,
+        ),
+        filled: true,
+        fillColor: const Color(0xFFF7F7F7),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide.none,
+        ),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+      ),
+    );
+  }
+
   void _showLogoutDialog(BuildContext context, AppLocalizations l10n) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.r),
+        ),
         title: Text(
           l10n.logout,
-          style: TextStyle(fontSize: ResponsiveHelper.fontSize(18)),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        content: Text(
-          l10n.areYouSureLogout,
-          style: TextStyle(fontSize: ResponsiveHelper.fontSize(16)),
-        ),
+        content: Text(l10n.areYouSureLogout),
         actions: [
           TextButton(
             onPressed: () => context.pop(),
             child: Text(
               l10n.cancel,
-              style: TextStyle(fontSize: ResponsiveHelper.fontSize(16)),
+              style: TextStyle(color: AppColors.textSecondary),
             ),
           ),
           ElevatedButton(
@@ -484,10 +583,43 @@ class CustomerProfileScreen extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.error,
               foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.r),
+              ),
             ),
-            child: Text(
-              l10n.logout,
-              style: TextStyle(fontSize: ResponsiveHelper.fontSize(16)),
+            child: Text(l10n.logout),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  const _SectionHeader({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      child: Row(
+        children: [
+          Container(
+            width: 4.w,
+            height: 18.h,
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(2.r),
+            ),
+          ),
+          SizedBox(width: 8.w),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: ResponsiveHelper.fontSize(16),
+              fontWeight: FontWeight.w800,
+              color: AppColors.textPrimary,
             ),
           ),
         ],
