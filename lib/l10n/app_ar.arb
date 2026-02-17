@@ -313,7 +313,6 @@
   "ok": "موافق",
   "info": "معلومات",
   "all": "الكل",
-  "minutes": "دقيقة",
   "free": "مجاني",
   "viewCart": "عرض السلة",
   "addProductsWorth": "أضف منتجات بقيمة {amount} لتبدأ الطلب",
@@ -551,7 +550,6 @@
   "specialDiet": "نظام غذائي خاص",
   "spicesAndSauces": "التوابل والصلصات",
   "shopByCategory": "تسوق حسب الفئة",
-  "mostSoldProducts": "الأكثر مبيعاً",
   "promotionalImages": "الصور الترويجية",
   "addPromotionalImage": "إضافة صورة ترويجية",
   "editPromotionalImage": "تعديل صورة ترويجية",
@@ -949,5 +947,16 @@
       }
     }
   },
-  "confirm": "تأكيد"
+  "confirm": "تأكيد",
+  "mostSoldProducts": "الأكثر مبيعاً",
+  "minOrderValue": "الحد الأدنى لقيمة الطلب : {value} ج.م",
+  "freeDeliveryAbove": "توصيل مجاني للطلبات فوق {value} ج.م",
+  "ramadanEssentials": "أساسيات رمضان",
+  "ramadanDrinks": "مشروبات رمضانية",
+  "burningPrices": "حرقنا الأسعار",
+  "savingsOffers": "عروض التوفير",
+  "saveUpTo": "وفر حتى {percentage}%",
+  "deliveryWithin": "توصيل خلال",
+  "minutes": "دقيقة",
+  "searchInMarket": "ابحث عن منتجات في الماركت"
 }

@@ -133,9 +133,9 @@ class _MarketProductCardState extends State<MarketProductCard>
           // but kept subtle one for depth if needed. Let's make it very subtle.
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
         ),

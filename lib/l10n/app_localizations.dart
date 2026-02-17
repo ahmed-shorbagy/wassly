@@ -98,6 +98,12 @@ abstract class AppLocalizations {
     Locale('en'),
   ];
 
+  /// No description provided for @searchProductsInHMarket.
+  ///
+  /// In en, this message translates to:
+  /// **'Search products in H Market'**
+  String get searchProductsInHMarket;
+
   /// No description provided for @createRestaurant.
   ///
   /// In en, this message translates to:
@@ -3158,12 +3164,6 @@ abstract class AppLocalizations {
   /// **'Shop by Category'**
   String get shopByCategory;
 
-  /// No description provided for @mostSoldProducts.
-  ///
-  /// In en, this message translates to:
-  /// **'Most Sold Products'**
-  String get mostSoldProducts;
-
   /// No description provided for @promotionalImages.
   ///
   /// In en, this message translates to:
@@ -4909,6 +4909,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirm'**
   String get confirm;
+
+  /// No description provided for @mostSoldProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Sold'**
+  String get mostSoldProducts;
+
+  /// No description provided for @minOrderValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Min order value: {value} EGP'**
+  String minOrderValue(String value);
+
+  /// No description provided for @freeDeliveryAbove.
+  ///
+  /// In en, this message translates to:
+  /// **'Free delivery above {value} EGP'**
+  String freeDeliveryAbove(String value);
+
+  /// No description provided for @ramadanEssentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Ramadan Essentials'**
+  String get ramadanEssentials;
+
+  /// No description provided for @ramadanDrinks.
+  ///
+  /// In en, this message translates to:
+  /// **'Ramadan Drinks'**
+  String get ramadanDrinks;
+
+  /// No description provided for @burningPrices.
+  ///
+  /// In en, this message translates to:
+  /// **'Price Drops'**
+  String get burningPrices;
+
+  /// No description provided for @savingsOffers.
+  ///
+  /// In en, this message translates to:
+  /// **'Savings Offers'**
+  String get savingsOffers;
+
+  /// No description provided for @saveUpTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Save up to {percentage}%'**
+  String saveUpTo(String percentage);
+
+  /// No description provided for @deliveryWithin.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery within'**
+  String get deliveryWithin;
+
+  /// No description provided for @searchInMarket.
+  ///
+  /// In en, this message translates to:
+  /// **'Search products in Market'**
+  String get searchInMarket;
 }
 
 class _AppLocalizationsDelegate

@@ -1,5 +1,6 @@
 {
   "@@locale": "en",
+  "searchProductsInHMarket": "Search products in H Market",
   "createRestaurant": "Create Restaurant",
   "restaurantSetup": "Restaurant Setup",
   "basicInformation": "Basic Information",
@@ -569,7 +570,6 @@
   "specialDiet": "Special Diet",
   "spicesAndSauces": "Spices & Sauces",
   "shopByCategory": "Shop by Category",
-  "mostSoldProducts": "Most Sold Products",
   "promotionalImages": "Promotional Images",
   "addPromotionalImage": "Add Promotional Image",
   "editPromotionalImage": "Edit Promotional Image",
@@ -967,5 +967,36 @@
       }
     }
   },
-  "confirm": "Confirm"
+  "confirm": "Confirm",
+  "mostSoldProducts": "Most Sold",
+  "minOrderValue": "Min order value: {value} EGP",
+  "@minOrderValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "freeDeliveryAbove": "Free delivery above {value} EGP",
+  "@freeDeliveryAbove": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "ramadanEssentials": "Ramadan Essentials",
+  "ramadanDrinks": "Ramadan Drinks",
+  "burningPrices": "Price Drops",
+  "savingsOffers": "Savings Offers",
+  "saveUpTo": "Save up to {percentage}%",
+  "@saveUpTo": {
+    "placeholders": {
+      "percentage": {
+        "type": "String"
+      }
+    }
+  },
+  "deliveryWithin": "Delivery within",
+  "searchInMarket": "Search products in Market"
 }

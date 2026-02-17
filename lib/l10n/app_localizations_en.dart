@@ -9,6 +9,9 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get searchProductsInHMarket => 'Search products in H Market';
+
+  @override
   String get createRestaurant => 'Create Restaurant';
 
   @override
@@ -1585,9 +1588,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shopByCategory => 'Shop by Category';
 
   @override
-  String get mostSoldProducts => 'Most Sold Products';
-
-  @override
   String get promotionalImages => 'Promotional Images';
 
   @override
@@ -2509,4 +2509,40 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get confirm => 'Confirm';
+
+  @override
+  String get mostSoldProducts => 'Most Sold';
+
+  @override
+  String minOrderValue(String value) {
+    return 'Min order value: $value EGP';
+  }
+
+  @override
+  String freeDeliveryAbove(String value) {
+    return 'Free delivery above $value EGP';
+  }
+
+  @override
+  String get ramadanEssentials => 'Ramadan Essentials';
+
+  @override
+  String get ramadanDrinks => 'Ramadan Drinks';
+
+  @override
+  String get burningPrices => 'Price Drops';
+
+  @override
+  String get savingsOffers => 'Savings Offers';
+
+  @override
+  String saveUpTo(String percentage) {
+    return 'Save up to $percentage%';
+  }
+
+  @override
+  String get deliveryWithin => 'Delivery within';
+
+  @override
+  String get searchInMarket => 'Search products in Market';
 }

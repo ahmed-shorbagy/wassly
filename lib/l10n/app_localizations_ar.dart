@@ -9,6 +9,9 @@ class AppLocalizationsAr extends AppLocalizations {
   AppLocalizationsAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get searchProductsInHMarket => 'Search products in H Market';
+
+  @override
   String get createRestaurant => 'إنشاء مطعم';
 
   @override
@@ -1576,9 +1579,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get shopByCategory => 'تسوق حسب الفئة';
 
   @override
-  String get mostSoldProducts => 'الأكثر مبيعاً';
-
-  @override
   String get promotionalImages => 'الصور الترويجية';
 
   @override
@@ -2493,4 +2493,40 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get confirm => 'تأكيد';
+
+  @override
+  String get mostSoldProducts => 'الأكثر مبيعاً';
+
+  @override
+  String minOrderValue(String value) {
+    return 'الحد الأدنى لقيمة الطلب : $value ج.م';
+  }
+
+  @override
+  String freeDeliveryAbove(String value) {
+    return 'توصيل مجاني للطلبات فوق $value ج.م';
+  }
+
+  @override
+  String get ramadanEssentials => 'أساسيات رمضان';
+
+  @override
+  String get ramadanDrinks => 'مشروبات رمضانية';
+
+  @override
+  String get burningPrices => 'حرقنا الأسعار';
+
+  @override
+  String get savingsOffers => 'عروض التوفير';
+
+  @override
+  String saveUpTo(String percentage) {
+    return 'وفر حتى $percentage%';
+  }
+
+  @override
+  String get deliveryWithin => 'توصيل خلال';
+
+  @override
+  String get searchInMarket => 'ابحث عن منتجات في الماركت';
 }
