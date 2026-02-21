@@ -164,6 +164,17 @@ class AuthRepositoryImpl implements AuthRepository {
       final user = firebaseAuth.currentUser;
       if (user != null) {
         AppLogger.logInfo('Firebase user found: ${user.email}');
+
+        // Check network before hitting Firestore
+        if (!(await networkInfo.isConnected)) {
+          AppLogger.logWarning(
+            'Network disconnect during getCurrentUser session restore',
+          );
+          return const Left(
+            NetworkFailure('No internet connection to sync profile'),
+          );
+        }
+
         final userDoc = await firestore
             .collection(AppConstants.usersCollection)
             .doc(user.uid)

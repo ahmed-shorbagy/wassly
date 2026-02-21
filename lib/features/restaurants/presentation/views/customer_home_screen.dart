@@ -404,7 +404,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             SliverToBoxAdapter(
               child: Padding(
                 padding: ResponsiveHelper.padding(
-                  horizontal: 16,
+                  horizontal:
+                      0, // Removed horizontal padding for fractional viewport peek
                   top: 12, // Reduced from 24
                   bottom: 4, // Reduced from 8
                 ),
@@ -636,7 +637,7 @@ class _HorizontalRestaurantList extends StatelessWidget {
             accentColor: accentColor,
           ),
           SizedBox(
-            height: 220.h,
+            height: 130.h,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               padding: ResponsiveHelper.padding(horizontal: 16),
@@ -687,15 +688,15 @@ class _BannerCarousel extends StatelessWidget {
 
     return Padding(
       padding: ResponsiveHelper.padding(
-        left: 16,
+        horizontal:
+            0, // Removed horizontal padding for fractional viewport peek
         top: 4,
-        right: 8,
         bottom: 0,
       ), // Reduced from 16
       child: CarouselSlider(
         options: CarouselOptions(
           height: bannerHeight + 24.h, // Space for shadows
-          viewportFraction: 0.9,
+          viewportFraction: 0.82, // Reduced for fractional peek
           enlargeCenterPage: true,
           enableInfiniteScroll: effective.length > 1,
           autoPlay: effective.length > 1,
@@ -711,7 +712,10 @@ class _BannerCarousel extends StatelessWidget {
             builder: (BuildContext context) {
               return Container(
                 width: MediaQuery.of(context).size.width,
-                margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 12.h),
+                margin: EdgeInsets.symmetric(
+                  horizontal: 4.w,
+                  vertical: 12.h,
+                ), // Reduced margin for cleaner peek
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20.r),
                   boxShadow: [
@@ -828,7 +832,7 @@ class _ThreeRowRestaurantScroller extends StatelessWidget {
     }
 
     final double cardWidth = MediaQuery.of(context).size.width * 0.7;
-    final double cardHeight = 220.h;
+    final double cardHeight = 130.h;
 
     Widget buildRow(List<RestaurantEntity> rowItems) {
       if (rowItems.isEmpty) return const SizedBox.shrink();
@@ -927,7 +931,7 @@ class _MarketProductCategoriesSectionState
     return AppColors.primary;
   }
 
-  Widget _buildCategoryCard(
+  Widget _buildCategoryBox(
     BuildContext context,
     String? imageUrl,
     String? assetPath,
@@ -935,77 +939,142 @@ class _MarketProductCategoriesSectionState
     VoidCallback onTap,
   ) {
     final accentColor = _getCategoryColor(title);
+    final isFood = title.contains('مطعم') || title.contains('أكل');
+    final isMarket = title.contains('ماركت') || title.contains('سوبر');
+    final isVeg = title.contains('خضروات') || title.contains('فواكه');
+
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20.r),
-          boxShadow: [
-            BoxShadow(
-              color: accentColor.withOpacity(0.08),
-              blurRadius: 15,
-              offset: const Offset(0, 6),
+      child: Column(
+        children: [
+          Container(
+            width: 95.w,
+            height: 105.h,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24.r),
+              boxShadow: [
+                BoxShadow(
+                  color: accentColor.withValues(alpha: 0.1),
+                  blurRadius: 15,
+                  offset: const Offset(0, 8),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 38.w,
-              height: 38.w,
-              padding: EdgeInsets.all(7.r),
-              decoration: BoxDecoration(
-                color: AppColors.getAccentBackground(accentColor),
-                borderRadius: BorderRadius.circular(14.r),
-              ),
-              child: assetPath != null
-                  ? Image.asset(
-                      assetPath,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Icon(
-                        Icons.category_rounded,
-                        size: 20.w,
-                        color: accentColor,
+            child: Stack(
+              clipBehavior: Clip.antiAlias,
+              children: [
+                // 1. Bottom Wavy/Blob Background
+                Positioned(
+                  bottom: -20,
+                  left: -10,
+                  right: -10,
+                  child: Container(
+                    height: 70.h,
+                    decoration: BoxDecoration(
+                      color: accentColor,
+                      borderRadius: BorderRadius.all(
+                        Radius.elliptical(100, 60),
                       ),
-                    )
-                  : (imageUrl != null && imageUrl.isNotEmpty)
-                  ? CachedNetworkImage(
-                      imageUrl: imageUrl,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => const Center(
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                      errorWidget: (context, url, error) => Icon(
-                        Icons.category_rounded,
-                        size: 20.w,
-                        color: accentColor,
-                      ),
-                    )
-                  : Icon(
-                      Icons.category_rounded,
-                      size: 20.w,
+                    ),
+                  ),
+                ),
+
+                // 2. Decorative Icons (Stars/Moons)
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  child: Opacity(
+                    opacity: 0.6,
+                    child: Icon(
+                      Icons.auto_awesome,
+                      size: 10.w,
                       color: accentColor,
                     ),
-            ),
-            SizedBox(width: 10.w),
-            Expanded(
-              child: Text(
-                title,
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
-                  height: 1.1,
-                  letterSpacing: -0.2,
+                  ),
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
+                Positioned(
+                  top: 15,
+                  left: 18,
+                  child: Opacity(
+                    opacity: 0.4,
+                    child: Icon(Icons.star, size: 8.w, color: accentColor),
+                  ),
+                ),
+                Positioned(
+                  top: 8,
+                  right: 12,
+                  child: Opacity(
+                    opacity: 0.8,
+                    child: Icon(
+                      Icons.dark_mode,
+                      size: 14.w,
+                      color: accentColor,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 14,
+                  right: 4,
+                  child: Opacity(
+                    opacity: 0.5,
+                    child: Icon(Icons.star, size: 6.w, color: accentColor),
+                  ),
+                ),
+
+                // 3. Hero Image (Centered & Overlapping)
+                Positioned.fill(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(10.w, 10.h, 10.w, 5.h),
+                    child: assetPath != null
+                        ? Image.asset(assetPath, fit: BoxFit.contain)
+                        : (imageUrl != null && imageUrl.isNotEmpty)
+                        ? CachedNetworkImage(
+                            imageUrl: imageUrl,
+                            fit: BoxFit.contain,
+                            placeholder: (c, u) => const Center(
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                            errorWidget: (c, u, e) => Image.asset(
+                              CategoryImageHelper.getDefaultAsset(),
+                              fit: BoxFit.contain,
+                            ),
+                          )
+                        : Image.asset(
+                            CategoryImageHelper.getDefaultAsset(),
+                            fit: BoxFit.contain,
+                          ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          SizedBox(height: 10.h),
+          // Label with Emoji matching reference style
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (isVeg) Text('🥗 ', style: TextStyle(fontSize: 14.sp)),
+              if (isFood) Text('🔥 ', style: TextStyle(fontSize: 14.sp)),
+              if (isMarket) Text('🛍️ ', style: TextStyle(fontSize: 14.sp)),
+              Flexible(
+                child: Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.textPrimary,
+                    height: 1.1,
+                    letterSpacing: -0.3,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -1093,105 +1162,50 @@ class _MarketProductCategoriesSectionState
       });
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Internal header removed as it's now handled by the parent
-        // Horizontal Scrollable Categories in 2 Rows
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.zero,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // First Row
-              Row(
-                children: List.generate((displayItems.length / 2).ceil(), (
-                  index,
-                ) {
-                  final item = displayItems[index];
-                  return Padding(
-                    padding: EdgeInsetsDirectional.only(end: 12.w),
-                    child: SizedBox(
-                      width: 130.w,
-                      height: 55.h,
-                      child: _buildCategoryCard(
-                        context,
-                        item['imageUrl'] as String?,
-                        item['asset'] as String?,
-                        item['title'] as String,
-                        () {
-                          // If specific category (like Pharmacy), open Market Page filtered by that category
-                          if (item['isSpecificCategory'] == true) {
-                            // Use a special param to indicate we want Markets filtered by this category
-                            // We leverage the existing onCategoryTap but maybe we need to be clearer
-                            // The existing logic inside onCategoryTap in CustomerHomeScreen needs to handle this.
-                            // Let's modify onCategoryTap to accept filterType.
-                            // BUT onCategoryTap is a callback defined in the parent.
-                            // I should update how onCategoryTap is CALLED here, or Update the Parent's callback.
-                            // The parent logic:
-                            // onCategoryTap: (category, isMarket) { ... }
+    return Container(
+      color: const Color(0xFFFFF2E6).withValues(alpha: 0.5), // Warm Peach theme
+      padding: EdgeInsets.symmetric(vertical: 8.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: List.generate(displayItems.length, (index) {
+                final item = displayItems[index];
 
-                            // If isSpecificCategory is true, we want to open MARKETS filtered by categoryName.
-                            // We pass isMarket=true to the callback.
-                            widget.onCategoryTap(
-                              item['categoryName'] ?? item['title'],
-                              true, // It IS a market category search
-                            );
-                          } else {
-                            widget.onCategoryTap(
-                              item['categoryName'] as String? ??
-                                  item['title'] as String,
-                              item['isMarket'] as bool,
-                            );
-                          }
-                        },
-                      ),
-                    ),
-                  );
-                }),
-              ),
-              ResponsiveHelper.spacing(height: 12),
-              // Second Row
-              if (displayItems.length > 1)
-                Row(
-                  children: List.generate(displayItems.length ~/ 2, (index) {
-                    final item =
-                        displayItems[index + (displayItems.length / 2).ceil()];
-                    return Padding(
-                      padding: EdgeInsetsDirectional.only(end: 12.w),
-                      child: SizedBox(
-                        width: 130.w,
-                        height: 55.h,
-                        child: _buildCategoryCard(
-                          context,
-                          item['imageUrl'] as String?,
-                          item['asset'] as String?,
-                          item['title'] as String,
-                          () {
-                            if (item['isSpecificCategory'] == true) {
-                              widget.onCategoryTap(
-                                item['categoryName'] ?? item['title'],
-                                true, // It IS a market category search
-                              );
-                            } else {
-                              widget.onCategoryTap(
-                                item['categoryName'] as String? ??
-                                    item['title'] as String,
-                                item['isMarket'] as bool,
-                              );
-                            }
-                          },
-                        ),
-                      ),
-                    );
-                  }),
-                ),
-            ],
+                return Padding(
+                  padding: EdgeInsets.only(right: 12.w),
+                  child: _buildCategoryBox(
+                    context,
+                    item['imageUrl'] as String?,
+                    item['asset'] as String?,
+                    item['title'] as String,
+                    () {
+                      if (item['isMarket'] == true) {
+                        widget.onCategoryTap(
+                          item['categoryName'] as String? ??
+                              item['title'] as String,
+                          true,
+                        );
+                      } else {
+                        widget.onCategoryTap(
+                          item['categoryName'] as String? ??
+                              item['title'] as String,
+                          false,
+                        );
+                      }
+                    },
+                  ),
+                );
+              }),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -1231,7 +1245,7 @@ class _DiscountRestaurantsBannerCarousel extends StatelessWidget {
         CarouselSlider(
           options: CarouselOptions(
             height: bannerHeight + 65.h, // Add space for text below
-            viewportFraction: 0.95,
+            viewportFraction: 0.85, // Reduced for fractional peek
             enlargeCenterPage: false,
             enableInfiniteScroll: restaurants.length > 1,
             autoPlay: restaurants.length > 1,
@@ -1247,7 +1261,9 @@ class _DiscountRestaurantsBannerCarousel extends StatelessWidget {
               builder: (BuildContext context) {
                 return Container(
                   width: MediaQuery.of(context).size.width,
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  margin: EdgeInsets.symmetric(
+                    horizontal: 4.w,
+                  ), // Added .w for consistency
                   child: GestureDetector(
                     onTap: () {
                       if (restaurant.discountTargetProductId != null &&

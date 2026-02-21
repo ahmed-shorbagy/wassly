@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -8,13 +9,10 @@ import '../../../../shared/widgets/error_widget.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../cubits/restaurant_cubit.dart';
 import '../../domain/entities/restaurant_entity.dart';
-import '../widgets/restaurant_card.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../widgets/search_restaurant_card.dart';
 import '../../../home/presentation/cubits/home_cubit.dart';
 import '../../domain/entities/restaurant_category_entity.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/utils/search_helper.dart';
-import '../../../../core/utils/category_image_helper.dart';
 
 class SearchResultsScreen extends StatefulWidget {
   final String initialQuery;
@@ -202,6 +200,8 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
                 return _buildTopCategories(context, l10n, categories);
               },
             ),
+            // Functional Filter Chips
+            _buildFilterSection(context, l10n),
             // Results List
             Expanded(
               child: BlocBuilder<RestaurantCubit, RestaurantState>(
@@ -223,18 +223,47 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
                     return _buildEmptyState(context, l10n);
                   }
 
-                  return ListView.builder(
-                    padding: const EdgeInsets.all(16),
+                  return ListView.separated(
+                    padding: EdgeInsets.zero,
                     itemCount: _filteredRestaurants.length,
+                    separatorBuilder: (context, index) => Divider(
+                      height: 1,
+                      color: Colors.grey.withValues(alpha: 0.1),
+                    ),
                     itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: SizedBox(
-                          height: 240.h,
-                          child: RestaurantCard(
-                            restaurant: _filteredRestaurants[index],
-                          ),
-                        ),
+                      final restaurant = _filteredRestaurants[index];
+                      return SearchRestaurantCard(
+                        restaurant: restaurant,
+                        onTap: () {
+                          bool isMarketStore = false;
+                          try {
+                            final homeState = context.read<HomeCubit>().state;
+                            if (homeState is HomeLoaded) {
+                              isMarketStore = homeState.categories.any((
+                                category,
+                              ) {
+                                return restaurant.categoryIds.contains(
+                                      category.id,
+                                    ) &&
+                                    category.isMarket;
+                              });
+                            }
+                          } catch (_) {
+                            isMarketStore = restaurant.categoryIds.any(
+                              (cid) =>
+                                  cid.toLowerCase().contains('groceries') ||
+                                  cid.toLowerCase().contains('supermarket'),
+                            );
+                          }
+
+                          if (isMarketStore) {
+                            context.push(
+                              '/market-products?restaurantId=${restaurant.id}&restaurantName=${Uri.encodeComponent(restaurant.name)}',
+                            );
+                          } else {
+                            context.push('/restaurant/${restaurant.id}');
+                          }
+                        },
                       );
                     },
                   );
@@ -251,94 +280,83 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
     return SafeArea(
       bottom: false,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.fromLTRB(8, 12, 16, 12),
         decoration: BoxDecoration(
           color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+          border: Border(
+            bottom: BorderSide(
+              color: Colors.grey.withValues(alpha: 0.1),
+              width: 1,
             ),
-          ],
+          ),
         ),
         child: Row(
           children: [
-            // Back arrow
+            // Back arrow in a clean style
             IconButton(
               icon: Icon(
-                Icons.arrow_back_ios_new,
+                Icons.arrow_back,
                 color: AppColors.textPrimary,
-                size: 20,
+                size: 24,
               ),
               onPressed: () => context.pop(),
             ),
-            const SizedBox(width: 8),
-            // Search field container
+            // Capsule Search field
             Expanded(
               child: Container(
-                height: 45,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                height: 48,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
-                  color: AppColors.border.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(15),
-                  border: Border.all(
-                    color: _searchController.text.isNotEmpty
-                        ? AppColors.primary
-                        : AppColors.border,
-                    width: 1.5,
-                  ),
+                  color: const Color(0xFFF5F5F5),
+                  borderRadius: BorderRadius.circular(24),
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.search,
-                      color: _searchController.text.isNotEmpty
-                          ? AppColors.primary
-                          : AppColors.textSecondary,
-                      size: 22,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: TextField(
-                        controller: _searchController,
-                        autofocus: widget.initialQuery.isEmpty,
-                        decoration: InputDecoration(
-                          hintText: l10n.searchRestaurants,
-                          hintStyle: TextStyle(
-                            color: AppColors.textSecondary.withOpacity(0.5),
-                            fontSize: 14,
-                          ),
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.zero,
-                          isDense: true,
-                        ),
-                        style: const TextStyle(
-                          fontSize: 15,
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
                     if (_searchController.text.isNotEmpty)
                       GestureDetector(
                         onTap: () {
                           _searchController.clear();
                           _onSearchChanged();
                         },
-                        child: Container(
-                          padding: const EdgeInsets.all(2),
-                          decoration: BoxDecoration(
-                            color: AppColors.textSecondary.withOpacity(0.2),
-                            shape: BoxShape.circle,
+                        child: Icon(
+                          Icons.close,
+                          size: 18,
+                          color: AppColors.textSecondary,
+                        ),
+                      )
+                    else
+                      const SizedBox(width: 4),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: _searchController,
+                        autofocus: false,
+                        textAlign: TextAlign.right, // Match RTL reference
+                        decoration: InputDecoration(
+                          hintText: l10n.searchRestaurants,
+                          hintStyle: TextStyle(
+                            color: AppColors.textSecondary.withValues(
+                              alpha: 0.6,
+                            ),
+                            fontSize: 14.sp,
                           ),
-                          child: const Icon(
-                            Icons.close,
-                            size: 14,
-                            color: AppColors.textSecondary,
-                          ),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.zero,
+                          isDense: true,
+                        ),
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
+                    ),
+                    const SizedBox(width: 8),
+                    Icon(
+                      Icons.search,
+                      color: AppColors.textSecondary.withValues(alpha: 0.8),
+                      size: 20,
+                    ),
                   ],
                 ),
               ),
@@ -390,8 +408,6 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
     final displayItems = [
       {
         'isAll': true,
-        'asset':
-            'assets/images/resturants.jpeg', // Using restaurants asset as 'All'
         'title': l10n.all,
         'action': () {
           setState(() {
@@ -405,17 +421,12 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
             if (widget.filterType == 'market') {
               return cat.isMarket;
             } else {
-              // Default to showing only restaurant categories if not explicitly market mode
-              // or show all? The user said "categories added by admin is for resturants only"
-              // referring to the ones currently visible.
               return !cat.isMarket;
             }
           })
           .map(
             (cat) => {
               'isAll': false,
-              'imageUrl': cat.imageUrl,
-              'asset': CategoryImageHelper.getAssetForCategory(cat.name),
               'title': cat.name,
               'action': () {
                 setState(() {
@@ -428,13 +439,21 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
     ];
 
     return Container(
-      height: 110.h,
-      padding: EdgeInsets.symmetric(vertical: 12.h),
+      height: 50.h,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          bottom: BorderSide(
+            color: Colors.grey.withValues(alpha: 0.1),
+            width: 1,
+          ),
+        ),
+      ),
       child: ListView.separated(
         padding: EdgeInsets.symmetric(horizontal: 16.w),
         scrollDirection: Axis.horizontal,
         itemCount: displayItems.length,
-        separatorBuilder: (_, __) => SizedBox(width: 12.w),
+        separatorBuilder: (_, __) => SizedBox(width: 24.w),
         itemBuilder: (context, index) {
           final item = displayItems[index];
           final isSelected = item['isAll'] == true
@@ -443,64 +462,92 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
 
           return GestureDetector(
             onTap: item['action'] as VoidCallback,
-            child: Column(
-              children: [
-                Container(
-                  width: 60.w,
-                  height: 60.w,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: isSelected
-                        ? Border.all(color: AppColors.primary, width: 2)
-                        : null,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 5,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: ClipOval(
-                    child: item['imageUrl'] != null
-                        ? CachedNetworkImage(
-                            imageUrl: item['imageUrl'] as String,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => const Center(
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                            errorWidget: (context, url, error) =>
-                                const Icon(Icons.category),
-                          )
-                        : (item['asset'] != null
-                              ? Image.asset(
-                                  item['asset'] as String,
-                                  fit: BoxFit.cover,
-                                )
-                              : const Padding(
-                                  padding: EdgeInsets.all(12),
-                                  child: Icon(
-                                    Icons.category,
-                                    color: AppColors.primary,
-                                  ),
-                                )),
-                  ),
+            child: Container(
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                border: isSelected
+                    ? const Border(
+                        bottom: BorderSide(
+                          color: AppColors.textPrimary,
+                          width: 2,
+                        ),
+                      )
+                    : null,
+              ),
+              child: Text(
+                item['title'] as String,
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
+                  color: isSelected
+                      ? AppColors.textPrimary
+                      : AppColors.textSecondary,
                 ),
-                SizedBox(height: 8.h),
-                Text(
-                  item['title'] as String,
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                    color: isSelected
-                        ? AppColors.primary
-                        : AppColors.textPrimary,
-                  ),
-                ),
-              ],
+              ),
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildFilterSection(BuildContext context, AppLocalizations l10n) {
+    return Container(
+      height: 60.h,
+      padding: EdgeInsets.symmetric(vertical: 12.h),
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        children: [
+          _buildFilterChip(label: l10n.freeDelivery, onTap: () {}),
+          SizedBox(width: 8.w),
+          _buildFilterChip(
+            label: l10n.pickup,
+            icon: Icons.directions_walk,
+            onTap: () {},
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterChip({
+    required String label,
+    IconData? icon,
+    required VoidCallback onTap,
+  }) {
+    final isSortIcon = icon == Icons.keyboard_arrow_down;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isSortIcon && icon != null) ...[
+              Icon(icon, size: 18.w, color: Colors.black),
+              SizedBox(width: 4.w),
+            ],
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+              ),
+            ),
+            if (icon != null && !isSortIcon) ...[
+              SizedBox(width: 4.w),
+              Icon(icon, size: 16.w, color: Colors.black),
+            ],
+          ],
+        ),
       ),
     );
   }

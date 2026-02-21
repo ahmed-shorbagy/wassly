@@ -20,7 +20,7 @@ class PromotionalImageWidget extends StatelessWidget {
         onTap: () => _handleTap(context),
         child: Container(
           width: double.infinity,
-          height: 180.h,
+          height: 160.h,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20.r),
             boxShadow: [

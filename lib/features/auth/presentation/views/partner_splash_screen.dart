@@ -77,34 +77,65 @@ class _PartnerSplashScreenState extends State<PartnerSplashScreen> {
         } else if (state is AuthUnauthenticated) {
           AppLogger.logInfo('User not authenticated, navigating to login');
           context.pushReplacement('/login');
-        } else if (state is AuthError) {
-          AppLogger.logWarning('Auth error in splash: ${state.message}');
-          context.pushReplacement('/login');
         }
+        // AuthError is handled in the UI
       },
       child: Scaffold(
         backgroundColor: AppColors.promoBackground,
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset(
-                'assets/images/logo.jpeg',
-                fit: BoxFit.contain,
-                width: 200,
-                height: 200,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Icon(
-                    Icons.delivery_dining,
-                    size: 80,
-                    color: AppColors.primary,
-                  );
-                },
+        body: BlocBuilder<AuthCubit, AuthState>(
+          builder: (context, state) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/images/logo.jpeg',
+                    fit: BoxFit.contain,
+                    width: 200,
+                    height: 200,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(
+                        Icons.delivery_dining,
+                        size: 80,
+                        color: AppColors.primary,
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                  if (state is AuthError) ...[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Text(
+                        state.message,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: AppColors.error),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: _checkAuth,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Retry'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextButton(
+                      onPressed: () => context.pushReplacement('/login'),
+                      child: const Text('Go to Login'),
+                    ),
+                  ] else ...[
+                    const CircularProgressIndicator(color: AppColors.primary),
+                  ],
+                ],
               ),
-              const SizedBox(height: 24),
-              const CircularProgressIndicator(color: AppColors.primary),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
