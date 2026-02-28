@@ -11,7 +11,7 @@ class CategoryImageHelper {
         name.contains('صيدلية') ||
         name.contains('صيدليه')) {
       // Covers pharmacy, pharmacies
-      return 'assets/images/pharamcies.jpeg'; // Note: retaining original filename typo
+      return 'assets/images/pharamcies-new.jpeg';
     } else if (name.contains('vegetable') ||
         name.contains('fruit') ||
         name.contains('fresh') ||
@@ -26,13 +26,13 @@ class CategoryImageHelper {
         name.contains('قهوة') ||
         name.contains('قهوه') ||
         name.contains('حلويات')) {
-      return 'assets/images/cake&cofee.jpeg'; // Note: retaining original filename typo
+      return 'assets/images/cake-new.jpeg';
     } else if (name.contains('market') ||
         name.contains('grocery') ||
         name.contains('supermarket') ||
         name.contains('ماركت') ||
         name.contains('سوبر')) {
-      return 'assets/images/market.jpeg';
+      return 'assets/images/market-new.jpeg';
     } else if (name.contains('bakery') ||
         name.contains('bake') ||
         name.contains('مخبز')) {
@@ -41,7 +41,7 @@ class CategoryImageHelper {
         name.contains('poultry') ||
         name.contains('لحم') ||
         name.contains('دجاج')) {
-      return 'assets/images/meats.jpeg';
+      return 'assets/images/meats-new.jpeg';
     } else if (name.contains('fish') ||
         name.contains('seafood') ||
         name.contains('سمك') ||
@@ -67,7 +67,7 @@ class CategoryImageHelper {
         name.contains('أكل') ||
         name.contains('طعام') ||
         name.contains('مطعم')) {
-      return 'assets/images/resturants.jpeg';
+      return 'assets/images/resturants-new.jpeg';
     }
 
     return null;
