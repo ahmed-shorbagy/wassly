@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../cubits/admin_cubit.dart';
 import 'image_viewer_screen.dart';
@@ -11,17 +13,19 @@ class AdminPartnerDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = partner['user'];
-    final details = partner['details'];
-    final type = partner['type'];
-    final partnerId = partner['id'];
-    final userId = user['id'];
+    final user = partner['user'] ?? {};
+    final details = partner['details'] ?? {};
+    final type = partner['type'] ?? 'unknown';
+    final partnerId = partner['id'] ?? '';
+    final userId = user['id'] ?? '';
 
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: Text('${user['name'] ?? 'Partner'} Details'),
         backgroundColor: Colors.purple,
         foregroundColor: Colors.white,
+        elevation: 0,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -29,81 +33,38 @@ class AdminPartnerDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header Section
-            Center(
-              child: Column(
-                children: [
-                  CircleAvatar(
-                    radius: 40,
-                    backgroundColor: Colors.purple.withOpacity(0.1),
-                    child: Icon(
-                      type == 'driver'
-                          ? Icons.drive_eta
-                          : (type == 'restaurant'
-                                ? Icons.restaurant
-                                : Icons.store),
-                      size: 40,
-                      color: Colors.purple,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    user['name'] ?? 'No Name',
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.purple.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      type.toString().toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.purple,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            _buildHeaderCard(user, type, details),
             const SizedBox(height: 24),
 
             // Contact Info
             _buildSectionTitle('Contact Information'),
             Card(
-              elevation: 2,
+              elevation: 0,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(color: Colors.grey.shade200),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
                     _buildDetailRow(
-                      Icons.email,
-                      'Email',
+                      Icons.email_outlined,
+                      'Email Address',
                       user['email'] ?? 'N/A',
                     ),
-                    const Divider(),
+                    const Divider(height: 24),
                     _buildDetailRow(
-                      Icons.phone,
-                      'Phone',
+                      Icons.phone_outlined,
+                      'Phone Number',
                       user['phone'] ?? 'N/A',
                     ),
-                    if (type != 'driver') ...[
-                      const Divider(),
+                    if (type == 'driver' && details['address'] != null) ...[
+                      const Divider(height: 24),
                       _buildDetailRow(
-                        Icons.location_on,
-                        'Address',
-                        details['address'] ?? 'N/A',
+                        Icons.home_outlined,
+                        'Home Address',
+                        details['address'],
                       ),
                     ],
                   ],
@@ -112,8 +73,132 @@ class AdminPartnerDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
+            // Business/Vehicle Details
+            if (type == 'restaurant' || type == 'market') ...[
+              _buildSectionTitle('Business Details'),
+              Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(color: Colors.grey.shade200),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildDetailRow(
+                        Icons.description_outlined,
+                        'Description',
+                        details['description'] ?? 'No description provided.',
+                      ),
+                      const Divider(height: 24),
+                      _buildDetailRow(
+                        Icons.location_on_outlined,
+                        'Business Address',
+                        details['address'] ?? 'N/A',
+                        trailing: details['location'] != null
+                            ? TextButton.icon(
+                                onPressed: () => _openMap(details['location']),
+                                icon: const Icon(Icons.map_outlined, size: 18),
+                                label: const Text('View on Map'),
+                                style: TextButton.styleFrom(
+                                  visualDensity: VisualDensity.compact,
+                                  foregroundColor: Colors.purple,
+                                ),
+                              )
+                            : null,
+                      ),
+                      const Divider(height: 24),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildDetailRow(
+                              Icons.delivery_dining_outlined,
+                              'Delivery Fee',
+                              '${details['deliveryFee'] ?? 0} EGP',
+                            ),
+                          ),
+                          Expanded(
+                            child: _buildDetailRow(
+                              Icons.shopping_basket_outlined,
+                              'Min. Order',
+                              '${details['minOrderAmount'] ?? 0} EGP',
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Divider(height: 24),
+                      _buildDetailRow(
+                        Icons.timer_outlined,
+                        'Est. Delivery Time',
+                        '${details['estimatedDeliveryTime'] ?? 0} mins',
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+            ] else if (type == 'driver') ...[
+              _buildSectionTitle('Vehicle Details'),
+              Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(color: Colors.grey.shade200),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildDetailRow(
+                              Icons.directions_car_outlined,
+                              'Vehicle Type',
+                              (details['vehicleType'] ?? 'N/A')
+                                  .toString()
+                                  .toUpperCase(),
+                            ),
+                          ),
+                          Expanded(
+                            child: _buildDetailRow(
+                              Icons.info_outline,
+                              'Model',
+                              details['vehicleModel'] ?? 'N/A',
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Divider(height: 24),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildDetailRow(
+                              Icons.palette_outlined,
+                              'Color',
+                              details['vehicleColor'] ?? 'N/A',
+                            ),
+                          ),
+                          Expanded(
+                            child: _buildDetailRow(
+                              Icons.pin_outlined,
+                              'Plate Number',
+                              details['vehiclePlateNumber'] ?? 'N/A',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
+
             // Documents
-            _buildSectionTitle('Documents & Images'),
+            _buildSectionTitle('Documents & Verify Images'),
             if (type == 'driver') ...[
               _buildDocumentGrid(context, [
                 _DocItem('Personal Image', details['personalImageUrl']),
@@ -133,14 +218,15 @@ class AdminPartnerDetailScreen extends StatelessWidget {
               ]),
             ],
 
-            const SizedBox(height: 100), // Space for bottom bar
+            const SizedBox(height: 32),
           ],
         ),
       ),
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
         decoration: BoxDecoration(
           color: Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -152,15 +238,24 @@ class AdminPartnerDetailScreen extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
-              child: OutlinedButton(
+              child: TextButton(
                 onPressed: () =>
                     _showRejectDialog(context, userId, partnerId, type),
-                style: OutlinedButton.styleFrom(
+                style: TextButton.styleFrom(
                   foregroundColor: Colors.red,
-                  side: const BorderSide(color: Colors.red),
                   padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: const BorderSide(color: Colors.red, width: 1.5),
+                  ),
                 ),
-                child: const Text('REJECT REQUEST'),
+                child: const Text(
+                  'REJECT REQUEST',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
               ),
             ),
             const SizedBox(width: 16),
@@ -172,8 +267,18 @@ class AdminPartnerDetailScreen extends StatelessWidget {
                   backgroundColor: Colors.green,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
-                child: const Text('APPROVE REQUEST'),
+                child: const Text(
+                  'APPROVE REQUEST',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
               ),
             ),
           ],
@@ -182,50 +287,171 @@ class AdminPartnerDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12, left: 4),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: Colors.black87,
-        ),
-      ),
-    );
-  }
+  Widget _buildHeaderCard(dynamic user, dynamic type, dynamic details) {
+    String? imageUrl;
+    if (type == 'driver') {
+      imageUrl = details['personalImageUrl'];
+    } else {
+      imageUrl = details['imageUrl'];
+    }
 
-  Widget _buildDetailRow(IconData icon, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
         children: [
-          Icon(icon, size: 20, color: Colors.grey),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
+          Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: Colors.purple.withOpacity(0.2),
+                width: 2,
+              ),
+            ),
+            child: CircleAvatar(
+              radius: 50,
+              backgroundColor: Colors.purple.withOpacity(0.05),
+              backgroundImage: imageUrl != null ? NetworkImage(imageUrl) : null,
+              child: imageUrl == null
+                  ? Icon(
+                      type == 'driver'
+                          ? Icons.person_outline
+                          : (type == 'restaurant'
+                                ? Icons.restaurant_outlined
+                                : Icons.store_outlined),
+                      size: 40,
+                      color: Colors.purple,
+                    )
+                  : null,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            user['name'] ?? 'No Name',
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            decoration: BoxDecoration(
+              color: _getTypeColor(type).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Text(
+              type.toString().toUpperCase(),
+              style: TextStyle(
+                color: _getTypeColor(type),
+                fontWeight: FontWeight.w800,
+                fontSize: 12,
+                letterSpacing: 1,
+              ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  Color _getTypeColor(String type) {
+    switch (type) {
+      case 'driver':
+        return Colors.blue;
+      case 'restaurant':
+        return Colors.orange;
+      case 'market':
+        return Colors.green;
+      default:
+        return Colors.purple;
+    }
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12, left: 4),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w800,
+          color: Colors.grey[400],
+          letterSpacing: 1.2,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(
+    IconData icon,
+    String label,
+    String value, {
+    Widget? trailing,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 20, color: Colors.purple[300]),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[500],
+                  letterSpacing: 0.5,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (trailing != null) trailing,
+      ],
+    );
+  }
+
+  Future<void> _openMap(dynamic location) async {
+    if (location is GeoPoint) {
+      final url =
+          'https://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}';
+      if (await canLaunchUrl(Uri.parse(url))) {
+        await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+      }
+    }
   }
 
   Widget _buildDocumentGrid(BuildContext context, List<_DocItem> items) {
@@ -234,10 +460,20 @@ class AdminPartnerDetailScreen extends StatelessWidget {
         .toList();
 
     if (validItems.isEmpty) {
-      return const Card(
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: Center(child: Text('No documents uploaded.')),
+      return Card(
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: Colors.grey.shade200),
+        ),
+        child: const Padding(
+          padding: EdgeInsets.all(24),
+          child: Center(
+            child: Text(
+              'No documents uploaded.',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
         ),
       );
     }
@@ -249,7 +485,7 @@ class AdminPartnerDetailScreen extends StatelessWidget {
         crossAxisCount: 2,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
-        childAspectRatio: 0.8,
+        childAspectRatio: 0.85,
       ),
       itemCount: validItems.length,
       itemBuilder: (context, index) {
@@ -266,8 +502,9 @@ class AdminPartnerDetailScreen extends StatelessWidget {
           },
           child: Container(
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+              border: Border.all(color: Colors.grey.shade200),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -275,34 +512,55 @@ class AdminPartnerDetailScreen extends StatelessWidget {
                 Expanded(
                   child: ClipRRect(
                     borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(12),
+                      top: Radius.circular(15),
                     ),
-                    child: Image.network(
-                      item.url!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.broken_image, color: Colors.grey),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Image.network(
+                          item.url!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Container(
+                                color: Colors.grey[100],
+                                child: const Icon(
+                                  Icons.broken_image,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                        ),
+                        Positioned(
+                          top: 8,
+                          right: 8,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Colors.black26,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.zoom_in,
+                              size: 18,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          item.label,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const Icon(Icons.zoom_in, size: 16, color: Colors.purple),
-                    ],
+                  padding: const EdgeInsets.all(12),
+                  child: Text(
+                    item.label,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black87,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ],
@@ -322,6 +580,7 @@ class AdminPartnerDetailScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text('Reject Partnership?'),
         content: const Text(
           'Are you sure you want to reject this request? This action cannot be undone and will delete the request data.',
@@ -336,7 +595,6 @@ class AdminPartnerDetailScreen extends StatelessWidget {
               Navigator.pop(dialogContext); // Close dialog
               context.read<AdminCubit>().rejectPartner(userId, partnerId, type);
               Navigator.pop(context); // Go back to list
-              // Note: The list screen's BlocListener will handle the success snackbar
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Confirm Reject'),
