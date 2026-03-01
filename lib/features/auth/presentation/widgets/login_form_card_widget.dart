@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'login_email_field_widget.dart';
 import 'login_password_field_widget.dart';
@@ -23,43 +24,48 @@ class LoginFormCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x22000000),
-            blurRadius: 16,
-            offset: Offset(0, 6),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Form(
-        key: formKey,
-        child: Column(
-          children: [
-            // Email Field
-            LoginEmailFieldWidget(controller: emailController),
-            const SizedBox(height: 16),
-            // Password Field
-            LoginPasswordFieldWidget(controller: passwordController),
-            const SizedBox(height: 8),
-            // Forgot Password Button
-            LoginForgotPasswordButtonWidget(
-              onPressed: onForgotPasswordPressed,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(28),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.12),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.2),
+              width: 1.5,
             ),
-            const SizedBox(height: 4),
-            // Login Button
-            LoginButtonWidget(onLoginPressed: onLoginPressed),
-            const SizedBox(height: 12),
-            // Social Login Buttons
-            const LoginSocialButtonsWidget(),
-          ],
+          ),
+          padding: const EdgeInsets.all(24),
+          child: Form(
+            key: formKey,
+            child: Column(
+              children: [
+                // Email Field
+                LoginEmailFieldWidget(controller: emailController),
+                const SizedBox(height: 20),
+                // Password Field
+                LoginPasswordFieldWidget(controller: passwordController),
+                const SizedBox(height: 12),
+                // Forgot Password Button
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: LoginForgotPasswordButtonWidget(
+                    onPressed: onForgotPasswordPressed,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                // Login Button
+                LoginButtonWidget(onLoginPressed: onLoginPressed),
+                const SizedBox(height: 24),
+                // Social Login Buttons
+                const LoginSocialButtonsWidget(),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 }
-

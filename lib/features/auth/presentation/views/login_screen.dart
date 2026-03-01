@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../../../config/flavor_config.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -34,41 +35,85 @@ class _LoginScreenState extends State<LoginScreen> {
     return BlocListener<AuthCubit, AuthState>(
       listener: _handleAuthStateChanges,
       child: Scaffold(
-        backgroundColor: const Color(0xFF27AE60),
-        body: Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF27AE60), Color(0xFF2ECC71)],
-            ),
-          ),
-          child: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 28, 20, 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Header with Logo and Welcome Text
-                  const LoginHeaderWidget(),
-                  const SizedBox(height: 20),
-                  // Form Card
-                  LoginFormCardWidget(
-                    formKey: _formKey,
-                    emailController: _emailController,
-                    passwordController: _passwordController,
-                    onLoginPressed: _handleLogin,
-                    onForgotPasswordPressed: _showForgotPasswordDialog,
+        body: Stack(
+          children: [
+            // Dynamic/Aurora Background
+            Positioned.fill(
+              child: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFF15BE77), Color(0xFF53E88B)],
                   ),
-                  const SizedBox(height: 16),
-                  // Sign Up Link
-                  const LoginSignupLinkWidget(),
-                ],
+                ),
               ),
             ),
-          ),
+            // Decorative Blurred Circles (Aurora Effects)
+            Positioned(
+              top: -100,
+              right: -50,
+              child: Container(
+                width: 300,
+                height: 300,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withOpacity(0.15),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 100,
+              left: -100,
+              child: Container(
+                width: 400,
+                height: 400,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xFF2ECC71).withOpacity(0.2),
+                ),
+              ),
+            ),
+            // Glassmorphism Overlay
+            Positioned.fill(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+                child: Container(color: Colors.transparent),
+              ),
+            ),
+            // Main Content
+            SafeArea(
+              child: Center(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 32,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Header with Logo and Welcome Text
+                      const LoginHeaderWidget(),
+                      const SizedBox(height: 40),
+                      // Form Card
+                      LoginFormCardWidget(
+                        formKey: _formKey,
+                        emailController: _emailController,
+                        passwordController: _passwordController,
+                        onLoginPressed: _handleLogin,
+                        onForgotPasswordPressed: _showForgotPasswordDialog,
+                      ),
+                      const SizedBox(height: 24),
+                      // Sign Up Link
+                      const LoginSignupLinkWidget(),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

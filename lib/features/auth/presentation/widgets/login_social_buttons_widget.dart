@@ -11,18 +11,23 @@ class LoginSocialButtonsWidget extends StatelessWidget {
         // Divider with "or" text
         Row(
           children: [
-            const Expanded(child: Divider()),
+            Expanded(child: Divider(color: Colors.white.withOpacity(0.2))),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
-                context.l10n.or,
-                style: const TextStyle(color: Colors.grey),
+                context.l10n.or.toUpperCase(),
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.6),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 1.2,
+                ),
               ),
             ),
-            const Expanded(child: Divider()),
+            Expanded(child: Divider(color: Colors.white.withOpacity(0.2))),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 24),
         // Social Login Buttons
         Row(
           children: [
@@ -31,12 +36,23 @@ class LoginSocialButtonsWidget extends StatelessWidget {
                 onPressed: () {
                   context.showInfoSnackBar(context.l10n.socialLoginComingSoon);
                 },
-                icon: const Icon(Icons.g_mobiledata, size: 22),
+                icon: Image.network(
+                  'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
+                  height: 20,
+                  errorBuilder: (context, error, stackTrace) =>
+                      const Icon(Icons.g_mobiledata, color: Colors.white),
+                ),
                 label: const Text('Google'),
                 style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(44),
+                  minimumSize: const Size.fromHeight(56),
+                  side: BorderSide(color: Colors.white.withOpacity(0.2)),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  foregroundColor: Colors.white,
+                  textStyle: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),

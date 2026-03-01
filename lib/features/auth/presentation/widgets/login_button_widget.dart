@@ -17,17 +17,35 @@ class LoginButtonWidget extends StatelessWidget {
           return const LoadingWidget();
         }
 
-        return SizedBox(
+        return Container(
           width: double.infinity,
+          height: 60,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF15BE77).withOpacity(0.3),
+                blurRadius: 15,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
           child: ElevatedButton(
             onPressed: onLoginPressed,
             style: ElevatedButton.styleFrom(
-              minimumSize: const Size.fromHeight(48),
+              backgroundColor: Colors.white,
+              foregroundColor: const Color(0xFF15BE77),
+              elevation: 0,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              textStyle: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.5,
               ),
             ),
-            child: Text(context.l10n.login),
+            child: Text(context.l10n.login.toUpperCase()),
           ),
         );
       },
