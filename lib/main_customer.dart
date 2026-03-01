@@ -91,17 +91,17 @@ class ToOrderCustomerApp extends StatelessWidget {
             minTextAdapt: true,
             splitScreenMode: true,
             builder: (context, child) {
-              return BackButtonHandler(
-                child: MaterialApp.router(
-                  title: FlavorConfig.instance.appName,
-                  theme: AppTheme.lightTheme,
-                  routerConfig: CustomerRouter.router,
-                  debugShowCheckedModeBanner: false,
-                  locale: localeState.locale,
-                  supportedLocales: AppLocalizations.supportedLocales,
-                  localizationsDelegates:
-                      AppLocalizations.localizationsDelegates,
-                ),
+              return MaterialApp.router(
+                title: FlavorConfig.instance.appName,
+                theme: AppTheme.lightTheme,
+                routerConfig: CustomerRouter.router,
+                debugShowCheckedModeBanner: false,
+                locale: localeState.locale,
+                supportedLocales: AppLocalizations.supportedLocales,
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                builder: (context, child) {
+                  return BackButtonHandler(child: child!);
+                },
               );
             },
           );

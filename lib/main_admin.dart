@@ -101,16 +101,17 @@ class ToOrderAdminApp extends StatelessWidget {
       providers: InjectionContainer().getBlocProviders(),
       child: BlocBuilder<LocaleCubit, LocaleState>(
         builder: (context, localeState) {
-          return BackButtonHandler(
-            child: MaterialApp.router(
-              title: FlavorConfig.instance.appName,
-              theme: AdminTheme.lightTheme,
-              routerConfig: AdminRouter.router,
-              debugShowCheckedModeBanner: false,
-              locale: localeState.locale,
-              supportedLocales: AppLocalizations.supportedLocales,
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-            ),
+          return MaterialApp.router(
+            title: FlavorConfig.instance.appName,
+            theme: AdminTheme.lightTheme,
+            routerConfig: AdminRouter.router,
+            debugShowCheckedModeBanner: false,
+            locale: localeState.locale,
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            builder: (context, child) {
+              return BackButtonHandler(child: child!);
+            },
           );
         },
       ),

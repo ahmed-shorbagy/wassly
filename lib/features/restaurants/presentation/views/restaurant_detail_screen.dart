@@ -18,8 +18,13 @@ import '../../../../core/utils/search_helper.dart';
 
 class RestaurantDetailScreen extends StatefulWidget {
   final String restaurantId;
+  final String? highlightProductId;
 
-  const RestaurantDetailScreen({super.key, required this.restaurantId});
+  const RestaurantDetailScreen({
+    super.key,
+    required this.restaurantId,
+    this.highlightProductId,
+  });
 
   @override
   State<RestaurantDetailScreen> createState() => _RestaurantDetailScreenState();
@@ -141,6 +146,17 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
             if (state is ProductsLoaded) {
               setState(() {
                 _products = state.products;
+                // If a specific product was linked, auto-search it once loaded
+                if (widget.highlightProductId != null &&
+                    widget.highlightProductId!.isNotEmpty &&
+                    _searchController.text.isEmpty) {
+                  final targetProduct = _products
+                      .where((p) => p.id == widget.highlightProductId)
+                      .firstOrNull;
+                  if (targetProduct != null) {
+                    _searchController.text = targetProduct.name;
+                  }
+                }
               });
             }
           },

@@ -263,7 +263,12 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   ) {
     // Separate restaurants with active discounts from regular restaurants
     final discountedRestaurants = restaurants
-        .where((r) => r.isDiscountActive)
+        .where(
+          (r) =>
+              r.isDiscountActive &&
+              r.discountImageUrl != null &&
+              r.discountImageUrl!.isNotEmpty,
+        )
         .toList();
 
     return RefreshIndicator(
@@ -728,84 +733,95 @@ class _BannerCarousel extends StatelessWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(20.r),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      // Responsive banner dimensions
-                      return SizedBox(
-                        width: double.infinity,
-                        height: bannerHeight,
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            CachedNetworkImage(
-                              imageUrl: b.imageUrl,
-                              width: double.infinity,
-                              height: bannerHeight,
-                              fit: BoxFit.cover,
-                              placeholder: (c, u) => Container(
-                                color: AppColors.surface,
-                                child: const Center(
-                                  child: CircularProgressIndicator(),
+                  child: GestureDetector(
+                    onTap: () {
+                      if (b.deepLink != null && b.deepLink!.isNotEmpty) {
+                        try {
+                          context.push(b.deepLink!);
+                        } catch (e) {
+                          // Ignore or log bad deep links
+                        }
+                      }
+                    },
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        // Responsive banner dimensions
+                        return SizedBox(
+                          width: double.infinity,
+                          height: bannerHeight,
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              CachedNetworkImage(
+                                imageUrl: b.imageUrl,
+                                width: double.infinity,
+                                height: bannerHeight,
+                                fit: BoxFit.cover,
+                                placeholder: (c, u) => Container(
+                                  color: AppColors.surface,
+                                  child: const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                ),
+                                errorWidget: (c, u, e) => Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        AppColors.primary,
+                                        AppColors.primaryDark,
+                                      ],
+                                    ),
+                                  ),
+                                  child: const Icon(
+                                    Icons.image_not_supported,
+                                    color: Colors.white,
+                                    size: 50,
+                                  ),
                                 ),
                               ),
-                              errorWidget: (c, u, e) => Container(
+                              // Gradient overlay
+                              Container(
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
                                     colors: [
-                                      AppColors.primary,
-                                      AppColors.primaryDark,
+                                      Colors.transparent,
+                                      Colors.black.withValues(alpha: 0.3),
                                     ],
                                   ),
                                 ),
-                                child: const Icon(
-                                  Icons.image_not_supported,
-                                  color: Colors.white,
-                                  size: 50,
-                                ),
                               ),
-                            ),
-                            // Gradient overlay
-                            Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [
-                                    Colors.transparent,
-                                    Colors.black.withValues(alpha: 0.3),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            // Title overlay
-                            if (b.title != null && b.title!.isNotEmpty)
-                              Positioned(
-                                bottom: 16.h,
-                                left: 16.w,
-                                right: 16.w,
-                                child: AutoSizeText(
-                                  b.title!,
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: ResponsiveHelper.fontSize(18),
-                                    fontWeight: FontWeight.bold,
-                                    shadows: [
-                                      Shadow(
-                                        color: Colors.black54,
-                                        offset: Offset(0, 2.h),
-                                        blurRadius: 4.r,
-                                      ),
-                                    ],
+                              // Title overlay
+                              if (b.title != null && b.title!.isNotEmpty)
+                                Positioned(
+                                  bottom: 16.h,
+                                  left: 16.w,
+                                  right: 16.w,
+                                  child: AutoSizeText(
+                                    b.title!,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: ResponsiveHelper.fontSize(18),
+                                      fontWeight: FontWeight.bold,
+                                      shadows: [
+                                        Shadow(
+                                          color: Colors.black54,
+                                          offset: Offset(0, 2.h),
+                                          blurRadius: 4.r,
+                                        ),
+                                      ],
+                                    ),
+                                    maxLines: 2,
+                                    minFontSize: 12,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  maxLines: 2,
-                                  minFontSize: 12,
-                                  overflow: TextOverflow.ellipsis,
                                 ),
-                              ),
-                          ],
-                        ),
-                      );
-                    },
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               );

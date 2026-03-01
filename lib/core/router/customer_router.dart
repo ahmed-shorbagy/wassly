@@ -118,7 +118,11 @@ class CustomerRouter {
         name: 'restaurant-detail',
         builder: (context, state) {
           final restaurantId = state.pathParameters['id'] ?? '';
-          return RestaurantDetailScreen(restaurantId: restaurantId);
+          final productId = state.uri.queryParameters['productId'];
+          return RestaurantDetailScreen(
+            restaurantId: restaurantId,
+            highlightProductId: productId,
+          );
         },
       ),
       GoRoute(
