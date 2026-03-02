@@ -37,8 +37,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         final addressState = context.read<DeliveryAddressCubit>().state;
-        if (addressState is DeliveryAddressSelected) {
-          _addressController.text = addressState.address;
+        if (addressState.selectedAddressDisplay != null) {
+          _addressController.text = addressState.selectedAddressDisplay!;
         }
         // Load user phone from auth if available
         final authState = context.read<AuthCubit>().state;
@@ -269,7 +269,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                                 'عنوان التوصيل',
                                           ),
                                           if (addressState
-                                              is DeliveryAddressSelected)
+                                                  .selectedAddressDisplay !=
+                                              null)
                                             TextButton.icon(
                                               onPressed: () {
                                                 // Show dialog to manage addresses
@@ -307,7 +308,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                           ),
                                           suffixIcon:
                                               addressState
-                                                  is DeliveryAddressSelected
+                                                      .selectedAddressDisplay !=
+                                                  null
                                               ? Icon(
                                                   Icons.check_circle,
                                                   color: AppColors.success,

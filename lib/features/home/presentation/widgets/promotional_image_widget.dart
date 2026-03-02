@@ -9,15 +9,18 @@ import '../../domain/entities/promotional_image_entity.dart';
 /// Used in the customer home screen below the banners section.
 class PromotionalImageWidget extends StatelessWidget {
   final PromotionalImageEntity image;
+  final VoidCallback? onTap;
 
-  const PromotionalImageWidget({super.key, required this.image});
+  const PromotionalImageWidget({super.key, required this.image, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       child: GestureDetector(
-        onTap: () => _handleTap(context),
+        onTap: (image.deepLink?.isNotEmpty == true || onTap != null)
+            ? () => _handleTap(context)
+            : null,
         child: Container(
           width: double.infinity,
           height: 160.h,
@@ -143,6 +146,8 @@ class PromotionalImageWidget extends StatelessWidget {
         // For now, just log it
         debugPrint('Opening external URL: $deepLink');
       }
+    } else if (onTap != null) {
+      onTap!();
     }
   }
 }

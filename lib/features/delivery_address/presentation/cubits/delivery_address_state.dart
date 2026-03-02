@@ -57,3 +57,29 @@ class DeliveryAddressError extends DeliveryAddressState {
   List<Object?> get props => [message];
 }
 
+extension DeliveryAddressStateX on DeliveryAddressState {
+  String? get selectedAddressDisplay {
+    if (this is DeliveryAddressSelected) {
+      return (this as DeliveryAddressSelected).displayAddress;
+    } else if (this is DeliveryAddressesLoaded) {
+      final selected = (this as DeliveryAddressesLoaded).selectedAddress;
+      if (selected != null) {
+        if (selected.addressLabel != null &&
+            selected.addressLabel!.isNotEmpty) {
+          return '${selected.addressLabel}: ${selected.fullAddress}';
+        }
+        return selected.fullAddress;
+      }
+    }
+    return null;
+  }
+
+  String? get currentAddressId {
+    if (this is DeliveryAddressSelected) {
+      return (this as DeliveryAddressSelected).addressId;
+    } else if (this is DeliveryAddressesLoaded) {
+      return (this as DeliveryAddressesLoaded).selectedAddress?.id;
+    }
+    return null;
+  }
+}

@@ -7,6 +7,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/extensions.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 import '../../../../shared/widgets/error_widget.dart';
+import '../../../restaurants/domain/entities/restaurant_entity.dart';
 import '../../../restaurants/presentation/cubits/restaurant_cubit.dart';
 import '../cubits/cart_cubit.dart';
 
@@ -287,6 +288,29 @@ class CartScreen extends StatelessWidget {
 
     final restaurantId =
         state.restaurantId ?? state.items.first.product.restaurantId;
+
+    if (restaurantId == 'market') {
+      final l10n = AppLocalizations.of(context);
+      // Create a mock restaurant entity for market orders
+      final marketEntity = RestaurantEntity(
+        id: 'market',
+        ownerId: 'admin',
+        name: l10n?.market ?? 'Market',
+        description: l10n?.market ?? 'Market Products',
+        address: '',
+        phone: '',
+        location: const <String, dynamic>{},
+        isOpen: true,
+        createdAt: DateTime.now(),
+        // These can be matched to the constants used in the market_products_screen
+        minOrderAmount: 20.0,
+        deliveryFee: 15.0,
+      );
+      if (context.mounted) {
+        context.push('/checkout', extra: marketEntity);
+      }
+      return;
+    }
 
     // Fetch restaurant data
     await context.read<RestaurantCubit>().getRestaurantById(restaurantId);

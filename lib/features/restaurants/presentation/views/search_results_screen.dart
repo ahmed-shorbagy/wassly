@@ -266,25 +266,70 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
                       return SearchRestaurantCard(
                         restaurant: restaurant,
                         onTap: () {
-                          bool isMarketStore = false;
+                          // If we are filtering by market, assume results are market stores
+                          bool isMarketStore = widget.filterType == 'market';
+
                           try {
-                            final homeState = context.read<HomeCubit>().state;
-                            if (homeState is HomeLoaded) {
-                              isMarketStore = homeState.categories.any((
-                                category,
-                              ) {
-                                return restaurant.categoryIds.contains(
-                                      category.id,
-                                    ) &&
-                                    category.isMarket;
-                              });
+                            if (!isMarketStore) {
+                              final homeState = context.read<HomeCubit>().state;
+                              if (homeState is HomeLoaded) {
+                                isMarketStore = homeState.categories.any((
+                                  category,
+                                ) {
+                                  if (!restaurant.categoryIds.contains(
+                                    category.id,
+                                  ))
+                                    return false;
+                                  if (category.isMarket) return true;
+
+                                  final nameLower = category.name.toLowerCase();
+                                  return _categoryMatchesQuery(
+                                        nameLower,
+                                        'pharmacy',
+                                      ) ||
+                                      _categoryMatchesQuery(
+                                        nameLower,
+                                        'vegetable',
+                                      ) ||
+                                      _categoryMatchesQuery(
+                                        nameLower,
+                                        'meat',
+                                      ) ||
+                                      _categoryMatchesQuery(
+                                        nameLower,
+                                        'cake',
+                                      ) ||
+                                      _categoryMatchesQuery(
+                                        nameLower,
+                                        'market',
+                                      );
+                                });
+                              }
                             }
                           } catch (_) {
-                            isMarketStore = restaurant.categoryIds.any(
-                              (cid) =>
-                                  cid.toLowerCase().contains('groceries') ||
-                                  cid.toLowerCase().contains('supermarket'),
-                            );
+                            if (!isMarketStore) {
+                              isMarketStore = restaurant.categoryIds.any(
+                                (cid) =>
+                                    cid.toLowerCase().contains('groceries') ||
+                                    cid.toLowerCase().contains('supermarket') ||
+                                    _categoryMatchesQuery(
+                                      cid.toLowerCase(),
+                                      'pharmacy',
+                                    ) ||
+                                    _categoryMatchesQuery(
+                                      cid.toLowerCase(),
+                                      'vegetable',
+                                    ) ||
+                                    _categoryMatchesQuery(
+                                      cid.toLowerCase(),
+                                      'meat',
+                                    ) ||
+                                    _categoryMatchesQuery(
+                                      cid.toLowerCase(),
+                                      'cake',
+                                    ),
+                              );
+                            }
                           }
 
                           if (isMarketStore) {

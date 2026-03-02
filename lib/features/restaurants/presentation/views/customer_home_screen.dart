@@ -349,7 +349,12 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       title: l10n.exploreOurRichWorld,
                       accentColor: AppColors.primary,
                     ),
-                    PromotionalImageWidget(image: promoImages.first),
+                    PromotionalImageWidget(
+                      image: promoImages.first,
+                      onTap: () {
+                        context.push('/market-products');
+                      },
+                    ),
                   ],
                 ),
               );
@@ -1608,8 +1613,8 @@ class _CombinedAppBar extends StatelessWidget {
               BlocBuilder<DeliveryAddressCubit, DeliveryAddressState>(
                 builder: (context, state) {
                   String displayText;
-                  if (state is DeliveryAddressSelected) {
-                    displayText = state.displayAddress;
+                  if (state.selectedAddressDisplay != null) {
+                    displayText = state.selectedAddressDisplay!;
                   } else {
                     displayText = l10n.selectDeliveryAddress;
                   }

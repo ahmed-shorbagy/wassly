@@ -49,8 +49,8 @@ class DeliveryAddressModel extends DeliveryAddressEntity {
       floorNumber: data['floorNumber'] as String?,
       additionalNotes: data['additionalNotes'] as String?,
       isDefault: data['isDefault'] as bool? ?? true,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
 
@@ -100,4 +100,3 @@ class DeliveryAddressModel extends DeliveryAddressEntity {
     );
   }
 }
-

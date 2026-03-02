@@ -14,9 +14,7 @@ class DeliveryAddressDialog extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: Container(
         constraints: BoxConstraints(
           maxHeight: MediaQuery.of(context).size.height * 0.8,
@@ -33,9 +31,9 @@ class DeliveryAddressDialog extends StatelessWidget {
                   Text(
                     l10n.selectDeliveryAddress,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
@@ -62,8 +60,8 @@ class DeliveryAddressDialog extends StatelessWidget {
                               color: AppColors.textSecondary,
                             ),
                             const SizedBox(height: 16),
-                              Text(
-                                'لا توجد عناوين', // No addresses found
+                            Text(
+                              'لا توجد عناوين', // No addresses found
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -76,7 +74,8 @@ class DeliveryAddressDialog extends StatelessWidget {
                                 Navigator.of(context).pop();
                                 showDialog(
                                   context: context,
-                                  builder: (context) => const AddEditAddressDialog(),
+                                  builder: (context) =>
+                                      const AddEditAddressDialog(),
                                 );
                               },
                               icon: const Icon(Icons.add),
@@ -94,7 +93,9 @@ class DeliveryAddressDialog extends StatelessWidget {
                     return ListView.builder(
                       shrinkWrap: true,
                       padding: const EdgeInsets.all(16),
-                      itemCount: state.addresses.length + 1, // +1 for "Manage Addresses" button
+                      itemCount:
+                          state.addresses.length +
+                          1, // +1 for "Manage Addresses" button
                       itemBuilder: (context, index) {
                         if (index == state.addresses.length) {
                           // Manage Addresses Button
@@ -110,14 +111,17 @@ class DeliveryAddressDialog extends StatelessWidget {
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: AppColors.primary,
                                 side: BorderSide(color: AppColors.primary),
-                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
                               ),
                             ),
                           );
                         }
 
                         final address = state.addresses[index];
-                        final isSelected = state.selectedAddress?.id == address.id;
+                        final isSelected =
+                            state.selectedAddress?.id == address.id;
 
                         return Card(
                           margin: const EdgeInsets.only(bottom: 8),
@@ -208,7 +212,7 @@ class DeliveryAddressDialog extends StatelessWidget {
                     );
                   }
 
-                  if (state is DeliveryAddressSelected) {
+                  if (state.selectedAddressDisplay != null) {
                     // Fallback: show add new address option
                     return Padding(
                       padding: const EdgeInsets.all(24),
@@ -216,7 +220,7 @@ class DeliveryAddressDialog extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            state.displayAddress,
+                            state.selectedAddressDisplay!,
                             style: TextStyle(
                               fontSize: 16,
                               color: AppColors.textPrimary,
@@ -228,7 +232,8 @@ class DeliveryAddressDialog extends StatelessWidget {
                               Navigator.of(context).pop();
                               showDialog(
                                 context: context,
-                                builder: (context) => const AddEditAddressDialog(),
+                                builder: (context) =>
+                                    const AddEditAddressDialog(),
                               );
                             },
                             icon: const Icon(Icons.add),
@@ -275,4 +280,3 @@ class DeliveryAddressDialog extends StatelessWidget {
     );
   }
 }
-

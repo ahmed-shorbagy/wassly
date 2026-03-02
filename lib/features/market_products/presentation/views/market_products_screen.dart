@@ -808,110 +808,151 @@ class _MarketProductsScreenState extends State<MarketProductsScreen> {
   }
 
   Widget _buildBottomInfoBar(BuildContext context, AppLocalizations l10n) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Colors.grey[200]!, width: 1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.minOrderValue('20'),
-                    style: TextStyle(
-                      fontSize: ResponsiveHelper.fontSize(13),
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  SizedBox(height: 2.h),
-                  Text(
-                    l10n.freeDeliveryAbove('100'),
-                    style: TextStyle(
-                      fontSize: ResponsiveHelper.fontSize(10),
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF15BE77),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            BlocBuilder<CartCubit, CartState>(
-              builder: (context, state) {
-                final cartCubit = context.read<CartCubit>();
-                final itemCount = cartCubit.getItemCount();
+    // Determine the minimum order. If the widget receives a minOrder or if there's a setting, use it.
+    // For now, we fallback to a default of 20 as it was hardcoded previously.
+    final double minOrder = 20.0;
 
-                return GestureDetector(
-                  onTap: () => context.push('/cart'),
-                  child: Container(
-                    padding: EdgeInsets.all(12.r),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.grey[200]!),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 4,
-                        ),
-                      ],
-                    ),
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Icon(
-                          Icons.shopping_cart_outlined,
-                          color: AppColors.textPrimary,
-                          size: 24.r,
-                        ),
-                        if (itemCount > 0)
-                          Positioned(
-                            top: -4.h,
-                            right: -4.w,
-                            child: Container(
-                              padding: EdgeInsets.all(4.r),
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFFFC107),
-                                shape: BoxShape.circle,
-                              ),
-                              constraints: BoxConstraints(
-                                minWidth: 16.w,
-                                minHeight: 16.w,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  itemCount.toString(),
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 8.sp,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+    return BlocBuilder<CartCubit, CartState>(
+      builder: (context, state) {
+        final cartCubit = context.read<CartCubit>();
+        final itemCount = cartCubit.getItemCount();
+        final double currentTotal = state is CartLoaded
+            ? state.totalPrice
+            : 0.0;
+        final double remaining = minOrder > currentTotal
+            ? minOrder - currentTotal
+            : 0.0;
+
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border(top: BorderSide(color: Colors.grey[200]!, width: 1)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 10,
+                offset: const Offset(0, -4),
+              ),
+            ],
+          ),
+          child: SafeArea(
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: itemCount == 0
+                        ? [
+                            // Empty Cart View
+                            Text(
+                              l10n.minOrderValue(minOrder.toStringAsFixed(0)),
+                              style: TextStyle(
+                                fontSize: ResponsiveHelper.fontSize(13),
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textPrimary,
                               ),
                             ),
+                            SizedBox(height: 2.h),
+                            Text(
+                              l10n.freeDeliveryAbove('100'),
+                              style: TextStyle(
+                                fontSize: ResponsiveHelper.fontSize(10),
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF15BE77),
+                              ),
+                            ),
+                          ]
+                        : [
+                            // Active Cart View
+                            Text(
+                              l10n.total,
+                              style: TextStyle(
+                                fontSize: ResponsiveHelper.fontSize(12),
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            Text(
+                              '${currentTotal.toStringAsFixed(2)} ${l10n.currencySymbol}',
+                              style: TextStyle(
+                                fontSize: ResponsiveHelper.fontSize(18),
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                            if (remaining > 0)
+                              Text(
+                                l10n.addProductsWorth(
+                                  remaining.toStringAsFixed(2),
+                                ),
+                                style: TextStyle(
+                                  fontSize: ResponsiveHelper.fontSize(11),
+                                  color: AppColors.error,
+                                ),
+                              ),
+                          ],
+                  ),
+                ),
+                if (itemCount == 0)
+                  // Show just the cart icon if empty
+                  GestureDetector(
+                    onTap: () => context.push('/cart'),
+                    child: Container(
+                      padding: EdgeInsets.all(12.r),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.grey[200]!),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 4,
                           ),
-                      ],
+                        ],
+                      ),
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Icon(
+                            Icons.shopping_cart_outlined,
+                            color: AppColors.textPrimary,
+                            size: 24.r,
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                else
+                  // Show Checkout Button if items exist
+                  ElevatedButton(
+                    onPressed: remaining <= 0
+                        ? () => context.push('/cart')
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 32.w,
+                        vertical: 16.h,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                    ),
+                    child: Text(
+                      l10n.viewCart,
+                      style: TextStyle(
+                        fontSize: ResponsiveHelper.fontSize(14),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                );
-              },
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
