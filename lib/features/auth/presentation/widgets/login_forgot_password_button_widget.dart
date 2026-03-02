@@ -12,9 +12,18 @@ class LoginForgotPasswordButtonWidget extends StatelessWidget {
       alignment: Alignment.centerRight,
       child: TextButton(
         onPressed: onPressed,
+        style: TextButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          minimumSize: Size.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
         child: Text(
           context.l10n.forgotPassword,
-          style: const TextStyle(color: Color(0xFF27AE60)),
+          style: const TextStyle(
+            color: Color(0xFF15BE77),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ),
     );

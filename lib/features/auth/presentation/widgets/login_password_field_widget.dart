@@ -23,15 +23,17 @@ class _LoginPasswordFieldWidgetState extends State<LoginPasswordFieldWidget> {
       validator: Validators.validatePassword,
       decoration: InputDecoration(
         hintText: context.l10n.password,
-        hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-        prefixIcon: Icon(
+        hintStyle: const TextStyle(color: Color(0xFFB0BEC5), fontSize: 15),
+        prefixIcon: const Icon(
           Icons.lock_outlined,
-          color: Colors.white.withOpacity(0.8),
+          color: Color(0xFF15BE77),
+          size: 22,
         ),
         suffixIcon: IconButton(
           icon: Icon(
-            _obscurePassword ? Icons.visibility : Icons.visibility_off,
-            color: Colors.white.withOpacity(0.7),
+            _obscurePassword ? Icons.visibility_off : Icons.visibility,
+            color: const Color(0xFFB0BEC5),
+            size: 22,
           ),
           onPressed: () {
             setState(() {
@@ -40,31 +42,33 @@ class _LoginPasswordFieldWidgetState extends State<LoginPasswordFieldWidget> {
           },
         ),
         filled: true,
-        fillColor: Colors.white.withOpacity(0.08),
+        fillColor: const Color(0xFFF5F6FA),
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 24,
-          vertical: 20,
+          horizontal: 20,
+          vertical: 18,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: BorderSide(
-            color: Colors.white.withOpacity(0.1),
-            width: 1,
-          ),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Color(0xFFEEEEEE), width: 1),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: BorderSide(
-            color: Colors.white.withOpacity(0.4),
-            width: 1.5,
-          ),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Color(0xFF15BE77), width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Color(0xFFE74C3C), width: 1),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Color(0xFFE74C3C), width: 1.5),
         ),
       ),
-      style: const TextStyle(color: Colors.white, fontSize: 16),
+      style: const TextStyle(color: Color(0xFF1E272E), fontSize: 15),
     );
   }
 }

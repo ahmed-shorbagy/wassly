@@ -161,7 +161,19 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, UserEntity?>> getCurrentUser() async {
     try {
       AppLogger.logAuth('Getting current user');
-      final user = firebaseAuth.currentUser;
+
+      // Attempt to get current user synchronously
+      var user = firebaseAuth.currentUser;
+
+      // If null, it might be because Firebase Auth is still initializing the
+      // session from persistent storage on startup. Wait for the first state change.
+      if (user == null) {
+        AppLogger.logInfo(
+          'Synchronous currentUser is null, waiting for authStateChanges...',
+        );
+        user = await firebaseAuth.authStateChanges().first;
+      }
+
       if (user != null) {
         AppLogger.logInfo('Firebase user found: ${user.email}');
 

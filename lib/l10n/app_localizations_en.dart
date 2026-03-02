@@ -1564,6 +1564,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vegetablesAndFruits => 'Vegetables & Fruits';
 
   @override
+  String get meats => 'Meats';
+
+  @override
   String get tissuesAndBags => 'Tissues & Bags';
 
   @override

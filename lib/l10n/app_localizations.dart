@@ -3116,6 +3116,12 @@ abstract class AppLocalizations {
   /// **'Vegetables & Fruits'**
   String get vegetablesAndFruits;
 
+  /// No description provided for @meats.
+  ///
+  /// In en, this message translates to:
+  /// **'Meats'**
+  String get meats;
+
   /// No description provided for @tissuesAndBags.
   ///
   /// In en, this message translates to:

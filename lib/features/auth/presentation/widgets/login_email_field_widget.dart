@@ -15,37 +15,40 @@ class LoginEmailFieldWidget extends StatelessWidget {
       validator: Validators.validateEmail,
       decoration: InputDecoration(
         hintText: context.l10n.email,
-        hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-        prefixIcon: Icon(
+        hintStyle: const TextStyle(color: Color(0xFFB0BEC5), fontSize: 15),
+        prefixIcon: const Icon(
           Icons.email_outlined,
-          color: Colors.white.withOpacity(0.8),
+          color: Color(0xFF15BE77),
+          size: 22,
         ),
         filled: true,
-        fillColor: Colors.white.withOpacity(0.08),
+        fillColor: const Color(0xFFF5F6FA),
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 24,
-          vertical: 20,
+          horizontal: 20,
+          vertical: 18,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: BorderSide(
-            color: Colors.white.withOpacity(0.1),
-            width: 1,
-          ),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Color(0xFFEEEEEE), width: 1),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: BorderSide(
-            color: Colors.white.withOpacity(0.4),
-            width: 1.5,
-          ),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Color(0xFF15BE77), width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Color(0xFFE74C3C), width: 1),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Color(0xFFE74C3C), width: 1.5),
         ),
       ),
-      style: const TextStyle(color: Colors.white, fontSize: 16),
+      style: const TextStyle(color: Color(0xFF1E272E), fontSize: 15),
     );
   }
 }

@@ -1555,6 +1555,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get vegetablesAndFruits => 'الخضروات والفواكه';
 
   @override
+  String get meats => 'اللحوم';
+
+  @override
   String get tissuesAndBags => 'مناديل و اكياس';
 
   @override

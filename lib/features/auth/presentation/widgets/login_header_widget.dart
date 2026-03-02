@@ -8,22 +8,19 @@ class LoginHeaderWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Logo with Glow
+        // Logo
         Container(
-          width: 100,
-          height: 100,
+          width: 80,
+          height: 80,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: const Color(0xFFF0FFF5),
             shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.white.withOpacity(0.5),
-                blurRadius: 20,
-                spreadRadius: 5,
-              ),
-            ],
+            border: Border.all(
+              color: const Color(0xFF15BE77).withOpacity(0.2),
+              width: 2,
+            ),
           ),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(14),
           child: Image.asset('assets/images/logo.jpeg', fit: BoxFit.contain),
         ),
         const SizedBox(height: 24),
@@ -32,21 +29,21 @@ class LoginHeaderWidget extends StatelessWidget {
           context.l10n.welcome,
           textAlign: TextAlign.center,
           style: const TextStyle(
-            color: Colors.white,
-            fontSize: 32,
-            fontWeight: FontWeight.w800,
+            color: Color(0xFF1E272E),
+            fontSize: 28,
+            fontWeight: FontWeight.w700,
             letterSpacing: -0.5,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         // Subtitle
         Text(
           context.l10n.loginToContinue,
           textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
+          style: const TextStyle(
+            color: Color(0xFF7F8C8D),
+            fontSize: 15,
+            fontWeight: FontWeight.w400,
           ),
         ),
       ],

@@ -35,207 +35,284 @@ class _SignupScreenState extends State<SignupScreen> {
     super.dispose();
   }
 
+  InputDecoration _buildInputDecoration({
+    required String hintText,
+    required IconData prefixIcon,
+    Widget? suffixIcon,
+  }) {
+    return InputDecoration(
+      hintText: hintText,
+      hintStyle: const TextStyle(color: Color(0xFFB0BEC5), fontSize: 15),
+      prefixIcon: Icon(prefixIcon, color: const Color(0xFF15BE77), size: 22),
+      suffixIcon: suffixIcon,
+      filled: true,
+      fillColor: const Color(0xFFF5F6FA),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: Color(0xFFEEEEEE), width: 1),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: Color(0xFF15BE77), width: 1.5),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: Color(0xFFE74C3C), width: 1),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: Color(0xFFE74C3C), width: 1.5),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF27AE60),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF27AE60), Color(0xFF2ECC71)],
-          ),
-        ),
-        child: SafeArea(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 28, 20, 20),
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
             child: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Header
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 56,
-                        height: 56,
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                        ),
-                        padding: const EdgeInsets.all(10),
-                        child: Image.asset(
-                          'assets/images/logo.jpeg',
-                          fit: BoxFit.contain,
+                  Center(
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0FFF5),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: const Color(0xFF15BE77).withOpacity(0.2),
+                          width: 2,
                         ),
                       ),
-                    ],
+                      padding: const EdgeInsets.all(14),
+                      child: Image.asset(
+                        'assets/images/logo.jpeg',
+                        fit: BoxFit.contain,
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 24),
                   Text(
                     context.l10n.newAccount,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
+                    style: const TextStyle(
+                      color: Color(0xFF1E272E),
+                      fontSize: 28,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.5,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Text(
                     context.l10n.joinWasslyNow,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.white, fontSize: 14),
-                  ),
-                  const SizedBox(height: 20),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color(0x22000000),
-                          blurRadius: 16,
-                          offset: Offset(0, 6),
-                        ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        // Note: In the customer app, only normal customers can sign up.
-                        // User type is enforced to customer; no selection UI is shown.
-                        const SizedBox(height: 8),
-
-                        // Name Field
-                        TextFormField(
-                          controller: _nameController,
-                          validator: Validators.validateName,
-                          decoration: InputDecoration(
-                            labelText: context.l10n.fullName,
-                            prefixIcon: const Icon(Icons.person_outlined),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Email Field
-                        TextFormField(
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          validator: Validators.validateEmail,
-                          decoration: InputDecoration(
-                            labelText: context.l10n.email,
-                            prefixIcon: const Icon(Icons.email_outlined),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Phone Field (Egypt-only)
-                        IntlPhoneField(
-                          initialCountryCode: 'EG',
-                          showDropdownIcon: false,
-                          disableLengthCheck: false,
-                          decoration: InputDecoration(
-                            labelText: context.l10n.phoneNumber,
-                            prefixIcon: const Icon(Icons.phone_outlined),
-                            counterText: '',
-                          ),
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          validator: (phone) {
-                            if (phone == null) {
-                              return context.l10n.pleaseEnterPhoneNumber;
-                            }
-                            // Egyptian mobile numbers are 10 national digits (without +20) and start with 10/11/12/15
-                            final national = phone.number;
-                            final validPrefix =
-                                national.startsWith('10') ||
-                                national.startsWith('11') ||
-                                national.startsWith('12') ||
-                                national.startsWith('15');
-                            if (!validPrefix || national.length != 10) {
-                              return context.l10n.pleaseEnterValidPhoneNumber;
-                            }
-                            return null;
-                          },
-                          onChanged: (phone) {
-                            // Persist the full international number (+20xxxxxxxxxx)
-                            _phoneController.text = phone.completeNumber;
-                          },
-                          onSaved: (phone) {
-                            if (phone != null) {
-                              _phoneController.text = phone.completeNumber;
-                            }
-                          },
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Password Field
-                        TextFormField(
-                          controller: _passwordController,
-                          obscureText: _obscurePassword,
-                          validator: Validators.validatePassword,
-                          decoration: InputDecoration(
-                            labelText: context.l10n.password,
-                            prefixIcon: const Icon(Icons.lock_outlined),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _obscurePassword = !_obscurePassword;
-                                });
-                              },
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Confirm Password Field
-                        TextFormField(
-                          controller: _confirmPasswordController,
-                          obscureText: _obscureConfirmPassword,
-                          validator: (value) =>
-                              Validators.validateConfirmPassword(
-                                value,
-                                _passwordController.text,
-                              ),
-                          decoration: InputDecoration(
-                            labelText: context.l10n.confirmPassword,
-                            prefixIcon: const Icon(Icons.lock_outlined),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscureConfirmPassword
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _obscureConfirmPassword =
-                                      !_obscureConfirmPassword;
-                                });
-                              },
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                      ],
+                    style: const TextStyle(
+                      color: Color(0xFF7F8C8D),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w400,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 32),
+
+                  // Name Field
+                  TextFormField(
+                    controller: _nameController,
+                    validator: Validators.validateName,
+                    decoration: _buildInputDecoration(
+                      hintText: context.l10n.fullName,
+                      prefixIcon: Icons.person_outlined,
+                    ),
+                    style: const TextStyle(
+                      color: Color(0xFF1E272E),
+                      fontSize: 15,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+
+                  // Email Field
+                  TextFormField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    validator: Validators.validateEmail,
+                    decoration: _buildInputDecoration(
+                      hintText: context.l10n.email,
+                      prefixIcon: Icons.email_outlined,
+                    ),
+                    style: const TextStyle(
+                      color: Color(0xFF1E272E),
+                      fontSize: 15,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+
+                  // Phone Field (Egypt-only)
+                  IntlPhoneField(
+                    initialCountryCode: 'EG',
+                    showDropdownIcon: false,
+                    disableLengthCheck: false,
+                    decoration: InputDecoration(
+                      hintText: context.l10n.phoneNumber,
+                      hintStyle: const TextStyle(
+                        color: Color(0xFFB0BEC5),
+                        fontSize: 15,
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.phone_outlined,
+                        color: Color(0xFF15BE77),
+                        size: 22,
+                      ),
+                      counterText: '',
+                      filled: true,
+                      fillColor: const Color(0xFFF5F6FA),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 18,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFEEEEEE),
+                          width: 1,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(
+                          color: Color(0xFF15BE77),
+                          width: 1.5,
+                        ),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFE74C3C),
+                          width: 1,
+                        ),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFE74C3C),
+                          width: 1.5,
+                        ),
+                      ),
+                    ),
+                    style: const TextStyle(
+                      color: Color(0xFF1E272E),
+                      fontSize: 15,
+                    ),
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    validator: (phone) {
+                      if (phone == null) {
+                        return context.l10n.pleaseEnterPhoneNumber;
+                      }
+                      final national = phone.number;
+                      final validPrefix =
+                          national.startsWith('10') ||
+                          national.startsWith('11') ||
+                          national.startsWith('12') ||
+                          national.startsWith('15');
+                      if (!validPrefix || national.length != 10) {
+                        return context.l10n.pleaseEnterValidPhoneNumber;
+                      }
+                      return null;
+                    },
+                    onChanged: (phone) {
+                      _phoneController.text = phone.completeNumber;
+                    },
+                    onSaved: (phone) {
+                      if (phone != null) {
+                        _phoneController.text = phone.completeNumber;
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 14),
+
+                  // Password Field
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: _obscurePassword,
+                    validator: Validators.validatePassword,
+                    decoration: _buildInputDecoration(
+                      hintText: context.l10n.password,
+                      prefixIcon: Icons.lock_outlined,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: const Color(0xFFB0BEC5),
+                          size: 22,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
+                    ),
+                    style: const TextStyle(
+                      color: Color(0xFF1E272E),
+                      fontSize: 15,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+
+                  // Confirm Password Field
+                  TextFormField(
+                    controller: _confirmPasswordController,
+                    obscureText: _obscureConfirmPassword,
+                    validator: (value) => Validators.validateConfirmPassword(
+                      value,
+                      _passwordController.text,
+                    ),
+                    decoration: _buildInputDecoration(
+                      hintText: context.l10n.confirmPassword,
+                      prefixIcon: Icons.lock_outlined,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureConfirmPassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: const Color(0xFFB0BEC5),
+                          size: 22,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscureConfirmPassword = !_obscureConfirmPassword;
+                          });
+                        },
+                      ),
+                    ),
+                    style: const TextStyle(
+                      color: Color(0xFF1E272E),
+                      fontSize: 15,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
 
                   // Signup Button
                   BlocConsumer<AuthCubit, AuthState>(
                     listener: (context, state) {
                       if (state is AuthAuthenticated) {
-                        // Customer app - always navigate to home (only customers sign up)
                         context.pushReplacement('/home');
                       } else if (state is AuthError) {
                         context.showErrorSnackBar(state.message);
@@ -247,12 +324,20 @@ class _SignupScreenState extends State<SignupScreen> {
                       }
                       return SizedBox(
                         width: double.infinity,
+                        height: 54,
                         child: ElevatedButton(
                           onPressed: _signup,
                           style: ElevatedButton.styleFrom(
-                            minimumSize: const Size.fromHeight(48),
+                            backgroundColor: const Color(0xFF15BE77),
+                            foregroundColor: Colors.white,
+                            elevation: 0,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            textStyle: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.3,
                             ),
                           ),
                           child: Text(context.l10n.signup),
@@ -261,29 +346,39 @@ class _SignupScreenState extends State<SignupScreen> {
                     },
                   ),
 
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
 
                   // Login Link
                   Center(
-                    child: Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.center,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
                           context.l10n.alreadyHaveAccount,
-                          style: const TextStyle(color: Colors.white),
+                          style: const TextStyle(
+                            color: Color(0xFF7F8C8D),
+                            fontSize: 14,
+                          ),
                         ),
                         TextButton(
                           onPressed: () => context.push('/login'),
                           style: TextButton.styleFrom(
-                            foregroundColor: Colors.white,
+                            foregroundColor: const Color(0xFF15BE77),
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
                           ),
-                          child: Text(context.l10n.login),
+                          child: Text(
+                            context.l10n.login,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                            ),
+                          ),
                         ),
                       ],
                     ),
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),

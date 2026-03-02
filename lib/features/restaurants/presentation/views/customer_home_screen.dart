@@ -908,13 +908,13 @@ class _MarketProductCategoriesSectionState
     super.initState();
     _fixedItems = [
       {
-        'asset': 'assets/images/market.jpeg',
+        'asset': 'assets/images/market-new.jpeg',
         'title': 'Market', // Will be localized in build
         'isMarket': true,
         'categoryName': null,
       },
       {
-        'asset': 'assets/images/resturants.jpeg',
+        'asset': 'assets/images/resturants-new.jpeg',
         'title': 'Restaurants', // Will be localized in build
         'isMarket': false,
         'categoryName': null,
@@ -1108,7 +1108,7 @@ class _MarketProductCategoriesSectionState
 
     // 2. Fixed Category Chips (Requested)
     displayItems.add({
-      'asset': 'assets/images/pharamcies.jpeg',
+      'asset': 'assets/images/pharamcies-new.jpeg',
       'title': l10n.pharmacy,
       'isMarket': true,
       'categoryName': 'Pharmacies',
@@ -1122,7 +1122,14 @@ class _MarketProductCategoriesSectionState
       'isSpecificCategory': true,
     });
     displayItems.add({
-      'asset': 'assets/images/cake&cofee.jpeg',
+      'asset': 'assets/images/meats-new.jpeg',
+      'title': l10n.meats,
+      'isMarket': true,
+      'categoryName': 'Meats',
+      'isSpecificCategory': true,
+    });
+    displayItems.add({
+      'asset': 'assets/images/cake-new.jpeg',
       'title': l10n.cakeAndCoffee,
       'isMarket': true,
       'categoryName': 'Cake & Coffee',
@@ -1144,6 +1151,7 @@ class _MarketProductCategoriesSectionState
       l10n.restaurants,
       l10n.pharmacy,
       l10n.vegetablesAndFruits,
+      l10n.meats,
       l10n.cakeAndCoffee,
     };
 
@@ -1154,12 +1162,27 @@ class _MarketProductCategoriesSectionState
       // This helps deduplicate "Pharmacies" vs "الصيدليه" by converting them to the same localized string
       final lowerName = cat.name.toLowerCase().trim();
 
-      if (lowerName.contains('pharmacy') || lowerName.contains('pharmacies')) {
+      if (lowerName.contains('pharmacy') ||
+          lowerName.contains('pharmacies') ||
+          lowerName.contains('صيدلي') ||
+          lowerName.contains('صيدلة')) {
         displayName = l10n.pharmacy;
       } else if (lowerName.contains('vegetable') ||
-          lowerName == 'fruits and vegetables') {
+          lowerName.contains('fruit') ||
+          lowerName == 'fruits and vegetables' ||
+          lowerName.contains('خضروات') ||
+          lowerName.contains('فواكه') ||
+          lowerName.contains('خضار')) {
+        // Normalize vegetable/fruit categories to prevent duplicates
         displayName = l10n.vegetablesAndFruits;
-      } else if (lowerName.contains('cake') && lowerName.contains('coffee')) {
+      } else if (lowerName.contains('meat') ||
+          lowerName.contains('لحوم') ||
+          lowerName.contains('لحم')) {
+        displayName = l10n.meats;
+      } else if (lowerName.contains('cake') && lowerName.contains('coffee') ||
+          lowerName.contains('كيك') ||
+          lowerName.contains('قهوة') ||
+          lowerName.contains('قهوه')) {
         displayName = l10n.cakeAndCoffee;
       }
 

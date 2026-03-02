@@ -11,53 +11,50 @@ class LoginSocialButtonsWidget extends StatelessWidget {
         // Divider with "or" text
         Row(
           children: [
-            Expanded(child: Divider(color: Colors.white.withOpacity(0.2))),
+            const Expanded(child: Divider(color: Color(0xFFE0E0E0))),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 context.l10n.or.toUpperCase(),
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.6),
+                style: const TextStyle(
+                  color: Color(0xFF9E9E9E),
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 1.2,
                 ),
               ),
             ),
-            Expanded(child: Divider(color: Colors.white.withOpacity(0.2))),
+            const Expanded(child: Divider(color: Color(0xFFE0E0E0))),
           ],
         ),
-        const SizedBox(height: 24),
-        // Social Login Buttons
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () {
-                  context.showInfoSnackBar(context.l10n.socialLoginComingSoon);
-                },
-                icon: Image.network(
-                  'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
-                  height: 20,
-                  errorBuilder: (context, error, stackTrace) =>
-                      const Icon(Icons.g_mobiledata, color: Colors.white),
-                ),
-                label: const Text('Google'),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(56),
-                  side: BorderSide(color: Colors.white.withOpacity(0.2)),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  foregroundColor: Colors.white,
-                  textStyle: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+        const SizedBox(height: 20),
+        // Google Login Button
+        SizedBox(
+          width: double.infinity,
+          height: 54,
+          child: OutlinedButton.icon(
+            onPressed: () {
+              context.showInfoSnackBar(context.l10n.socialLoginComingSoon);
+            },
+            icon: Image.network(
+              'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
+              height: 20,
+              errorBuilder: (context, error, stackTrace) =>
+                  const Icon(Icons.g_mobiledata, color: Color(0xFF757575)),
+            ),
+            label: const Text('Google'),
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: Color(0xFFE0E0E0)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              foregroundColor: const Color(0xFF424242),
+              textStyle: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
               ),
             ),
-          ],
+          ),
         ),
       ],
     );

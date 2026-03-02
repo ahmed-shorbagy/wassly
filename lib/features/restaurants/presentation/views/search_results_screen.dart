@@ -51,11 +51,21 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
     }
 
     // Determine the selected category from the initial query
-    // If q matches a category name, we consider it a category filter
+    // Use keyword-based matching to handle bilingual names (e.g., query='Pharmacies' but DB has 'الصيدليه')
     if (widget.initialQuery.isNotEmpty) {
       final queryLower = widget.initialQuery.toLowerCase().trim();
-      final matchingCategory = _availableCategories.where((c) {
+
+      // First try exact match
+      var matchingCategory = _availableCategories.where((c) {
         return c.name.toLowerCase().trim() == queryLower;
+      }).firstOrNull;
+
+      // If no exact match, try keyword-based matching
+      matchingCategory ??= _availableCategories.where((c) {
+        final catNameLower = c.name.toLowerCase().trim();
+        // Check if query keywords appear in the category name, or vice-versa
+        return _categoryMatchesQuery(catNameLower, queryLower) ||
+            _categoryMatchesQuery(queryLower, catNameLower);
       }).firstOrNull;
 
       if (matchingCategory != null) {
@@ -77,6 +87,27 @@ class _SearchResultsScreenState extends State<SearchResultsScreen>
     }
 
     _searchController.addListener(_onSearchChanged);
+  }
+
+  /// Check if a category name matches a query using bilingual keyword matching.
+  /// This allows matching English queries against Arabic DB names and vice-versa.
+  bool _categoryMatchesQuery(String name, String query) {
+    // Map of keyword groups — if query contains any keyword from a group,
+    // the category matches if its name contains any keyword from the same group
+    const keywordGroups = [
+      ['pharmacy', 'pharmacies', 'صيدلي', 'صيدلة', 'صيدليات', 'صيدليه'],
+      ['vegetable', 'vegetables', 'fruit', 'fruits', 'خضروات', 'فواكه', 'خضار'],
+      ['cake', 'كيك', 'coffee', 'قهوة', 'قهوه'],
+      ['meat', 'meats', 'لحوم', 'لحم', 'لحمة'],
+      ['market', 'ماركت', 'متجر', 'سوق'],
+    ];
+
+    for (final group in keywordGroups) {
+      final queryMatches = group.any((kw) => query.contains(kw));
+      final nameMatches = group.any((kw) => name.contains(kw));
+      if (queryMatches && nameMatches) return true;
+    }
+    return false;
   }
 
   @override

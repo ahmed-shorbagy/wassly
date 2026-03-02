@@ -13,24 +13,17 @@ class LoginSignupLinkWidget extends StatelessWidget {
         children: [
           Text(
             context.l10n.dontHaveAccount,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
-              fontSize: 15,
-            ),
+            style: const TextStyle(color: Color(0xFF7F8C8D), fontSize: 14),
           ),
           TextButton(
             onPressed: () => context.push('/signup'),
             style: TextButton.styleFrom(
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+              foregroundColor: const Color(0xFF15BE77),
+              padding: const EdgeInsets.symmetric(horizontal: 6),
             ),
             child: Text(
               context.l10n.signup,
-              style: const TextStyle(
-                fontWeight: FontWeight.w800,
-                fontSize: 15,
-                decoration: TextDecoration.underline,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
             ),
           ),
         ],
